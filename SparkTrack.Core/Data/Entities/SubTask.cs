@@ -1,4 +1,4 @@
-﻿namespace SparkTrack.Core.Data;
+﻿namespace SparkTrack.Core.Data.Entities;
 
 public record SubTask
 {
@@ -6,7 +6,7 @@ public record SubTask
     
     public required string Name { get; init; }
     
-    public required Guid ExecutorEmployeeId { get; init; }
+    public required User ExecutorEmployee { get; init; }
     
     public float Cost { get; init; }
     

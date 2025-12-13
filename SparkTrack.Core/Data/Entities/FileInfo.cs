@@ -1,4 +1,4 @@
-﻿namespace SparkTrack.Core.Data;
+﻿namespace SparkTrack.Core.Data.Entities;
 
 public record FileInfo
 {
