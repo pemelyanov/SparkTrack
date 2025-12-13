@@ -1,0 +1,486 @@
+// Основные стили страницы идей
+
+.features-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--mat-sys-surface-container-low);
+  min-height: 100vh;
+}
+
+// Заголовок страницы
+.page-header {
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.page-title {
+  font: var(--mat-sys-headline-large);
+  color: var(--mat-sys-on-surface);
+  margin: 0;
+  font-weight: 500;
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--mat-sys-primary-container);
+  border-radius: var(--mat-sys-corner-medium);
+  color: var(--mat-sys-on-primary-container);
+  font: var(--mat-sys-body-medium);
+
+  .clear-selection-btn {
+    margin-left: auto;
+    font: var(--mat-sys-label-small);
+  }
+}
+
+// Контейнер фильтров
+.filters-container {
+  .filters-card {
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: var(--mat-sys-elevation-1);
+
+    &:hover {
+      box-shadow: var(--mat-sys-elevation-2);
+    }
+  }
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+.filter-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-checkbox {
+  ::ng-deep {
+    .mdc-label {
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface);
+    }
+  }
+}
+
+.channel-select {
+  width: 100%;
+  max-width: 300px;
+
+  ::ng-deep {
+    .mat-mdc-form-field-flex {
+      background-color: var(--mat-sys-surface-container-highest);
+    }
+  }
+}
+
+.filter-icon {
+  color: var(--mat-sys-primary);
+  margin-right: 0.5rem;
+}
+
+// Контейнер таблицы
+.table-container {
+  flex: 1;
+
+  .table-card {
+    height: 100%;
+    border-radius: var(--mat-sys-corner-large);
+    box-shadow: var(--mat-sys-elevation-1);
+
+    &:hover {
+      box-shadow: var(--mat-sys-elevation-2);
+    }
+  }
+}
+
+// Таблица
+.ideas-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  .mat-header-row {
+    background-color: var(--mat-sys-surface-container-high);
+
+    .mat-header-cell {
+      font: var(--mat-sys-title-medium);
+      color: var(--mat-sys-on-surface);
+      font-weight: 500;
+      padding: 1rem;
+      border-bottom: 2px solid var(--mat-sys-outline-variant);
+
+      &.column-select {
+        width: 60px;
+        padding: 0 1rem;
+      }
+
+      &.column-id {
+        width: 80px;
+        text-align: center;
+      }
+
+      &.column-title {
+        min-width: 300px;
+      }
+
+      &.column-deadline,
+      &.column-channel,
+      &.column-status {
+        min-width: 150px;
+      }
+
+      // Стили для сортировки
+      .mat-sort-header-container {
+        justify-content: center;
+
+        &.mat-sort-header-sorted {
+          color: var(--mat-sys-primary);
+        }
+      }
+    }
+  }
+
+  .mat-row {
+    transition: all 0.2s var(--mat-sys-motion-easing-standard);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--mat-sys-surface-container);
+    }
+
+    &.row-selected {
+      background-color: rgba(var(--mat-sys-primary-rgb), 0.08);
+    }
+
+    &:not(:last-child) {
+      .mat-cell {
+        border-bottom: 1px solid var(--mat-sys-outline-variant);
+      }
+    }
+
+    .mat-cell {
+      padding: 1rem;
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface);
+
+      &.cell-select {
+        padding: 0 1rem;
+        width: 60px;
+
+        ::ng-deep .mat-mdc-checkbox {
+          --mdc-checkbox-unselected-icon-color: var(--mat-sys-outline);
+          --mdc-checkbox-selected-icon-color: var(--mat-sys-primary);
+        }
+      }
+
+      &.cell-id {
+        text-align: center;
+        font-weight: 500;
+        color: var(--mat-sys-primary);
+      }
+
+      &.cell-title {
+        .idea-title-content {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .idea-title {
+          flex: 1;
+        }
+      }
+
+      &.cell-deadline {
+        .deadline-content {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+      }
+
+      &.cell-channel {
+        .channel-badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 1rem;
+          font: var(--mat-sys-label-small);
+          font-weight: 500;
+
+          &.channel-веб {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+          }
+
+          &.channel-мобильное {
+            background-color: rgba(156, 39, 176, 0.1);
+            color: #9c27b0;
+          }
+
+          &.channel-бэкенд {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+          }
+
+          &.channel-аналитика {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+          }
+
+          &.channel-qa {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+          }
+
+          &.channel-devops {
+            background-color: rgba(103, 58, 183, 0.1);
+            color: #673ab7;
+          }
+
+          &.channel-фронтенд {
+            background-color: rgba(0, 188, 212, 0.1);
+            color: #00bcd4;
+          }
+
+          &.channel-дизайн {
+            background-color: rgba(233, 30, 99, 0.1);
+            color: #e91e63;
+          }
+        }
+      }
+
+      &.cell-status {
+        .status-badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 1rem;
+          font: var(--mat-sys-label-small);
+          font-weight: 500;
+
+          &.status-completed {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--mat-sys-tertiary);
+          }
+
+          &.status-in-progress {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--mat-sys-primary);
+          }
+
+          &.status-planned {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--mat-sys-secondary);
+          }
+
+          &.status-default {
+            background-color: var(--mat-sys-surface-container-high);
+            color: var(--mat-sys-on-surface-variant);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Состояние "нет данных"
+.no-data-cell {
+  text-align: center;
+  padding: 3rem !important;
+}
+
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    opacity: 0.5;
+  }
+
+  p {
+    font: var(--mat-sys-body-large);
+    margin: 0;
+  }
+
+  .no-data-hint {
+    font: var(--mat-sys-body-small);
+    opacity: 0.7;
+  }
+}
+
+// Пагинатор
+.ideas-paginator {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  margin-top: 1rem;
+  background: transparent;
+
+  ::ng-deep {
+    .mat-mdc-paginator-container {
+      justify-content: space-between;
+      padding: 1rem 0;
+    }
+
+    .mat-mdc-paginator-page-size-label {
+      font: var(--mat-sys-body-small);
+      color: var(--mat-sys-on-surface-variant);
+    }
+
+    .mat-mdc-select-value {
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface);
+    }
+
+    .mat-mdc-paginator-range-label {
+      font: var(--mat-sys-body-medium);
+      color: var(--mat-sys-on-surface);
+    }
+
+    .mat-mdc-icon-button {
+      color: var(--mat-sys-primary);
+
+      &:disabled {
+        color: var(--mat-sys-on-surface-variant);
+        opacity: 0.5;
+      }
+    }
+  }
+}
+
+// Адаптивность
+@media (max-width: 960px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .channel-select {
+    max-width: 100%;
+  }
+
+  .ideas-table {
+    .mat-header-cell,
+    .mat-cell {
+      padding: 0.75rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .features-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font: var(--mat-sys-headline-medium);
+  }
+
+  .selection-info {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .clear-selection-btn {
+      margin-left: 0;
+      align-self: flex-end;
+    }
+  }
+
+  .ideas-table {
+    display: block;
+    overflow-x: auto;
+
+    .mat-header-cell {
+      &.column-select {
+        width: 50px;
+      }
+
+      &.column-id {
+        width: 70px;
+      }
+
+      &.column-title {
+        min-width: 250px;
+      }
+
+      &.column-deadline,
+      &.column-channel,
+      &.column-status {
+        min-width: 120px;
+      }
+    }
+  }
+
+  .ideas-paginator {
+    ::ng-deep {
+      .mat-mdc-paginator-container {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .mat-mdc-paginator-page-size {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Анимации
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.features-container > * {
+  animation: fadeIn 0.3s var(--mat-sys-motion-easing-emphasized) forwards;
+}
+
+.table-container {
+  animation-delay: 0.1s;
+}
+
+// Selection animation
+.row-selected {
+  animation: selectionPulse 1.5s ease-in-out;
+}
+
+@keyframes selectionPulse {
+  0%, 100% {
+    background-color: rgba(var(--mat-sys-primary-rgb), 0.08);
+  }
+  50% {
+    background-color: rgba(var(--mat-sys-primary-rgb), 0.12);
+  }
+}

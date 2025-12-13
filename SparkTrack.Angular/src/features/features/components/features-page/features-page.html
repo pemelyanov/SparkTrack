@@ -1,0 +1,186 @@
+<div class="features-container">
+  <!-- Заголовок -->
+  <div class="page-header">
+    <h1 class="page-title">Идеи</h1>
+
+    <!-- Информация о выделенных строках -->
+    @if (selection.selected.length > 0) {
+      <div class="selection-info">
+        Выбрано: {{ selection.selected.length }}
+        <button mat-button color="warn" (click)="selection.clear()" class="clear-selection-btn">
+          Снять выделение
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Фильтры -->
+  <div class="filters-container">
+    <mat-card appearance="outlined" class="filters-card">
+      <mat-card-content>
+        <div class="filters-grid">
+
+          <!-- Фильтр по каналу -->
+          <div class="filter-group">
+            <div class="filter-control">
+              <mat-checkbox
+                [(ngModel)]="channelFilterEnabled"
+                (change)="onChannelFilterEnabledChange()"
+                class="filter-checkbox"
+              >
+                Фильтр по каналу
+              </mat-checkbox>
+            </div>
+
+            <mat-form-field appearance="outline" class="channel-select">
+              <mat-label>Выберите канал</mat-label>
+              <mat-select
+                [(ngModel)]="selectedChannel"
+                (selectionChange)="onChannelSelectionChange()"
+                [disabled]="!channelFilterEnabled()"
+              >
+                @for (channel of channels(); track channel.id) {
+                  <mat-option [value]="channel.id">
+                    {{ channel.name }}
+                  </mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix class="filter-icon">filter_list</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Фильтр по статусу -->
+          <div class="filter-group">
+            <mat-checkbox
+              [(ngModel)]="showCompleted"
+              (change)="onShowCompletedChange()"
+              class="filter-checkbox"
+            >
+              Отображать завершенные
+            </mat-checkbox>
+          </div>
+
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Таблица с идеями -->
+  <div class="table-container">
+    <mat-card appearance="outlined" class="table-card">
+      <mat-card-content>
+        <!-- Таблица -->
+        <table
+          mat-table
+          [dataSource]="paginatedIdeas()"
+          (matSortChange)="onSortChange($event)"
+          matSort
+          class="ideas-table"
+        >
+
+          <!-- Столбец с чекбоксом -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef class="column-select">
+              <mat-checkbox
+                [checked]="isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                (change)="toggleAllRows()"
+                [aria-label]="checkboxLabel()"
+              >
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row" class="cell-select">
+              <mat-checkbox
+                [checked]="selection.isSelected(row)"
+                (change)="$event ? selection.toggle(row) : null"
+                [aria-label]="checkboxLabel(row)"
+                (click)="$event.stopPropagation()"
+              >
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Столбец № -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="id" class="column-id">№</th>
+            <td mat-cell *matCellDef="let idea" class="cell-id">{{ idea.id }}</td>
+          </ng-container>
+
+          <!-- Столбец Идея -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="title" class="column-title">Идея</th>
+            <td mat-cell *matCellDef="let idea" class="cell-title">
+              <div class="idea-title-content">
+                <span class="idea-title">{{ idea.title }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Столбец Дедлайн -->
+          <ng-container matColumnDef="deadline">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="deadline" class="column-deadline">Дедлайн</th>
+            <td mat-cell *matCellDef="let idea" class="cell-deadline">
+              <div class="deadline-content">
+                {{ formatDate(idea.deadline) }}
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Столбец Канал (отображается только если фильтр выключен) -->
+          <ng-container matColumnDef="channel">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="channel" class="column-channel">Канал</th>
+            <td mat-cell *matCellDef="let idea" class="cell-channel">
+              <span class="channel-badge" [class]="'channel-' + idea.channel.toLowerCase()">
+                {{ idea.channel }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Столбец Статус -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="status" class="column-status">Статус</th>
+            <td mat-cell *matCellDef="let idea" class="cell-status">
+              <span class="status-badge" [class]="getStatusClass(idea.status)">
+                {{ idea.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Заголовок таблицы -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+          <!-- Строки данных -->
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns();"
+            [class.row-selected]="selection.isSelected(row)"
+            (click)="onRowClick(row)"
+          ></tr>
+
+          <!-- Пустое состояние -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns().length">
+              <div class="no-data-message">
+                <mat-icon>search_off</mat-icon>
+                <p>Нет данных для отображения</p>
+                <p class="no-data-hint">Попробуйте изменить параметры фильтрации</p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+
+        <!-- Пагинатор -->
+        <mat-paginator
+          [length]="filteredIdeas().length"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions()"
+          [pageIndex]="currentPage()"
+          (page)="onPageChange($event)"
+          showFirstLastButtons
+          aria-label="Выберите страницу"
+          class="ideas-paginator"
+        ></mat-paginator>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

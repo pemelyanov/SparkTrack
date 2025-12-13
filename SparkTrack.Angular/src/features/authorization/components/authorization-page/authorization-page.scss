@@ -1,0 +1,246 @@
+// Основные стили для страницы авторизации с использованием Material Design
+
+.authorization-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  // Используем min-height вместо height, чтобы избежать скролла
+  min-height: 100vh;
+
+  // Используем безопасный padding
+  padding: 1.5rem;
+  box-sizing: border-box; // Важно для правильного расчета размеров
+
+  // Используем тему Material для фона
+  background-color: var(--mat-sys-surface-container);
+
+  // Добавляем тонкий фон-паттерн для глубины
+  background-image: radial-gradient(circle at 1px 1px, var(--mat-sys-outline-variant) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.authorization-card {
+  width: 100%;
+  max-width: 420px;
+
+  // Ограничиваем максимальную высоту карточки
+  max-height: 90vh;
+  overflow-y: auto; // Добавляем скролл только внутри карточки если нужно
+
+  // Используем токены Material Design 3
+  border-radius: var(--mat-sys-corner-extra-large);
+  box-shadow: var(--mat-sys-elevation-3);
+  transition: all 0.2s var(--mat-sys-motion-easing-emphasized);
+
+  &:hover {
+    box-shadow: var(--mat-sys-elevation-4);
+  }
+}
+
+.card-title {
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0;
+
+  // Убираем лишние отступы
+  margin: 0;
+}
+
+.form-field {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.field-icon {
+  color: var(--mat-sys-primary);
+  margin-right: 0.5rem;
+}
+
+.visibility-toggle {
+  color: var(--mat-sys-on-surface-variant);
+  transition: color 0.2s var(--mat-sys-motion-easing-standard);
+
+  &:hover {
+    color: var(--mat-sys-primary);
+  }
+
+  &:active {
+    color: var(--mat-sys-primary-container);
+  }
+}
+
+.password-hint {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin: 0.5rem 0 0;
+}
+
+.link {
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  font: var(--mat-sys-body-small);
+  transition: all 0.2s var(--mat-sys-motion-easing-standard);
+
+  &:hover {
+    color: var(--mat-sys-primary-container);
+    text-decoration: underline;
+  }
+}
+
+.card-actions {
+  padding: 1rem !important;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  margin-top: 0.5rem;
+
+  // Убираем лишние отступы
+  margin-bottom: 0;
+}
+
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+}
+
+.reset-button {
+  font: var(--mat-sys-label-large);
+  font-weight: 500;
+  transition: all 0.2s var(--mat-sys-motion-easing-standard);
+
+  &:hover:not([disabled]) {
+    background-color: var(--mat-sys-surface-container-high);
+  }
+}
+
+.submit-button {
+  min-width: 7.5rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.2s var(--mat-sys-motion-easing-standard);
+}
+
+.button-spinner {
+  ::ng-deep circle {
+    stroke: var(--mat-sys-on-primary) !important;
+  }
+}
+
+.additional-info {
+  margin-top: 1.5rem;
+  text-align: center;
+
+  // Убираем отступы снизу
+  margin-bottom: 0;
+}
+
+.register-text {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+
+.register-link {
+  color: var(--mat-sys-primary);
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 0.25rem;
+  transition: color 0.2s var(--mat-sys-motion-easing-standard);
+
+  &:hover {
+    color: var(--mat-sys-primary-container);
+    text-decoration: underline;
+  }
+}
+
+// Анимации с использованием Motion tokens
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--mat-sys-motion-duration-400));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.authorization-card {
+  animation: fadeIn 0.6s var(--mat-sys-motion-easing-emphasized);
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 600px) {
+  .authorization-container {
+    padding: 1rem;
+
+    // На маленьких экранах используем более компактную верстку
+    justify-content: flex-start;
+    padding-top: 2rem;
+  }
+
+  .authorization-card {
+    max-width: 100%;
+    max-height: none; // Убираем ограничение высоты на мобильных
+    border-radius: var(--mat-sys-corner-large);
+  }
+
+  .card-title {
+    font: var(--mat-sys-headline-small);
+  }
+
+  .card-subtitle {
+    font: var(--mat-sys-body-small);
+  }
+
+  .login-form {
+    gap: 1rem;
+  }
+}
+
+// Для очень высоких экранов
+@media (min-height: 900px) {
+  .authorization-container {
+    padding: 2rem 1.5rem;
+  }
+}
+
+// Поддержка prefers-reduced-motion
+@media (prefers-reduced-motion: reduce) {
+  .authorization-card {
+    animation: none;
+  }
+
+  * {
+    transition-duration: 0.001ms !important;
+  }
+}
+
+// Print styles
+@media print {
+  .authorization-container {
+    background: none;
+    min-height: auto;
+    padding: 0;
+  }
+
+  .authorization-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    max-width: 100%;
+    max-height: none;
+  }
+}

@@ -1,0 +1,105 @@
+<div class="authorization-container">
+  <mat-card appearance="outlined" class="authorization-card">
+    <mat-card-header>
+      <mat-card-title class="card-title">Авторизация</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <!-- Поле логина (email) -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="login"
+            placeholder="Введите email"
+            required
+          >
+          <mat-icon matPrefix class="field-icon">person</mat-icon>
+
+          @if (showLoginError()) {
+            <mat-error>
+              @if (loginControl()?.hasError('required')) {
+                Поле email обязательно для заполнения
+              }
+              @if (loginControl()?.hasError('email')) {
+                Введите корректный email адрес
+              }
+            </mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Поле пароля -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Пароль</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Введите пароль"
+            required
+          >
+          <mat-icon matPrefix class="field-icon">lock</mat-icon>
+
+          <button
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="hidePassword() ? 'Показать пароль' : 'Скрыть пароль'"
+            [attr.aria-pressed]="!hidePassword()"
+            class="visibility-toggle"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Ссылка на восстановление пароля -->
+        <div class="forgot-password-link">
+          <a routerLink="/forgot-password" class="link">Забыли пароль?</a>
+        </div>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="card-actions">
+      <div class="actions-container">
+        <!-- Кнопка сброса -->
+        <button
+          mat-button
+          color="warn"
+          (click)="onReset()"
+          [disabled]="isLoading()"
+          class="reset-button"
+        >
+          Сбросить
+        </button>
+
+        <!-- Кнопка входа -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          (click)="onSubmit()"
+          [disabled]="isLoading()"
+          class="submit-button"
+        >
+          @if (!isLoading()) {
+            <span>Войти</span>
+          }
+          @if (isLoading()) {
+            <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+          }
+        </button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Дополнительная информация -->
+  <div class="additional-info">
+    <p class="register-text">
+      Нет учетной записи?
+      <a routerLink="/register" class="register-link">Зарегистрируйтесь</a>
+    </p>
+  </div>
+</div>
