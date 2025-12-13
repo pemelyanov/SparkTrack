@@ -4,7 +4,6 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="src\features\authorization\components\" />
-      <Folder Include="src\features\core\" />
       <Folder Include="src\features\features\components\" />
     </ItemGroup>
 </Project>

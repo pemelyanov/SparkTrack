@@ -15,6 +15,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSortModule, MatSort, Sort } from '@angular/material/sort';
 import { MatCardModule } from '@angular/material/card';
 import { SelectionModel } from '@angular/cdk/collections';
+import { guid } from '../../../core/data/guid';
+import { Feature } from '../../../core/data/feature';
+import { Project } from '../../../core/data/project';
 
 // Interface for Idea
 
@@ -49,7 +52,7 @@ export class FeaturesPage {
   // Signals
   showCompleted = signal(true);
   channelFilterEnabled = signal(false);
-  selectedChannel = signal<number | null>(null);
+  selectedProject = signal<guid | null>(null);
 
   // Selection model for checkboxes
   selection = new SelectionModel<Feature>(true, []);
@@ -63,99 +66,99 @@ export class FeaturesPage {
   ideas = signal<Feature[]>([
     {
       id: 1,
-      title: 'Новый дизайн главной страницы',
+      name: 'Новый дизайн главной страницы',
       deadline: new Date('2024-02-15'),
       status: 'В работе',
-      channel: 'Веб',
+      project: 'Веб',
     },
     {
       id: 2,
-      title: 'Мобильное приложение для iOS',
+      name: 'Мобильное приложение для iOS',
       deadline: new Date('2024-03-01'),
       status: 'Запланировано',
-      channel: 'Мобильное',
+      project: 'Мобильное',
     },
     {
       id: 3,
-      title: 'Интеграция с Telegram API',
+      name: 'Интеграция с Telegram API',
       deadline: new Date('2024-01-30'),
       status: 'Завершено',
-      channel: 'Бэкенд',
+      project: 'Бэкенд',
     },
     {
       id: 4,
-      title: 'Оптимизация базы данных',
+      name: 'Оптимизация базы данных',
       deadline: new Date('2024-02-28'),
       status: 'В работе',
-      channel: 'Бэкенд',
+      project: 'Бэкенд',
     },
     {
       id: 5,
-      title: 'Адаптивная верстка каталога',
+      name: 'Адаптивная верстка каталога',
       deadline: new Date('2024-02-10'),
       status: 'Завершено',
-      channel: 'Веб',
+      project: 'Веб',
     },
     {
       id: 6,
-      title: 'Push-уведомления в Android',
+      name: 'Push-уведомления в Android',
       deadline: new Date('2024-03-15'),
       status: 'Запланировано',
-      channel: 'Мобильное',
+      project: 'Мобильное',
     },
     {
       id: 7,
-      title: 'Система кэширования',
+      name: 'Система кэширования',
       deadline: new Date('2024-02-20'),
       status: 'В работе',
-      channel: 'Бэкенд',
+      project: 'Бэкенд',
     },
     {
       id: 8,
-      title: 'Детальная аналитика пользователей',
+      name: 'Детальная аналитика пользователей',
       deadline: new Date('2024-03-05'),
       status: 'Запланировано',
-      channel: 'Аналитика',
+      project: 'Аналитика',
     },
     {
       id: 9,
-      title: 'Обновление UI компонентов',
+      name: 'Обновление UI компонентов',
       deadline: new Date('2024-02-25'),
       status: 'В работе',
-      channel: 'Веб',
+      project: 'Веб',
     },
     {
       id: 10,
-      title: 'Микросервис авторизации',
+      name: 'Микросервис авторизации',
       deadline: new Date('2024-03-10'),
       status: 'Запланировано',
-      channel: 'Бэкенд',
+      project: 'Бэкенд',
     },
     {
       id: 11,
-      title: 'Автоматическое тестирование',
+      name: 'Автоматическое тестирование',
       deadline: new Date('2024-02-18'),
       status: 'Завершено',
-      channel: 'QA',
+      project: 'QA',
     },
     {
       id: 12,
-      title: 'Система мониторинга',
+      name: 'Система мониторинга',
       deadline: new Date('2024-03-20'),
       status: 'Запланировано',
-      channel: 'DevOps',
+      project: 'DevOps',
     },
   ]);
 
-  channels = signal<Channel[]>([
-    { id: 1, name: 'Веб', enabled: true },
-    { id: 2, name: 'Мобильное', enabled: true },
-    { id: 3, name: 'Бэкенд', enabled: true },
-    { id: 4, name: 'Фронтенд', enabled: true },
-    { id: 5, name: 'Дизайн', enabled: true },
-    { id: 6, name: 'Аналитика', enabled: true },
-    { id: 7, name: 'QA', enabled: true },
-    { id: 8, name: 'DevOps', enabled: true },
+  channels = signal<Project[]>([
+    { id: '1', name: 'Веб' },
+    { id: '2', name: 'Мобильное' },
+    { id: '3', name: 'Бэкенд' },
+    { id: '4', name: 'Фронтенд' },
+    { id: '5', name: 'Дизайн' },
+    { id: '6', name: 'Аналитика' },
+    { id: '7', name: 'QA' },
+    { id: '8', name: 'DevOps' },
   ]);
 
   // Table columns - добавлен столбец select
@@ -166,7 +169,7 @@ export class FeaturesPage {
     const ideas = this.ideas();
     const showCompleted = this.showCompleted();
     const channelFilterEnabled = this.channelFilterEnabled();
-    const selectedChannelId = this.selectedChannel();
+    const selectedChannelId = this.selectedProject();
 
     let filtered = [...ideas];
 
@@ -179,7 +182,7 @@ export class FeaturesPage {
     if (channelFilterEnabled && selectedChannelId !== null) {
       const selectedChannel = this.channels().find((ch) => ch.id === selectedChannelId);
       if (selectedChannel) {
-        filtered = filtered.filter((idea) => idea.channel === selectedChannel.name);
+        filtered = filtered.filter((idea) => idea.project === selectedChannel.name);
       }
     }
 
@@ -221,14 +224,14 @@ export class FeaturesPage {
 
   onChannelFilterEnabledChange(): void {
     if (!this.channelFilterEnabled()) {
-      this.selectedChannel.set(null);
+      this.selectedProject.set(null);
     }
     this.updateDisplayedColumns();
     this.selection.clear();
     this.currentPage.set(0);
   }
 
-  onChannelSelectionChange(): void {
+  onProjectSelectionChange(): void {
     this.selection.clear();
     this.currentPage.set(0);
   }
@@ -246,11 +249,11 @@ export class FeaturesPage {
         case 'id':
           return compare(a.id, b.id, isAsc);
         case 'title':
-          return compare(a.title, b.title, isAsc);
+          return compare(a.name, b.name, isAsc);
         case 'deadline':
           return compare(a.deadline.getTime(), b.deadline.getTime(), isAsc);
         case 'channel':
-          return compare(a.channel, b.channel, isAsc);
+          return compare(a.project, b.project, isAsc);
         case 'status':
           return compare(a.status, b.status, isAsc);
         default:

@@ -35,13 +35,13 @@
             <mat-form-field appearance="outline" class="channel-select">
               <mat-label>Выберите канал</mat-label>
               <mat-select
-                [(ngModel)]="selectedChannel"
-                (selectionChange)="onChannelSelectionChange()"
+                [(ngModel)]="selectedProject"
+                (selectionChange)="onProjectSelectionChange()"
                 [disabled]="!channelFilterEnabled()"
               >
-                @for (channel of channels(); track channel.id) {
-                  <mat-option [value]="channel.id">
-                    {{ channel.name }}
+                @for (project of channels(); track project.id) {
+                  <mat-option [value]="project.id">
+                    {{ project.name }}
                   </mat-option>
                 }
               </mat-select>
@@ -111,7 +111,7 @@
             <th mat-header-cell *matHeaderCellDef mat-sort-header="title" class="column-title">Идея</th>
             <td mat-cell *matCellDef="let idea" class="cell-title">
               <div class="idea-title-content">
-                <span class="idea-title">{{ idea.title }}</span>
+                <span class="idea-title">{{ idea.name }}</span>
               </div>
             </td>
           </ng-container>
@@ -130,8 +130,8 @@
           <ng-container matColumnDef="channel">
             <th mat-header-cell *matHeaderCellDef mat-sort-header="channel" class="column-channel">Канал</th>
             <td mat-cell *matCellDef="let idea" class="cell-channel">
-              <span class="channel-badge" [class]="'channel-' + idea.channel.toLowerCase()">
-                {{ idea.channel }}
+              <span class="channel-badge" [class]="'channel-' + idea.project.toLowerCase()">
+                {{ idea.project }}
               </span>
             </td>
           </ng-container>
