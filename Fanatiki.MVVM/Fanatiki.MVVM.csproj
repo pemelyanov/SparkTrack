@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <PackageReference Include="Avalonia" />
+        <PackageReference Include="ReactiveUI" />
+        <PackageReference Include="ReactiveUI.Fody" />
+        <PackageReference Include="ReactiveUI.Validation" />
+        <PackageReference Include="Autofac" />
+        <PackageReference Include="Splat.Autofac" />
+    </ItemGroup>
+</Project>

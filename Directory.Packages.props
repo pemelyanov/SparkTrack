@@ -3,6 +3,30 @@
     <!-- Enable central package management, https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <!--Версии пакетов-->
+  <PropertyGroup>
+    <AvaloniaVersion>11.3.8</AvaloniaVersion>
+  </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="BigHelp.Http" Version="0.3.2" />
+    <PackageVersion Include="FluentAvaloniaUI" Version="2.4.1" />
+    <PackageVersion Include="FluentIcons.Avalonia.Fluent" Version="1.2.313" />
+    <PackageVersion Include="NLog" Version="6.0.6" />
+    <PackageVersion Include="Octokit" Version="14.0.0" />
+    <PackageVersion Include="ReactiveUI.Fody" Version="19.5.41" />
+    <PackageVersion Include="System.Reactive" Version="6.1.0" />
+    <PackageVersion Include="ReactiveUI" Version="20.2.45" />
+    <PackageVersion Include="ReactiveUI.Validation" Version="4.1.1" />
+    <PackageVersion Include="Autofac" Version="8.4.0" />
+    <PackageVersion Include="Splat.Autofac" Version="15.2.22" />
+    <PackageVersion Include="Xaml.Behaviors" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Xaml.Behaviors.Interactions" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
   </ItemGroup>
 </Project>
