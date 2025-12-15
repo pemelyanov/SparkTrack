@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.Core.Services.Authorization;
 
-using Data.Entities;
+using Shared.Data.Entities;
 
 public interface IAuthorizationService
 {

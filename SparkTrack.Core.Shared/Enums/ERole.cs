@@ -1,4 +1,4 @@
-﻿namespace SparkTrack.Core.Enums;
+﻿namespace SparkTrack.Core.Shared.Enums;
 
 public enum ERole
 {

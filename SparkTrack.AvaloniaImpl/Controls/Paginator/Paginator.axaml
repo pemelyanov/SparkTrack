@@ -1,0 +1,49 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
+             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
+             xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.Paginator.Paginator">
+    <UserControl.Styles>
+        <StyleInclude Source="PaginatorStyles.axaml" />
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="Auto * Auto">
+        <StackPanel Grid.Column="0" Classes="horizontal">
+            <TextBlock Classes="mr-2 va-center" Text="Элементов на странице:" />
+
+            <ComboBox Classes="mr-2" ItemsSource="{Binding $parent[paginator:Paginator].ItemsPerPageList}"
+                      SelectedItem="{Binding $parent[paginator:Paginator].ItemsPerPage}" />
+
+        </StackPanel>
+        <StackPanel Grid.Column="2" Classes="horizontal">
+            <TextBlock Classes="mr-2 va-center"
+                       Text="{Binding $parent[paginator:Paginator].PagesQuantity, StringFormat='Всего страниц: {0}'}" />
+
+            <Button Content="{markupExtensions:SymbolIcon Symbol=ArrowPrevious}"
+                    IsEnabled="{Binding $parent[paginator:Paginator].CanPrevious^}"
+                    Click="FirstPage_OnClick" />
+            <Button Content="{markupExtensions:SymbolIcon Symbol=ChevronLeft}"
+                    IsEnabled="{Binding $parent[paginator:Paginator].CanPrevious^}"
+                    Click="PreviousPage_Click" />
+
+            <TextBox Classes="mx-2" Width="16" TextAlignment="Center"
+                     Text="{Binding $parent[paginator:Paginator].CurrentPage, Converter={x:Static converters:StringToIntConverter.Instance}}">
+                <Interaction.Behaviors>
+                    <behaviors:IntBoxBehaviorBase />
+                </Interaction.Behaviors>
+            </TextBox>
+
+            <Button Content="{markupExtensions:SymbolIcon Symbol=ChevronRight}"
+                    IsEnabled="{Binding $parent[paginator:Paginator].CanNext^}"
+                    Click="NextPage_Click" />
+            <Button Content="{markupExtensions:SymbolIcon Symbol=ArrowNext}"
+                    IsEnabled="{Binding $parent[paginator:Paginator].CanNext^}"
+                    Click="LastPage_Click" />
+        </StackPanel>
+    </Grid>
+</UserControl>

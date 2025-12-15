@@ -1,4 +1,4 @@
-﻿namespace SparkTrack.Core.Data.Entities;
+﻿namespace SparkTrack.Core.Shared.Data.Entities;
 
 using Enums;
 

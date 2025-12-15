@@ -4,14 +4,12 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <OutputType>WinExe</OutputType>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Autofac" />
+      <ProjectReference Include="..\SparkTrack.AvaloniaImpl\SparkTrack.AvaloniaImpl.csproj" />
     </ItemGroup>
 
 </Project>

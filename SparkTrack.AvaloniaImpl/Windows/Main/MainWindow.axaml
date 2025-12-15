@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:SparkTrack.AvaloniaImpl.Windows.Main"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+        xmlns:fluent="clr-namespace:FluentIcons.Avalonia.Fluent;assembly=FluentIcons.Avalonia.Fluent"
+        xmlns:reactiveUi="http://reactiveui.net"
+        xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="SparkTrack.AvaloniaImpl.Windows.Main.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        WindowStartupLocation="CenterScreen"
+        Title="SparkTrack">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <controls:NavigationView x:Name="NavigationView" IsPaneOpen="False" IsSettingsVisible="False"
+                             Background="Transparent" MenuItemsSource="{Binding NavigationList^}"
+                             SelectedItem="{Binding SelectedPageType, Mode=OneWay}">
+        <controls:NavigationView.MenuItemTemplate>
+            <DataTemplate x:DataType="system:Type">
+                <controls:NavigationViewItem
+                    Content="{Binding ., Converter={x:Static converters:NavigationViewItemConverters.Name}}"
+                    IsSelected="True" Tapped="NavigationItem_OnTapped" Tag="{Binding}">
+                    <controls:NavigationViewItem.IconSource>
+                        <fluent:SymbolIconSource
+                            Symbol="{Binding ., Converter={x:Static converters:NavigationViewItemConverters.Symbol}}" />
+                    </controls:NavigationViewItem.IconSource>
+                </controls:NavigationViewItem>
+            </DataTemplate>
+        </controls:NavigationView.MenuItemTemplate>
+
+        <controls:NavigationView.PaneFooter>
+        </controls:NavigationView.PaneFooter>
+
+        <Grid RowDefinitions="Auto *" Margin="8" RowSpacing="8">
+            <reactiveUi:RoutedViewHost Grid.Row="1" Router="{Binding Router}" />
+        </Grid>
+    </controls:NavigationView>
+</Window>

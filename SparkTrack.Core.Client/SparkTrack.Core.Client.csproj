@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
+      <ProjectReference Include="..\SparkTrack.Reactive\SparkTrack.Reactive.csproj" />
     </ItemGroup>
 
     <ItemGroup>

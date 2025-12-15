@@ -1,7 +1,7 @@
 ﻿namespace SparkTrack.Core.Services.Features;
 
-using Data;
-using Data.Entities;
+using Shared.Data;
+using Shared.Data.Entities;
 
 public interface IFeaturesService
 {

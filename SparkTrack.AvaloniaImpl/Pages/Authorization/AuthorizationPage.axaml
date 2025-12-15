@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:authorization="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Authorization"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.Authorization.AuthorizationPage"
+             x:DataType="authorization:AuthorizationPageViewModel">
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="UseFloatingWatermark" Value="True" />
+        </Style>
+    </UserControl.Styles>
+    <Panel>
+        <Border Classes="card" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Авторизация" Classes="title" />
+            
+                <TextBox Watermark="Логин" Text="{Binding Login}" />
+                
+                <TextBox Watermark="Пароль" Text="{Binding Password}" PasswordChar="*" />
+                
+                <Button Classes="accent" Content="Войти" HorizontalAlignment="Right" Command="{Binding LogInAsync}" />
+            </StackPanel>
+        </Border>
+    </Panel>
+</UserControl>

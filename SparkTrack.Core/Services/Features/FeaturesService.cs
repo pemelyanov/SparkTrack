@@ -1,11 +1,11 @@
 ﻿namespace SparkTrack.Core.Services.Features;
 
 using Authorization;
-using Data;
-using Data.Entities;
-using Enums;
 using Exceptions;
 using Repositories;
+using Shared.Data;
+using Shared.Data.Entities;
+using Shared.Enums;
 
 internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthorizationService authorizationService) : IFeaturesService
 {

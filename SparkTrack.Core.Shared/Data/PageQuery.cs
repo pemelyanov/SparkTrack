@@ -1,4 +1,4 @@
-﻿namespace SparkTrack.Core.Data;
+﻿namespace SparkTrack.Core.Shared.Data;
 
 public record PageQuery(int Page, int ItemsPerPage)
 {

@@ -1,0 +1,43 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+    
+    <Style Selector="StackPanel.horizontal">
+        <Setter Property="Orientation" Value="Horizontal" />
+    </Style>
+    
+    <Style Selector=":is(Control).mr-2">
+        <Setter Property="Margin" Value="0 0 8 0" />
+    </Style>
+    
+    <Style Selector=":is(Control).mx-2">
+        <Setter Property="Margin" Value="8 0 8 0" />
+    </Style>
+    
+    <Style Selector=":is(Control).va-center">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="ItemsControl.page-list">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <StackPanel Classes="horizontal" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+        
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate DataType="system:Object">
+                    <Button Content="{Binding }"/>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</Styles>

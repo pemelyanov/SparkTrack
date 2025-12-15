@@ -1,7 +1,7 @@
 ﻿namespace SparkTrack.Core.Repositories;
 
-using Data;
-using Data.Entities;
+using Shared.Data;
+using Shared.Data.Entities;
 
 public interface IFeaturesRepository
 {
