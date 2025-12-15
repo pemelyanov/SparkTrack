@@ -17,4 +17,4 @@ public record FeatureData
     public string Description { get; init; } = string.Empty;
 
     public IEnumerable<FileData> AttachmentsList { get; init; } = [];
-};
+}

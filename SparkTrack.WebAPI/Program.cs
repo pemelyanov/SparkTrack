@@ -16,7 +16,8 @@ builder.Services.AddSwaggerGen();
 
 void RegisterServices(ContainerBuilder container)
 {
-    container.Register(_ => new DbContextOptionsBuilder<SparkTrackDbContext>().UseInMemoryDatabase("SparkTrack").Options)
+    container.Register(_ => new DbContextOptionsBuilder<SparkTrackDbContext>()
+            .UseInMemoryDatabase("SparkTrack").Options)
         .SingleInstance();
     container.RegisterModule<CoreModule>();
     container.RegisterModule<DataAccessEFModule>();
