@@ -20,7 +20,7 @@ public interface IFeaturesService
     /// </summary>
     /// <param name="id">Id фичи</param>
     /// <returns></returns>
-    Task<Feature> GetAsync(int id);
+    Task<Feature?> GetAsync(int id);
 
     Task AddAsync(FeatureEdit feature);
 

@@ -79,4 +79,15 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+      <PackageReference Include="Swashbuckle.AspNetCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SparkTrack.Core\SparkTrack.Core.csproj" />
+      <ProjectReference Include="..\SparkTrack.DataAccess.EFCore\SparkTrack.DataAccess.EFCore.csproj" />
+    </ItemGroup>
+
 </Project>

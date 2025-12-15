@@ -8,6 +8,7 @@
     <AvaloniaVersion>11.3.8</AvaloniaVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
     <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
@@ -19,9 +20,11 @@
     <PackageVersion Include="FluentAvaloniaUI" Version="2.4.1" />
     <PackageVersion Include="FluentIcons.Avalonia.Fluent" Version="1.2.313" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.1" />
     <PackageVersion Include="NLog" Version="6.0.6" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="ReactiveUI.Fody" Version="19.5.41" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.0.1" />
     <PackageVersion Include="System.Reactive" Version="6.1.0" />
     <PackageVersion Include="ReactiveUI" Version="20.2.45" />
     <PackageVersion Include="ReactiveUI.Validation" Version="4.1.1" />

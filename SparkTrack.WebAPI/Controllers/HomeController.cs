@@ -2,11 +2,28 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SparkTrack.WebAPI.Controllers;
 
-public class HomeController : Controller
+using Core.Services.Features;
+using Core.Shared.Data;
+using Core.Shared.Data.Edit;
+using Core.Shared.Data.Entities;
+
+public class HomeController(IFeaturesService featuresService) : Controller
 {
-    public IActionResult Index()
+    public async Task<ActionResult<IReadOnlyPagedData<Feature>>> Index()
     {
-        return Ok();
+        await featuresService.AddAsync(
+            new FeatureEdit
+            {
+                Name = "Test",
+                ProjectId = Guid.Empty,
+                TasksList = [],
+                Deadline = DateTime.Now,
+                Description = "asdasdasd",
+                AttachmentsIdList = []
+            }
+        );
+        
+        return Ok(await featuresService.GetPageAsync(null, true, PageQuery.All));
     }
 
     public IActionResult Privacy()

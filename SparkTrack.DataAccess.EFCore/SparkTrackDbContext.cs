@@ -3,11 +3,11 @@
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-public class SparkTrackDbContext : DbContext
+public class SparkTrackDbContext(DbContextOptions<SparkTrackDbContext> options) : DbContext(options)
 {
-    public DbSet<UserData> Users { get; } = null!;
-    public DbSet<ProjectData> Projects { get; } = null!;
-    public DbSet<FeatureData> Features { get; } = null!;
-    public DbSet<SubTaskData> SubTasks { get; } = null!;
-    public DbSet<FileData> Files { get; } = null!;
+    public DbSet<UserData> Users => Set<UserData>();
+    public DbSet<ProjectData> Projects  => Set<ProjectData>();
+    public DbSet<FeatureData> Features  => Set<FeatureData>();
+    public DbSet<SubTaskData> SubTasks  => Set<SubTaskData>();
+    public DbSet<FileData> Files  => Set<FileData>();
 }

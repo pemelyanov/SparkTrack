@@ -24,7 +24,7 @@ internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthoriz
         return featuresRepository.GetPageAsync(projectId, showCompleted, employeeFilter, pageQuery);
     }
 
-    public Task<Feature> GetAsync(int id)
+    public Task<Feature?> GetAsync(int id)
     {
         var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
 
