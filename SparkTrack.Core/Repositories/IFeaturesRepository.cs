@@ -22,7 +22,7 @@ public interface IFeaturesRepository
     /// <param name="id">Id фичи</param>
     /// <param name="subTaskEmployeeId">Id сотрудника для фильтрации списка подзадач в фиче. Если null - будет выведен список всех подзадач</param>
     /// <returns></returns>
-    Task<Feature> GetAsync(int id, Guid? subTaskEmployeeId);
+    Task<Feature?> GetAsync(int id, Guid? subTaskEmployeeId);
 
     Task AddAsync(FeatureEdit feature);
 

@@ -10,4 +10,13 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
+      <ProjectReference Include="..\SparkTrack.Core\SparkTrack.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Configuration\" />
+    </ItemGroup>
+
 </Project>

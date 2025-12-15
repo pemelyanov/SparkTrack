@@ -1,7 +1,5 @@
 ﻿namespace SparkTrack.Core.Shared.Data.Edit;
 
-using Entities;
-
 public record FeatureEdit
 {
     public int Id { get; init; }
@@ -10,7 +8,7 @@ public record FeatureEdit
     
     public required Guid ProjectId { get; init; }
     
-    public required IReadOnlyList<SubTask> TasksList { get; init; }
+    public required IReadOnlyList<SubTaskEdit> TasksList { get; init; }
     
     public DateTime Deadline { get; init; }
 

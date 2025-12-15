@@ -2,5 +2,5 @@
 
 public record PageQuery(int Page, int ItemsPerPage)
 {
-    public PageQuery All => new(-1, -1);
+    public static PageQuery All => new(-1, -1);
 }
