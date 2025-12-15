@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgresql
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      TZ: UTC
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      # Основной том для данных
+      - postgres_data:/var/lib/postgresql/data
+      
+      # Опционально: конфигурационные файлы
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      
+      # Опционально: бекапы
+      - ${POSTGRES_BACKUP_DIR}:/backups
+      
+      # Для Linux: сохраняем права на файлы
+      - ./data/postgres:/var/lib/postgresql/data:cached
+      
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 80s
+    networks:
+      - spark-network
+
+  # Опционально: pgAdmin для управления (только для разработки)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json
+    restart: unless-stopped
+    networks:
+      - spark-network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${POSTGRES_DATA_DIR}
+  pgadmin_data:
+
+networks:
+  spark-network:
+    driver: bridge

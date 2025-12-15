@@ -17,7 +17,7 @@ builder.Services.AddSwaggerGen();
 void RegisterServices(ContainerBuilder container)
 {
     container.Register(_ => new DbContextOptionsBuilder<SparkTrackDbContext>()
-            .UseInMemoryDatabase("SparkTrack").Options)
+            .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).Options)
         .SingleInstance();
     container.RegisterModule<CoreModule>();
     container.RegisterModule<DataAccessEFModule>();
@@ -45,5 +45,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
+
+app.Services.GetRequiredService<SparkTrackDbContext>().Database.EnsureCreated();
 
 app.Run();

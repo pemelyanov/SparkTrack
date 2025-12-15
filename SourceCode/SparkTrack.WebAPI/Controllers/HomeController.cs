@@ -11,18 +11,6 @@ public class HomeController(IFeaturesService featuresService) : Controller
 {
     public async Task<ActionResult<IReadOnlyPagedData<Feature>>> Index()
     {
-        await featuresService.AddAsync(
-            new FeatureEdit
-            {
-                Name = "Test",
-                ProjectId = Guid.Empty,
-                TasksList = [],
-                Deadline = DateTime.Now,
-                Description = "asdasdasd",
-                AttachmentsIdList = []
-            }
-        );
-        
         return Ok(await featuresService.GetPageAsync(null, true, PageQuery.All));
     }
 
