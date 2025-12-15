@@ -1,0 +1,52 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:entities="clr-namespace:SparkTrack.Core.Shared.Data.Entities;assembly=SparkTrack.Core.Shared"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.FeatureStatus.FeatureStatus"
+             x:Name="Root">
+    <UserControl.Resources>
+        <system:Int32 x:Key="One">1</system:Int32>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="Border.completed">
+            <Setter Property="Background" Value="SeaGreen" />
+        </Style>
+        
+        <Style Selector="Border.in-progress">
+            <Setter Property="Background" Value="DarkGray" />
+        </Style>
+    </UserControl.Styles>
+    <Panel>
+        <CheckBox
+            IsVisible="{Binding #Root.SubTasksList.Count, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={StaticResource One}}"
+            ToolTip.Tip="Отметка о готовности" />
+        
+        <ItemsControl IsVisible="{Binding #Root.SubTasksList.Count, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource One}}"
+                      ItemsSource="{Binding #Root.SubTasksList}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="entities:SubTask">
+                    <Border CornerRadius="999" Width="24" Height="24" BorderThickness="2" BorderBrush="DimGray"
+                            Classes.completed="{Binding IsCompleted}"
+                            Classes.in-progress="{Binding !IsCompleted}">
+                        <ToolTip.Tip>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                <TextBlock Text="{Binding ExecutorEmployee.Name, StringFormat='Исполнитель: {0}'}" />
+                                <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0}₽'}" />
+                            </StackPanel>
+                        </ToolTip.Tip>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Panel>
+</UserControl>

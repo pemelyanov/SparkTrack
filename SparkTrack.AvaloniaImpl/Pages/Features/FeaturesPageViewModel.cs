@@ -49,26 +49,26 @@ public class FeaturesPageViewModel(Lazy<IScreen> screen) : ViewModelBase, IRouta
                             Role = ERole.Employee
                         },
                     },
-                    new SubTask
-                    {
-                        Name = "Съемка",
-                        ExecutorEmployee = new User
-                        {
-                            Id = Guid.Empty,
-                            Name = "Влад",
-                            Role = ERole.Employee
-                        },
-                    },
-                    new SubTask
-                    {
-                        Name = "Превью",
-                        ExecutorEmployee = new User
-                        {
-                            Id = Guid.Empty,
-                            Name = "Олег",
-                            Role = ERole.Employee
-                        },
-                    }
+                    // new SubTask
+                    // {
+                    //     Name = "Съемка",
+                    //     ExecutorEmployee = new User
+                    //     {
+                    //         Id = Guid.Empty,
+                    //         Name = "Влад",
+                    //         Role = ERole.Employee
+                    //     },
+                    // },
+                    // new SubTask
+                    // {
+                    //     Name = "Превью",
+                    //     ExecutorEmployee = new User
+                    //     {
+                    //         Id = Guid.Empty,
+                    //         Name = "Олег",
+                    //         Role = ERole.Employee
+                    //     },
+                    // }
                 ]
             }
         )

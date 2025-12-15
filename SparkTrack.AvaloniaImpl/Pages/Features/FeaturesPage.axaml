@@ -6,6 +6,7 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
+             xmlns:featureStatus="clr-namespace:SparkTrack.AvaloniaImpl.Controls.FeatureStatus"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Features.FeaturesPage"
              x:DataType="features:FeaturesPageViewModel"
@@ -63,8 +64,14 @@
                                     Header="Канал" Binding="{Binding Model.Project.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"
                                     Header="Дедлайн" Binding="{Binding Model.Deadline, StringFormat='dd.MM.yyyy'}"/>
-                <DataGridTextColumn Width="220" IsReadOnly="True"
-                                    Header="Статус" />
+                <DataGridTemplateColumn Width="220" IsReadOnly="True"
+                                    Header="Статус">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
         

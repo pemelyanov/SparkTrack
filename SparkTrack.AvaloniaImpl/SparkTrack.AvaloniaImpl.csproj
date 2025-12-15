@@ -38,8 +38,4 @@
       <ProjectReference Include="..\Fanatiki.MVVM\Fanatiki.MVVM.csproj" />
       <ProjectReference Include="..\SparkTrack.Core.Client\SparkTrack.Core.Client.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Controls\" />
-    </ItemGroup>
 </Project>
