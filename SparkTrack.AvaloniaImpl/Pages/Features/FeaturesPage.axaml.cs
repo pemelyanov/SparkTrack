@@ -10,4 +10,9 @@ public partial class FeaturesPage : ReactiveUserControl<FeaturesPageViewModel>
     {
         InitializeComponent();
     }
+
+    private void DataGrid_OnSorting(object? sender, DataGridColumnEventArgs e)
+    {
+        e.Handled = true;
+    }
 }
