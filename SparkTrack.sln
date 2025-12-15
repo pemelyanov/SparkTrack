@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Reactive", "Spar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Core.Client", "SparkTrack.Core.Client\SparkTrack.Core.Client.csproj", "{6B38AB77-9AE5-4264-B3A3-91124B8918A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.DataAccess.EFCore", "SparkTrack.DataAccess.EFCore\SparkTrack.DataAccess.EFCore.csproj", "{03ECE74C-A954-4F10-9CD6-362C92D3AF29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,7 @@ Global
 		{663E97F7-5987-4CD5-A2E7-0825FBDF7B2F} = {F582FA44-CBEA-4892-AB06-7745473ABDCF}
 		{158748DF-826F-4A52-85BF-F02690910CDD} = {F582FA44-CBEA-4892-AB06-7745473ABDCF}
 		{6B38AB77-9AE5-4264-B3A3-91124B8918A8} = {F582FA44-CBEA-4892-AB06-7745473ABDCF}
+		{03ECE74C-A954-4F10-9CD6-362C92D3AF29} = {D8EB2169-C16E-4DAC-824E-EE64974C1B2E}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3D679824-3986-472A-B08F-51BADB3B0D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -83,5 +86,9 @@ Global
 		{6B38AB77-9AE5-4264-B3A3-91124B8918A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B38AB77-9AE5-4264-B3A3-91124B8918A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B38AB77-9AE5-4264-B3A3-91124B8918A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03ECE74C-A954-4F10-9CD6-362C92D3AF29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03ECE74C-A954-4F10-9CD6-362C92D3AF29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03ECE74C-A954-4F10-9CD6-362C92D3AF29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03ECE74C-A954-4F10-9CD6-362C92D3AF29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

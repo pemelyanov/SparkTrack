@@ -18,6 +18,7 @@
     <PackageVersion Include="BigHelp.Http" Version="0.3.2" />
     <PackageVersion Include="FluentAvaloniaUI" Version="2.4.1" />
     <PackageVersion Include="FluentIcons.Avalonia.Fluent" Version="1.2.313" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
     <PackageVersion Include="NLog" Version="6.0.6" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
     <PackageVersion Include="ReactiveUI.Fody" Version="19.5.41" />
