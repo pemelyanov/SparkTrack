@@ -8,7 +8,30 @@
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Features.FeaturesPage"
-             x:DataType="features:FeaturesPageViewModel">
+             x:DataType="features:FeaturesPageViewModel"
+             x:Name="Root">
+    <UserControl.Styles>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Focusable" Value="False" />
+            
+            <Style Selector="^ :is(Control)">
+                <Setter Property="Focusable" Value="False" />
+            </Style>
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="Focusable" Value="False" />
+            
+            <Style Selector="^ :is(Control)">
+                <Setter Property="Focusable" Value="False" />
+            </Style>
+        </Style>
+        <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+    </UserControl.Styles>
     <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type features:FeaturesPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:NavigationViewItemConverters.Name}}" />
@@ -24,7 +47,9 @@
             <DataGrid.Columns>
                 <DataGridTemplateColumn CanUserSort="False" IsReadOnly="False">
                     <DataGridTemplateColumn.Header>
-                        <CheckBox Margin="16 0" />
+                        <CheckBox Margin="16 0" 
+                                  IsEnabled="{Binding #Root.ViewModel.CurrentPageData.Count, FallbackValue={x:False}}"
+                                  IsChecked="{Binding #Root.ViewModel.CurrentPageSelectionState, Mode=TwoWay, FallbackValue={x:False}}"/>
                     </DataGridTemplateColumn.Header>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
