@@ -9,7 +9,7 @@ public class FakeAuthService : IAuthorizationService
     {
         Id = Guid.Empty,
         Name = "asd",
-        Role = ERole.Admin
+        Role = ERole.God
     };
 
     public Task AuthorizeAsync(Guid userId) => throw new NotImplementedException();

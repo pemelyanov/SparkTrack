@@ -21,7 +21,7 @@ internal class ProjectsService(IAuthorizationService authorizationService, IProj
     {
         authorizationService.GetUserOrThrowIfNotInRole(ERole.God);
 
-        return projectsRepository.AddAsync(project);
+        return projectsRepository.AddAsync(project with { Id = Guid.Empty });
     }
 
     public Task DeleteAsync(Guid id)

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using SparkTrack.Core.AutofacModules;
 using SparkTrack.DataAccess.EFCore;
 using SparkTrack.DataAccess.EFCore.AutofacModules;
+using SparkTrack.WebAPI.AutofacModules;
+using SparkTrack.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,7 @@ void RegisterServices(ContainerBuilder container)
     container.Register(_ => new DbContextOptionsBuilder<SparkTrackDbContext>()
             .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).Options)
         .SingleInstance();
+    container.RegisterModule<WebAPIModule>();
     container.RegisterModule<CoreModule>();
     container.RegisterModule<DataAccessEFModule>();
 }
@@ -30,6 +33,9 @@ if (!app.Environment.IsDevelopment())
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+else
+{
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -39,12 +45,9 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.UseMiddleware<AuthorizationServiceMiddleware>();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
-);
+app.MapControllers();
 
 app.Services.GetRequiredService<SparkTrackDbContext>().Database.EnsureCreated();
 
