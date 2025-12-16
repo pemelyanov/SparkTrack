@@ -1,79 +1,57 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Pages.Features;
 
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Core.Shared.Data.Entities;
-using Core.Shared.Enums;
+using Core.Shared.Data;
+using Core.Shared.Services.Features;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-public class FeaturesPageViewModel(Lazy<IScreen> screen) : ViewModelBase, IRoutableViewModel
+public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
 {
+    private readonly Lazy<IScreen>    m_screen;
+    private readonly IFeaturesService m_featuresService;
+
+    public FeaturesPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService)
+    {
+        m_screen = screen;
+        m_featuresService = featuresService;
+
+        ReloadTableCommand = CreateReloadTableCommand();
+    }
+
     protected override void OnFirstActivated(CompositeDisposable disposables)
     {
         base.OnFirstActivated(disposables);
         
         SetupItemSelectionChangedReaction(disposables);
         SetupTableSelectionStateChangeReaction(disposables);
+
+        ReloadTableCommand.Execute().Subscribe().DisposeWith(disposables);
     }
 
     public string UrlPathSegment => "features";
 
-    public IScreen HostScreen => screen.Value;
+    public IScreen HostScreen => m_screen.Value;
     
     [Reactive]
     public bool? CurrentPageSelectionState { get; set; }
 
     [Reactive]
-    public IReadOnlyList<FeatureViewModel> CurrentPageData { get; private set; } = Enumerable.Range(1, 25)
-        .Select(
-            it => new Feature()
-            {
-                Id = it,
-                Name = $"Идея {it}",
-                Deadline = DateTime.Now,
-                Project = new Project
-                {
-                    Id = Guid.Empty,
-                    Name = $"Проект {it}"
-                },
-                TasksList = [
-                    new SubTask
-                    {
-                        Name = "Монтаж",
-                        ExecutorEmployee = new User
-                        {
-                            Id = Guid.Empty,
-                            Name = "Костя",
-                            Role = ERole.Employee
-                        },
-                    },
-                    // new SubTask
-                    // {
-                    //     Name = "Съемка",
-                    //     ExecutorEmployee = new User
-                    //     {
-                    //         Id = Guid.Empty,
-                    //         Name = "Влад",
-                    //         Role = ERole.Employee
-                    //     },
-                    // },
-                    // new SubTask
-                    // {
-                    //     Name = "Превью",
-                    //     ExecutorEmployee = new User
-                    //     {
-                    //         Id = Guid.Empty,
-                    //         Name = "Олег",
-                    //         Role = ERole.Employee
-                    //     },
-                    // }
-                ]
-            }
-        )
-        .Select(it => new FeatureViewModel(it))
-        .ToArray();
+    public IReadOnlyList<FeatureViewModel> CurrentPageData { get; private set; } = [];
+    
+    public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
+
+    private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(
+        async () =>
+        {
+            var page = await m_featuresService.GetPageAsync(null, true, PageQuery.All);
+
+            CurrentPageData = page.Items.Select(it => new FeatureViewModel(it)).ToArray();
+        }
+    );
     
     private void SetupTableSelectionStateChangeReaction(CompositeDisposable disposables)
     {
@@ -120,5 +98,4 @@ public class FeaturesPageViewModel(Lazy<IScreen> screen) : ViewModelBase, IRouta
             .Subscribe(value => CurrentPageSelectionState = value)
             .DisposeWith(disposables);
     }
-
 }

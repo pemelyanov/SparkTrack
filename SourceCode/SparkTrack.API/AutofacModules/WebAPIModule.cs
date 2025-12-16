@@ -2,6 +2,7 @@
 
 using Autofac;
 using API;
+using Services.Features;
 
 public class APIModule(string apiBaseUrl) : Module
 {
@@ -10,6 +11,8 @@ public class APIModule(string apiBaseUrl) : Module
         builder.RegisterType<SparkHttpClient>().As<HttpClient>();
         
         RegisterClient<FeaturesClient>(builder);
+
+        builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
     }
 
     private void RegisterClient<TClient>(ContainerBuilder builder) where TClient : class
@@ -17,8 +20,8 @@ public class APIModule(string apiBaseUrl) : Module
         builder.Register<ClientWrapper<TClient>>(
             c =>
             {
-                var httpClient = c.Resolve<HttpClient>();
-                var client = (TClient)Activator.CreateInstance(typeof(TClient), apiBaseUrl, httpClient)!;
+                var httpClient = c.Resolve<HttpClient>(new TypedParameter(typeof(string), apiBaseUrl));
+                var client = (TClient)Activator.CreateInstance(typeof(TClient), httpClient)!;
 
                 return new ClientWrapper<TClient>(client, httpClient);
             }
