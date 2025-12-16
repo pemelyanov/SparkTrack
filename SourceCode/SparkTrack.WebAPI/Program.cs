@@ -1,6 +1,9 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using SparkTrack.Authentication.Core.Models;
+using SparkTrack.Authentication.WebAPI.Extensions;
 using SparkTrack.Core.AutofacModules;
 using SparkTrack.DataAccess.EFCore;
 using SparkTrack.DataAccess.EFCore.AutofacModules;
@@ -15,6 +18,44 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(Registe
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument();
+
+
+var jwtConfiguration = new JwtConfiguration();
+builder.Configuration.Bind("JwtConfiguration", jwtConfiguration);
+
+builder.Services
+    .AddJwtConfiguration(jwtConfiguration)
+    .AddAccessTokenGenerator()
+    .AddRefreshTokenGenerator()
+    .AddRefreshTokenValidator()
+    .AddRefreshTokenStorageConfiguration()
+    .AddRefreshTokensService<Guid>()
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddDefaultJwtBearer(
+        jwtConfiguration,
+        config: options =>
+        {
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+
+                    // If the request is for our hub...
+                    var path = context.HttpContext.Request.Path;
+                    if (
+                        !string.IsNullOrEmpty(accessToken)
+                        && path.StartsWithSegments("/hub")
+                    )
+                    {
+                        // Read the token out of the query string
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
+        }
+    );
 
 void RegisterServices(ContainerBuilder container)
 {
@@ -46,12 +87,16 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<AuthorizationServiceMiddleware>();
 
 app.MapControllers();
 
-app.Services.GetRequiredService<SparkTrackDbContext>().Database.EnsureCreated();
+var database = app.Services.GetRequiredService<SparkTrackDbContext>().Database;
+
+database.EnsureDeleted();
+database.EnsureCreated();
 
 app.Run();
