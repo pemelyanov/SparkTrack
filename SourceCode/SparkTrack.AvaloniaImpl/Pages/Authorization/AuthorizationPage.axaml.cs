@@ -1,8 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-
-namespace SparkTrack.AvaloniaImpl.Pages.Authorization;
+﻿namespace SparkTrack.AvaloniaImpl.Pages.Authorization;
 
 using Avalonia.ReactiveUI;
 

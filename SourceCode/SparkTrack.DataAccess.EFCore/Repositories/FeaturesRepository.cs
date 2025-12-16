@@ -18,7 +18,6 @@ internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepo
         PageQuery pageQuery
     ) => dbContext.Features
         .AsNoTracking()
-        .AsPaginated(pageQuery)
         .WhereIf(projectId is not null, it => it.Project.Id == projectId)
         .WhereIf(
             subTaskEmployeeId is not null,
@@ -27,6 +26,7 @@ internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepo
         .Select(
             GetFeatureMapExpression(subTaskEmployeeId)
         )
+        .AsPaginated(pageQuery)
         .CollectAsync();
 
     public Task<Feature?> GetAsync(int id, Guid? subTaskEmployeeId) => dbContext.Features.Where(it => it.Id == id)

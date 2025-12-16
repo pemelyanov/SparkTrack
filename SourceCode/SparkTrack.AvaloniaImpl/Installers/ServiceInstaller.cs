@@ -2,7 +2,6 @@
 
 using Autofac;
 using Services.NavigationListResolver;
-using SparkTrack.Core.Client.Services.Authorization;
 
 public static class ServiceInstaller
 {
