@@ -7,6 +7,7 @@ using Shared.Data;
 using Shared.Data.Edit;
 using Shared.Data.Entities;
 using Shared.Enums;
+using Shared.Services.Features;
 
 internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthorizationService authorizationService)
     : IFeaturesService

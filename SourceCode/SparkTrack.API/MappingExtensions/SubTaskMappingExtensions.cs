@@ -1,9 +1,8 @@
-﻿namespace SparkTrack.WebAPI.MappingExtensions;
+﻿namespace SparkTrack.API.MappingExtensions;
 
+using API;
 using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
-using DTO;
-using DTO.Edit;
 
 public static class SubTaskMappingExtensions
 {
@@ -32,6 +31,16 @@ public static class SubTaskMappingExtensions
         Id = it.Id,
         Name = it.Name,
         ExecutorEmployee = it.ExecutorEmployee.ToDTO(),
+        Cost = it.Cost,
+        IsCompleted = it.IsCompleted,
+        OnPayment = it.OnPayment
+    };
+    
+    public static SubTask ToDomain(this SubTaskDTO it) => new()
+    {
+        Id = it.Id,
+        Name = it.Name,
+        ExecutorEmployee = it.ExecutorEmployee.ToDomain(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
         OnPayment = it.OnPayment

@@ -5,6 +5,7 @@ using Extensions;
 using Repositories;
 using Shared.Data.Entities;
 using Shared.Enums;
+using Shared.Services.Projects;
 
 internal class ProjectsService(IAuthorizationService authorizationService, IProjectsRepository projectsRepository) : IProjectsService
 {

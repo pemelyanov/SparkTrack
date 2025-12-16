@@ -1,6 +1,6 @@
-﻿namespace SparkTrack.Core.Services.Projects;
+﻿namespace SparkTrack.Core.Shared.Services.Projects;
 
-using Shared.Data.Entities;
+using Data.Entities;
 
 public interface IProjectsService
 {

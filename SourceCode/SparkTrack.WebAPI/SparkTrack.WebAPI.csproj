@@ -83,7 +83,9 @@
       <PackageReference Include="Autofac.Extensions.DependencyInjection" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+      <PackageReference Include="NSwag.AspNetCore" />
       <PackageReference Include="Swashbuckle.AspNetCore" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Swagger" />
     </ItemGroup>
 
     <ItemGroup>

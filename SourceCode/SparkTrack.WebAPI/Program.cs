@@ -14,12 +14,15 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(Registe
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApiDocument();
 
 void RegisterServices(ContainerBuilder container)
 {
-    container.Register(_ => new DbContextOptionsBuilder<SparkTrackDbContext>()
-            .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")).Options)
+    container.Register(
+            _ => new DbContextOptionsBuilder<SparkTrackDbContext>()
+                .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+                .Options
+        )
         .SingleInstance();
     container.RegisterModule<WebAPIModule>();
     container.RegisterModule<CoreModule>();
@@ -36,8 +39,8 @@ if (!app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseOpenApi();
+    app.UseSwaggerUi();
 }
 
 app.UseHttpsRedirection();

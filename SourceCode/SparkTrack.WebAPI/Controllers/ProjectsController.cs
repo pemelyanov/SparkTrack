@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.WebAPI.Controllers;
 
-using Core.Services.Projects;
+using Core.Shared.Services.Projects;
 using DTO;
 using Extensions;
 using MappingExtensions;

@@ -1,6 +1,7 @@
 ﻿namespace SparkTrack.AvaloniaImpl;
 
 using Windows.Main;
+using API.AutofacModules;
 using Autofac;
 using Core.Client.Installers;
 using Fanatiki.MVVM;
@@ -24,5 +25,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
         builder.RegisterAvaloniaServices();
         builder.RegisterClientCoreServices();
+        // TODO: Вынести BaseAPI в файл конфигурации
+        builder.RegisterModule(new APIModule("http://localhost:5196/"));
     }
 }

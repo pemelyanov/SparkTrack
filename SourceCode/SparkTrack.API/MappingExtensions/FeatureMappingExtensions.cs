@@ -1,9 +1,8 @@
-﻿namespace SparkTrack.WebAPI.MappingExtensions;
+﻿namespace SparkTrack.API.MappingExtensions;
 
+using API;
 using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
-using DTO;
-using DTO.Edit;
 
 public static class FeatureMappingExtensions
 {
@@ -38,5 +37,16 @@ public static class FeatureMappingExtensions
         Deadline = it.Deadline,
         Description = it.Description,
         AttachmentsList = it.AttachmentsList.Select(file => file.ToDTO()).ToArray()
+    };
+    
+    public static Feature ToDomain(this FeatureDTO it) => new()
+    {
+        Id = it.Id,
+        Name = it.Name,
+        Project = it.Project.ToDomain(),
+        TasksList = it.TasksList.Select(task => task.ToDomain()).ToArray(),
+        Deadline = it.Deadline,
+        Description = it.Description,
+        AttachmentsList = it.AttachmentsList.Select(file => file.ToDomain()).ToArray()
     };
 }

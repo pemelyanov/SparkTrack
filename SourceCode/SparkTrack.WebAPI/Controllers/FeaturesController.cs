@@ -1,7 +1,7 @@
 ﻿namespace SparkTrack.WebAPI.Controllers;
 
-using Core.Services.Features;
 using Core.Shared.Data;
+using Core.Shared.Services.Features;
 using DTO;
 using DTO.Edit;
 using Extensions;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 public class FeaturesController(IFeaturesService featuresService) : Controller
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyPagedData<FeatureDTO>>> GetListAsync(
+    public async Task<ActionResult<PagedDTO<FeatureDTO>>> GetPageAsync(
         Guid? projectId = null,
         bool showCompleted = false,
         [FromQuery] PageQueryDTO? pageQuery = null
@@ -21,7 +21,9 @@ public class FeaturesController(IFeaturesService featuresService) : Controller
     {
         var page = await featuresService.GetPageAsync(projectId, showCompleted, pageQuery?.ToDomain() ?? PageQuery.All);
 
-        return Ok(page);
+        var mappedPage = page.ToDTO(it => it.ToDTO());
+
+        return Ok(mappedPage);
     }
 
     [HttpPost]
