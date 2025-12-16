@@ -38,6 +38,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.DataAccess.EFCor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.API", "SparkTrack.API\SparkTrack.API.csproj", "{99387BB5-A421-410C-ADFD-91A2161627A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Authentication.Core", "SparkTrack.Authentication.Core\SparkTrack.Authentication.Core.csproj", "{2480273E-973C-441E-BEC8-E9D7574AE177}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Authentication.WebAPI", "SparkTrack.Authentication.WebAPI\SparkTrack.Authentication.WebAPI.csproj", "{5C96617A-7BF8-4854-B0BC-7DEF43545F13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Authentication.DataAccess.EFCore", "SparkTrack.Authentication.DataAccess.EFCore\SparkTrack.Authentication.DataAccess.EFCore.csproj", "{A36E69A5-E3E5-418E-8DEE-A0F4A28C1FE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +61,9 @@ Global
 		{6B38AB77-9AE5-4264-B3A3-91124B8918A8} = {F582FA44-CBEA-4892-AB06-7745473ABDCF}
 		{03ECE74C-A954-4F10-9CD6-362C92D3AF29} = {D8EB2169-C16E-4DAC-824E-EE64974C1B2E}
 		{99387BB5-A421-410C-ADFD-91A2161627A1} = {F582FA44-CBEA-4892-AB06-7745473ABDCF}
+		{2480273E-973C-441E-BEC8-E9D7574AE177} = {D8EB2169-C16E-4DAC-824E-EE64974C1B2E}
+		{5C96617A-7BF8-4854-B0BC-7DEF43545F13} = {D8EB2169-C16E-4DAC-824E-EE64974C1B2E}
+		{A36E69A5-E3E5-418E-8DEE-A0F4A28C1FE8} = {D8EB2169-C16E-4DAC-824E-EE64974C1B2E}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3D679824-3986-472A-B08F-51BADB3B0D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -97,5 +106,17 @@ Global
 		{99387BB5-A421-410C-ADFD-91A2161627A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99387BB5-A421-410C-ADFD-91A2161627A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99387BB5-A421-410C-ADFD-91A2161627A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2480273E-973C-441E-BEC8-E9D7574AE177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2480273E-973C-441E-BEC8-E9D7574AE177}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2480273E-973C-441E-BEC8-E9D7574AE177}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2480273E-973C-441E-BEC8-E9D7574AE177}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C96617A-7BF8-4854-B0BC-7DEF43545F13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C96617A-7BF8-4854-B0BC-7DEF43545F13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C96617A-7BF8-4854-B0BC-7DEF43545F13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C96617A-7BF8-4854-B0BC-7DEF43545F13}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A36E69A5-E3E5-418E-8DEE-A0F4A28C1FE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A36E69A5-E3E5-418E-8DEE-A0F4A28C1FE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A36E69A5-E3E5-418E-8DEE-A0F4A28C1FE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A36E69A5-E3E5-418E-8DEE-A0F4A28C1FE8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

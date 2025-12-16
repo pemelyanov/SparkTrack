@@ -7,13 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Autofac" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SparkTrack.Authentication.DataAccess.EFCore\SparkTrack.Authentication.DataAccess.EFCore.csproj" />
-      <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
-      <ProjectReference Include="..\SparkTrack.Core\SparkTrack.Core.csproj" />
+      <ProjectReference Include="..\SparkTrack.Authentication.Core\SparkTrack.Authentication.Core.csproj" />
     </ItemGroup>
 
 </Project>

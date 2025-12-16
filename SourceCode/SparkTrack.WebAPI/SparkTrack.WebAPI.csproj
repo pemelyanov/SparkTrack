@@ -8,12 +8,14 @@
   
     <ItemGroup>
       <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
       <PackageReference Include="NSwag.AspNetCore" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SparkTrack.Authentication.WebAPI\SparkTrack.Authentication.WebAPI.csproj" />
       <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
       <ProjectReference Include="..\SparkTrack.Core\SparkTrack.Core.csproj" />
       <ProjectReference Include="..\SparkTrack.DataAccess.EFCore\SparkTrack.DataAccess.EFCore.csproj" />
