@@ -34,13 +34,13 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
         return password;
     }
 
-    public async Task<bool> LoginAsync(string email, string password)
+    public async Task<User?> LogInAsync(string email, string password)
     {
         var user = await usersRepository.GetByEmailAsync(email);
 
-        if (user?.PasswordHash is null) return false;
+        if (user?.PasswordHash is null || !await passwordHasher.VerifyAsync(password, user.PasswordHash)) return null;
 
-        return await passwordHasher.VerifyAsync(password, user.PasswordHash);
+        return user;
     }
 
     public async Task<bool> ChangePassword(string oldPassword, string newPassword)

@@ -19,7 +19,7 @@ public interface IAuthorizationService
     /// <returns>Пароль пользователя</returns>
     Task<string> RegisterAsync(UserEdit userEdit, ERole role);
 
-    Task<bool> LoginAsync(string email, string password);
+    Task<User?> LogInAsync(string email, string password);
 
     Task<bool> ChangePassword(string oldPassword, string newPassword);
 }
