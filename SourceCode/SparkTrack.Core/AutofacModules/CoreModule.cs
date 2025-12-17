@@ -3,6 +3,7 @@
 using Autofac;
 using Services.Authorization;
 using Services.Features;
+using Services.PasswordHasher;
 using Services.Projects;
 
 public class CoreModule : Module
@@ -11,6 +12,7 @@ public class CoreModule : Module
     {
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
         builder.RegisterType<ProjectsService>().AsImplementedInterfaces();
-        builder.RegisterType<FakeAuthService>().AsImplementedInterfaces();
+        builder.RegisterType<AuthorizationService>().AsImplementedInterfaces();
+        builder.RegisterType<PasswordHasher>().AsImplementedInterfaces();
     }
 }

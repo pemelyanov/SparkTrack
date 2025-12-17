@@ -16,6 +16,7 @@
     <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="BCrypt.Net-Core" Version="1.6.0" />
     <PackageVersion Include="BigHelp.Http" Version="0.3.2" />
     <PackageVersion Include="FluentAvaloniaUI" Version="2.4.1" />
     <PackageVersion Include="FluentIcons.Avalonia.Fluent" Version="1.2.313" />
@@ -26,6 +27,7 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="NSwag.AspNetCore" Version="14.6.3" />
     <PackageVersion Include="Octokit" Version="14.0.0" />
+    <PackageVersion Include="PasswordGenerator" Version="2.1.0" />
     <PackageVersion Include="ReactiveUI.Fody" Version="19.5.41" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.0.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />

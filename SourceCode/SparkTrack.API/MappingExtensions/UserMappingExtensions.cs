@@ -9,13 +9,15 @@ public static class UserMappingExtensions
     {
         Id = it.Id,
         Name = it.Name,
-        Role = it.Role.Cast<ERole>()
+        Role = it.Role.Cast<ERole>(),
+        Email = it.Email
     };
     
     public static User ToDomain(this UserDTO it) => new()
     {
         Id = it.Id,
         Name = it.Name,
-        Role = it.Role.Cast<Core.Shared.Enums.ERole>()
+        Role = it.Role.Cast<Core.Shared.Enums.ERole>(),
+        Email = it.Email
     };
 }

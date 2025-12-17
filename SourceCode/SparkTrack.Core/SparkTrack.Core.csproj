@@ -12,6 +12,8 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" />
+      <PackageReference Include="BCrypt.Net-Core" />
+      <PackageReference Include="PasswordGenerator" />
     </ItemGroup>
 
 </Project>

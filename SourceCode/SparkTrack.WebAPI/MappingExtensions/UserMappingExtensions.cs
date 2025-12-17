@@ -9,6 +9,7 @@ public static class UserMappingExtensions
     {
         Id = it.Id,
         Name = it.Name,
-        Role = it.Role
+        Role = it.Role,
+        Email = it.Email
     };
 }

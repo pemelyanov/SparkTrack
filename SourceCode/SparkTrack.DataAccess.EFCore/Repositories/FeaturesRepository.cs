@@ -87,7 +87,8 @@ internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepo
                     {
                         Id = task.ExecutorEmployee.Id,
                         Name = task.ExecutorEmployee.Name,
-                        Role = task.ExecutorEmployee.Role
+                        Role = task.ExecutorEmployee.Role,
+                        Email = task.ExecutorEmployee.Email
                     }
                 }
             )

@@ -9,4 +9,8 @@ public record User
     public required string Name { get; init; }
     
     public required ERole Role { get; init; }
+    
+    public required string Email { get; init; }
+    
+    public string? PasswordHash { get; init; }
 }

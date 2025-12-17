@@ -16,7 +16,8 @@ internal class FakeAuthorizationService : IAuthorizationService
         {
             Id = Guid.Empty,
             Name = "Самбади",
-            Role = ERole.Admin
+            Role = ERole.Admin,
+            Email = "asd@asd"
         };
 
         return Task.FromResult(true);
