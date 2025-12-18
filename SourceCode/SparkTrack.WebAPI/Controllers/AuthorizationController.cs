@@ -3,6 +3,7 @@
 using Core.Shared.Enums;
 using DTO;
 using DTO.Edit;
+using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.JwtAuthorization;
@@ -16,14 +17,17 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
     {
         var dto = await authorizationService.LogInAsync(logInDTO.Email, logInDTO.Password);
 
+        if (dto is null) return NotFound();
+
         return Ok(dto);
     }
 
     [HttpPost("refresh")]
-    [Authorize]
     public async Task<ActionResult<AuthorizationDTO?>> RefreshTokensAsync(TokenRefreshDTO tokenRefreshDTO)
     {
         var dto = await authorizationService.RefreshTokensAsync(tokenRefreshDTO.RefreshToken);
+
+        if (dto is null) return NotFound();
 
         return Ok(dto);
     }
@@ -48,20 +52,16 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
 
     [HttpPost("register/admin")]
     [Authorize(Roles = nameof(ERole.God))]
-    public async Task<ActionResult<string>> RegisterAdminAsync(UserEditDTO userEdit)
+    public Task<ActionResult<string>> RegisterAdminAsync(UserEditDTO userEdit)
     {
-        var password = await authorizationService.RegisterAsync(userEdit, ERole.Admin);
-
-        return Ok(password);
+        return this.OkWithDomainExceptionsHandling(() => authorizationService.RegisterAsync(userEdit, ERole.Admin));
     }
 
     [HttpPost("register/employee")]
     [Authorize(Roles = nameof(ERole.Admin))]
-    public async Task<ActionResult<string>> RegisterEmployeeAsync(UserEditDTO userEdit)
+    public Task<ActionResult<string>> RegisterEmployeeAsync(UserEditDTO userEdit)
     {
-        var password = await authorizationService.RegisterAsync(userEdit, ERole.Employee);
-
-        return Ok(password);
+        return this.OkWithDomainExceptionsHandling(() => authorizationService.RegisterAsync(userEdit, ERole.Employee));
     }
 
     [HttpPatch("change-password")]

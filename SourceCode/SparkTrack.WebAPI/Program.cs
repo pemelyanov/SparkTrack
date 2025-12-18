@@ -3,8 +3,11 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using SparkTrack.Authentication.Core.Models;
+using SparkTrack.Authentication.DataAccess.EFCore.AutofacModules;
 using SparkTrack.Authentication.WebAPI.Extensions;
 using SparkTrack.Core.AutofacModules;
+using SparkTrack.Core.Services.Authorization;
+using SparkTrack.Core.Shared.Data.Edit;
 using SparkTrack.DataAccess.EFCore;
 using SparkTrack.DataAccess.EFCore.AutofacModules;
 using SparkTrack.WebAPI.AutofacModules;
@@ -68,6 +71,7 @@ void RegisterServices(ContainerBuilder container)
     container.RegisterModule<WebAPIModule>();
     container.RegisterModule<CoreModule>();
     container.RegisterModule<DataAccessEFModule>();
+    container.RegisterModule<AuthenticationDataAccessEFCoreModule>();// TODO: Для консистентности надо бы на экстеншны для ServiceCollection переделать
 }
 
 var app = builder.Build();
@@ -98,5 +102,11 @@ var database = app.Services.GetRequiredService<SparkTrackDbContext>().Database;
 
 database.EnsureDeleted();
 database.EnsureCreated();
+
+var defaultGod = app.Configuration.GetSection("DefaultGod:UserEdit").Get<UserEdit>()!;
+var defaultGodPassword = app.Configuration.GetSection("DefaultGod:Password").Get<string>()!;
+
+await app.Services.GetRequiredService<IAuthorizationService>()
+    .InvalidateDefaultGodAsync(defaultGod, defaultGodPassword);
 
 app.Run();

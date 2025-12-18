@@ -6,5 +6,5 @@ public class RefreshTokenData<TUserKey>
     public TUserKey UserId { get; set; } = default!;
     public string Token { get; set; } = null!;
     public string TokenHash { get; set; } = null!;
-    public DateTime GenerationDate { get; set; } = DateTime.Now;
+    public DateTime GenerationDate { get; set; } = DateTime.UtcNow;
 }

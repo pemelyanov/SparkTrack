@@ -6,6 +6,7 @@ using Authentication.Core.Services.JwtRefreshTokenGenerator;
 using Authentication.Core.Services.JwtRefreshTokenValidator;
 using Authentication.Core.Services.RefreshTokensService;
 using Constants;
+using Core.Repositories;
 using Core.Services.Authorization;
 using Core.Shared.Enums;
 using DTO;
@@ -17,7 +18,8 @@ internal class JwtAuthorizationService(
     IRefreshTokensService<Guid> refreshTokensService,
     IJwtAccessTokenGenerator jwtAccessTokenGenerator,
     IJwtRefreshTokenGenerator jwtRefreshTokenGenerator,
-    IJwtRefreshTokenValidator jwtRefreshTokenValidator
+    IJwtRefreshTokenValidator jwtRefreshTokenValidator,
+    IUsersRepository usersRepository
 ) : IJwtAuthorizationService
 {
     public async Task<AuthorizationDTO?> LogInAsync(string email, string password)
@@ -53,10 +55,12 @@ internal class JwtAuthorizationService(
 
         var token = await refreshTokensService.GetTokenAsync(refreshToken);
 
-        if (token == null)
+        if (token is null)
             return null;
 
-        if (authorizeService.CurrentUser is not { } user)
+        var user = await usersRepository.GetAsync(token.UserId);
+
+        if (user is null)
             return null;
 
         var newRefreshToken = await jwtRefreshTokenGenerator.GenerateRefreshTokenAsync();

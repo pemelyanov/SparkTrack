@@ -3,6 +3,7 @@
 using System.Linq.Expressions;
 using Core.Repositories;
 using Core.Shared.Data.Entities;
+using Core.Shared.Enums;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,6 +48,8 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
 
         await dbContext.SaveChangesAsync();
     }
+
+    public Task<bool> UsersWithRoleExistsAsync(ERole role) => dbContext.Users.Where(it => it.Role == role).AnyAsync();
 
     private static Expression<Func<UserData, User>> GetMapToUserExpression()
     {

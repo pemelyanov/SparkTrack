@@ -22,4 +22,9 @@ public interface IAuthorizationService
     Task<User?> LogInAsync(string email, string password);
 
     Task<bool> ChangePassword(string oldPassword, string newPassword);
+
+    /// <summary>
+    /// Создает дефолтный аккаунт бога, если его еще нет
+    /// </summary>
+    Task InvalidateDefaultGodAsync(UserEdit userData, string password);
 }

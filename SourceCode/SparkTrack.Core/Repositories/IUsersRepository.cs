@@ -1,6 +1,7 @@
 ﻿namespace SparkTrack.Core.Repositories;
 
 using Shared.Data.Entities;
+using Shared.Enums;
 
 public interface IUsersRepository
 {
@@ -11,4 +12,6 @@ public interface IUsersRepository
     Task<User?> GetByEmailAsync(string email);
 
     Task UpdateAsync(User user);
+
+    Task<bool> UsersWithRoleExistsAsync(ERole role);
 }

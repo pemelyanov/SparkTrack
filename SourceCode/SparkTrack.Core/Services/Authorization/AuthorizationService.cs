@@ -58,4 +58,19 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
 
         return true;
     }
+
+    public async Task InvalidateDefaultGodAsync(UserEdit userData, string password)
+    {
+        if(await usersRepository.UsersWithRoleExistsAsync(ERole.God)) return;
+
+        var god = new User
+        {
+            Email = userData.Email,
+            Name = userData.Name,
+            Role = ERole.God,
+            PasswordHash = await passwordHasher.HashAsync(password)
+        };
+
+        await usersRepository.AddAsync(god);
+    }
 }
