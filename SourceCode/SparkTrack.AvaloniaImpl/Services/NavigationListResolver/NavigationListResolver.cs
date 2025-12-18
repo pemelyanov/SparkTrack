@@ -24,11 +24,6 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
         
         m_authorizationSubscription = authorizationService.CurrentUser
             .Select(user => user?.Role is null ? [] : m_navigationListByRoleMap[user.Role])
-            .Do(
-                it =>
-                {
-                    
-                })
             .Subscribe(m_navigationList);
     }
 
