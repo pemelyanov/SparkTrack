@@ -10,9 +10,9 @@ public class CoreModule : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
-        builder.RegisterType<ProjectsService>().AsImplementedInterfaces();
-        builder.RegisterType<AuthorizationService>().AsImplementedInterfaces();
-        builder.RegisterType<PasswordHasher>().AsImplementedInterfaces();
+        builder.RegisterType<FeaturesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<ProjectsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<PasswordHasher>().AsImplementedInterfaces().InstancePerLifetimeScope();
     }
 }

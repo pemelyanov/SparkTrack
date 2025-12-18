@@ -9,7 +9,7 @@ public interface IAuthorizationService
 
     Task<bool> LogInAsync(string login, string password);
 
-    Task LogOut();
+    Task<bool> TryAuthorizeExistingCredentials();
 
-    Task RefreshCredentialsAsync();
+    Task LogOutAsync();
 }

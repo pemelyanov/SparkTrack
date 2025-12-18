@@ -3,7 +3,7 @@
 using Windows.Main;
 using API.AutofacModules;
 using Autofac;
-using Core.Client.Installers;
+using Core.Client.AutofacModules;
 using Fanatiki.MVVM;
 using Installers;
 using Pages.Authorization;
@@ -24,8 +24,18 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<MainWindow>().AsSelf().SingleInstance();
 
         builder.RegisterAvaloniaServices();
-        builder.RegisterClientCoreServices();
+        builder.RegisterModule<CoreClientModule>();
         // TODO: Вынести BaseAPI в файл конфигурации
-        builder.RegisterModule(new APIModule("http://localhost:5196/"));
+        // TODO: Вынести путь до настроек в файл конфигурации
+        builder.RegisterModule(
+            new APIModule(
+                "http://localhost:5196/",
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "SparkTrack",
+                    "tokens.json"
+                )
+            )
+        );
     }
 }

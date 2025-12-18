@@ -23,7 +23,9 @@ internal class FakeAuthorizationService : IAuthorizationService
         return Task.FromResult(true);
     }
 
-    public Task LogOut()
+    public Task<bool> TryAuthorizeExistingCredentials() => Task.FromResult(false);
+
+    public Task LogOutAsync()
     {
         m_currentUser.Value = null;
         

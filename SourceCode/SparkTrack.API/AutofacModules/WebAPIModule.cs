@@ -2,17 +2,27 @@
 
 using Autofac;
 using API;
+using Core.Client.Services.Configuration;
+using Data;
+using Interceptors;
+using Services.Authorization;
 using Services.Features;
 
-public class APIModule(string apiBaseUrl) : Module
+public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
         builder.RegisterType<SparkHttpClient>().As<HttpClient>();
         
         RegisterClient<FeaturesClient>(builder);
+        RegisterClient<AuthorizationClient>(builder);
 
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
+        builder.RegisterType<RetryAuthHandler>();
+        builder.RegisterType<JsonConfigurationService<TokensConfiguration>>()
+            .AsImplementedInterfaces()
+            .WithParameter(new TypedParameter(typeof(string), tokensConfigPath));
+        builder.RegisterType<AuthorizationService>().AsImplementedInterfaces();
     }
 
     private void RegisterClient<TClient>(ContainerBuilder builder) where TClient : class
