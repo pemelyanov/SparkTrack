@@ -11,5 +11,6 @@ public class DataAccessEFModule : Module
         
         builder.RegisterType<FeaturesRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<ProjectsRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<UsersRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
     }
 }

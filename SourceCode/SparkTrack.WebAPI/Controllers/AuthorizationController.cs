@@ -11,7 +11,7 @@ using Services.JwtAuthorization;
 [Route("authorization")]
 public class AuthorizationController(IJwtAuthorizationService authorizationService) : Controller
 {
-    [HttpPost]
+    [HttpPost("login")]
     public async Task<ActionResult<AuthorizationDTO>?> LogInAsync(LogInDTO logInDTO)
     {
         var dto = await authorizationService.LogInAsync(logInDTO.Email, logInDTO.Password);
@@ -19,7 +19,7 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         return Ok(dto);
     }
 
-    [HttpPost]
+    [HttpPost("refresh")]
     [Authorize]
     public async Task<ActionResult<AuthorizationDTO?>> RefreshTokensAsync(TokenRefreshDTO tokenRefreshDTO)
     {
@@ -28,7 +28,7 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         return Ok(dto);
     }
 
-    [HttpDelete]
+    [HttpDelete("logout")]
     [Authorize]
     public async Task<ActionResult> LogOutAsync(string refreshToken)
     {
@@ -37,7 +37,7 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         return Ok();
     }
 
-    [HttpDelete]
+    [HttpDelete("logout-all")]
     [Authorize]
     public async Task<ActionResult> LogOutAllAsync(Guid userId)
     {
@@ -46,9 +46,8 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         return Ok();
     }
 
-    [HttpPost]
-    // TODO: как-то подвязать enum
-    [Authorize(Roles = "God")]
+    [HttpPost("register/admin")]
+    [Authorize(Roles = nameof(ERole.God))]
     public async Task<ActionResult<string>> RegisterAdminAsync(UserEditDTO userEdit)
     {
         var password = await authorizationService.RegisterAsync(userEdit, ERole.Admin);
@@ -56,9 +55,8 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         return Ok(password);
     }
 
-    [HttpPost]
-    // TODO: как-то подвязать enum
-    [Authorize(Roles = "Admin")]
+    [HttpPost("register/employee")]
+    [Authorize(Roles = nameof(ERole.Admin))]
     public async Task<ActionResult<string>> RegisterEmployeeAsync(UserEditDTO userEdit)
     {
         var password = await authorizationService.RegisterAsync(userEdit, ERole.Employee);
@@ -66,9 +64,9 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         return Ok(password);
     }
 
-    [HttpPatch]
+    [HttpPatch("change-password")]
     [Authorize]
-    public async Task<ActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO) // TODO: переделать на DTO
+    public async Task<ActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
     {
         var result = await authorizationService.ChangePassword(
             changePasswordDTO.OldPassword,
