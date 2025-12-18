@@ -3,16 +3,19 @@
 using Core.Client.Services.Authorization;
 using Core.Client.Services.Configuration;
 using Core.Shared.Data.Entities;
-using Core.Shared.Enums;
 using Data;
 using MappingExtensions;
+using NLog;
 using Reactive;
 
 internal class AuthorizationService(
     Func<ClientWrapper<AuthorizationClient>> authorizationClientFactory,
+    Func<ClientWrapper<ProfileClient>> profileClientFactory,
     IConfigurationService<TokensConfiguration> configurationService
 ) : IAuthorizationService
 {
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+    
     private readonly BehaviorObservableSubject<User?> m_currentUser = new(null);
 
     public IBehaviorObservable<User?> CurrentUser => m_currentUser;
@@ -31,14 +34,6 @@ internal class AuthorizationService(
                 }
             );
 
-            m_currentUser.Value = new User
-            {
-                Id = authorizationDTO.UserId,
-                Name = "", // TODO
-                Email = "", // TODO
-                Role = authorizationDTO.UserRole.Cast<ERole>(),
-            };
-
             configurationService.UpdateConfig(
                 new TokensConfiguration
                 {
@@ -46,6 +41,8 @@ internal class AuthorizationService(
                     RefreshToken = authorizationDTO.RefreshToken
                 }
             );
+            
+            m_currentUser.Value = await GetCurrentProfileAsync();
 
             return true;
         }
@@ -57,10 +54,20 @@ internal class AuthorizationService(
         return false;
     }
 
-    public Task<bool> TryAuthorizeExistingCredentials()
+    public async Task<bool> TryAuthorizeExistingCredentials()
     {
-        // TODO
-        return Task.FromResult(false);
+        try
+        {
+            m_currentUser.Value = await GetCurrentProfileAsync();
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            s_logger.Warn(e);
+        }
+
+        return false;
     }
 
     public async Task LogOutAsync()
@@ -76,5 +83,14 @@ internal class AuthorizationService(
                 RefreshToken = string.Empty
             }
         );
+    }
+
+    private async Task<User> GetCurrentProfileAsync()
+    {
+        using var profileClientWrapper = profileClientFactory();
+
+        var user = await profileClientWrapper.Client.GetAsync();
+
+        return user.ToDomain();
     }
 }

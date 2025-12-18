@@ -16,6 +16,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         
         RegisterClient<FeaturesClient>(builder);
         RegisterClient<AuthorizationClient>(builder);
+        RegisterClient<ProfileClient>(builder);
 
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
         builder.RegisterType<RetryAuthHandler>();

@@ -1,9 +1,11 @@
 ﻿namespace SparkTrack.WebAPI.Controllers;
 
+using Core.Shared.Enums;
 using Core.Shared.Services.Projects;
 using DTO;
 using Extensions;
 using MappingExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -11,6 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 public class ProjectsController(IProjectsService projectsService) : Controller
 {
     [HttpGet]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IEnumerable<ProjectDTO>>> GetListAsync()
     {
         var list = await projectsService.GetListAsync();
@@ -20,6 +25,10 @@ public class ProjectsController(IProjectsService projectsService) : Controller
     }
     
     [HttpPost]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult> AddAsync(ProjectDTO projectDTO)
     {
         return this.CreatedWithDomainExceptionsHandling(

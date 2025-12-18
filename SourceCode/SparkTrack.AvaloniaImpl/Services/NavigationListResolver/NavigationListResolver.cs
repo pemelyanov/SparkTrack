@@ -14,7 +14,7 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
     {
         [ERole.Admin] = [typeof(FeaturesPageViewModel)],
         [ERole.Employee] = [typeof(FeaturesPageViewModel)],
-        [ERole.God] = []
+        [ERole.God] = [typeof(FeaturesPageViewModel)]
     };
 
     private readonly IDisposable m_authorizationSubscription;
@@ -38,4 +38,6 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
     }
 
     public IBehaviorObservable<IReadOnlyList<Type>> NavigationList => m_navigationList;
+
+    public Type ResolveDefaultPageForRole(ERole role) => m_navigationListByRoleMap[role][0];
 }
