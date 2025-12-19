@@ -1,0 +1,26 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
+             xmlns:account="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Account"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.Account.Account"
+             x:DataType="account:AccountViewModel">
+    <Border Classes="card">
+        <Grid ColumnDefinitions="Auto *" RowDefinitions="Auto Auto" ColumnSpacing="8" RowSpacing="8">
+            <ContentControl Content="{markupExtensions:SymbolIcon Symbol=Person}"  Width="64" Height="64" 
+                            Foreground="{DynamicResource ButtonForeground}"/>
+            
+            <StackPanel Grid.Column="1" Grid.Row="0" Spacing="8">
+                <TextBlock Text="{Binding CurrentUser.Value.Name}" />
+                <SelectableTextBlock Text="{Binding CurrentUser.Value.Email}" />
+                <TextBlock Text="{Binding CurrentUser.Value.Role}" />
+            </StackPanel>
+
+            <Button Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Content="Выйти" 
+                    HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"
+                    Command="{Binding LogOutAsync}"/>
+        </Grid>
+    </Border>
+</UserControl>

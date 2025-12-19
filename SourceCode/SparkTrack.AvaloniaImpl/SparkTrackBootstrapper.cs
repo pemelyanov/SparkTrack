@@ -3,6 +3,7 @@
 using Windows.Main;
 using API.AutofacModules;
 using Autofac;
+using Controls.Account;
 using Core.Client.AutofacModules;
 using Fanatiki.MVVM;
 using Installers;
@@ -17,6 +18,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<MainWindowViewModel>().As<IScreen>().AsSelf().SingleInstance();
         builder.RegisterType<AuthorizationPageViewModel>().SingleInstance();
         builder.RegisterType<FeaturesPageViewModel>().SingleInstance();
+        builder.RegisterType<AccountViewModel>().SingleInstance();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

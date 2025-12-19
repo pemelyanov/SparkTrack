@@ -74,7 +74,7 @@ internal class AuthorizationService(
     {
         using var authorizationClientWrapper = authorizationClientFactory();
 
-        await authorizationClientWrapper.Client.LogOutAsync();
+        await authorizationClientWrapper.Client.LogOutAsync(configurationService.Config.RefreshToken);
 
         configurationService.UpdateConfig(
             new TokensConfiguration
@@ -83,6 +83,8 @@ internal class AuthorizationService(
                 RefreshToken = string.Empty
             }
         );
+
+        m_currentUser.Value = null;
     }
 
     private async Task<User> GetCurrentProfileAsync()

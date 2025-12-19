@@ -16,6 +16,7 @@ public class ProfileController(IAuthorizationService authorizationService) : Con
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<UserDTO> Get()
     {
-        return Ok(authorizationService.CurrentUser!.ToDTO());
+        if (authorizationService.CurrentUser is null) return Unauthorized();
+        return Ok(authorizationService.CurrentUser.ToDTO());
     }
 }

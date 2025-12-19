@@ -8,6 +8,8 @@
         xmlns:reactiveUi="http://reactiveui.net"
         xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:account="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Account"
+        xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SparkTrack.AvaloniaImpl.Windows.Main.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -38,6 +40,29 @@
         </controls:NavigationView.MenuItemTemplate>
 
         <controls:NavigationView.PaneFooter>
+            <Panel>
+                <ToggleButton Width="32" Height="32" Margin="10 0 0 0" Padding="4"
+                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                              Content="{markupExtensions:SymbolIcon Symbol=Person}"
+                              IsChecked="{Binding #NavigationView.IsPaneOpen, Mode=TwoWay}">
+                    <ToggleButton.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="AccountViewModel.CurrentUser.Value"
+                                     Converter="{x:Static ObjectConverters.IsNotNull}" />
+                            <Binding Path="!#NavigationView.IsPaneOpen" />
+                        </MultiBinding>
+                    </ToggleButton.IsVisible>
+                </ToggleButton>
+                <account:Account DataContext="{Binding AccountViewModel}"
+                                 Margin="8 0">
+                    <account:Account.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="CurrentUser.Value" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                            <Binding Path="#NavigationView.IsPaneOpen" />
+                        </MultiBinding>
+                    </account:Account.IsVisible>
+                </account:Account>
+            </Panel>
         </controls:NavigationView.PaneFooter>
 
         <Grid RowDefinitions="Auto *" Margin="8" RowSpacing="8">
