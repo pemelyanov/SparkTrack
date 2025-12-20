@@ -4,6 +4,7 @@ using Windows.Main;
 using API.AutofacModules;
 using Autofac;
 using Controls.Account;
+using Controls.UserEditForm;
 using Core.Client.AutofacModules;
 using Fanatiki.MVVM;
 using Installers;
@@ -11,6 +12,7 @@ using Pages.Authorization;
 using Pages.Features;
 using Pages.Users;
 using ReactiveUI;
+using Services.DialogHost;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
@@ -21,11 +23,12 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<FeaturesPageViewModel>().SingleInstance();
         builder.RegisterType<UsersPageViewModel>().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
+        builder.RegisterType<UserEditFormViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
     {
-        builder.RegisterType<MainWindow>().AsSelf().SingleInstance();
+        builder.RegisterType<MainWindow>().AsSelf().As<IDialogHost>().SingleInstance();
 
         builder.RegisterAvaloniaServices();
         builder.RegisterModule<CoreClientModule>();

@@ -5,7 +5,6 @@ using System.Reactive.Disposables;
 using Core.Client.Services.Authorization;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
-using Features;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services.NavigationListResolver;

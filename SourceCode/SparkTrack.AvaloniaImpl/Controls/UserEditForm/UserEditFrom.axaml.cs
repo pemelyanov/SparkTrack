@@ -1,11 +1,17 @@
-﻿using Avalonia.Controls;
+﻿namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
 
-namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
+using Windows;
+using FluentAvalonia.UI.Controls;
 
-public partial class UserEditFrom : UserControl
+public partial class UserEditFrom : ReactiveContentDialog<UserEditFormViewModel>
 {
     public UserEditFrom()
     {
         InitializeComponent();
+    }
+
+    protected override void OnPrimaryButtonClick(ContentDialogButtonClickEventArgs args)
+    {
+        args.Cancel = true;
     }
 }

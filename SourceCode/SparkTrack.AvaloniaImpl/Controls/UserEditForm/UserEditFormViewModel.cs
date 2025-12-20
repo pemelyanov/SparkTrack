@@ -8,24 +8,31 @@ using Core.Shared.Data.Edit;
 using Core.Shared.Enums;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
 
 public class UserEditFormViewModel : ViewModelBase
 {
+    private readonly IDialogHost           m_dialogHost;
     private readonly IUsersService         m_usersService;
     private readonly IAuthorizationService m_authorizationService;
 
-    public UserEditFormViewModel(IUsersService usersService, IAuthorizationService authorizationService)
+    public UserEditFormViewModel(IDialogHost dialogHost, IAuthorizationService authorizationService,IUsersService? usersService = null)
     {
+        m_dialogHost = dialogHost;
         m_usersService = usersService;
         m_authorizationService = authorizationService;
 
         CreateUserCommand = InitializeCreateUserCommand();
     }
-
+    
+    [Reactive]
     public string Name { get; set; } = string.Empty;
 
+    [Reactive]
     public string Email { get; set; } = string.Empty;
 
+    [Reactive]
     public string? GeneratedPassword { get; private set; }
 
     public ReactiveCommand<Unit, Unit> CreateUserCommand { get; }
@@ -33,6 +40,7 @@ public class UserEditFormViewModel : ViewModelBase
     private ReactiveCommand<Unit, Unit> InitializeCreateUserCommand() => ReactiveCommand.CreateFromTask(
         async () =>
         {
+            Console.WriteLine("asdasd");
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Email)
                 || m_authorizationService.CurrentUser.Value?.Role is not { } currentUserRole) return;
 
@@ -55,6 +63,8 @@ public class UserEditFormViewModel : ViewModelBase
                 (isEmailValid, isNameValid, isPasswordGenerated) => isEmailValid && isNameValid && !isPasswordGenerated
             )
     );
+
+    public void Open() => m_dialogHost.ShowAsync(this);
 
     private IObservable<bool> GetIsEmailValidObservable()
     {

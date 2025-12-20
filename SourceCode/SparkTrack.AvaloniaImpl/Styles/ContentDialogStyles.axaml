@@ -1,0 +1,28 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector=":is(controls|ContentDialog)">
+        <Setter Property="Theme" Value="{DynamicResource {x:Type controls:ContentDialog}}" />
+        
+        <Style Selector="^ /template/ Button#PrimaryButton">
+            <Setter Property="Command" Value="{Binding $parent[controls:ContentDialog].PrimaryButtonCommand}" />
+            <Setter Property="CommandParameter" Value="{Binding $parent[controls:ContentDialog].PrimaryButtonCommandParameter}" />
+        </Style>
+        
+        <Style Selector="^ /template/ Button#SecondaryButton">
+            <Setter Property="Command" Value="{Binding $parent[controls:ContentDialog].SecondaryButtonCommand}" />
+            <Setter Property="CommandParameter" Value="{Binding $parent[controls:ContentDialog].SecondaryButtonCommandParameter}" />
+        </Style>
+        
+        <Style Selector="^ /template/ Button#CloseButton">
+            <Setter Property="Command" Value="{Binding $parent[controls:ContentDialog].CloseButtonCommand}" />
+            <Setter Property="CommandParameter" Value="{Binding $parent[controls:ContentDialog].CloseButtonCommandParameter}" />
+        </Style>
+    </Style>
+</Styles>
