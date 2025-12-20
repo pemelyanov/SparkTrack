@@ -1,6 +1,7 @@
 ﻿namespace SparkTrack.API.MappingExtensions;
 
 using API;
+using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
 
 public static class UserMappingExtensions
@@ -18,6 +19,12 @@ public static class UserMappingExtensions
         Id = it.Id,
         Name = it.Name,
         Role = it.Role.Cast<Core.Shared.Enums.ERole>(),
+        Email = it.Email
+    };
+    
+    public static UserEditDTO ToDTO(this UserEdit it) => new()
+    {
+        Name = it.Name,
         Email = it.Email
     };
 }

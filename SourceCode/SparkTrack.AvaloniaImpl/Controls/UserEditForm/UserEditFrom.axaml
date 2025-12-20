@@ -4,6 +4,7 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                         xmlns:userEditForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserEditForm"
                         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
                         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                         x:Class="SparkTrack.AvaloniaImpl.Controls.UserEditForm.UserEditFrom"
                         x:DataType="userEditForm:UserEditFormViewModel"
@@ -11,17 +12,23 @@
                         DefaultButton="Primary"
                         PrimaryButtonText="Создать"
                         PrimaryButtonCommand="{Binding CreateUserCommand}"
-                        SecondaryButtonText="Закрыть">
+                        SecondaryButtonText="Сброс"
+                        SecondaryButtonCommand="{Binding Reset}"
+                        CloseButtonText="Закрыть">
     <StackPanel Width="400" Spacing="8">
         <TextBox Watermark="Имя" Text="{Binding Name}"
                  IsReadOnly="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         <TextBox Watermark="Email" Text="{Binding Email}"
                  IsReadOnly="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
-        <StackPanel IsVisible="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+        <StackPanel IsVisible="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                    Spacing="8">
             <TextBlock Text="Пользователь успешно создан. Для входа используйте указанную почту и пароль ниже:"
                        TextAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
-            <SelectableTextBlock Text="{Binding GeneratedPassword}" HorizontalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                <SelectableTextBlock Text="{Binding GeneratedPassword}" VerticalAlignment="Center" />
+                <Button Content="{markupExtensions:SymbolIcon Symbol=Copy}" VerticalAlignment="Center" Click="Button_OnClick" />
+            </StackPanel>
         </StackPanel>
     </StackPanel>
 </controls:ContentDialog>

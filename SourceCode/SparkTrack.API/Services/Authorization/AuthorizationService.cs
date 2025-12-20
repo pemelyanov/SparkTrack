@@ -58,6 +58,10 @@ internal class AuthorizationService(
     {
         try
         {
+            var config = configurationService.Config;
+
+            if (string.IsNullOrEmpty(config.AccessToken) || string.IsNullOrEmpty(config.RefreshToken)) return false;
+            
             m_currentUser.Value = await GetCurrentProfileAsync();
 
             return true;
@@ -74,7 +78,14 @@ internal class AuthorizationService(
     {
         using var authorizationClientWrapper = authorizationClientFactory();
 
-        await authorizationClientWrapper.Client.LogOutAsync(configurationService.Config.RefreshToken);
+        try
+        {
+            await authorizationClientWrapper.Client.LogOutAsync(configurationService.Config.RefreshToken);
+        }
+        catch (Exception e)
+        {
+            s_logger.Warn(e);
+        }
 
         configurationService.UpdateConfig(
             new TokensConfiguration

@@ -24,8 +24,7 @@
     </Design.DataContext>
 
     <controls:NavigationView x:Name="NavigationView" IsPaneOpen="False" IsSettingsVisible="False"
-                             Background="Transparent" MenuItemsSource="{Binding NavigationList^}"
-                             SelectedItem="{Binding SelectedPageType, Mode=OneWay}">
+                             Background="Transparent" MenuItemsSource="{Binding NavigationList^}">
         <controls:NavigationView.MenuItemTemplate>
             <DataTemplate x:DataType="system:Type">
                 <controls:NavigationViewItem

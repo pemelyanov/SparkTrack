@@ -17,7 +17,7 @@ public class UserEditFormViewModel : ViewModelBase
     private readonly IUsersService         m_usersService;
     private readonly IAuthorizationService m_authorizationService;
 
-    public UserEditFormViewModel(IDialogHost dialogHost, IAuthorizationService authorizationService,IUsersService? usersService = null)
+    public UserEditFormViewModel(IDialogHost dialogHost, IAuthorizationService authorizationService, IUsersService usersService)
     {
         m_dialogHost = dialogHost;
         m_usersService = usersService;
@@ -40,7 +40,6 @@ public class UserEditFormViewModel : ViewModelBase
     private ReactiveCommand<Unit, Unit> InitializeCreateUserCommand() => ReactiveCommand.CreateFromTask(
         async () =>
         {
-            Console.WriteLine("asdasd");
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Email)
                 || m_authorizationService.CurrentUser.Value?.Role is not { } currentUserRole) return;
 
@@ -64,7 +63,14 @@ public class UserEditFormViewModel : ViewModelBase
             )
     );
 
-    public void Open() => m_dialogHost.ShowAsync(this);
+    public Task OpenAsync() => m_dialogHost.ShowAsync(this);
+
+    public void Reset()
+    {
+        Email = string.Empty;
+        Name = string.Empty;
+        GeneratedPassword = string.Empty;
+    }
 
     private IObservable<bool> GetIsEmailValidObservable()
     {

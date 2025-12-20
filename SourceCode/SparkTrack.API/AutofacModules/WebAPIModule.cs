@@ -7,6 +7,7 @@ using Data;
 using Interceptors;
 using Services.Authorization;
 using Services.Features;
+using Services.Users;
 
 public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
 {
@@ -23,7 +24,9 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<JsonConfigurationService<TokensConfiguration>>()
             .AsImplementedInterfaces()
             .WithParameter(new TypedParameter(typeof(string), tokensConfigPath));
+        
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<UsersService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterClient<TClient>(ContainerBuilder builder) where TClient : class

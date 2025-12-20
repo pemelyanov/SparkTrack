@@ -1,11 +1,11 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Windows.Main;
 
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Controls.Account;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using Pages.Authorization;
-using Reactive;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services.NavigationListResolver;
@@ -23,6 +23,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     {
         m_navigationListResolver = navigationListResolver;
         AccountViewModel = accountViewModel;
+        NavigationList = m_navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
         Router.NavigateOnUIThread(startPage);
     }
 
@@ -35,7 +36,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
     public RoutingState Router { get; } = new();
 
-    public IBehaviorObservable<IReadOnlyList<Type>> NavigationList => m_navigationListResolver.NavigationList;
+    public IObservable<IReadOnlyList<Type>> NavigationList { get; }
 
     public AccountViewModel AccountViewModel { get; }
 

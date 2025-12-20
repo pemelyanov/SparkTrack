@@ -6,7 +6,6 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Users"
-             xmlns:userEditForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserEditForm"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Users.UsersPage"
              x:DataType="users:UsersPageViewModel"
@@ -15,7 +14,7 @@
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type users:UsersPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
         
-        <Button Grid.Row="1" Classes="primary" HorizontalAlignment="Right" Content="Создать" Command="{Binding UserEditFormViewModel.Open}" />
+        <Button Grid.Row="1" Classes="primary" HorizontalAlignment="Right" Content="Создать" Command="{Binding UserEditFormViewModel.OpenAsync}" />
         
         <DataGrid Grid.Row="2"
                   AutoGenerateColumns="False"
