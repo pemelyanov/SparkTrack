@@ -35,7 +35,7 @@
     </UserControl.Styles>
     <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type features:FeaturesPageViewModel}" x:DataType="system:Type"
-                   Text="{Binding ., Converter={x:Static converters:NavigationViewItemConverters.Name}}" />
+                   Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
         
         <DataGrid Grid.Row="2"
                   AutoGenerateColumns="False"

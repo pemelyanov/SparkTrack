@@ -4,10 +4,12 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Core.Shared.Data;
+using Core.Shared.Data.Entities;
 using Core.Shared.Services.Features;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ViewModels;
 
 public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
 {
@@ -40,7 +42,7 @@ public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
     public bool? CurrentPageSelectionState { get; set; }
 
     [Reactive]
-    public IReadOnlyList<FeatureViewModel> CurrentPageData { get; private set; } = [];
+    public IReadOnlyList<SelectableViewModel<Feature>> CurrentPageData { get; private set; } = [];
     
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
 
@@ -49,7 +51,7 @@ public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
         {
             var page = await m_featuresService.GetPageAsync(null, true, PageQuery.All);
 
-            CurrentPageData = page.Items.Select(it => new FeatureViewModel(it)).ToArray();
+            CurrentPageData = page.Items.Select(it => new SelectableViewModel<Feature>(it)).ToArray();
         }
     );
     

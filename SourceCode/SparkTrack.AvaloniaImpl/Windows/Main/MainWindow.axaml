@@ -29,11 +29,11 @@
         <controls:NavigationView.MenuItemTemplate>
             <DataTemplate x:DataType="system:Type">
                 <controls:NavigationViewItem
-                    Content="{Binding ., Converter={x:Static converters:NavigationViewItemConverters.Name}}"
+                    Content="{Binding ., Converter={x:Static converters:PagesConverters.Name}}"
                     IsSelected="True" Tapped="NavigationItem_OnTapped" Tag="{Binding}">
                     <controls:NavigationViewItem.IconSource>
                         <fluent:SymbolIconSource
-                            Symbol="{Binding ., Converter={x:Static converters:NavigationViewItemConverters.Symbol}}" />
+                            Symbol="{Binding ., Converter={x:Static converters:PagesConverters.Symbol}}" />
                     </controls:NavigationViewItem.IconSource>
                 </controls:NavigationViewItem>
             </DataTemplate>
