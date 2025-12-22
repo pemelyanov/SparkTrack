@@ -5,6 +5,7 @@ using Services.Authorization;
 using Services.Features;
 using Services.PasswordHasher;
 using Services.Projects;
+using Services.Users;
 
 public class CoreModule : Module
 {
@@ -14,5 +15,6 @@ public class CoreModule : Module
         builder.RegisterType<ProjectsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PasswordHasher>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<UsersService>().AsImplementedInterfaces().InstancePerLifetimeScope();
     }
 }

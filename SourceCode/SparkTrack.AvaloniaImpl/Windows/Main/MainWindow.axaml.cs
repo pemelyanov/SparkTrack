@@ -21,16 +21,24 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogHo
         ViewModel?.SelectPage(type);
     }
 
-    public Task ShowAsync(ReactiveObject viewModel)
+    public async Task<bool?> ShowAsync(ReactiveObject viewModel)
     {
         var view = ViewLocator.Current.ResolveView(viewModel);
 
         if (view != null) view.ViewModel = viewModel;
 
-        return view switch
+        var result = await (view switch
         {
             ContentDialog contentDialog => contentDialog.ShowAsync(this),
             _ => throw new NotSupportedException()
-        };
+        });
+
+        return ToBool(result);
     }
+
+    private bool? ToBool(ContentDialogResult result) => result switch
+    {
+        ContentDialogResult.Primary => true,
+        _ => null
+    };
 }

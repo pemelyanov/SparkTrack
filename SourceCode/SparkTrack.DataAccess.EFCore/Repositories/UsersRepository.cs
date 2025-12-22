@@ -2,9 +2,11 @@
 
 using System.Linq.Expressions;
 using Core.Repositories;
+using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Data.Entities;
+using Extensions;
 using Microsoft.EntityFrameworkCore;
 
 internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
@@ -50,6 +52,17 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
     }
 
     public Task<bool> UsersWithRoleExistsAsync(ERole role) => dbContext.Users.Where(it => it.Role == role).AnyAsync();
+
+    public Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery) => dbContext.Users
+        .AsNoTracking()
+        .Where(
+            it => it.Role == role
+        )
+        .Select(
+            GetMapToUserExpression()
+        )
+        .AsPaginated(pageQuery)
+        .CollectAsync();
 
     private static Expression<Func<UserData, User>> GetMapToUserExpression()
     {

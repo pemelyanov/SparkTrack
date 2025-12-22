@@ -4,5 +4,5 @@ using ReactiveUI;
 
 public interface IDialogHost
 {
-    Task ShowAsync(ReactiveObject viewModel);
+    Task<bool?> ShowAsync(ReactiveObject viewModel);
 }

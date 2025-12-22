@@ -6,6 +6,7 @@ using Core.Client.Services.Authorization;
 using Core.Client.Services.Users;
 using Core.Shared.Data.Edit;
 using Core.Shared.Enums;
+using Core.Shared.Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -45,7 +46,7 @@ public class UserEditFormViewModel : ViewModelBase
 
             if (currentUserRole is ERole.Employee) return;
 
-            var createdUserRole = ResolveSubordinateRole(currentUserRole);
+            var createdUserRole = currentUserRole.ResolveSubordinateRole();
 
             var userEdit = new UserEdit
             {
@@ -63,7 +64,7 @@ public class UserEditFormViewModel : ViewModelBase
             )
     );
 
-    public Task OpenAsync() => m_dialogHost.ShowAsync(this);
+    public Task<bool?> OpenAsync() => m_dialogHost.ShowAsync(this);
 
     public void Reset()
     {
@@ -89,11 +90,4 @@ public class UserEditFormViewModel : ViewModelBase
         return this.WhenAnyValue(it => it.GeneratedPassword)
             .Select(it => !string.IsNullOrEmpty(it));
     }
-
-    private static ERole ResolveSubordinateRole(ERole currentUserRole) => currentUserRole switch
-    {
-        ERole.Admin => ERole.Employee,
-        ERole.God => ERole.Admin,
-        _ => throw new NotSupportedException()
-    };
 }

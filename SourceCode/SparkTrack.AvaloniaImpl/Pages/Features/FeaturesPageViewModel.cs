@@ -34,6 +34,13 @@ public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
         ReloadTableCommand.Execute().Subscribe().DisposeWith(disposables);
     }
 
+    protected override void OnActivated(CompositeDisposable disposables)
+    {
+        base.OnActivated(disposables);
+        
+        ReloadTableCommand.Execute().Subscribe().DisposeWith(disposables);
+    }
+
     public string UrlPathSegment => "features";
 
     public IScreen HostScreen => m_screen.Value;

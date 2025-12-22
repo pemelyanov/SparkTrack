@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.Core.Repositories;
 
+using Shared.Data;
 using Shared.Data.Entities;
 using Shared.Enums;
 
@@ -14,4 +15,6 @@ public interface IUsersRepository
     Task UpdateAsync(User user);
 
     Task<bool> UsersWithRoleExistsAsync(ERole role);
+
+    Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery);
 }
