@@ -9,6 +9,7 @@ using Core.Client.AutofacModules;
 using Fanatiki.MVVM;
 using Installers;
 using Pages.Authorization;
+using Pages.Feature;
 using Pages.Features;
 using Pages.Users;
 using ReactiveUI;
@@ -24,6 +25,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<UsersPageViewModel>().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
         builder.RegisterType<UserEditFormViewModel>();
+        builder.RegisterType<FeaturePageViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

@@ -44,6 +44,8 @@
                   CanUserResizeColumns="True"
                   CanUserSortColumns="True"
                   Sorting="DataGrid_OnSorting"
+                  LoadingRow="DataGrid_OnLoadingRow"
+                  UnloadingRow="DataGrid_OnUnloadingRow"
                   ItemsSource="{Binding CurrentPageData}">
             <DataGrid.Columns>
                 <DataGridTemplateColumn CanUserSort="False" IsReadOnly="False">

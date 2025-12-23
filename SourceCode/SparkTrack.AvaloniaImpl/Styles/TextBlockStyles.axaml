@@ -6,9 +6,19 @@
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="TextBlock">
+    <Style Selector=":is(TextBlock)">
         <Style Selector="^.title">
             <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        
+        <Style Selector="^.subtitle">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        
+        <Style Selector="^.caption">
+            <Setter Property="FontSize" Value="16" />
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
     </Style>

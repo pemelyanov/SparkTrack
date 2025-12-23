@@ -1,0 +1,88 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.Fluent.MarkupExtensions;assembly=FluentIcons.Avalonia.Fluent"
+             xmlns:feature="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Feature"
+             xmlns:subTask="clr-namespace:SparkTrack.AvaloniaImpl.Controls.SubTask"
+             xmlns:comment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Comment"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
+             x:DataType="feature:FeaturePageViewModel">
+    <UserControl.Styles>
+        <Style Selector="Panel#FilesPanel Rectangle#DashRectangle">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <Style Selector="Panel#FilesPanel:drag-over Rectangle#DashRectangle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        
+        <Style Selector="TextBox">
+            <Setter Property="UseFloatingWatermark" Value="True" />
+        </Style>
+    </UserControl.Styles>
+    <ScrollViewer>
+        <StackPanel Spacing="8">
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="title" Text="Идея" />
+                    <TextBlock Text="Задачи: " />
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                  PointerWheelChanged="InputElement_OnPointerWheelChanged">
+                        <StackPanel Spacing="8" Orientation="Horizontal">
+                            <ItemsControl ItemsSource="{Binding SubTasksList}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <subTask:SubTask />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Content="{markupExtensions:SymbolIcon Symbol=Add}"
+                                    Command="{Binding AddSubTask}"
+                                    ToolTip.Tip="Добавить задачу" />
+                        </StackPanel>
+                    </ScrollViewer>
+                    <TextBox Watermark="Описание" AcceptsReturn="True" AcceptsTab="True" MinHeight="300" />
+
+                    <Panel HorizontalAlignment="Stretch">
+                        <TextBlock Text="Файлы: " HorizontalAlignment="Left" />
+                        <Button Content="Добавить" HorizontalAlignment="Right" />
+                    </Panel>
+
+                    <Panel x:Name="FilesPanel" Background="Transparent"
+                           Loaded="FilesPanel_OnLoaded"
+                           Unloaded="FilesPanel_OnUnloaded"
+                           DragDrop.AllowDrop="True"
+                           MinHeight="50">
+                        <ItemsControl />
+                        <Rectangle x:Name="DashRectangle" IsHitTestVisible="False" StrokeDashArray="5, 1"
+                                   Stroke="{DynamicResource ButtonForeground}"
+                                   StrokeThickness="2" RadiusX="8" RadiusY="8" Opacity="0.8" />
+                    </Panel>
+                </StackPanel>
+            </Border>
+            
+            <Button Content="Комментарий" HorizontalAlignment="Right" />
+
+            <ItemsControl ItemsSource="{Binding CommentsList}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <comment:Comment />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

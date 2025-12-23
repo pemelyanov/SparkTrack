@@ -2,7 +2,10 @@
 
 namespace SparkTrack.AvaloniaImpl.Pages.Features;
 
+using Avalonia.Input;
 using Avalonia.ReactiveUI;
+using Core.Shared.Data.Entities;
+using ViewModels;
 
 public partial class FeaturesPage : ReactiveUserControl<FeaturesPageViewModel>
 {
@@ -14,5 +17,22 @@ public partial class FeaturesPage : ReactiveUserControl<FeaturesPageViewModel>
     private void DataGrid_OnSorting(object? sender, DataGridColumnEventArgs e)
     {
         e.Handled = true;
+    }
+
+    private void DataGrid_OnLoadingRow(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.DoubleTapped += RowOnDoubleTapped;
+    }
+    
+    private void DataGrid_OnUnloadingRow(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.DoubleTapped -= RowOnDoubleTapped;
+    }
+
+    private void RowOnDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if(sender is not Control { DataContext: SelectableViewModel<Feature> featureViewModel }) return;
+        
+        ViewModel?.OpenFeature(featureViewModel.Model);
     }
 }

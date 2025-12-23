@@ -14,7 +14,7 @@ public static class AuthorizationServiceExtensions
         return service.CurrentUser;
     }
 
-    public static User GetUserOrThrowIfNotInRole(this IAuthorizationService service, ERole role)
+    public static User GetUserOrThrowIfNotInRole(this IAuthorizationService service, ERole role, params ERole[] otherRoles)
     {
         if (service.CurrentUser is null) throw new UnauthorizedException();
 

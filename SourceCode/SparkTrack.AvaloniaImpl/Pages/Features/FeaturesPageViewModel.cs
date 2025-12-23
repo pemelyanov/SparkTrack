@@ -6,20 +6,24 @@ using System.Reactive.Linq;
 using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using Core.Shared.Services.Features;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
+using Feature;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using ViewModels;
 
 public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
 {
-    private readonly Lazy<IScreen>    m_screen;
-    private readonly IFeaturesService m_featuresService;
+    private readonly Lazy<IScreen>              m_screen;
+    private readonly IFeaturesService           m_featuresService;
+    private readonly Func<FeaturePageViewModel> m_featurePageViewModelFactory;
 
-    public FeaturesPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService)
+    public FeaturesPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService, Func<FeaturePageViewModel> featurePageViewModelFactory)
     {
         m_screen = screen;
         m_featuresService = featuresService;
+        m_featurePageViewModelFactory = featurePageViewModelFactory;
 
         ReloadTableCommand = CreateReloadTableCommand();
     }
@@ -52,6 +56,11 @@ public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
     public IReadOnlyList<SelectableViewModel<Feature>> CurrentPageData { get; private set; } = [];
     
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
+
+    public void OpenFeature(Feature feature)
+    {
+        HostScreen.Router.NavigateOnUIThread(m_featurePageViewModelFactory());
+    }
 
     private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(
         async () =>
