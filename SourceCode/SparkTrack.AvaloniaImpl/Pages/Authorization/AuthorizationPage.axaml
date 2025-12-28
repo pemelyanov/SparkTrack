@@ -20,7 +20,7 @@
                 
                 <TextBox Watermark="Пароль" Text="{Binding Password}" PasswordChar="*" />
                 
-                <Button Classes="accent" Content="Войти" HorizontalAlignment="Right" Command="{Binding LogInAsync}" />
+                <Button Classes="accent" Content="Войти" HorizontalAlignment="Right" Command="{Binding LogInCommand}" />
             </StackPanel>
         </Border>
     </Panel>

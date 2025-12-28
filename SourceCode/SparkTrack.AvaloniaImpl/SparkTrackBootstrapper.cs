@@ -19,7 +19,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
     protected override void RegisterViewModels(ContainerBuilder builder)
     {
-        builder.RegisterType<MainWindowViewModel>().As<IScreen>().AsSelf().SingleInstance();
+        builder.RegisterType<MainWindowViewModel>().AsImplementedInterfaces().AsSelf().SingleInstance();
         builder.RegisterType<AuthorizationPageViewModel>().SingleInstance();
         builder.RegisterType<FeaturesPageViewModel>().SingleInstance();
         builder.RegisterType<UsersPageViewModel>().SingleInstance();
@@ -30,7 +30,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
     protected override void RegisterServices(ContainerBuilder builder)
     {
-        builder.RegisterType<MainWindow>().AsSelf().As<IDialogHost>().SingleInstance();
+        builder.RegisterType<MainWindow>().AsSelf().AsImplementedInterfaces().SingleInstance();
 
         builder.RegisterAvaloniaServices();
         builder.RegisterModule<CoreClientModule>();

@@ -3,6 +3,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using Core.Client.Services.Authorization;
+using Core.Client.Services.PopupNotification;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
@@ -12,19 +13,23 @@ using Splat;
 
 public class AuthorizationPageViewModel : ViewModelBase, IRoutableViewModel
 {
-    private readonly Lazy<IScreen>           m_screen;
-    private readonly IAuthorizationService   m_authorizationService;
-    private readonly INavigationListResolver m_navigationListResolver;
+    private readonly Lazy<IScreen>             m_screen;
+    private readonly IAuthorizationService     m_authorizationService;
+    private readonly INavigationListResolver   m_navigationListResolver;
+    private readonly IPopupNotificationService m_popupNotificationService;
 
     public AuthorizationPageViewModel(Lazy<IScreen> screen,
                                       IAuthorizationService authorizationService,
-                                      INavigationListResolver navigationListResolver)
+                                      INavigationListResolver navigationListResolver, 
+                                      IPopupNotificationService popupNotificationService)
     {
         m_screen = screen;
         m_authorizationService = authorizationService;
         m_navigationListResolver = navigationListResolver;
+        m_popupNotificationService = popupNotificationService;
 
         AuthorizeExistingCredentialsCommand = CreateAuthorizeExistingCredentialsCommand();
+        LogInCommand = CreateLogInCommand();
     }
 
     protected override void OnFirstActivated(CompositeDisposable disposables)
@@ -54,12 +59,24 @@ public class AuthorizationPageViewModel : ViewModelBase, IRoutableViewModel
             NavigateToDefaultPage();
         }
     );
+    
+    public ReactiveCommand<Unit, Unit> LogInCommand { get; }
 
-    public async Task LogInAsync()
+    private ReactiveCommand<Unit, Unit> CreateLogInCommand() => ReactiveCommand.CreateFromTask(LogInAsync);
+
+    private async Task LogInAsync()
     {
-        if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password)) return;
+        if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
+        {
+            m_popupNotificationService.Error("Введите логин и пароль", "Ошибка авторизации");
+            return;
+        }
 
-        if (!await m_authorizationService.LogInAsync(Login, Password)) return;
+        if (!await m_authorizationService.LogInAsync(Login, Password))
+        {
+            m_popupNotificationService.Error("Неверный логин или пароль", "Ошибка авторизации");
+            return;
+        }
 
         NavigateToDefaultPage();
     }
