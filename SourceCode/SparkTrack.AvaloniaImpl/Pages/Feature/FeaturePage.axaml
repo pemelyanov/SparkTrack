@@ -62,7 +62,12 @@
                                         ToolTip.Tip="Добавить задачу" />
                             </StackPanel>
                         </ScrollViewer>
-                        <TextBox Watermark="Описание" AcceptsReturn="True" AcceptsTab="True" MinHeight="300" />
+                        <TextBox Watermark="Описание" AcceptsReturn="True" AcceptsTab="True" MinHeight="300"
+                                 Text="{Binding Description}" />
+                        
+                        <Panel HorizontalAlignment="Left">
+                            <CalendarDatePicker Watermark="Дедлайн" SelectedDate="{Binding Deadline}" />
+                        </Panel>
 
                         <Panel HorizontalAlignment="Stretch">
                             <TextBlock Text="Файлы: " HorizontalAlignment="Left" />

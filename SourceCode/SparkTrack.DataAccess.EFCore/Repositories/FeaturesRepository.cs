@@ -48,6 +48,7 @@ internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepo
             )
             .ToArray();
 
+        // TODO: Добавить аттачи
         // var attachments = dbContext.Files.Where(it => feature.AttachmentsIdList.Any(id => it.Id == id)).ToArray();
 
         var featureData = new FeatureData
@@ -63,6 +64,12 @@ internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepo
         await dbContext.Features.AddAsync(featureData);
         
         await dbContext.SaveChangesAsync();
+    }
+
+    public Task EditAsync(FeatureEdit feature)
+    {
+        // TODO: Add edit
+        return Task.CompletedTask;
     }
 
     public Task DeleteAsync(int id) => throw new NotImplementedException();

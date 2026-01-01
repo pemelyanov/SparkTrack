@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Controls.SubTask;
 
+using Core.Shared.Data.Edit;
 using SubTaskData = Core.Shared.Data.Entities.SubTask;
 using Core.Shared.Data.Entities;
 using Fanatiki.MVVM.ViewModels;
@@ -53,4 +54,12 @@ public class SubTaskViewModel(
     public float Cost { get; set; } = subTask?.Cost ?? 0;
 
     public void Delete() => onDelete(this);
+
+    public SubTaskEdit MapToEdit() => new()
+    {
+        Id = subTask?.Id ?? Guid.Empty,
+        Name = Name,
+        ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NullReferenceException("Select employee"),
+        Cost = Cost,
+    };
 }

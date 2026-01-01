@@ -25,6 +25,8 @@ public interface IFeaturesRepository
     Task<Feature?> GetAsync(int id, Guid? subTaskEmployeeId);
 
     Task AddAsync(FeatureEdit feature);
+    
+    Task EditAsync(FeatureEdit feature);
 
     Task DeleteAsync(int id);
 }

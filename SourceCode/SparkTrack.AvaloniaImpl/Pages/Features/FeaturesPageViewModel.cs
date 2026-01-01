@@ -34,8 +34,6 @@ public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
         
         SetupItemSelectionChangedReaction(disposables);
         SetupTableSelectionStateChangeReaction(disposables);
-
-        ReloadTableCommand.Execute().Subscribe().DisposeWith(disposables);
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
