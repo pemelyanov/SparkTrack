@@ -7,15 +7,37 @@ using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using System.Reactive.Linq;
 using Comment = Core.Shared.Data.Entities.Comment;
+using SubTask = Core.Shared.Data.Entities.SubTask;
 
-public class FeaturePageViewModel(Lazy<IScreen> hostScreen) : ViewModelBase, IRoutableViewModel
+public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 {
+    private readonly Lazy<IScreen> m_hostScreen;
+
+    public FeaturePageViewModel(Feature? feature, Lazy<IScreen> hostScreen)
+    {
+        m_hostScreen = hostScreen;
+        Name = feature?.Name ?? "Название идеи";
+        
+        var subTasks = feature?.TasksList.Select(CreateSubTaskViewModel) ?? [];
+
+        SubTasksList = new ObservableCollection<SubTaskViewModel>(subTasks);
+        if (feature is null) IsNameEditing = true;
+    }
+
     public string UrlPathSegment => "feature";
 
-    public IScreen HostScreen => hostScreen.Value;
+    public IScreen HostScreen => m_hostScreen.Value;
 
-    public ObservableCollection<SubTaskViewModel> SubTasksList { get; } = [];
+    [Reactive]
+    public string Name { get; set; }
+    
+    [Reactive]
+    public bool IsNameEditing { get; set; }
+
+    public ObservableCollection<SubTaskViewModel> SubTasksList { get; }
 
     public ObservableCollection<CommentViewModel> CommentsList { get; } =
     [
@@ -50,7 +72,18 @@ public class FeaturePageViewModel(Lazy<IScreen> hostScreen) : ViewModelBase, IRo
 
     public void AddSubTask()
     {
-        var subTask = new SubTaskViewModel(
+        var subTask = CreateSubTaskViewModel();
+        subTask.IsInEditMode = true;
+
+        foreach (var taskViewModel in SubTasksList)
+            taskViewModel.IsInEditMode = false;
+
+        SubTasksList.Add(subTask);
+    }
+
+    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null) => new(
+        subTask,
+        Observable.Return<IReadOnlyList<User>>(
             [
                 new User
                 {
@@ -58,16 +91,8 @@ public class FeaturePageViewModel(Lazy<IScreen> hostScreen) : ViewModelBase, IRo
                     Name = "asdadad",
                     Role = ERole.Employee,
                 }
-            ],
-            it => SubTasksList.Remove(it)
-        )
-        {
-            IsInEditMode = true
-        };
-
-        foreach (var taskViewModel in SubTasksList)
-            taskViewModel.IsInEditMode = false;
-
-        SubTasksList.Add(subTask);
-    }
+            ]
+        ),
+        it => SubTasksList.Remove(it)
+    );
 }

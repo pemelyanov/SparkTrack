@@ -33,9 +33,17 @@
             <Setter Property="IsVisible" Value="False"/>
         </Style>
     </UserControl.Styles>
+    
     <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type features:FeaturesPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
+        
+        <Grid Grid.Row="1" ColumnDefinitions="* Auto">
+            <!-- TODO: Filters block -->
+            
+            <Button Grid.Column="1" Classes="accent" Content="Создать" 
+                    VerticalAlignment="Bottom" Command="{Binding CreateFeature}"/>
+        </Grid>
         
         <DataGrid Grid.Row="2"
                   AutoGenerateColumns="False"

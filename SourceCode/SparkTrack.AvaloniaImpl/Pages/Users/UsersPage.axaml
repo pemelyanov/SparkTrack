@@ -6,7 +6,6 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Users"
-             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.Fluent.MarkupExtensions;assembly=FluentIcons.Avalonia.Fluent"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Users.UsersPage"
              x:DataType="users:UsersPageViewModel"
@@ -18,8 +17,8 @@
         <Button Grid.Row="1" Classes="primary" HorizontalAlignment="Right" Content="Создать" 
                 Command="{Binding OpenUserAddAsync}" />
         
-        <Button Grid.Row="2" Content="{markupExtensions:SymbolIcon Symbol=ArrowClockwise}" Command="{Binding ReloadTableCommand}"
-                HorizontalAlignment="Right" Width="40" />
+        <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
+                HorizontalAlignment="Right" />
         
         <DataGrid Grid.Row="3"
                   AutoGenerateColumns="False"

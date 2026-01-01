@@ -12,5 +12,6 @@
         <StyleInclude Source="Styles/BorderStyles.axaml" />
         <StyleInclude Source="Styles/TextBlockStyles.axaml" />
         <StyleInclude Source="Styles/ContentDialogStyles.axaml" />
+        <StyleInclude Source="Styles/ButtonStyles.axaml" />
     </Application.Styles>
 </Application>

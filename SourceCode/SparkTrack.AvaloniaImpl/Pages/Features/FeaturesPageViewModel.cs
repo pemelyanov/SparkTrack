@@ -15,11 +15,11 @@ using ViewModels;
 
 public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
 {
-    private readonly Lazy<IScreen>              m_screen;
-    private readonly IFeaturesService           m_featuresService;
-    private readonly Func<FeaturePageViewModel> m_featurePageViewModelFactory;
+    private readonly Lazy<IScreen>                        m_screen;
+    private readonly IFeaturesService                     m_featuresService;
+    private readonly Func<Feature?, FeaturePageViewModel> m_featurePageViewModelFactory;
 
-    public FeaturesPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService, Func<FeaturePageViewModel> featurePageViewModelFactory)
+    public FeaturesPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService, Func<Feature?, FeaturePageViewModel> featurePageViewModelFactory)
     {
         m_screen = screen;
         m_featuresService = featuresService;
@@ -59,7 +59,12 @@ public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
 
     public void OpenFeature(Feature feature)
     {
-        HostScreen.Router.NavigateOnUIThread(m_featurePageViewModelFactory());
+        HostScreen.Router.NavigateOnUIThread(m_featurePageViewModelFactory(feature));
+    }
+
+    public void CreateFeature()
+    {
+        HostScreen.Router.NavigateOnUIThread(m_featurePageViewModelFactory(null));
     }
 
     private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(

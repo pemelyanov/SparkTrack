@@ -4,26 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:subTask="clr-namespace:SparkTrack.AvaloniaImpl.Controls.SubTask"
              xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.Fluent.MarkupExtensions;assembly=FluentIcons.Avalonia.Fluent"
-             xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
              x:DataType="subTask:SubTaskViewModel">
     <UserControl.Styles>
-        <Style Selector="ToggleButton.edit">
-            <Setter Property="Content">
-                <Template>
-                    <avalonia:SymbolIcon Symbol="Edit" />
-                </Template>
-            </Setter>
-        </Style>
-        <Style Selector="ToggleButton.save">
-            <Setter Property="Content">
-                <Template>
-                    <avalonia:SymbolIcon Symbol="Checkmark" />
-                </Template>
-            </Setter>
-        </Style>
-        
         <Style Selector="TextBox">
             <Setter Property="UseFloatingWatermark" Value="True" />
         </Style>
@@ -42,7 +26,7 @@
                                   DisplayMemberBinding="{Binding Name}" />
                     </StackPanel>
                     <CalendarDatePicker Watermark="Дедлайн" SelectedDate="{Binding Deadline}" />
-                    <TextBox Watermark="Стоимость (₽)" Text="{Binding Price}" />
+                    <TextBox Watermark="Стоимость (₽)" Text="{Binding Cost}" />
                 </StackPanel>
 
                 <StackPanel IsVisible="{Binding !IsInEditMode}" Spacing="8">
@@ -57,7 +41,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Стоимость: " />
-                        <TextBlock Text="{Binding Price, StringFormat='{}{0:C}'}" />
+                        <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
                     </StackPanel>
                 </StackPanel>
             </Panel>
