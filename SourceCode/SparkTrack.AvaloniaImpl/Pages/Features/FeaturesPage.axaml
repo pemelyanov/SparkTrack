@@ -7,6 +7,7 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:featureStatus="clr-namespace:SparkTrack.AvaloniaImpl.Controls.FeatureStatus"
+             xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Features.FeaturesPage"
              x:DataType="features:FeaturesPageViewModel"
@@ -56,18 +57,7 @@
                   UnloadingRow="DataGrid_OnUnloadingRow"
                   ItemsSource="{Binding CurrentPageData}">
             <DataGrid.Columns>
-                <DataGridTemplateColumn CanUserSort="False" IsReadOnly="False">
-                    <DataGridTemplateColumn.Header>
-                        <CheckBox Margin="16 0" 
-                                  IsEnabled="{Binding #Root.ViewModel.CurrentPageData.Count, FallbackValue={x:False}}"
-                                  IsChecked="{Binding #Root.ViewModel.CurrentPageSelectionState, Mode=TwoWay, FallbackValue={x:False}}"/>
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"

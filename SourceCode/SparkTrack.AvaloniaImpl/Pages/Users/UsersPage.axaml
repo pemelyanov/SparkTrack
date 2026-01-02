@@ -6,6 +6,7 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Users"
+             xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Users.UsersPage"
              x:DataType="users:UsersPageViewModel"
@@ -29,18 +30,7 @@
                   Sorting="DataGrid_OnSorting"
                   ItemsSource="{Binding CurrentPageData}">
             <DataGrid.Columns>
-                <DataGridTemplateColumn CanUserSort="False" IsReadOnly="False">
-                    <DataGridTemplateColumn.Header>
-                        <CheckBox Margin="16 0" 
-                                  IsEnabled="{Binding #Root.ViewModel.CurrentPageData.Count, FallbackValue={x:False}}"
-                                  IsChecked="{Binding #Root.ViewModel.CurrentPageSelectionState, Mode=TwoWay, FallbackValue={x:False}}"/>
-                    </DataGridTemplateColumn.Header>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox HorizontalAlignment="Center" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Имя" Binding="{Binding Model.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"
