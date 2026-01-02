@@ -10,17 +10,14 @@ using Core.Shared.Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services.DialogHost;
 
 public class UserEditFormViewModel : ViewModelBase
 {
-    private readonly IDialogHost           m_dialogHost;
     private readonly IUsersService         m_usersService;
     private readonly IAuthorizationService m_authorizationService;
 
-    public UserEditFormViewModel(IDialogHost dialogHost, IAuthorizationService authorizationService, IUsersService usersService)
+    public UserEditFormViewModel(IAuthorizationService authorizationService, IUsersService usersService)
     {
-        m_dialogHost = dialogHost;
         m_usersService = usersService;
         m_authorizationService = authorizationService;
 
@@ -63,8 +60,6 @@ public class UserEditFormViewModel : ViewModelBase
                 (isEmailValid, isNameValid, isPasswordGenerated) => isEmailValid && isNameValid && !isPasswordGenerated
             )
     );
-
-    public Task<bool?> OpenAsync() => m_dialogHost.ShowAsync(this);
 
     public void Reset()
     {

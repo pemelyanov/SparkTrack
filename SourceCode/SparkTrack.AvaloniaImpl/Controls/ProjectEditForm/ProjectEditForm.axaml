@@ -1,0 +1,31 @@
+<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:projectEditForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectEditForm"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.ProjectEditForm.ProjectEditForm"
+             PrimaryButtonText="Сохранить"
+             SecondaryButtonText="Сбросить"
+             CloseButtonText="Отмена"
+             DefaultButton="Primary"
+             PrimaryButtonCommand="{Binding SaveCommand}"
+             SecondaryButtonCommand="{Binding Reset}"
+             x:DataType="projectEditForm:ProjectEditFormViewModel"
+             Classes.edit="{Binding IsEditMode}"
+             Classes.add="{Binding !IsEditMode}">
+    <controls:ContentDialog.Styles>
+        <Style Selector=":is(controls|ContentDialog).edit">
+            <Setter Property="Title" Value="Редактирование проекта" />
+        </Style>
+        
+        <Style Selector=":is(controls|ContentDialog).add">
+            <Setter Property="Title" Value="Создание проекта" />
+        </Style>
+    </controls:ContentDialog.Styles>
+    <StackPanel Width="400" Spacing="8">
+        <TextBox Watermark="Название" Text="{Binding Name}" />
+        <TextBox Watermark="Ссылка" Text="{Binding Link}" />
+    </StackPanel>
+</controls:ContentDialog>

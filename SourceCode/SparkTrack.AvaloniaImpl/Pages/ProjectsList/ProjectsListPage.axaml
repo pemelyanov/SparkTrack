@@ -17,15 +17,17 @@
             <!-- TODO: Filters block -->
             
             <Button Grid.Column="1" Classes="accent" Content="Создать" 
-                    VerticalAlignment="Bottom"/>
+                    VerticalAlignment="Bottom" Command="{Binding AddProjectAsync}"/>
         </Grid>
         
         <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
                 HorizontalAlignment="Right" />
         
         <DataGrid Grid.Row="3"
-                  Classes="readonly rows-checkbox-selection-sync"
-                  ItemsSource="{Binding ProjectsList}">
+                  Classes="readonly"
+                  ItemsSource="{Binding ProjectsList}"
+                  LoadingRow="DataGrid_OnLoadingRow"
+                  UnloadingRow="DataGrid_OnUnloadingRow">
             <DataGrid.Columns>
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"

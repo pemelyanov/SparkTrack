@@ -25,7 +25,7 @@ public class ProjectsController(IProjectsService projectsService) : Controller
     }
     
     [HttpPost]
-    [Authorize(Roles = nameof(ERole.Admin))]
+    [Authorize(Roles = nameof(ERole.God))]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

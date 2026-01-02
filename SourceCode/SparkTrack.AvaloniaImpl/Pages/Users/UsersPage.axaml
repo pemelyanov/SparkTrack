@@ -15,7 +15,7 @@
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type users:UsersPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
         
-        <Button Grid.Row="1" Classes="primary" HorizontalAlignment="Right" Content="Создать" 
+        <Button Grid.Row="1" Classes="accent" HorizontalAlignment="Right" Content="Создать" 
                 Command="{Binding OpenUserAddAsync}" />
         
         <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"

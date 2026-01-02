@@ -4,6 +4,7 @@ using Windows.Main;
 using API.AutofacModules;
 using Autofac;
 using Controls.Account;
+using Controls.ProjectEditForm;
 using Controls.UserEditForm;
 using Core.Client.AutofacModules;
 using Fanatiki.MVVM;
@@ -26,6 +27,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<UserEditFormViewModel>();
         builder.RegisterType<FeaturePageViewModel>();
         builder.RegisterType<ProjectsListPageViewModel>().SingleInstance();
+        builder.RegisterType<ProjectEditFormViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

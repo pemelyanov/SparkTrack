@@ -4,9 +4,12 @@ using Avalonia;
 using Avalonia.ReactiveUI;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
+using ViewModels;
 
 public abstract class ReactiveContentDialog<TViewModel> : ContentDialog, IViewFor<TViewModel> where TViewModel : class
 {
+    private DialogViewModelBase? m_lastDialogViewModel;
+    
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "AvaloniaProperty",
         "AVP1002",
@@ -32,6 +35,27 @@ public abstract class ReactiveContentDialog<TViewModel> : ContentDialog, IViewFo
     {
         get => GetValue(ViewModelProperty);
         set => SetValue(ViewModelProperty, value);
+    }
+
+    protected override void OnDataContextChanged(EventArgs e)
+    {
+        base.OnDataContextChanged(e);
+
+        if (m_lastDialogViewModel is not null)
+        {
+            m_lastDialogViewModel.CloseSignal -= DialogViewModel_OnCloseSignal;
+            m_lastDialogViewModel = null;
+        }
+        
+        if(DataContext is not DialogViewModelBase dialogViewModelBase) return;
+
+        m_lastDialogViewModel = dialogViewModelBase;
+        dialogViewModelBase.CloseSignal += DialogViewModel_OnCloseSignal;
+    }
+
+    private void DialogViewModel_OnCloseSignal(bool? result)
+    {
+        Hide(GetResult(result));
     }
 
     object? IViewFor.ViewModel
@@ -60,4 +84,11 @@ public abstract class ReactiveContentDialog<TViewModel> : ContentDialog, IViewFo
             }
         }
     }
+
+    protected ContentDialogResult GetResult(bool? boolResult) => boolResult switch
+    {
+        true => ContentDialogResult.Primary,
+        false => ContentDialogResult.Secondary,
+        _ => ContentDialogResult.None
+    };
 }
