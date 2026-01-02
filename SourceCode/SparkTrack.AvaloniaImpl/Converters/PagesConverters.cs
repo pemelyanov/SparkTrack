@@ -2,17 +2,18 @@
 
 using Avalonia.Data.Converters;
 using Pages.FeaturesList;
+using Pages.ProjectsList;
 using Pages.Users;
-using Symbol = FluentAvalonia.UI.Controls.Symbol;
 
 // TODO: Это кринж, надо сделать поудобней
 public static class PagesConverters
 {
-    public static IValueConverter Symbol { get; } = new FuncValueConverter<Type, Symbol?>(
+    public static IValueConverter Symbol { get; } = new FuncValueConverter<Type, FluentIcons.Common.Symbol?>(
         type => type switch
         {
-            _ when type == typeof(FeaturesListPageViewModel) => FluentAvalonia.UI.Controls.Symbol.List,
-            _ when type == typeof(UsersPageViewModel) => FluentAvalonia.UI.Controls.Symbol.OtherUser,
+            _ when type == typeof(FeaturesListPageViewModel) => FluentIcons.Common.Symbol.List,
+            _ when type == typeof(UsersPageViewModel) => FluentIcons.Common.Symbol.PersonSettings,
+            _ when type == typeof(ProjectsListPageViewModel) => FluentIcons.Common.Symbol.Production,
             _ => null
         }
     );
@@ -22,6 +23,7 @@ public static class PagesConverters
         {
             _ when type == typeof(FeaturesListPageViewModel) => "Идеи",
             _ when type == typeof(UsersPageViewModel) => "Пользователи",
+            _ when type == typeof(ProjectsListPageViewModel) => "Проекты",
             _ => null
         }
     );

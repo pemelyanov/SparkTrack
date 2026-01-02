@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:projectsList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.ProjectsList"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.ProjectsList.ProjectsListPage"
+             x:DataType="projectsList:ProjectsListPageViewModel">
+   <Grid RowDefinitions="Auto Auto Auto *" RowSpacing="8">
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type projectsList:ProjectsListPageViewModel}" x:DataType="system:Type"
+                   Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
+        
+        <Grid Grid.Row="1" ColumnDefinitions="* Auto">
+            <!-- TODO: Filters block -->
+            
+            <Button Grid.Column="1" Classes="accent" Content="Создать" 
+                    VerticalAlignment="Bottom"/>
+        </Grid>
+        
+        <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
+                HorizontalAlignment="Right" />
+        
+        <DataGrid Grid.Row="3"
+                  Classes="readonly rows-checkbox-selection-sync"
+                  ItemsSource="{Binding ProjectsList}">
+            <DataGrid.Columns>
+                <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
+                <DataGridTextColumn Width="*" IsReadOnly="True"
+                                    Header="Канал" Binding="{Binding Model.Name}" />
+                <DataGridTextColumn Width="*" IsReadOnly="True"
+                                    Header="Ссылка" Binding="{Binding Model.Link}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

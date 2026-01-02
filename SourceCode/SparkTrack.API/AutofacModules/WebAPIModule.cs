@@ -7,6 +7,7 @@ using Data;
 using Interceptors;
 using Services.Authorization;
 using Services.Features;
+using Services.Projects;
 using Services.Users;
 
 public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
@@ -19,6 +20,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         RegisterClient<AuthorizationClient>(builder);
         RegisterClient<ProfileClient>(builder);
         RegisterClient<UsersClient>(builder);
+        RegisterClient<ProjectsClient>(builder);
 
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
         builder.RegisterType<RetryAuthHandler>();
@@ -28,6 +30,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<ProjectsService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterClient<TClient>(ContainerBuilder builder) where TClient : class

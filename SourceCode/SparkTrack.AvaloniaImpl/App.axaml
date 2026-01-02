@@ -13,5 +13,6 @@
         <StyleInclude Source="Styles/TextBlockStyles.axaml" />
         <StyleInclude Source="Styles/ContentDialogStyles.axaml" />
         <StyleInclude Source="Styles/ButtonStyles.axaml" />
+        <StyleInclude Source="Styles/DataGridStyles.axaml" />
     </Application.Styles>
 </Application>

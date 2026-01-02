@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using Core.Client.Services.Authorization;
 using Core.Shared.Enums;
 using Pages.FeaturesList;
+using Pages.ProjectsList;
 using Pages.Users;
 using Reactive;
 
@@ -15,7 +16,7 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
     {
         [ERole.Admin] = [typeof(FeaturesListPageViewModel), typeof(UsersPageViewModel)],
         [ERole.Employee] = [typeof(FeaturesListPageViewModel)],
-        [ERole.God] = [typeof(FeaturesListPageViewModel), typeof(UsersPageViewModel)]
+        [ERole.God] = [typeof(FeaturesListPageViewModel), typeof(ProjectsListPageViewModel), typeof(UsersPageViewModel)]
     };
 
     private readonly IDisposable m_authorizationSubscription;

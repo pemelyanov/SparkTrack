@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Services\Projects\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SparkTrack.Core.Client\SparkTrack.Core.Client.csproj" />
       <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
       <ProjectReference Include="..\SparkTrack.Reactive\SparkTrack.Reactive.csproj" />

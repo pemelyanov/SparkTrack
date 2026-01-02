@@ -12,30 +12,7 @@
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
              x:Name="Root">
-    <UserControl.Styles>
-        <Style Selector="DataGridColumnHeader">
-            <Setter Property="Focusable" Value="False" />
-            
-            <Style Selector="^ :is(Control)">
-                <Setter Property="Focusable" Value="False" />
-            </Style>
-        </Style>
-        <Style Selector="DataGridCell">
-            <Setter Property="Focusable" Value="False" />
-            
-            <Style Selector="^ :is(Control)">
-                <Setter Property="Focusable" Value="False" />
-            </Style>
-        </Style>
-        <Style Selector="DataGridCell:focus /template/ Grid#FocusVisual">
-            <Setter Property="IsVisible" Value="False"/>
-        </Style>
-        <Style Selector="DataGridCell:current /template/ Rectangle#CurrencyVisual">
-            <Setter Property="IsVisible" Value="False"/>
-        </Style>
-    </UserControl.Styles>
-    
-    <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
+    <Grid RowDefinitions="Auto Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type featuresList:FeaturesListPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
         
@@ -46,12 +23,11 @@
                     VerticalAlignment="Bottom" Command="{Binding CreateFeature}"/>
         </Grid>
         
-        <DataGrid Grid.Row="2"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="False"
-                  CanUserReorderColumns="False"
-                  CanUserResizeColumns="True"
-                  CanUserSortColumns="True"
+        <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
+                HorizontalAlignment="Right" />
+        
+        <DataGrid Grid.Row="3"
+                  Classes="readonly"
                   Sorting="DataGrid_OnSorting"
                   LoadingRow="DataGrid_OnLoadingRow"
                   UnloadingRow="DataGrid_OnUnloadingRow"
@@ -75,6 +51,6 @@
             </DataGrid.Columns>
         </DataGrid>
         
-        <paginator:Paginator Grid.Row="3" />
+        <paginator:Paginator Grid.Row="4" />
     </Grid>
 </UserControl>

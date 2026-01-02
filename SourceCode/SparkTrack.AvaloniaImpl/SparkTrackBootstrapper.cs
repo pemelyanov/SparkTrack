@@ -11,6 +11,7 @@ using Installers;
 using Pages.Authorization;
 using Pages.Feature;
 using Pages.FeaturesList;
+using Pages.ProjectsList;
 using Pages.Users;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
@@ -24,6 +25,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<AccountViewModel>().SingleInstance();
         builder.RegisterType<UserEditFormViewModel>();
         builder.RegisterType<FeaturePageViewModel>();
+        builder.RegisterType<ProjectsListPageViewModel>().SingleInstance();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
