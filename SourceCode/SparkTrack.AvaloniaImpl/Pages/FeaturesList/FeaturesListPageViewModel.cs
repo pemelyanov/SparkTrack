@@ -1,25 +1,25 @@
-﻿namespace SparkTrack.AvaloniaImpl.Pages.Features;
+﻿namespace SparkTrack.AvaloniaImpl.Pages.FeaturesList;
 
+using Fanatiki.MVVM.ViewModels;
+using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using Extensions;
+using Feature;
+using ViewModels;
+using Core.Shared.Data;
+using Core.Shared.Data.Entities;
+using SparkTrack.Core.Shared.Services.Features;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Core.Shared.Data;
-using Core.Shared.Data.Entities;
-using Core.Shared.Services.Features;
-using Extensions;
-using Fanatiki.MVVM.ViewModels;
-using Feature;
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
-using ViewModels;
 
-public class FeaturesPageViewModel : ViewModelBase, IRoutableViewModel
+public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 {
     private readonly Lazy<IScreen>                        m_screen;
     private readonly IFeaturesService                     m_featuresService;
     private readonly Func<Feature?, FeaturePageViewModel> m_featurePageViewModelFactory;
 
-    public FeaturesPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService, Func<Feature?, FeaturePageViewModel> featurePageViewModelFactory)
+    public FeaturesListPageViewModel(Lazy<IScreen> screen, IFeaturesService featuresService, Func<Feature?, FeaturePageViewModel> featurePageViewModelFactory)
     {
         m_screen = screen;
         m_featuresService = featuresService;

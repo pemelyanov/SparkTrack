@@ -2,15 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:features="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Features"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:featureStatus="clr-namespace:SparkTrack.AvaloniaImpl.Controls.FeatureStatus"
              xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
+             xmlns:featuresList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.FeaturesList"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="SparkTrack.AvaloniaImpl.Pages.Features.FeaturesPage"
-             x:DataType="features:FeaturesPageViewModel"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
+             x:DataType="featuresList:FeaturesListPageViewModel"
              x:Name="Root">
     <UserControl.Styles>
         <Style Selector="DataGridColumnHeader">
@@ -36,7 +36,7 @@
     </UserControl.Styles>
     
     <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
-        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type features:FeaturesPageViewModel}" x:DataType="system:Type"
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type featuresList:FeaturesListPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
         
         <Grid Grid.Row="1" ColumnDefinitions="* Auto">

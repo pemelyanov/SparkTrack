@@ -1,15 +1,14 @@
-﻿using Avalonia.Controls;
+﻿namespace SparkTrack.AvaloniaImpl.Pages.FeaturesList;
 
-namespace SparkTrack.AvaloniaImpl.Pages.Features;
-
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using Core.Shared.Data.Entities;
 using ViewModels;
+using Core.Shared.Data.Entities;
 
-public partial class FeaturesPage : ReactiveUserControl<FeaturesPageViewModel>
+public partial class FeaturesListPage : ReactiveUserControl<FeaturesListPageViewModel>
 {
-    public FeaturesPage()
+    public FeaturesListPage()
     {
         InitializeComponent();
     }

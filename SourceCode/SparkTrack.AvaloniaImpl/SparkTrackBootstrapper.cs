@@ -10,10 +10,8 @@ using Fanatiki.MVVM;
 using Installers;
 using Pages.Authorization;
 using Pages.Feature;
-using Pages.Features;
+using Pages.FeaturesList;
 using Pages.Users;
-using ReactiveUI;
-using Services.DialogHost;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
@@ -21,7 +19,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
     {
         builder.RegisterType<MainWindowViewModel>().AsImplementedInterfaces().AsSelf().SingleInstance();
         builder.RegisterType<AuthorizationPageViewModel>().SingleInstance();
-        builder.RegisterType<FeaturesPageViewModel>().SingleInstance();
+        builder.RegisterType<FeaturesListPageViewModel>().SingleInstance();
         builder.RegisterType<UsersPageViewModel>().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
         builder.RegisterType<UserEditFormViewModel>();
