@@ -7,6 +7,7 @@ using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.Features;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -98,6 +99,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
+    public void Back() => HostScreen.Router.BackOnUIThread();
+
     public void AddSubTask()
     {
         var subTask = CreateSubTaskViewModel();
@@ -132,6 +135,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         {
             await m_featuresService.AddAsync(editData);
             
+            Back();
             return;
         }
 

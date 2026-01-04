@@ -6,9 +6,13 @@
              xmlns:feature="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Feature"
              xmlns:subTask="clr-namespace:SparkTrack.AvaloniaImpl.Controls.SubTask"
              xmlns:comment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Comment"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel">
+    <UserControl.Resources>
+        <converters:ComparisonConverter x:Key="LessOrEqualConverter" Operation="Elt" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="Panel#FilesPanel Rectangle#DashRectangle">
             <Setter Property="IsVisible" Value="False" />
@@ -21,17 +25,32 @@
         <Style Selector="TextBox">
             <Setter Property="UseFloatingWatermark" Value="True" />
         </Style>
+        
         <Style Selector="TextBox.title">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="24" />
         </Style>
+        
+        <Style Selector=":is(Control).title-container">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <ThicknessTransition Property="Margin" Duration="0:0:0.25" />
+                </Transitions>
+            </Setter>
+            
+            <Style Selector="^.back-offset">
+                <Setter Property="Margin" Value="32 0 0 0" />
+            </Style>
+        </Style>
     </UserControl.Styles>
     <Panel>
-        <ScrollViewer>
+        <ScrollViewer x:Name="MainScrollViewer">
             <StackPanel Spacing="8">
                 <Border Classes="card">
                     <StackPanel Spacing="8">
-                        <StackPanel Spacing="8" Orientation="Horizontal" MaxWidth="500" HorizontalAlignment="Left">
+                        <StackPanel Classes="title-container"
+                                    Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=56}"
+                            Spacing="8" Orientation="Horizontal" MaxWidth="500" HorizontalAlignment="Left">
                             <Panel>
                                 <TextBlock IsVisible="{Binding !IsNameEditing}" Classes="title" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                                 <TextBox UseFloatingWatermark="False" IsVisible="{Binding IsNameEditing}" Classes="title" Text="{Binding Name}" />
@@ -105,9 +124,11 @@
             </StackPanel>
         </ScrollViewer>
         
+        <Button Classes="back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding Back}" />
+        
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
             <Button Classes="reload"/>
-            <Button Classes="accent" Content="Сохранить" />
+            <Button Classes="accent" Content="Сохранить" Command="{Binding SaveCommand}" />
         </StackPanel>
     </Panel>
 </UserControl>

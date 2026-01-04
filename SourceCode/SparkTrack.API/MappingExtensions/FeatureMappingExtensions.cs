@@ -12,7 +12,7 @@ public static class FeatureMappingExtensions
         Name = it.Name,
         ProjectId = it.ProjectId,
         TasksList = it.TasksList.Select(task => task.ToDTO()).ToArray(),
-        Deadline = it.Deadline,
+        Deadline = it.Deadline.ToUniversalTime(),
         Description = it.Description,
         AttachmentsIdList = it.AttachmentsIdList
     };
@@ -23,7 +23,7 @@ public static class FeatureMappingExtensions
         Name = it.Name,
         ProjectId = it.ProjectId,
         TasksList = it.TasksList.Select(task => task.ToDomain()).ToArray(),
-        Deadline = it.Deadline,
+        Deadline = it.Deadline.ToLocalTime(),
         Description = it.Description,
         AttachmentsIdList = it.AttachmentsIdList
     };
@@ -34,7 +34,7 @@ public static class FeatureMappingExtensions
         Name = it.Name,
         Project = it.Project.ToDTO(),
         TasksList = it.TasksList.Select(task => task.ToDTO()).ToArray(),
-        Deadline = it.Deadline,
+        Deadline = it.Deadline.ToUniversalTime(),
         Description = it.Description,
         AttachmentsList = it.AttachmentsList.Select(file => file.ToDTO()).ToArray()
     };
@@ -45,7 +45,7 @@ public static class FeatureMappingExtensions
         Name = it.Name,
         Project = it.Project.ToDomain(),
         TasksList = it.TasksList.Select(task => task.ToDomain()).ToArray(),
-        Deadline = it.Deadline,
+        Deadline = it.Deadline.ToLocalTime(),
         Description = it.Description,
         AttachmentsList = it.AttachmentsList.Select(file => file.ToDomain()).ToArray()
     };

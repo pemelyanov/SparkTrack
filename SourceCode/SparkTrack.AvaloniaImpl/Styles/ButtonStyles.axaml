@@ -20,6 +20,19 @@
         </Setter>
     </Style>
     
+    <Style Selector=":is(Button).back">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="ArrowLeft" />
+            </Template>
+        </Setter>
+    </Style>
+    
     <Style Selector="ToggleButton.edit">
         <Setter Property="Content">
             <Template>
