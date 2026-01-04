@@ -8,24 +8,30 @@
              xmlns:featureStatus="clr-namespace:SparkTrack.AvaloniaImpl.Controls.FeatureStatus"
              xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
              xmlns:featuresList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.FeaturesList"
+             xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
              x:Name="Root">
     <Grid RowDefinitions="Auto Auto Auto * Auto" RowSpacing="8">
-        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type featuresList:FeaturesListPageViewModel}" x:DataType="system:Type"
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type featuresList:FeaturesListPageViewModel}"
+                   x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
-        
+
         <Grid Grid.Row="1" ColumnDefinitions="* Auto">
             <!-- TODO: Filters block -->
-            
-            <Button Grid.Column="1" Classes="accent" Content="Создать" 
-                    VerticalAlignment="Bottom" Command="{Binding CreateFeature}"/>
+            <WrapPanel Grid.Column="0">
+                <projectsFilter:ProjectsFilter Width="400" MaxWidth="400" DataContext="{Binding ProjectsFilterViewModel}" />
+            </WrapPanel>
+
+            <Button Grid.Column="1" Classes="accent" Content="Создать"
+                    IsEnabled="{Binding ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}"
+                    VerticalAlignment="Bottom" Command="{Binding CreateFeature}" />
         </Grid>
-        
+
         <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
                 HorizontalAlignment="Right" />
-        
+
         <DataGrid Grid.Row="3"
                   Classes="readonly"
                   Sorting="DataGrid_OnSorting"
@@ -39,9 +45,9 @@
                 <DataGridTextColumn Width="220" IsReadOnly="True"
                                     Header="Канал" Binding="{Binding Model.Project.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"
-                                    Header="Дедлайн" Binding="{Binding Model.Deadline, StringFormat='dd.MM.yyyy'}"/>
+                                    Header="Дедлайн" Binding="{Binding Model.Deadline, StringFormat='dd.MM.yyyy'}" />
                 <DataGridTemplateColumn Width="220" IsReadOnly="True"
-                                    Header="Статус">
+                                        Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" />
@@ -50,7 +56,7 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        
+
         <paginator:Paginator Grid.Row="4" />
     </Grid>
 </UserControl>

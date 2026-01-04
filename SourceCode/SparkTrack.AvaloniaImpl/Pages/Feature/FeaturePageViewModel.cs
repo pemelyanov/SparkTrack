@@ -21,8 +21,18 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Guid             m_projectId;
     private readonly Lazy<IScreen>    m_hostScreen;
     private readonly IFeaturesService m_featuresService;
+    
+    public FeaturePageViewModel(Guid projectId, Lazy<IScreen> hostScreen, IFeaturesService featuresService) : this(null, projectId, hostScreen, featuresService)
+    {
+       
+    }
 
-    public FeaturePageViewModel(Feature? feature, Guid projectId, Lazy<IScreen> hostScreen, IFeaturesService featuresService)
+    public FeaturePageViewModel(Feature feature, Lazy<IScreen> hostScreen, IFeaturesService featuresService) : this(feature, feature.Project.Id, hostScreen, featuresService)
+    {
+       
+    }
+    
+    private FeaturePageViewModel(Feature? feature, Guid projectId, Lazy<IScreen> hostScreen, IFeaturesService featuresService)
     {
         m_feature = feature;
         m_projectId = projectId;

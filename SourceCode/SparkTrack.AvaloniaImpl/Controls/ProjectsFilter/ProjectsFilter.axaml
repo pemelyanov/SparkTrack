@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.ProjectsFilter.ProjectsFilter"
+             x:DataType="projectsFilter:ProjectsFilterViewModel">
+    <UserControl.Resources>
+        <converters:NullValueToListConverter x:Key="NullValueToListConverter" />
+    </UserControl.Resources>
+    <Grid ColumnDefinitions="Auto *">
+        <TextBlock Grid.Column="0" Text="Проект: " VerticalAlignment="Center"/>
+        <ComboBox Grid.Column="1" VerticalAlignment="Center" 
+                  ItemsSource="{Binding ProjectsList, Converter={StaticResource NullValueToListConverter}}"
+                  SelectedItem="{Binding SelectedProject}"
+                  DisplayMemberBinding="{Binding Name, FallbackValue='Все'}"
+                  PlaceholderText="Все" />
+    </Grid>
+</UserControl>
