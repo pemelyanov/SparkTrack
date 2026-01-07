@@ -4,17 +4,17 @@ public record FeatureData
 {
     public int Id { get; init; }
     
-    public required string Name { get; init; }
+    public required string Name { get; set; }
 
-    public ProjectData Project { get; init; } = null!;
+    public ProjectData Project { get; set; } = null!;
     
-    public Guid ProjectId { get; init; }
-    
-    public required IEnumerable<SubTaskData> TasksList { get; init; }
-    
-    public DateTime Deadline { get; init; }
+    public Guid ProjectId { get; set; }
 
-    public string Description { get; init; } = string.Empty;
+    public ICollection<SubTaskData> TasksList { get; init; } = [];
+    
+    public DateTime Deadline { get; set; }
 
-    public IEnumerable<FileData> AttachmentsList { get; init; } = [];
+    public string Description { get; set; } = string.Empty;
+
+    public ICollection<FileData> AttachmentsList { get; init; } = [];
 }

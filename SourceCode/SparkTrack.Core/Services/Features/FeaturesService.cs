@@ -34,24 +34,18 @@ internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthoriz
         return featuresRepository.GetAsync(id, employeeFilter);
     }
 
-    public Task AddAsync(FeatureEdit feature)
+    public Task<int> AddAsync(FeatureEdit feature)
     {
-        authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);
-
         return featuresRepository.AddAsync(feature);
     }
 
     public Task EditAsync(FeatureEdit feature)
     {
-        authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);
-
         return featuresRepository.EditAsync(feature);
     }
 
     public Task DeleteAsync(int id)
     {
-        authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);
-
         return featuresRepository.DeleteAsync(id);
     }
 }

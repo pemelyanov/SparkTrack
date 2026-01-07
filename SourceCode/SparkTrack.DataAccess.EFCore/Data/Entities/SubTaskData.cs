@@ -4,15 +4,15 @@ public record SubTaskData
 {
     public Guid Id { get; init; }
     
-    public required string Name { get; init; }
+    public required string Name { get; set; }
 
-    public UserData ExecutorEmployee { get; init; } = null!;
+    public UserData ExecutorEmployee { get; set; } = null!;
     
-    public required Guid ExecutorEmployeeId { get; init; }
+    public required Guid ExecutorEmployeeId { get; set; }
     
-    public float Cost { get; init; }
+    public float Cost { get; set; }
     
-    public bool IsCompleted { get; init; }
+    public bool IsCompleted { get; set; }
     
-    public bool OnPayment { get; init; }
+    public bool OnPayment { get; set; }
 }

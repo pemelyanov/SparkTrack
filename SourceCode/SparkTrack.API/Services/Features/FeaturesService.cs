@@ -20,16 +20,18 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
 
     public Task<Feature?> GetAsync(int id) => throw new NotImplementedException();
 
-    public async Task AddAsync(FeatureEdit feature)
+    public async Task<int> AddAsync(FeatureEdit feature)
     {
         using var clientWrapper = featuresClientFactory();
 
-        await clientWrapper.Client.AddAsync(feature.ToDTO());
+        return await clientWrapper.Client.AddAsync(feature.ToDTO());
     }
 
-    public Task EditAsync(FeatureEdit feature)
+    public async Task EditAsync(FeatureEdit feature)
     {
-        return Task.CompletedTask;
+        using var clientWrapper = featuresClientFactory();
+
+        await clientWrapper.Client.EditAsync(feature.ToDTO());
     }
 
     public Task DeleteAsync(int id) => throw new NotImplementedException();

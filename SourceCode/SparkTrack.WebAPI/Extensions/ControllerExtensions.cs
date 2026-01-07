@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 public static class ControllerExtensions
 {
-    public static Task<ActionResult<TData>> OkWithDomainExceptionsHandling<TData>(this Controller controller, Func<Task<TData>> action)
+    public static Task<ActionResult<TData>> OkWithDomainExceptionsHandling<TData>(
+        this Controller controller,
+        Func<Task<TData>> action
+    )
     {
         return controller.HandleDomainExceptionsInternal<ActionResult<TData>>(
             async () =>
@@ -16,7 +19,7 @@ public static class ControllerExtensions
             }
         );
     }
-    
+
     public static Task<ActionResult> OkWithDomainExceptionsHandling(this Controller controller, Func<Task> action)
     {
         return controller.HandleDomainExceptionsInternal<ActionResult>(
@@ -28,7 +31,22 @@ public static class ControllerExtensions
             }
         );
     }
-    
+
+    public static Task<ActionResult<TData>> CreatedWithDomainExceptionsHandling<TData>(
+        this Controller controller,
+        Func<Task<TData>> action
+    )
+    {
+        return controller.HandleDomainExceptionsInternal<ActionResult<TData>>(
+            async () =>
+            {
+                TData id = await action();
+
+                return controller.Created((string?)null, id);
+            }
+        );
+    }
+
     public static Task<ActionResult> CreatedWithDomainExceptionsHandling(this Controller controller, Func<Task> action)
     {
         return controller.HandleDomainExceptionsInternal<ActionResult>(

@@ -9,7 +9,7 @@ using Data.Entities;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
 
-internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepository
+internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepository
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         Guid? projectId,
@@ -18,96 +18,169 @@ internal class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepo
         PageQuery pageQuery
     ) => dbContext.Features
         .AsNoTracking()
-        .WhereIf(projectId is not null, it => it.Project.Id == projectId)
+        .WhereIf(projectId is not null, f => f.ProjectId == projectId)
         .WhereIf(
             subTaskEmployeeId is not null,
-            it => it.TasksList.Any(task => task.ExecutorEmployee.Id == subTaskEmployeeId)
+            f => f.TasksList.Any(t => t.ExecutorEmployeeId == subTaskEmployeeId)
         )
-        .Select(
-            GetFeatureMapExpression(subTaskEmployeeId)
+        .WhereIf(
+            !showCompleted,
+            f => f.TasksList.Any(t => !t.IsCompleted)
         )
+        .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .AsPaginated(pageQuery)
         .CollectAsync();
 
-    public Task<Feature?> GetAsync(int id, Guid? subTaskEmployeeId) => dbContext.Features.Where(it => it.Id == id)
+    public Task<Feature?> GetAsync(
+        int id,
+        Guid? subTaskEmployeeId
+    ) => dbContext.Features
+        .AsNoTracking()
+        .Where(f => f.Id == id)
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .FirstOrDefaultAsync();
 
-    public async Task AddAsync(FeatureEdit feature)
+    public async Task<int> AddAsync(FeatureEdit feature)
     {
-        var subTasks = feature.TasksList.Select(
-                it => new SubTaskData
-                {
-                    Id = it.Id,
-                    Name = it.Name,
-                    ExecutorEmployeeId = it.ExecutorEmployeeId,
-                    Cost = it.Cost,
-                    IsCompleted = it.IsCompleted,
-                    OnPayment = it.OnPayment
-                }
-            )
-            .ToArray();
-
-        // TODO: Добавить аттачи
-        // var attachments = dbContext.Files.Where(it => feature.AttachmentsIdList.Any(id => it.Id == id)).ToArray();
-
         var featureData = new FeatureData
         {
             Name = feature.Name,
             ProjectId = feature.ProjectId,
-            TasksList = subTasks,
             Deadline = feature.Deadline,
             Description = feature.Description,
+            TasksList = feature.TasksList
+                .Select(
+                    t => new SubTaskData
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        ExecutorEmployeeId = t.ExecutorEmployeeId,
+                        Cost = t.Cost,
+                        IsCompleted = t.IsCompleted,
+                        OnPayment = t.OnPayment
+                    }
+                )
+                .ToList()
         };
 
-        await dbContext.SubTasks.AddRangeAsync(subTasks);
-        await dbContext.Features.AddAsync(featureData);
-        
+        var addedFeature = await dbContext.Features.AddAsync(featureData);
+        await dbContext.SaveChangesAsync();
+
+        return addedFeature.Entity.Id;
+    }
+
+    public async Task EditAsync(FeatureEdit feature)
+    {
+        var featureData = await dbContext.Features
+            .Include(f => f.TasksList)
+            .FirstOrDefaultAsync(f => f.Id == feature.Id);
+
+        if (featureData is null)
+        {
+            throw new InvalidOperationException($"Feature with id {feature.Id} not found");
+        }
+
+        featureData.Name = feature.Name;
+        featureData.Deadline = feature.Deadline;
+        featureData.Description = feature.Description;
+
+        var existingTasks = featureData.TasksList
+            .ToDictionary(t => t.Id);
+
+        foreach (var taskEdit in feature.TasksList)
+        {
+            if (taskEdit.Id == Guid.Empty)
+            {
+                featureData.TasksList.Add(
+                    new SubTaskData
+                    {
+                        Name = taskEdit.Name,
+                        ExecutorEmployeeId = taskEdit.ExecutorEmployeeId,
+                        Cost = taskEdit.Cost,
+                        IsCompleted = taskEdit.IsCompleted,
+                        OnPayment = taskEdit.OnPayment
+                    }
+                );
+
+                continue;
+            }
+
+            if (!existingTasks.TryGetValue(taskEdit.Id, out var existingTask))
+            {
+                continue;
+            }
+
+            existingTask.Name = taskEdit.Name;
+            existingTask.ExecutorEmployeeId = taskEdit.ExecutorEmployeeId;
+            existingTask.Cost = taskEdit.Cost;
+            existingTask.IsCompleted = taskEdit.IsCompleted;
+            existingTask.OnPayment = taskEdit.OnPayment;
+
+            existingTasks.Remove(taskEdit.Id);
+        }
+
+        if (existingTasks.Count > 0)
+        {
+            dbContext.SubTasks.RemoveRange(existingTasks.Values);
+        }
+
         await dbContext.SaveChangesAsync();
     }
 
-    public Task EditAsync(FeatureEdit feature)
+    public async Task DeleteAsync(int id)
     {
-        // TODO: Add edit
-        return Task.CompletedTask;
+        var feature = await dbContext.Features
+            .Include(f => f.TasksList)
+            .FirstOrDefaultAsync(f => f.Id == id);
+
+        if (feature is null)
+        {
+            throw new InvalidOperationException($"Feature with id {id} not found");
+        }
+
+        dbContext.SubTasks.RemoveRange(feature.TasksList);
+        dbContext.Features.Remove(feature);
+
+        await dbContext.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(int id) => throw new NotImplementedException();
-
-    private Expression<Func<FeatureData, Feature>> GetFeatureMapExpression(Guid? subTaskEmployeeId) => it => new Feature
+    private static Expression<Func<FeatureData, Feature>> GetFeatureMapExpression(
+        Guid? subTaskEmployeeId
+    ) => f => new Feature
     {
-        Id = it.Id,
-        Name = it.Name,
+        Id = f.Id,
+        Name = f.Name,
+        Deadline = f.Deadline,
+        Description = f.Description,
         Project = new Project
         {
-            Id = it.Project.Id,
-            Name = it.Project.Name
+            Id = f.Project.Id,
+            Name = f.Project.Name
         },
-        TasksList = it.TasksList
-            .Where(task => subTaskEmployeeId == null || task.ExecutorEmployee.Id == subTaskEmployeeId)
+        TasksList = f.TasksList
+            .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId)
             .Select(
-                task => new SubTask
+                t => new SubTask
                 {
-                    Name = task.Name,
-                    Id = task.Id,
+                    Id = t.Id,
+                    Name = t.Name,
                     ExecutorEmployee = new User
                     {
-                        Id = task.ExecutorEmployee.Id,
-                        Name = task.ExecutorEmployee.Name,
-                        Role = task.ExecutorEmployee.Role,
-                        Email = task.ExecutorEmployee.Email
+                        Id = t.ExecutorEmployee.Id,
+                        Name = t.ExecutorEmployee.Name,
+                        Role = t.ExecutorEmployee.Role,
+                        Email = t.ExecutorEmployee.Email
                     }
                 }
             )
             .ToArray(),
-        Deadline = it.Deadline,
-        Description = it.Description,
-        AttachmentsList = it.AttachmentsList.Select(
-                attachment => new FileInfo
+        AttachmentsList = f.AttachmentsList
+            .Select(
+                a => new FileInfo
                 {
-                    Id = attachment.Id,
-                    Name = attachment.Name,
-                    Link = attachment.Link
+                    Id = a.Id,
+                    Name = a.Name,
+                    Link = a.Link
                 }
             )
             .ToArray()

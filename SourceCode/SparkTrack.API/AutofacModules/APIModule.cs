@@ -9,21 +9,19 @@ using Services.Authorization;
 using Services.Features;
 using Services.Projects;
 using Services.Users;
+using System.Reflection;
+using Module = Autofac.Module;
 
 public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterType<SparkHttpClient>().As<HttpClient>();
+        builder.RegisterType<SparkHttpClient>().As<HttpClient>().WithParameter(new TypedParameter(typeof(string), apiBaseUrl));
+        builder.RegisterType<RetryAuthHandler>();
         
-        RegisterClient<FeaturesClient>(builder);
-        RegisterClient<AuthorizationClient>(builder);
-        RegisterClient<ProfileClient>(builder);
-        RegisterClient<UsersClient>(builder);
-        RegisterClient<ProjectsClient>(builder);
+        RegisterAllClientsFromAssembly<ClientBase>(builder, typeof(APIModule).Assembly);
 
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
-        builder.RegisterType<RetryAuthHandler>();
         builder.RegisterType<JsonConfigurationService<TokensConfiguration>>()
             .AsImplementedInterfaces()
             .WithParameter(new TypedParameter(typeof(string), tokensConfigPath));
@@ -33,16 +31,13 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<ProjectsService>().AsImplementedInterfaces().SingleInstance();
     }
 
-    private void RegisterClient<TClient>(ContainerBuilder builder) where TClient : class
+    private void RegisterAllClientsFromAssembly<TClientBase>(ContainerBuilder builder, Assembly assembly)
     {
-        builder.Register<ClientWrapper<TClient>>(
-            c =>
-            {
-                var httpClient = c.Resolve<HttpClient>(new TypedParameter(typeof(string), apiBaseUrl));
-                var client = (TClient)Activator.CreateInstance(typeof(TClient), httpClient)!;
+        builder.RegisterAssemblyTypes(assembly)
+            .Where(it => it.IsAssignableTo(typeof(TClientBase)));
 
-                return new ClientWrapper<TClient>(client, httpClient);
-            }
-        );
+        builder
+            .RegisterGeneric(typeof(ClientWrapper<>))
+            .AsSelf();
     }
 }

@@ -23,7 +23,7 @@ public class UsersController(IUsersService usersService) : Controller
         return Ok(page.ToDTO(it => it.ToDTO()));
     }
 
-    [Authorize(Roles = nameof(ERole.God))]
+    [Authorize(Roles = $"{nameof(ERole.God)}, {nameof(ERole.Admin)}")]
     [HttpGet("employees")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
