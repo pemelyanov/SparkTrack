@@ -17,7 +17,7 @@ using ILogger = NLog.ILogger;
 public class MainWindowViewModel : ViewModelBase, IScreen
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
-    
+
     public MainWindowViewModel(
         AuthorizationPageViewModel startPage,
         INavigationListResolver navigationListResolver,
@@ -26,7 +26,7 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     {
         AccountViewModel = accountViewModel;
         NavigationList = navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
-        
+
         Router.NavigateOnUIThread(startPage);
     }
 
@@ -34,12 +34,24 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     {
         base.OnFirstActivated(disposables);
 
-        Router.CurrentViewModel.Subscribe(it =>
-        {
-            SelectedPageType = it.GetType();
+        Router.CurrentViewModel
+            .CombineLatest(NavigationList)
+            .Throttle(TimeSpan.FromMicroseconds(50))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(
+                args =>
+                {
+                    var selectedPageType = args.First.GetType();
+                    var navigationList = args.Second;
 
-            s_logger.Info("Selected page changed to {page}", SelectedPageType.Name);
-        }).DisposeWith(disposables);
+                    if (!navigationList.Contains(selectedPageType)) return;
+
+                    SelectedPageType = selectedPageType;
+
+                    s_logger.Info("Selected page changed to {page}", SelectedPageType.Name);
+                }
+            )
+            .DisposeWith(disposables);
     }
 
     public RoutingState Router { get; } = CreateRouter();

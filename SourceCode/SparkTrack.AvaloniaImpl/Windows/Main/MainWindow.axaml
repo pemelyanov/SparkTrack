@@ -24,12 +24,14 @@
     </Design.DataContext>
 
     <controls:NavigationView x:Name="NavigationView" IsPaneOpen="False" IsSettingsVisible="False"
-                             Background="Transparent" MenuItemsSource="{Binding NavigationList^}">
+                             Background="Transparent" 
+                             MenuItemsSource="{Binding NavigationList^}"
+                             SelectedItem="{Binding SelectedPageType, Mode=TwoWay}">
         <controls:NavigationView.MenuItemTemplate>
             <DataTemplate x:DataType="system:Type">
-                <controls:NavigationViewItem
+                <controls:NavigationViewItem SelectsOnInvoked="True"
                     Content="{Binding ., Converter={x:Static converters:PagesConverters.Name}}"
-                    IsSelected="True" Tapped="NavigationItem_OnTapped" Tag="{Binding}">
+                    Tapped="NavigationItem_OnTapped" Tag="{Binding}">
                     <controls:NavigationViewItem.IconSource>
                         <fluent:SymbolIconSource
                             Symbol="{Binding ., Converter={x:Static converters:PagesConverters.Symbol}}" />
