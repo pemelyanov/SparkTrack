@@ -8,7 +8,7 @@ public record SubTask
     
     public required User ExecutorEmployee { get; init; }
     
-    public DateTime Deadline { get; init; }
+    public required DateTime Deadline { get; init; }
     
     public float Cost { get; init; }
     

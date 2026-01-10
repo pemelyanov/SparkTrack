@@ -46,7 +46,6 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         {
             Name = feature.Name,
             ProjectId = feature.ProjectId,
-            Deadline = feature.Deadline,
             Description = feature.Description,
             TasksList = feature.TasksList
                 .Select(
@@ -55,6 +54,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                         Id = t.Id,
                         Name = t.Name,
                         ExecutorEmployeeId = t.ExecutorEmployeeId,
+                        Deadline = t.Deadline,
                         Cost = t.Cost,
                         IsCompleted = t.IsCompleted,
                         OnPayment = t.OnPayment
@@ -81,7 +81,6 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         }
 
         featureData.Name = feature.Name;
-        featureData.Deadline = feature.Deadline;
         featureData.Description = feature.Description;
 
         var existingTasks = featureData.TasksList
@@ -96,6 +95,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                     {
                         Name = taskEdit.Name,
                         ExecutorEmployeeId = taskEdit.ExecutorEmployeeId,
+                        Deadline = taskEdit.Deadline,
                         Cost = taskEdit.Cost,
                         IsCompleted = taskEdit.IsCompleted,
                         OnPayment = taskEdit.OnPayment
@@ -150,7 +150,6 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
     {
         Id = f.Id,
         Name = f.Name,
-        Deadline = f.Deadline,
         Description = f.Description,
         Project = new Project
         {
@@ -164,6 +163,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                 {
                     Id = t.Id,
                     Name = t.Name,
+                    Deadline = t.Deadline,
+                    Cost = t.Cost,
                     ExecutorEmployee = new User
                     {
                         Id = t.ExecutorEmployee.Id,

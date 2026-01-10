@@ -16,7 +16,7 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
     {
         [ERole.Admin] = [typeof(FeaturesListPageViewModel), typeof(UsersPageViewModel)],
         [ERole.Employee] = [typeof(FeaturesListPageViewModel)],
-        [ERole.God] = [typeof(FeaturesListPageViewModel), typeof(ProjectsListPageViewModel), typeof(UsersPageViewModel)]
+        [ERole.God] = [typeof(UsersPageViewModel), typeof(ProjectsListPageViewModel)]
     };
 
     private readonly IDisposable m_authorizationSubscription;

@@ -13,15 +13,18 @@
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
              x:Name="Root">
+    <UserControl.Resources>
+        <converters:FeatureDeadlineConverter x:Key="FeatureDeadlineConverter" />
+    </UserControl.Resources>
     <Grid RowDefinitions="Auto Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type featuresList:FeaturesListPageViewModel}"
                    x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
 
         <Grid Grid.Row="1" ColumnDefinitions="* Auto">
-            <!-- TODO: Filters block -->
             <WrapPanel Grid.Column="0">
-                <projectsFilter:ProjectsFilter Width="400" MaxWidth="400" DataContext="{Binding ProjectsFilterViewModel}" />
+                <projectsFilter:ProjectsFilter Width="400" MaxWidth="400"
+                                               DataContext="{Binding ProjectsFilterViewModel}" />
             </WrapPanel>
 
             <Button Grid.Column="1" Classes="accent" Content="Создать"
@@ -43,9 +46,11 @@
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"
+                                    IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
                                     Header="Канал" Binding="{Binding Model.Project.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"
-                                    Header="Дедлайн" Binding="{Binding Model.Deadline, StringFormat='dd.MM.yyyy'}" />
+                                    Header="Дедлайн"
+                                    Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter}, StringFormat='dd.MM.yyyy', FallbackValue='—'}" />
                 <DataGridTemplateColumn Width="220" IsReadOnly="True"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>

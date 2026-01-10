@@ -10,6 +10,8 @@ public record SubTaskData
     
     public required Guid ExecutorEmployeeId { get; set; }
     
+    public required DateTime Deadline { get; set; }
+    
     public float Cost { get; set; }
     
     public bool IsCompleted { get; set; }

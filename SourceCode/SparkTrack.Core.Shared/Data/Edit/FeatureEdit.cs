@@ -10,8 +10,6 @@ public record FeatureEdit
     
     public required IReadOnlyList<SubTaskEdit> TasksList { get; init; }
     
-    public DateTime Deadline { get; init; }
-
     public string Description { get; init; } = string.Empty;
 
     public IReadOnlyList<Guid> AttachmentsIdList { get; init; } = [];

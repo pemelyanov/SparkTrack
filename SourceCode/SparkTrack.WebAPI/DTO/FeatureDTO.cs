@@ -9,8 +9,6 @@ public record FeatureDTO
     public required ProjectDTO Project { get; init; }
     
     public required IReadOnlyList<SubTaskDTO> TasksList { get; init; }
-    
-    public DateTime Deadline { get; init; }
 
     public string Description { get; init; } = string.Empty;
 

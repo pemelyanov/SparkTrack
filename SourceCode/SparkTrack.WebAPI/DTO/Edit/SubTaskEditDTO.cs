@@ -8,6 +8,8 @@ public record SubTaskEditDTO
     
     public required Guid ExecutorEmployeeId { get; init; }
     
+    public required DateTime Deadline { get; init; }
+    
     public float Cost { get; init; }
     
     public bool IsCompleted { get; init; }

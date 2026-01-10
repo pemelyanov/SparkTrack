@@ -9,8 +9,6 @@ public record Feature
     public required Project Project { get; init; }
     
     public required IReadOnlyList<SubTask> TasksList { get; init; }
-    
-    public DateTime Deadline { get; init; }
 
     public string Description { get; init; } = string.Empty;
 

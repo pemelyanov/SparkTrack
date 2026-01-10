@@ -18,7 +18,14 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
         return new ReadOnlyPagedData<Feature>(list, dto.Total);
     }
 
-    public Task<Feature?> GetAsync(int id) => throw new NotImplementedException();
+    public async Task<Feature?> GetAsync(int id)
+    {
+        using var clientWrapper = featuresClientFactory();
+
+        var dto = await clientWrapper.Client.GetAsync(id);
+
+        return dto.ToDomain();
+    }
 
     public async Task<int> AddAsync(FeatureEdit feature)
     {

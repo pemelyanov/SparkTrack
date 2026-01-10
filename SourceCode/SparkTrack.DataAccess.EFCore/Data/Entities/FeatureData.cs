@@ -11,8 +11,6 @@ public record FeatureData
     public Guid ProjectId { get; set; }
 
     public ICollection<SubTaskData> TasksList { get; init; } = [];
-    
-    public DateTime Deadline { get; set; }
 
     public string Description { get; set; } = string.Empty;
 

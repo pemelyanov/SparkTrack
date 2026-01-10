@@ -19,9 +19,6 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
         builder.Property(f => f.ProjectId)
             .IsRequired();
         
-        builder.Property(f => f.Deadline)
-            .IsRequired();
-        
         builder.Property(f => f.Description)
             .IsRequired(false);
         

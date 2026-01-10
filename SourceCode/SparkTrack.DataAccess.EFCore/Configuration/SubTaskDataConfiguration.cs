@@ -19,8 +19,10 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
         builder.Property(t => t.ExecutorEmployeeId)
             .IsRequired();
         
+        builder.Property(f => f.Deadline)
+            .IsRequired();
+        
         builder.Property(t => t.Cost)
-            .HasPrecision(18, 2) // Для денежных значений
             .IsRequired();
         
         builder.Property(t => t.IsCompleted)

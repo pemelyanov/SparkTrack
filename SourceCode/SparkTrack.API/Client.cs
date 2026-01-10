@@ -2496,9 +2496,6 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("tasksList")]
         public System.Collections.Generic.IReadOnlyList<SubTaskDTO> TasksList { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("deadline")]
-        public System.DateTime Deadline { get; init; }
-
         [System.Text.Json.Serialization.JsonPropertyName("description")]
         public string Description { get; init; }
 
@@ -2534,6 +2531,9 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("executorEmployee")]
         public UserDTO ExecutorEmployee { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("deadline")]
+        public System.DateTime Deadline { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("cost")]
         public float Cost { get; init; }
@@ -2607,9 +2607,6 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("tasksList")]
         public System.Collections.Generic.IReadOnlyList<SubTaskEditDTO> TasksList { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("deadline")]
-        public System.DateTime Deadline { get; init; }
-
         [System.Text.Json.Serialization.JsonPropertyName("description")]
         public string Description { get; init; }
 
@@ -2630,6 +2627,9 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("executorEmployeeId")]
         public System.Guid ExecutorEmployeeId { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("deadline")]
+        public System.DateTime Deadline { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("cost")]
         public float Cost { get; init; }

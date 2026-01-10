@@ -12,6 +12,7 @@ public static class SubTaskMappingExtensions
         Id = it.Id,
         Name = it.Name,
         ExecutorEmployeeId = it.ExecutorEmployeeId,
+        Deadline = it.Deadline,
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
         OnPayment = it.OnPayment
@@ -23,6 +24,7 @@ public static class SubTaskMappingExtensions
         Name = it.Name,
         ExecutorEmployeeId = it.ExecutorEmployeeId,
         Cost = it.Cost,
+        Deadline = it.Deadline,
         IsCompleted = it.IsCompleted,
         OnPayment = it.OnPayment
     };
@@ -32,6 +34,7 @@ public static class SubTaskMappingExtensions
         Id = it.Id,
         Name = it.Name,
         ExecutorEmployee = it.ExecutorEmployee.ToDTO(),
+        Deadline = it.Deadline,
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
         OnPayment = it.OnPayment
