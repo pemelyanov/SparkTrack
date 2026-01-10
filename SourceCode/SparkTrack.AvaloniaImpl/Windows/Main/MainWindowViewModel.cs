@@ -5,25 +5,28 @@ using System.Reactive.Linq;
 using Controls.Account;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
+using NLog;
 using Pages.Authorization;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Routing;
 using Services.NavigationListResolver;
 using Splat;
+using ILogger = NLog.ILogger;
 
 public class MainWindowViewModel : ViewModelBase, IScreen
 {
-    private readonly INavigationListResolver m_navigationListResolver;
-
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+    
     public MainWindowViewModel(
         AuthorizationPageViewModel startPage,
         INavigationListResolver navigationListResolver,
         AccountViewModel accountViewModel
     )
     {
-        m_navigationListResolver = navigationListResolver;
         AccountViewModel = accountViewModel;
-        NavigationList = m_navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
+        NavigationList = navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
+        
         Router.NavigateOnUIThread(startPage);
     }
 
@@ -31,10 +34,15 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     {
         base.OnFirstActivated(disposables);
 
-        Router.CurrentViewModel.Subscribe(it => SelectedPageType = it.GetType()).DisposeWith(disposables);
+        Router.CurrentViewModel.Subscribe(it =>
+        {
+            SelectedPageType = it.GetType();
+
+            s_logger.Info("Selected page changed to {page}", SelectedPageType.Name);
+        }).DisposeWith(disposables);
     }
 
-    public RoutingState Router { get; } = new();
+    public RoutingState Router { get; } = CreateRouter();
 
     public IObservable<IReadOnlyList<Type>> NavigationList { get; }
 
@@ -51,4 +59,6 @@ public class MainWindowViewModel : ViewModelBase, IScreen
 
         Router.PopToOnUIThread(page);
     }
+
+    private static RoutingState CreateRouter() => new SuspendableRoutingState();
 }

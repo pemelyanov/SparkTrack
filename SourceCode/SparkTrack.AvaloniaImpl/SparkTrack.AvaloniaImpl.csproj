@@ -39,4 +39,8 @@
       <ProjectReference Include="..\SparkTrack.API\SparkTrack.API.csproj" />
       <ProjectReference Include="..\SparkTrack.Core.Client\SparkTrack.Core.Client.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="NLog.config" />
+    </ItemGroup>
 </Project>

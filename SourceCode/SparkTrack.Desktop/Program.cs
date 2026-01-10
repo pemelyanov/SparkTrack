@@ -17,6 +17,7 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        SetupLogger();
         s_logger.Info("Logger configured");
         
         RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
@@ -43,4 +44,12 @@ sealed class Program
         .LogToTrace()
         .UseReactiveUI()
         .UseBootstrapper<SparkTrackBootstrapper>([typeof(App).Assembly]);
+    
+    private static void SetupLogger()
+    {
+        NLogConfigManager.EnsureNLogConfig(typeof(App).Assembly, "SparkTrack.AvaloniaImpl.NLog.config");
+
+        LogManager.Setup(cfg => cfg.LoadConfigurationFromFile(NLogConfigManager.NLogConfigPath));
+        LogManager.ReconfigExistingLoggers();
+    }
 }

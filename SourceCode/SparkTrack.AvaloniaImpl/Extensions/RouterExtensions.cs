@@ -49,7 +49,13 @@ public static class RouterExtensions
 
         IEnumerable<IRoutableViewModel> itemsToRemove = stack.Skip(existingViewModelIndex + 1);
 
-        Dispatcher.UIThread.Invoke(() => router.NavigationStack.RemoveMany(itemsToRemove));
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            var suspension = (router.NavigationStack as SuspendableObservableCollection<IRoutableViewModel>)?
+                .SuspendNotifications();
+            router.NavigationStack.RemoveMany(itemsToRemove);
+            suspension?.Dispose();
+        });
     }
 
     /// <summary>
@@ -65,8 +71,13 @@ public static class RouterExtensions
 
         IRoutableViewModel? existingViewModel = stack.FirstOrDefault(it => it == viewModel);
 
+        var suspension = (router.NavigationStack as SuspendableObservableCollection<IRoutableViewModel>)?
+            .SuspendNotifications(false);
+        
         if (existingViewModel is not null)
             Dispatcher.UIThread.Invoke(() => router.NavigationStack.Remove(existingViewModel));
+        
+        suspension?.Dispose();
 
         router.NavigateOnUIThread(viewModel);
     }

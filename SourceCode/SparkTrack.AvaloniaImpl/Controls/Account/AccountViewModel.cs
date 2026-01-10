@@ -22,6 +22,8 @@ public class AccountViewModel(
     {
         try
         {
+            s_logger.Info("LogOut executed");
+            
             await authorizationService.LogOutAsync();
         }
         catch (Exception e)
