@@ -22,6 +22,7 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
         IsImage = stream.IsImageBySignature();
         Uri = path;
         Name = Path.GetFileName(path);
+        Extension = Path.GetExtension(path).TrimStart('.');
         Size = stream.Length;
     }
 
@@ -32,6 +33,8 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
     public string Uri { get; }
 
     public string Name { get; }
+
+    public string Extension { get; }
 
     public long Size { get; }
 

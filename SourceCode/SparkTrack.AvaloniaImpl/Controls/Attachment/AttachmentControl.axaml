@@ -12,6 +12,7 @@
     <UserControl.Resources>
         <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
         <converters:BytesToStringConverter x:Key="BytesToStringConverter" />
+        <converters:FileExtensionToSymbolConverter x:Key="FileExtensionToSymbolConverter"/>
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="ContentControl.image">
@@ -26,8 +27,8 @@
         <Style Selector="ContentControl.file">
             <Setter Property="Content">
                 <Template>
-                    <Border>
-                        <avalonia:SymbolIcon Symbol="Attach" />
+                    <Border x:DataType="attachment:IAttachmentViewModel">
+                        <avalonia:SymbolIcon Symbol="{Binding Extension, Converter={StaticResource FileExtensionToSymbolConverter}}" />
                     </Border>
                 </Template>
             </Setter>

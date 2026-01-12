@@ -12,6 +12,8 @@ public interface IAttachmentViewModel
     
     string Name { get; }
     
+    string Extension { get; }
+    
     long Size { get; }
     
     ICommand SaveAsCommand { get; }
