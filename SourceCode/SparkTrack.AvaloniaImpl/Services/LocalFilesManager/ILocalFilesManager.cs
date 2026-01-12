@@ -16,6 +16,19 @@ public interface ILocalFilesManager
         string? suggestedFolderPath = null,
         params EFileType[] fileTypes
     );
+    
+    /// <summary>
+    /// Запускает средство для выбора набора файлов для открытия
+    /// </summary>
+    /// <param name="suggestedFolderPath">Папка, которая будет открыта по умолчанию</param>
+    /// <param name="fileTypes">Фильтры типов файлов</param>
+    /// <returns>
+    /// Выбранные файлы
+    /// </returns>
+    Task<string[]> ChooseFilesForOpenAsync(
+        string? suggestedFolderPath = null,
+        params EFileType[] fileTypes
+    );
 
     /// <summary>
     /// Запускает средство для выбора файла для сохранения

@@ -33,7 +33,7 @@
                     VerticalAlignment="Bottom" Command="{Binding CreateFeature}" />
         </Grid>
 
-        <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
+        <Button Grid.Row="2" Classes="icon reload" Command="{Binding ReloadTableCommand}"
                 HorizontalAlignment="Right" />
 
         <DataGrid Grid.Row="3"

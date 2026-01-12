@@ -38,23 +38,13 @@ public class LocalFilesManager : ILocalFilesManager
     /// <inheritdoc />
     public async Task<string?> ChooseFileForOpenAsync(string? suggestedFolderPath = null, params EFileType[] fileTypes)
     {
-        TopLevel topLevel = GetTopLevel();
-        IStorageFolder? suggestedStartLocation = suggestedFolderPath is null
-            ? null
-            : await topLevel.StorageProvider.TryGetFolderFromPathAsync(suggestedFolderPath);
+        var files = await ChooseFilesForOpenAsync(false, suggestedFolderPath, fileTypes);
 
-        FilePickerOpenOptions options = new()
-        {
-            AllowMultiple = false,
-            FileTypeFilter = fileTypes.Select(DetermineFilePickerType).ToArray(),
-            Title = "Открыть",
-            SuggestedStartLocation = suggestedStartLocation,
-        };
-
-        IReadOnlyList<IStorageFile> file = await topLevel.StorageProvider.OpenFilePickerAsync(options);
-
-        return file.FirstOrDefault()?.TryGetLocalPath() ?? string.Empty;
+        return files.FirstOrDefault() ?? string.Empty;
     }
+
+    public Task<string[]> ChooseFilesForOpenAsync(string? suggestedFolderPath = null, params EFileType[] fileTypes) =>
+        ChooseFilesForOpenAsync(true, suggestedFolderPath, fileTypes);
 
     /// <inheritdoc />
     public async Task<string?> ChooseDirectoryAsync(string? suggestedFolderPath = null)
@@ -74,6 +64,26 @@ public class LocalFilesManager : ILocalFilesManager
         IReadOnlyList<IStorageFolder> folder = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
 
         return folder.FirstOrDefault()?.TryGetLocalPath();
+    }
+    
+    private async Task<string[]> ChooseFilesForOpenAsync(bool allowMultiple, string? suggestedFolderPath = null, params EFileType[] fileTypes)
+    {
+        TopLevel topLevel = GetTopLevel();
+        IStorageFolder? suggestedStartLocation = suggestedFolderPath is null
+            ? null
+            : await topLevel.StorageProvider.TryGetFolderFromPathAsync(suggestedFolderPath);
+
+        FilePickerOpenOptions options = new()
+        {
+            AllowMultiple = allowMultiple,
+            FileTypeFilter = fileTypes.Select(DetermineFilePickerType).ToArray(),
+            Title = "Открыть",
+            SuggestedStartLocation = suggestedStartLocation,
+        };
+
+        IReadOnlyList<IStorageFile> file = await topLevel.StorageProvider.OpenFilePickerAsync(options);
+
+        return file.Select(it => it.TryGetLocalPath()).Where(it => it is not null).ToArray()!;
     }
 
     private static TopLevel GetTopLevel()

@@ -1,6 +1,7 @@
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
 using Extensions;
+using System.Diagnostics;
 
 public class LocalAttachmentViewModel : IAttachmentViewModel
 {
@@ -19,6 +20,8 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
 
     public bool IsImage { get; }
 
+    public bool IsDownloaded => true;
+
     public string Uri { get; }
 
     public string Name { get; }
@@ -28,5 +31,26 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
     public void Remove()
     {
         m_onRemove.Invoke(this);
+    }
+
+    public Task DownloadAsync() => throw new NotImplementedException();
+
+    public void Open()
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = Uri,
+            UseShellExecute = true
+        });
+    }
+
+    public void OpenInExplorer()
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "explorer.exe",
+            Arguments = $"/select,\"{Uri}\"",
+            UseShellExecute = true
+        });
     }
 }

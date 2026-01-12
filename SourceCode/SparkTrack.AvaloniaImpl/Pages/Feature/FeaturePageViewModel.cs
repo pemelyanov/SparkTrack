@@ -16,6 +16,7 @@ using Fanatiki.MVVM.ViewModels;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.LocalFilesManager;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -31,28 +32,32 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Lazy<IScreen>                        m_hostScreen;
     private readonly IFeaturesService                     m_featuresService;
     private readonly IUsersService                        m_usersService;
+    private readonly ILocalFilesManager                   m_localFilesManager;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
         Guid projectId,
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
-        IUsersService usersService
-    ) : this(null, projectId, hostScreen, featuresService, usersService) { }
+        IUsersService usersService,
+        ILocalFilesManager localFilesManager
+    ) : this(null, projectId, hostScreen, featuresService, usersService, localFilesManager) { }
 
     public FeaturePageViewModel(
         Feature feature,
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
-        IUsersService usersService
-    ) : this(feature, feature.Project.Id, hostScreen, featuresService, usersService) { }
+        IUsersService usersService,
+        ILocalFilesManager localFilesManager
+    ) : this(feature, feature.Project.Id, hostScreen, featuresService, usersService, localFilesManager) { }
 
     private FeaturePageViewModel(
         Feature? feature,
         Guid projectId,
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
-        IUsersService usersService
+        IUsersService usersService,
+        ILocalFilesManager localFilesManager
     )
     {
         m_feature = feature;
@@ -60,6 +65,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_hostScreen = hostScreen;
         m_featuresService = featuresService;
         m_usersService = usersService;
+        m_localFilesManager = localFilesManager;
 
         InitializeProperties(feature);
 
@@ -130,7 +136,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public async Task ChooseAttachmentsAsync()
     {
-        
+        var files = await m_localFilesManager.ChooseFilesForOpenAsync();
+
+        foreach (var file in files.Where(it => !string.IsNullOrEmpty(it)))
+            AddAttachment(file);
     }
 
     public void AddAttachment(string path)

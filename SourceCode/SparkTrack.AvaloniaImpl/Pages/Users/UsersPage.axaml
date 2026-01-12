@@ -18,7 +18,7 @@
         <Button Grid.Row="1" Classes="accent" HorizontalAlignment="Right" Content="Создать" 
                 Command="{Binding OpenUserAddAsync}" />
         
-        <Button Grid.Row="2" Classes="reload" Command="{Binding ReloadTableCommand}"
+        <Button Grid.Row="2" Classes="icon reload" Command="{Binding ReloadTableCommand}"
                 HorizontalAlignment="Right" />
         
         <DataGrid Grid.Row="3"

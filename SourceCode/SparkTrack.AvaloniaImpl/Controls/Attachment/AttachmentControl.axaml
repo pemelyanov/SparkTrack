@@ -32,12 +32,33 @@
                 </Template>
             </Setter>
         </Style>
+
+        <Style Selector=":is(Control).half-transparent">
+            <Setter Property="Opacity" Value="0.35" />
+        </Style>
+        
+        <Style Selector=":is(Panel).file-actions Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
     </UserControl.Styles>
     <Border Classes="card" x:Name="Container" Padding="0">
         <Grid ColumnDefinitions="Auto * Auto" Width="256">
-            <ContentControl Classes.file="{Binding !IsImage}"
+            <ContentControl Classes.half-transparent="{Binding #Container.IsPointerOver}"
+                            Classes.file="{Binding !IsImage}"
                             Classes.image="{Binding IsImage}"
                             Grid.Column="0" Width="64" Height="64" />
+
+            <Panel Grid.Column="0" Classes="file-actions" IsVisible="{Binding #Container.IsPointerOver}">
+                <Button Content="{markupExtensions:SymbolIcon Symbol=ArrowDownload}"
+                        Command="{Binding DownloadAsync}"
+                        IsVisible="{Binding !IsDownloaded}"/>
+
+                <Button Content="{markupExtensions:SymbolIcon Symbol=Open}" Command="{Binding Open}"
+                        IsVisible="{Binding IsDownloaded}"  />
+            </Panel>
 
             <TextBlock Grid.Column="1" Text="{Binding Name}"
                        TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"
@@ -47,12 +68,18 @@
                        HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
                        FontSize="12" Opacity="0.75" />
 
-            <Button Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" Padding="2"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                    Width="16" Height="16" Content="{markupExtensions:SymbolIcon Symbol=Dismiss, FontSize=10}"
-                    Margin="4"
-                    IsVisible="{Binding #Container.IsPointerOver}"
-                    Command="{Binding Remove}" />
+            <StackPanel Grid.Column="2" Margin="4" IsVisible="{Binding #Container.IsPointerOver}" Spacing="4">
+                <Button Classes="icon small close"
+                        Command="{Binding Remove}" />
+                
+                <Button Classes="icon small more">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </StackPanel>
         </Grid>
     </Border>
 </UserControl>

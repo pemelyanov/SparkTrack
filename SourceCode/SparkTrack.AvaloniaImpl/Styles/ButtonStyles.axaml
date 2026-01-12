@@ -7,12 +7,40 @@
         </Border>
     </Design.PreviewWith>
     
-    <Style Selector=":is(Button).reload">
+    <Style Selector=":is(Button).icon">
         <Setter Property="Width" Value="32" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        
+        <Style Selector="^.small">
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            
+            <Style Selector="^ avalonia|SymbolIcon">
+                <Setter Property="FontSize" Value="10" />
+            </Style>
+        </Style>
+    </Style>
+    
+    <Style Selector=":is(Button).more">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="MoreVertical" />
+            </Template>
+        </Setter>
+    </Style>
+    
+    <Style Selector=":is(Button).close">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="Dismiss" />
+            </Template>
+        </Setter>
+    </Style>
+    
+    <Style Selector=":is(Button).reload">
         <Setter Property="Content">
             <Template>
                 <avalonia:SymbolIcon Symbol="ArrowClockwise" />
@@ -21,11 +49,6 @@
     </Style>
     
     <Style Selector=":is(Button).back">
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Content">
             <Template>
                 <avalonia:SymbolIcon Symbol="ArrowLeft" />
@@ -40,6 +63,7 @@
             </Template>
         </Setter>
     </Style>
+    
     <Style Selector="ToggleButton.save">
         <Setter Property="Content">
             <Template>
