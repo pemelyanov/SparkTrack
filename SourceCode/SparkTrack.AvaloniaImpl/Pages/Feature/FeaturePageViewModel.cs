@@ -10,6 +10,7 @@ using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.Features;
+using Delegates;
 using DynamicData;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
@@ -33,6 +34,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly IFeaturesService                     m_featuresService;
     private readonly IUsersService                        m_usersService;
     private readonly ILocalFilesManager                   m_localFilesManager;
+    private readonly LocalAttachmentViewModelFactory      m_localAttachmentViewModelFactory;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -40,16 +42,34 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        ILocalFilesManager localFilesManager
-    ) : this(null, projectId, hostScreen, featuresService, usersService, localFilesManager) { }
+        ILocalFilesManager localFilesManager,
+        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
+    ) : this(
+        null,
+        projectId,
+        hostScreen,
+        featuresService,
+        usersService,
+        localFilesManager,
+        localAttachmentViewModelFactory
+    ) { }
 
     public FeaturePageViewModel(
         Feature feature,
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        ILocalFilesManager localFilesManager
-    ) : this(feature, feature.Project.Id, hostScreen, featuresService, usersService, localFilesManager) { }
+        ILocalFilesManager localFilesManager,
+        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
+    ) : this(
+        feature,
+        feature.Project.Id,
+        hostScreen,
+        featuresService,
+        usersService,
+        localFilesManager,
+        localAttachmentViewModelFactory
+    ) { }
 
     private FeaturePageViewModel(
         Feature? feature,
@@ -57,7 +77,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        ILocalFilesManager localFilesManager
+        ILocalFilesManager localFilesManager,
+        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
     )
     {
         m_feature = feature;
@@ -66,6 +87,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_featuresService = featuresService;
         m_usersService = usersService;
         m_localFilesManager = localFilesManager;
+        m_localAttachmentViewModelFactory = localAttachmentViewModelFactory;
 
         InitializeProperties(feature);
 
@@ -144,8 +166,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void AddAttachment(string path)
     {
-        var attachment = new LocalAttachmentViewModel(path, a => AttachmentsList.Remove(a));
-        
+        var attachment = m_localAttachmentViewModelFactory.Invoke(path, a => AttachmentsList.Remove(a));
+
         AttachmentsList.Add(attachment);
     }
 

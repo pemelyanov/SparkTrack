@@ -75,6 +75,7 @@
                 <Button Classes="icon small more">
                     <Button.Flyout>
                         <MenuFlyout>
+                            <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}"/>
                             <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"/>
                         </MenuFlyout>
                     </Button.Flyout>

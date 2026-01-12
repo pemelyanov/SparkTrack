@@ -4,6 +4,7 @@ using Windows.Main;
 using API.AutofacModules;
 using Autofac;
 using Controls.Account;
+using Controls.Attachment;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.UserEditForm;
@@ -30,6 +31,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<ProjectsListPageViewModel>().SingleInstance();
         builder.RegisterType<ProjectEditFormViewModel>();
         builder.RegisterType<ProjectsFilterViewModel>();
+        builder.RegisterType<LocalAttachmentViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

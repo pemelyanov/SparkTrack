@@ -1,5 +1,7 @@
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
+using System.Windows.Input;
+
 public interface IAttachmentViewModel
 {
     bool IsImage { get; }
@@ -11,6 +13,8 @@ public interface IAttachmentViewModel
     string Name { get; }
     
     long Size { get; }
+    
+    ICommand SaveAsCommand { get; }
 
     void Remove();
 
