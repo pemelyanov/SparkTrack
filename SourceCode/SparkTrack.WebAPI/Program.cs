@@ -6,8 +6,7 @@ using SparkTrack.Authentication.Core.Models;
 using SparkTrack.Authentication.DataAccess.EFCore.AutofacModules;
 using SparkTrack.Authentication.WebAPI.Extensions;
 using SparkTrack.Core.AutofacModules;
-using SparkTrack.Core.Services.Authorization;
-using SparkTrack.Core.Shared.Data.Edit;
+using SparkTrack.Core.Seeding;
 using SparkTrack.DataAccess.EFCore;
 using SparkTrack.DataAccess.EFCore.AutofacModules;
 using SparkTrack.WebAPI.AutofacModules;
@@ -62,6 +61,12 @@ builder.Services
 
 void RegisterServices(ContainerBuilder container)
 {
+    var isDevelopment = true;
+    
+    #if !DEBUG
+    isDevelopment = false;
+    #endif
+    
     container.Register(
             _ => new DbContextOptionsBuilder<SparkTrackDbContext>()
                 .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -69,7 +74,7 @@ void RegisterServices(ContainerBuilder container)
         )
         .SingleInstance();
     container.RegisterModule<WebAPIModule>();
-    container.RegisterModule<CoreModule>();
+    container.RegisterModule(new CoreModule(isDevelopment));
     container.RegisterModule<DataAccessEFModule>();
     container.RegisterModule<AuthenticationDataAccessEFCoreModule>();// TODO: Для консистентности надо бы на экстеншны для ServiceCollection переделать
 }
@@ -103,10 +108,9 @@ var database = app.Services.GetRequiredService<SparkTrackDbContext>().Database;
 database.EnsureDeleted();
 database.EnsureCreated();
 
-var defaultGod = app.Configuration.GetSection("DefaultGod:UserEdit").Get<UserEdit>()!;
-var defaultGodPassword = app.Configuration.GetSection("DefaultGod:Password").Get<string>()!;
+var seeders = app.Services.GetServices<IDataSeeder>();
 
-await app.Services.GetRequiredService<IAuthorizationService>()
-    .InvalidateDefaultGodAsync(defaultGod, defaultGodPassword);
+foreach (var seeder in seeders)
+    await seeder.SeedAsync();
 
 app.Run();

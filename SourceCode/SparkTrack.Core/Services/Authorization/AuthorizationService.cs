@@ -12,9 +12,15 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
 {
     public User? CurrentUser { get; private set; }
 
-    public async Task AuthorizeAsync(Guid userId)
+    public async Task AuthorizeAsync(Guid? userId)
     {
-        CurrentUser = await usersRepository.GetAsync(userId);
+        if (userId is null)
+        {
+            CurrentUser = null;
+            return;
+        } 
+        
+        CurrentUser = await usersRepository.GetAsync(userId.Value);
     }
 
     public async Task<string> RegisterAsync(UserEdit userEdit, ERole role)

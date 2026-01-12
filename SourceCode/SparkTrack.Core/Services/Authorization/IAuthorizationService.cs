@@ -11,7 +11,7 @@ public interface IAuthorizationService
     /// <summary>
     /// Принудительно устанавливает пользователя с указанным Id текущим
     /// </summary>
-    Task AuthorizeAsync(Guid userId);
+    Task AuthorizeAsync(Guid? userId);
 
     /// <summary>
     /// Создает пользователя с указанными данными

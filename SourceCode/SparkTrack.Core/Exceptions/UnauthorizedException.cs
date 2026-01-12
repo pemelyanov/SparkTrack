@@ -1,3 +1,3 @@
 ﻿namespace SparkTrack.Core.Exceptions;
 
-public class UnauthorizedException : Exception;
+public class UnauthorizedException(string? message = null) : Exception(message);

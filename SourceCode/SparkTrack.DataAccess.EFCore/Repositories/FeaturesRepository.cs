@@ -158,6 +158,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         },
         TasksList = f.TasksList
             .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId)
+            .OrderBy(t => t.Deadline)
             .Select(
                 t => new SubTask
                 {

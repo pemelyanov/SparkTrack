@@ -7,4 +7,6 @@ using Shared.Enums;
 public interface IUsersService
 {
     Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery);
+
+    Task<User?> GetByEmailAsync(string email);
 }
