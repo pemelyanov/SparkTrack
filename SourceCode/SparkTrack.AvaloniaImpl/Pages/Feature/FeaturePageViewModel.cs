@@ -25,7 +25,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
-    private Feature?                             m_feature;
+    private          Feature?                             m_feature;
     private readonly Guid                                 m_projectId;
     private readonly Lazy<IScreen>                        m_hostScreen;
     private readonly IFeaturesService                     m_featuresService;
@@ -59,9 +59,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_hostScreen = hostScreen;
         m_featuresService = featuresService;
         m_usersService = usersService;
-        
+
         InitializeProperties(feature);
-        
+
         if (feature is null) IsNameEditing = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
@@ -154,7 +154,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         if (m_feature?.Id is not { } featureId) return;
 
         m_feature = await m_featuresService.GetAsync(featureId);
-        
+
         InitializeProperties(m_feature);
     }
 
@@ -181,7 +181,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
         Description = Description
     };
-    
+
     private void InitializeProperties(Feature? feature)
     {
         Name = feature?.Name ?? "Название идеи";
@@ -195,5 +195,4 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             SubTasksList.AddRange(subTasks);
         }
     }
-
 }

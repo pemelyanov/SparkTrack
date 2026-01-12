@@ -9,6 +9,7 @@
              xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
              xmlns:featuresList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.FeaturesList"
              xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
@@ -50,7 +51,8 @@
                                     Header="Канал" Binding="{Binding Model.Project.Name}" />
                 <DataGridTextColumn Width="220" IsReadOnly="True"
                                     Header="Дедлайн"
-                                    Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter}, StringFormat='dd.MM.yyyy', FallbackValue='—'}" />
+                                    Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
+                                    StringFormat={x:Static constants:DateFormats.ShortRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
                 <DataGridTemplateColumn Width="220" IsReadOnly="True"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>

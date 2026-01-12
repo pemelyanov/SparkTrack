@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:entities="clr-namespace:SparkTrack.Core.Shared.Data.Entities;assembly=SparkTrack.Core.Shared"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.FeatureStatus.FeatureStatus"
              x:Name="Root">
@@ -42,6 +43,10 @@
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" />
                                 <TextBlock Text="{Binding ExecutorEmployee.Name, StringFormat='Исполнитель: {0}'}" />
                                 <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0}₽'}" />
+                                <TextBlock>
+                                    <Run Text="Дедлайн:"/>
+                                    <Run Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
+                                </TextBlock>
                             </StackPanel>
                         </ToolTip.Tip>
                     </Border>
