@@ -1,0 +1,58 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
+             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
+             xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.Attachment.AttachmentControl"
+             x:DataType="attachment:IAttachmentViewModel">
+    <UserControl.Resources>
+        <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
+        <converters:BytesToStringConverter x:Key="BytesToStringConverter" />
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="ContentControl.image">
+            <Setter Property="Content">
+                <Template>
+                    <Image x:DataType="attachment:IAttachmentViewModel"
+                           Source="{Binding Uri, Converter={StaticResource PathToImageSourceConverter}}" />
+                </Template>
+            </Setter>
+        </Style>
+
+        <Style Selector="ContentControl.file">
+            <Setter Property="Content">
+                <Template>
+                    <Border>
+                        <avalonia:SymbolIcon Symbol="Attach" />
+                    </Border>
+                </Template>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+    <Border Classes="card" x:Name="Container" Padding="0">
+        <Grid ColumnDefinitions="Auto * Auto" Width="256">
+            <ContentControl Classes.file="{Binding !IsImage}"
+                            Classes.image="{Binding IsImage}"
+                            Grid.Column="0" Width="64" Height="64" />
+
+            <TextBlock Grid.Column="1" Text="{Binding Name}"
+                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"
+                       HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" />
+
+            <TextBlock Grid.Column="1" Text="{Binding Size, Converter={StaticResource BytesToStringConverter}}"
+                       HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
+                       FontSize="12" Opacity="0.75" />
+
+            <Button Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" Padding="2"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                    Width="16" Height="16" Content="{markupExtensions:SymbolIcon Symbol=Dismiss, FontSize=10}"
+                    Margin="4"
+                    IsVisible="{Binding #Container.IsPointerOver}"
+                    Command="{Binding Remove}" />
+        </Grid>
+    </Border>
+</UserControl>

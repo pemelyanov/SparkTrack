@@ -7,6 +7,8 @@
              xmlns:subTask="clr-namespace:SparkTrack.AvaloniaImpl.Controls.SubTask"
              xmlns:comment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Comment"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
+             xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel">
@@ -18,7 +20,7 @@
             <Setter Property="IsVisible" Value="False" />
         </Style>
 
-        <Style Selector="Panel#FilesPanel:drag-over Rectangle#DashRectangle">
+        <Style Selector=":is(Window):drag-over Panel#FilesPanel Rectangle#DashRectangle">
             <Setter Property="IsVisible" Value="True" />
         </Style>
 
@@ -93,8 +95,21 @@
                                Loaded="FilesPanel_OnLoaded"
                                Unloaded="FilesPanel_OnUnloaded"
                                DragDrop.AllowDrop="True"
+                               behaviors:DragDropBehaviors.AddDragOverClass="True"
                                MinHeight="50">
-                            <ItemsControl />
+                            <ItemsControl ItemsSource="{Binding AttachmentsList}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <attachment:AttachmentControl />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <Rectangle x:Name="DashRectangle" IsHitTestVisible="False" StrokeDashArray="5, 1"
                                        Stroke="{DynamicResource ButtonForeground}"
                                        StrokeThickness="2" RadiusX="8" RadiusY="8" Opacity="0.8" />

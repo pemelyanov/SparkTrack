@@ -10,12 +10,15 @@
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:account="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Account"
         xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
+        xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SparkTrack.AvaloniaImpl.Windows.Main.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         WindowStartupLocation="CenterScreen"
-        Title="SparkTrack">
+        Title="SparkTrack"
+        DragDrop.AllowDrop="True"
+        behaviors:DragDropBehaviors.AddDragOverClass="True">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,

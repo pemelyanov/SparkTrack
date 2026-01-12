@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Pages.Feature;
 
+using Controls.Attachment;
 using System.Collections.ObjectModel;
 using Controls.Comment;
 using Controls.SubTask;
@@ -87,6 +88,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public SuspendableObservableCollection<SubTaskViewModel> SubTasksList { get; } = [];
 
+    public SuspendableObservableCollection<IAttachmentViewModel> AttachmentsList { get; } = [];
+
     public ObservableCollection<CommentViewModel> CommentsList { get; } =
     [
         new(
@@ -124,6 +127,18 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
+
+    public async Task ChooseAttachmentsAsync()
+    {
+        
+    }
+
+    public void AddAttachment(string path)
+    {
+        var attachment = new LocalAttachmentViewModel(path, a => AttachmentsList.Remove(a));
+        
+        AttachmentsList.Add(attachment);
+    }
 
     public void Back() => HostScreen.Router.BackOnUIThread();
 

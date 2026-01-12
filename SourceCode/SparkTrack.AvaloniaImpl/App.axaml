@@ -7,7 +7,7 @@
   
     <Application.Styles>
         <FluentTheme />
-        <styling:FluentAvaloniaTheme PreferSystemTheme="True" PreferUserAccentColor="True" />
+        <styling:FluentAvaloniaTheme PreferSystemTheme="False" PreferUserAccentColor="True" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
         <StyleInclude Source="Styles/BorderStyles.axaml" />
         <StyleInclude Source="Styles/TextBlockStyles.axaml" />
