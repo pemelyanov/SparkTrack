@@ -178,7 +178,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             .ToArray(),
         AttachmentsList = f.AttachmentsList
             .Select(
-                a => new FileInfo
+                a => new AttachmentInfo
                 {
                     Id = a.Id,
                     Name = a.Name,

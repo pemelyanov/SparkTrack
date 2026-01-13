@@ -7,6 +7,7 @@ using Data;
 using Interceptors;
 using Services.Authorization;
 using Services.Features;
+using Services.Files;
 using Services.Projects;
 using Services.Users;
 using System.Reflection;
@@ -29,6 +30,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<ProjectsService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<FilesService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterAllClientsFromAssembly<TClientBase>(ContainerBuilder builder, Assembly assembly)

@@ -5,6 +5,7 @@ using Seeding;
 using Seeding.Development;
 using Services.Authorization;
 using Services.Features;
+using Services.Files;
 using Services.PasswordHasher;
 using Services.Projects;
 using Services.Users;
@@ -18,6 +19,7 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PasswordHasher>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
         RegisterSeeders(builder);
     }

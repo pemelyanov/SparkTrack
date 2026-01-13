@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using SparkTrack.Authentication.Core.Models;
 using SparkTrack.Authentication.DataAccess.EFCore.AutofacModules;
@@ -19,6 +20,12 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(Registe
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 20L * 1024 * 1024 * 1024;
+});
+
 builder.Services.AddOpenApiDocument();
 
 

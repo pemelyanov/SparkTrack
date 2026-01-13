@@ -5,10 +5,10 @@ using DTO;
 
 public static class FileInfoMappingExtensions
 {
-    public static FileInfoDTO ToDTO(this FileInfo fileInfo) => new()
+    public static FileInfoDTO ToDTO(this AttachmentInfo attachmentInfo) => new()
     {
-        Id = fileInfo.Id,
-        Name = fileInfo.Name,
-        Link = fileInfo.Link
+        Id = attachmentInfo.Id,
+        Name = attachmentInfo.Name,
+        Link = attachmentInfo.Link
     };
 }

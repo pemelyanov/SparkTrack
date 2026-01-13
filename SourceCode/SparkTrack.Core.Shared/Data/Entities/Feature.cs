@@ -12,5 +12,5 @@ public record Feature
 
     public string Description { get; init; } = string.Empty;
 
-    public IReadOnlyList<FileInfo> AttachmentsList { get; init; } = [];
+    public IReadOnlyList<AttachmentInfo> AttachmentsList { get; init; } = [];
 }

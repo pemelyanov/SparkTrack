@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.Core.Shared.Data.Entities;
 
-public record FileInfo
+public record AttachmentInfo
 {
     public Guid Id { get; init; }
     
