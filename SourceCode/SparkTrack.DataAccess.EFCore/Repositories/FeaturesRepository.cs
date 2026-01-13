@@ -69,7 +69,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Name = a.Name,
         Extension = a.Extension,
         Size = a.Size,
-        FileId = a.FileId
+        FileId = a.FileId,
+        IsImage = a.IsImage,
+        Checksum = a.Checksum
     };
 
     private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
@@ -100,7 +102,14 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         HandleSubTasks(feature, featureData);
         
-        var existingTasks = featureData.AttachmentsList
+        HandleAttachments(feature, featureData);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private void HandleAttachments(FeatureEdit feature, FeatureData featureData)
+    {
+        var existingAttachments = featureData.AttachmentsList
             .ToDictionary(t => t.Id);
 
         foreach (var attachment in feature.AttachmentsList)
@@ -114,15 +123,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                 continue;
             }
 
-            existingTasks.Remove(attachment.Id, out AttachmentData _);
+            existingAttachments.Remove(attachment.Id, out AttachmentData _);
         }
 
-        if (existingTasks.Count > 0)
+        if (existingAttachments.Count > 0)
         {
-            dbContext.Attachments.RemoveRange(existingTasks.Values);
+            dbContext.Attachments.RemoveRange(existingAttachments.Values);
         }
-
-        await dbContext.SaveChangesAsync();
     }
 
     private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
@@ -220,7 +227,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                     Name = a.Name,
                     Extension = a.Extension,
                     Size = a.Size,
-                    FileId = a.FileId
+                    FileId = a.FileId,
+                    IsImage = a.IsImage,
+                    Checksum = a.Checksum
                 }
             )
             .ToArray()

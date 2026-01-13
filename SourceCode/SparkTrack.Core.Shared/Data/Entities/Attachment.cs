@@ -11,4 +11,10 @@ public record Attachment
     public long Size { get; init; }
     
     public Guid FileId { get; init; }
+    
+    // TODO: Возможно стоит использовать что-то абстрактное, типа IsAutoLoadNeeded,
+    // т.к. по этому полю на фронте определяем надо при предзагружать это дело
+    public bool IsImage { get; init; }
+
+    public byte[] Checksum { get; init; } = [];
 }

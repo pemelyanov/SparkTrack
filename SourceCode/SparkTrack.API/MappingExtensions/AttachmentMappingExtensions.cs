@@ -11,7 +11,9 @@ public static class AttachmentMappingExtensions
         Name = attachment.Name,
         Extension = attachment.Extension,
         Size = attachment.Size,
-        FileId = attachment.FileId
+        FileId = attachment.FileId,
+        IsImage = attachment.IsImage,
+        Checksum = attachment.Checksum
     };
     
     public static Attachment ToDomain(this AttachmentDTO attachment) => new()
@@ -20,6 +22,8 @@ public static class AttachmentMappingExtensions
         Name = attachment.Name,
         Extension = attachment.Extension,
         Size = attachment.Size,
-        FileId = attachment.FileId
+        FileId = attachment.FileId,
+        IsImage = attachment.IsImage,
+        Checksum = attachment.Checksum
     };
 }

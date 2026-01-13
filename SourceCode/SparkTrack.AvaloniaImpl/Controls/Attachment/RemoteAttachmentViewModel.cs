@@ -43,7 +43,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         );
 
         // TODO: Добавить проверку MD5 суммы файла
-        IsDownloaded = File.Exists(Uri);
+        IsDownloaded = CheckIsDownloaded();
 
         if (IsDownloaded)
         {
@@ -56,7 +56,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
                 if (!IsDownloaded)
                     await DownloadAsync();
 
-                var targetPath = await localFilesManager.ChooseFileForSaveAsync();
+                var targetPath = await localFilesManager.ChooseFileForSaveAsync(null, null, Extension);
 
                 if (string.IsNullOrEmpty(targetPath)) return;
 
@@ -77,7 +77,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     {
         base.OnActivated(disposables);
 
-        if (IsImage && !IsDownloaded) DownloadAsync().ToObservable().Subscribe().DisposeWith(disposables);
+        if (m_attachment.IsImage && !IsDownloaded) DownloadAsync().ToObservable().Subscribe().DisposeWith(disposables);
     }
 
     [Reactive]
@@ -111,11 +111,18 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         }
         catch
         {
-            IsDownloaded = File.Exists(Uri);
+            IsDownloaded = CheckIsDownloaded();
         }
     }
 
     public Attachment ToModel() => m_attachment;
 
     protected override IAttachmentViewModel GetThis() => this;
+    
+    private bool CheckIsDownloaded()
+    {
+        if (!File.Exists(Uri)) return false;
+
+        return Md5Helper.VerifyFileMd5(Uri, m_attachment.Checksum);
+    }
 }

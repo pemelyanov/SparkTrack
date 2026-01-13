@@ -2941,6 +2941,12 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("fileId")]
         public System.Guid FileId { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("isImage")]
+        public bool IsImage { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("checksum")]
+        public byte[] Checksum { get; init; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]

@@ -11,28 +11,33 @@ public class LocalFilesManager : ILocalFilesManager
     #region Methods
 
     /// <inheritdoc />
-    public async Task<string?> ChooseFileForSaveAsync(
+    public Task<string?> ChooseFileForSaveAsync(
         string? suggestedFolderPath,
         string? suggestedFileName,
         params EFileType[] fileTypes
     )
     {
-        TopLevel topLevel = GetTopLevel();
-        IStorageFolder? suggestedStartLocation = suggestedFolderPath is null
-            ? null
-            : await topLevel.StorageProvider.TryGetFolderFromPathAsync(suggestedFolderPath);
+        return ChooseFileForSaveAsync(
+            suggestedFolderPath,
+            suggestedFileName,
+            fileTypes.Select(DetermineFilePickerType).ToArray()
+        );
+    }
 
-        FilePickerSaveOptions options = new()
-        {
-            FileTypeChoices = fileTypes.Select(DetermineFilePickerType).ToArray(),
-            Title = "Сохранить",
-            SuggestedStartLocation = suggestedStartLocation,
-            SuggestedFileName = suggestedFileName
-        };
-
-        IStorageFile? file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
-
-        return file?.TryGetLocalPath() ?? string.Empty;
+    public Task<string?> ChooseFileForSaveAsync(
+        string? suggestedFolderPath = null,
+        string? suggestedFileName = null,
+        params string[] fileExtensions
+    )
+    {
+        return ChooseFileForSaveAsync(
+            suggestedFolderPath,
+            suggestedFileName,
+            fileExtensions.Select(ext => new FilePickerFileType(ext)
+            {
+                Patterns = [$"*.{ext}"]
+            }).ToArray()
+        );
     }
 
     /// <inheritdoc />
@@ -100,6 +105,30 @@ public class LocalFilesManager : ILocalFilesManager
     {
         _ => FilePickerFileTypes.All,
     };
+        
+    private async Task<string?> ChooseFileForSaveAsync(
+        string? suggestedFolderPath,
+        string? suggestedFileName,
+        IReadOnlyList<FilePickerFileType> fileTypes
+    )
+    {
+        TopLevel topLevel = GetTopLevel();
+        IStorageFolder? suggestedStartLocation = suggestedFolderPath is null
+            ? null
+            : await topLevel.StorageProvider.TryGetFolderFromPathAsync(suggestedFolderPath);
+
+        FilePickerSaveOptions options = new()
+        {
+            FileTypeChoices = fileTypes,
+            Title = "Сохранить",
+            SuggestedStartLocation = suggestedStartLocation,
+            SuggestedFileName = suggestedFileName
+        };
+
+        IStorageFile? file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
+
+        return file?.TryGetLocalPath() ?? string.Empty;
+    }
 
     #endregion
 }

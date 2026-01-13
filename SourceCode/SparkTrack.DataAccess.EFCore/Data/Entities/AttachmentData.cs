@@ -11,4 +11,8 @@ public record AttachmentData
     public long Size { get; init; }
     
     public Guid FileId { get; init; }
+    
+    public bool IsImage { get; init; }
+    
+    public byte[] Checksum { get; init; } = [];
 }

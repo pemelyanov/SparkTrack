@@ -4,7 +4,7 @@ using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class FileDataConfiguration : IEntityTypeConfiguration<AttachmentData>
+public class AttachmentDataConfiguration : IEntityTypeConfiguration<AttachmentData>
 {
     public virtual void Configure(EntityTypeBuilder<AttachmentData> builder)
     {
@@ -23,6 +23,12 @@ public class FileDataConfiguration : IEntityTypeConfiguration<AttachmentData>
             .IsRequired();
         
         builder.Property(f => f.FileId)
+            .IsRequired();
+
+        builder.Property(f => f.IsImage)
+            .IsRequired();
+
+        builder.Property(f => f.Checksum)
             .IsRequired();
     }
 }

@@ -62,7 +62,9 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         Name = Name,
         Extension = Extension,
         Size = Size,
-        FileId = UploadedFileId ?? throw new InvalidOperationException("Upload file before converting")
+        FileId = UploadedFileId ?? throw new InvalidOperationException("Upload file before converting"),
+        IsImage = IsImage,
+        Checksum = Md5Helper.ComputeFileMd5(Uri)
     };
 
     protected override IAttachmentViewModel GetThis() => this;
