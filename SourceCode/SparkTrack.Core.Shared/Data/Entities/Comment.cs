@@ -8,7 +8,7 @@ public class Comment
 
     public string Text { get; init; } = string.Empty;
 
-    public IReadOnlyList<AttachmentInfo> AttachmentsList { get; init; } = [];
+    public IReadOnlyList<Attachment> AttachmentsList { get; init; } = [];
     
     public DateTime CreatedAt { get; init; }
     

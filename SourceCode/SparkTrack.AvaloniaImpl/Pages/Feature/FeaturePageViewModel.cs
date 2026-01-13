@@ -21,6 +21,7 @@ using Services.LocalFilesManager;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
 
@@ -34,7 +35,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly IFeaturesService                     m_featuresService;
     private readonly IUsersService                        m_usersService;
     private readonly ILocalFilesManager                   m_localFilesManager;
-    private readonly LocalAttachmentViewModelFactory      m_localAttachmentViewModelFactory;
+    private readonly LocalAttachmentViewModelFactory      m_localLocalAttachmentViewModelFactory;
+    private readonly RemoteAttachmentViewModelFactory     m_remoteAttachmentViewModelFactory;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -43,7 +45,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IFeaturesService featuresService,
         IUsersService usersService,
         ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
+        LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
+        RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
     ) : this(
         null,
         projectId,
@@ -51,7 +54,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         featuresService,
         usersService,
         localFilesManager,
-        localAttachmentViewModelFactory
+        localLocalAttachmentViewModelFactory,
+        remoteAttachmentViewModelFactory
     ) { }
 
     public FeaturePageViewModel(
@@ -60,7 +64,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IFeaturesService featuresService,
         IUsersService usersService,
         ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
+        LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
+        RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
     ) : this(
         feature,
         feature.Project.Id,
@@ -68,7 +73,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         featuresService,
         usersService,
         localFilesManager,
-        localAttachmentViewModelFactory
+        localLocalAttachmentViewModelFactory,
+        remoteAttachmentViewModelFactory
     ) { }
 
     private FeaturePageViewModel(
@@ -78,7 +84,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IFeaturesService featuresService,
         IUsersService usersService,
         ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
+        LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
+        RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
     )
     {
         m_feature = feature;
@@ -87,7 +94,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_featuresService = featuresService;
         m_usersService = usersService;
         m_localFilesManager = localFilesManager;
-        m_localAttachmentViewModelFactory = localAttachmentViewModelFactory;
+        m_localLocalAttachmentViewModelFactory = localLocalAttachmentViewModelFactory;
+        m_remoteAttachmentViewModelFactory = remoteAttachmentViewModelFactory;
 
         InitializeProperties(feature);
 
@@ -166,7 +174,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void AddAttachment(string path)
     {
-        var attachment = m_localAttachmentViewModelFactory.Invoke(path, a => AttachmentsList.Remove(a));
+        var attachment = m_localLocalAttachmentViewModelFactory.Invoke(path, OnAttachmentDelete);
 
         AttachmentsList.Add(attachment);
     }
@@ -206,16 +214,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task SaveAsync()
     {
-        var localAttachments = AttachmentsList.OfType<LocalAttachmentViewModel>().ToArray();
+        var localAttachments =
+            AttachmentsList.OfType<LocalAttachmentViewModel>().Where(it => it.UploadedFileId is null);
 
-        using (AttachmentsList.SuspendNotifications())
-        {
-            foreach (var localAttachment in localAttachments)
-            {
-                await localAttachment.UploadAsync();
-            }   
-        }
-        
+        var uploadingTasks = localAttachments.Select(it => it.UploadAsync());
+
+        await Task.WhenAll(uploadingTasks);
+
         var editData = CreateEditData();
 
         if (m_feature is null)
@@ -225,8 +230,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             Back();
             return;
         }
-        
+
         await m_featuresService.EditAsync(editData);
+
+        await RefreshCommand.Execute().ToTask();
     }
 
     private FeatureEdit CreateEditData() => new()
@@ -235,6 +242,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Name = Name,
         ProjectId = m_projectId,
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
+        AttachmentsList = AttachmentsList.Select(it => it.ToModel()).ToArray(),
         Description = Description
     };
 
@@ -250,5 +258,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             SubTasksList.Clear();
             SubTasksList.AddRange(subTasks);
         }
+
+        var attachments =
+            feature?.AttachmentsList.Select(it => m_remoteAttachmentViewModelFactory(it, OnAttachmentDelete)) ?? [];
+
+        using (AttachmentsList.SuspendNotifications())
+        {
+            AttachmentsList.Clear();
+            AttachmentsList.AddRange(attachments);
+        }
     }
+    
+    private void OnAttachmentDelete(IAttachmentViewModel a) => AttachmentsList.Remove(a);
 }

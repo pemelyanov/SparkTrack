@@ -12,5 +12,5 @@ public record FeatureDTO
 
     public string Description { get; init; } = string.Empty;
 
-    public IReadOnlyList<FileInfoDTO> AttachmentsList { get; init; } = [];
+    public IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; } = [];
 }

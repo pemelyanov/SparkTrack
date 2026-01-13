@@ -2858,7 +2858,7 @@ namespace SparkTrack.API
         public string Description { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
-        public System.Collections.Generic.IReadOnlyList<FileInfoDTO> AttachmentsList { get; init; }
+        public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
     }
 
@@ -2923,7 +2923,7 @@ namespace SparkTrack.API
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class FileInfoDTO
+    public partial class AttachmentDTO
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
@@ -2932,8 +2932,14 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("name")]
         public string Name { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("link")]
-        public string Link { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("extension")]
+        public string Extension { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("size")]
+        public long Size { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("fileId")]
+        public System.Guid FileId { get; init; }
 
     }
 
@@ -2968,8 +2974,8 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("description")]
         public string Description { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("attachmentsIdList")]
-        public System.Collections.Generic.IReadOnlyList<System.Guid> AttachmentsIdList { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
+        public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
     }
 

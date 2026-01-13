@@ -23,14 +23,18 @@ public class FilesService(ClientFactory<FilesClient> clientFactory) : IFilesServ
 
         var response = await wrapper.Client.DownloadAsync(id);
 
-        await using var progressStream = new ProgressWriteStream(response.Stream, progress);
+        var length = response.Headers["Content-Length"].Select(long.Parse).First();
+
+        progress.TotalProgress.OnNext(length);
 
         var outputFolder = Path.GetDirectoryName(outputPath);
 
         if (!string.IsNullOrEmpty(outputFolder)) Directory.CreateDirectory(outputFolder);
 
-        await using var fileStream = File.OpenWrite(outputPath);
+        var fileStream = File.OpenWrite(outputPath);
 
-        await progressStream.CopyToAsync(fileStream);
+        await using var progressStream = new ProgressWriteStream(fileStream, progress);
+
+        await response.Stream.CopyToAsync(progressStream);
     }
 }

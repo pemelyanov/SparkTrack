@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.Core.Shared.Data.Edit;
 
+using Entities;
+
 public record FeatureEdit
 {
     public int Id { get; init; }
@@ -12,5 +14,5 @@ public record FeatureEdit
     
     public string Description { get; init; } = string.Empty;
 
-    public IReadOnlyList<Guid> AttachmentsIdList { get; init; } = [];
+    public IReadOnlyList<Attachment> AttachmentsList { get; init; } = [];
 }

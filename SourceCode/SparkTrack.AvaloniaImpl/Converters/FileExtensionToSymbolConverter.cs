@@ -27,6 +27,9 @@ public class FileExtensionToSymbolConverter : IValueConverter
             "pdf" or "doc" or "docx" or "xls" or "xlsx" or "ppt" or "pptx" or "odt" or "ods"
                 or "txt" or "rtf" or "md" or "csv"
                 => Symbol.Document,
+            
+            "jpg" or "jpeg" or "png" or "gif" or "bmp" or "webp" or "tiff" or "svg" or "ico"
+                => Symbol.Image,
             _ => Symbol.Attach
         };
     }

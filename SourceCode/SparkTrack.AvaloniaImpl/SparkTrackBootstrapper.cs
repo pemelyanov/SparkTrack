@@ -32,6 +32,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<ProjectEditFormViewModel>();
         builder.RegisterType<ProjectsFilterViewModel>();
         builder.RegisterType<LocalAttachmentViewModel>();
+        builder.RegisterType<RemoteAttachmentViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

@@ -32,7 +32,7 @@ public class FilesController(IFilesService filesService) : ControllerBase
     [Produces("application/octet-stream")]
     public async Task<IActionResult> DownloadAsync([FromRoute] Guid id)
     {
-        await using var fileStream = await filesService.DownloadAsync(id);
+        var fileStream = await filesService.DownloadAsync(id);
 
         if (fileStream is null) return NotFound();
 

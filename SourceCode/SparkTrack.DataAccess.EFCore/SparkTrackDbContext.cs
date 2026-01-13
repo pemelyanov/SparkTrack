@@ -18,7 +18,7 @@ public class SparkTrackDbContext(
 
     public DbSet<SubTaskData> SubTasks => Set<SubTaskData>();
 
-    public DbSet<FileData> Files => Set<FileData>();
+    public DbSet<AttachmentData> Attachments => Set<AttachmentData>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

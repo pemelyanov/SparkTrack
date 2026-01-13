@@ -1,5 +1,6 @@
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
+using Core.Shared.Data.Entities;
 using System.Windows.Input;
 
 public interface IAttachmentViewModel
@@ -27,4 +28,6 @@ public interface IAttachmentViewModel
     void Open();
 
     void OpenInExplorer();
+
+    Attachment ToModel();
 }

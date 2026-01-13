@@ -33,7 +33,7 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
         
-        // Связь с FileData
+        // Связь с AttachmentData
         builder.HasMany(f => f.AttachmentsList)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);

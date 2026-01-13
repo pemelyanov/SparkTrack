@@ -49,18 +49,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             Description = feature.Description,
             TasksList = feature.TasksList
                 .Select(
-                    t => new SubTaskData
-                    {
-                        Id = t.Id,
-                        Name = t.Name,
-                        ExecutorEmployeeId = t.ExecutorEmployeeId,
-                        Deadline = t.Deadline,
-                        Cost = t.Cost,
-                        IsCompleted = t.IsCompleted,
-                        OnPayment = t.OnPayment
-                    }
+                    ToSubTaskData
                 )
-                .ToList()
+                .ToList(),
+            AttachmentsList = feature.AttachmentsList.Select(
+                    ToAttachmentData
+                )
+                .ToArray()
         };
 
         var addedFeature = await dbContext.Features.AddAsync(featureData);
@@ -69,10 +64,30 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         return addedFeature.Entity.Id;
     }
 
+    private static AttachmentData ToAttachmentData(Attachment a) => new()
+    {
+        Name = a.Name,
+        Extension = a.Extension,
+        Size = a.Size,
+        FileId = a.FileId
+    };
+
+    private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
+    {
+        Id = t.Id,
+        Name = t.Name,
+        ExecutorEmployeeId = t.ExecutorEmployeeId,
+        Deadline = t.Deadline,
+        Cost = t.Cost,
+        IsCompleted = t.IsCompleted,
+        OnPayment = t.OnPayment
+    };
+
     public async Task EditAsync(FeatureEdit feature)
     {
         var featureData = await dbContext.Features
             .Include(f => f.TasksList)
+            .Include(f => f.AttachmentsList)
             .FirstOrDefaultAsync(f => f.Id == feature.Id);
 
         if (featureData is null)
@@ -83,6 +98,35 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         featureData.Name = feature.Name;
         featureData.Description = feature.Description;
 
+        HandleSubTasks(feature, featureData);
+        
+        var existingTasks = featureData.AttachmentsList
+            .ToDictionary(t => t.Id);
+
+        foreach (var attachment in feature.AttachmentsList)
+        {
+            if (attachment.Id == Guid.Empty)
+            {
+                featureData.AttachmentsList.Add(
+                    ToAttachmentData(attachment)
+                );
+
+                continue;
+            }
+
+            existingTasks.Remove(attachment.Id, out AttachmentData _);
+        }
+
+        if (existingTasks.Count > 0)
+        {
+            dbContext.Attachments.RemoveRange(existingTasks.Values);
+        }
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
+    {
         var existingTasks = featureData.TasksList
             .ToDictionary(t => t.Id);
 
@@ -91,15 +135,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             if (taskEdit.Id == Guid.Empty)
             {
                 featureData.TasksList.Add(
-                    new SubTaskData
-                    {
-                        Name = taskEdit.Name,
-                        ExecutorEmployeeId = taskEdit.ExecutorEmployeeId,
-                        Deadline = taskEdit.Deadline,
-                        Cost = taskEdit.Cost,
-                        IsCompleted = taskEdit.IsCompleted,
-                        OnPayment = taskEdit.OnPayment
-                    }
+                    ToSubTaskData(taskEdit)
                 );
 
                 continue;
@@ -123,14 +159,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         {
             dbContext.SubTasks.RemoveRange(existingTasks.Values);
         }
-
-        await dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)
     {
         var feature = await dbContext.Features
             .Include(f => f.TasksList)
+            .Include(featureData => featureData.AttachmentsList)
             .FirstOrDefaultAsync(f => f.Id == id);
 
         if (feature is null)
@@ -139,6 +174,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         }
 
         dbContext.SubTasks.RemoveRange(feature.TasksList);
+        dbContext.Attachments.RemoveRange(feature.AttachmentsList);
         dbContext.Features.Remove(feature);
 
         await dbContext.SaveChangesAsync();
@@ -178,11 +214,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             .ToArray(),
         AttachmentsList = f.AttachmentsList
             .Select(
-                a => new AttachmentInfo
+                a => new Attachment
                 {
                     Id = a.Id,
                     Name = a.Name,
-                    Link = a.Link
+                    Extension = a.Extension,
+                    Size = a.Size,
+                    FileId = a.FileId
                 }
             )
             .ToArray()

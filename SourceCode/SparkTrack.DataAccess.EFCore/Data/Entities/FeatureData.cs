@@ -14,5 +14,5 @@ public record FeatureData
 
     public string Description { get; set; } = string.Empty;
 
-    public ICollection<FileData> AttachmentsList { get; init; } = [];
+    public ICollection<AttachmentData> AttachmentsList { get; init; } = [];
 }

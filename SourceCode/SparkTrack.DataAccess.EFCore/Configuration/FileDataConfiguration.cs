@@ -4,9 +4,9 @@ using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class FileDataConfiguration : IEntityTypeConfiguration<FileData>
+public class FileDataConfiguration : IEntityTypeConfiguration<AttachmentData>
 {
-    public virtual void Configure(EntityTypeBuilder<FileData> builder)
+    public virtual void Configure(EntityTypeBuilder<AttachmentData> builder)
     {
         builder.HasKey(f => f.Id);
         builder.Property(f => f.Id)
@@ -16,8 +16,13 @@ public class FileDataConfiguration : IEntityTypeConfiguration<FileData>
             .IsRequired()
             .HasMaxLength(500);
         
-        builder.Property(f => f.Link)
-            .IsRequired()
-            .HasMaxLength(1000);
+        builder.Property(f => f.Extension)
+            .IsRequired();
+
+        builder.Property(f => f.Size)
+            .IsRequired();
+        
+        builder.Property(f => f.FileId)
+            .IsRequired();
     }
 }
