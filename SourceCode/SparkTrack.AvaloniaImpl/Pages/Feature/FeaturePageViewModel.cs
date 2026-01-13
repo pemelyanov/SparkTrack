@@ -4,8 +4,6 @@ using Controls.Attachment;
 using System.Collections.ObjectModel;
 using Controls.Comment;
 using Controls.SubTask;
-using Core.Client.Data;
-using Core.Client.Services.Files;
 using Core.Client.Services.Users;
 using Core.Shared.Data;
 using Core.Shared.Data.Edit;
@@ -37,7 +35,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly IUsersService                        m_usersService;
     private readonly ILocalFilesManager                   m_localFilesManager;
     private readonly LocalAttachmentViewModelFactory      m_localAttachmentViewModelFactory;
-    private readonly IFilesService                        m_filesService;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -46,8 +43,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IFeaturesService featuresService,
         IUsersService usersService,
         ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localAttachmentViewModelFactory,
-        IFilesService filesService
+        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
     ) : this(
         null,
         projectId,
@@ -55,8 +51,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         featuresService,
         usersService,
         localFilesManager,
-        localAttachmentViewModelFactory,
-        filesService
+        localAttachmentViewModelFactory
     ) { }
 
     public FeaturePageViewModel(
@@ -65,8 +60,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IFeaturesService featuresService,
         IUsersService usersService,
         ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localAttachmentViewModelFactory,
-        IFilesService filesService
+        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
     ) : this(
         feature,
         feature.Project.Id,
@@ -74,8 +68,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         featuresService,
         usersService,
         localFilesManager,
-        localAttachmentViewModelFactory,
-        filesService
+        localAttachmentViewModelFactory
     ) { }
 
     private FeaturePageViewModel(
@@ -85,8 +78,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IFeaturesService featuresService,
         IUsersService usersService,
         ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localAttachmentViewModelFactory,
-        IFilesService filesService
+        LocalAttachmentViewModelFactory localAttachmentViewModelFactory
     )
     {
         m_feature = feature;
@@ -96,7 +88,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_usersService = usersService;
         m_localFilesManager = localFilesManager;
         m_localAttachmentViewModelFactory = localAttachmentViewModelFactory;
-        m_filesService = filesService;
 
         InitializeProperties(feature);
 
@@ -221,9 +212,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         {
             foreach (var localAttachment in localAttachments)
             {
-                await using var fileStream = File.OpenRead(localAttachment.Uri);
-                await m_filesService.UploadAsync(fileStream, new LoadingProgress());
-                //TODO: Replace with remote attachment here
+                await localAttachment.UploadAsync();
             }   
         }
         

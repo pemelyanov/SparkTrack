@@ -7,11 +7,12 @@ using Delegates;
 
 public class FilesService(ClientFactory<FilesClient> clientFactory) : IFilesService
 {
-    public async Task<Guid> UploadAsync(Stream stream, LoadingProgress progress)
+    public async Task<Guid> UploadAsync(string inputPath, LoadingProgress progress)
     {
         using var wrapper = clientFactory.Invoke();
 
-        var progressStream = new ProgressReadStream(stream, progress);
+        await using var stream = File.OpenRead(inputPath);
+        await using var progressStream = new ProgressReadStream(stream, progress);
 
         return await wrapper.Client.UploadAsync(new FileParameter(progressStream));
     }
@@ -22,7 +23,7 @@ public class FilesService(ClientFactory<FilesClient> clientFactory) : IFilesServ
 
         var response = await wrapper.Client.DownloadAsync(id);
 
-        var progressStream = new ProgressWriteStream(response.Stream, progress);
+        await using var progressStream = new ProgressWriteStream(response.Stream, progress);
 
         var outputFolder = Path.GetDirectoryName(outputPath);
 

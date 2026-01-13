@@ -1,22 +1,33 @@
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
+using Core.Client.Data;
+using Core.Client.Services.Files;
 using Extensions;
+using Fanatiki.MVVM.ViewModels;
 using ImageDialog;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
 
-public class LocalAttachmentViewModel : IAttachmentViewModel
+public class LocalAttachmentViewModel : ViewModelBase, IAttachmentViewModel
 {
     private readonly Action<IAttachmentViewModel> m_onRemove;
     private readonly IDialogHost                  m_dialogHost;
+    private readonly IFilesService                m_filesService;
 
-    public LocalAttachmentViewModel(string path, Action<IAttachmentViewModel> onRemove, IDialogHost dialogHost)
+    public LocalAttachmentViewModel(
+        string path,
+        Action<IAttachmentViewModel> onRemove,
+        IDialogHost dialogHost,
+        IFilesService filesService
+    )
     {
         m_onRemove = onRemove;
         m_dialogHost = dialogHost;
+        m_filesService = filesService;
         using var stream = File.OpenRead(path);
 
         IsImage = stream.IsImageBySignature();
@@ -38,6 +49,11 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
 
     public long Size { get; }
 
+    public Guid? UploadedFileId { get; private set; }
+
+    [Reactive]
+    public AttachmentLoadProgress? LoadProgress { get; private set; }
+
     public ICommand SaveAsCommand { get; } = ReactiveCommand.Create(() => { }, Observable.Return(false));
 
     public void Remove()
@@ -47,17 +63,29 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
 
     public Task DownloadAsync() => throw new NotImplementedException();
 
+    public async Task UploadAsync()
+    {
+        var progress = new AttachmentLoadProgress(ELoadType.Upload, new LoadingProgress());
+
+        LoadProgress = progress;
+
+        UploadedFileId = await m_filesService.UploadAsync(Uri, progress.Progress);
+
+        LoadProgress = null;
+    }
+
     public void Open()
     {
         if (!IsImage)
         {
-         
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = Uri,
-                UseShellExecute = true
-            });
-            
+            Process.Start(
+                new ProcessStartInfo
+                {
+                    FileName = Uri,
+                    UseShellExecute = true
+                }
+            );
+
             return;
         }
 
@@ -68,11 +96,13 @@ public class LocalAttachmentViewModel : IAttachmentViewModel
 
     public void OpenInExplorer()
     {
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "explorer.exe",
-            Arguments = $"/select,\"{Uri}\"",
-            UseShellExecute = true
-        });
+        Process.Start(
+            new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{Uri}\"",
+                UseShellExecute = true
+            }
+        );
     }
 }

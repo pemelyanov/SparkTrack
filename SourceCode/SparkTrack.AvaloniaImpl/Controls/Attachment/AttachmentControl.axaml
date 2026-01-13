@@ -6,13 +6,15 @@
              xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
              xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.Attachment.AttachmentControl"
-             x:DataType="attachment:IAttachmentViewModel">
+             x:DataType="attachment:IAttachmentViewModel"
+             x:Name="Root">
     <UserControl.Resources>
         <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
         <converters:BytesToStringConverter x:Key="BytesToStringConverter" />
-        <converters:FileExtensionToSymbolConverter x:Key="FileExtensionToSymbolConverter"/>
+        <converters:FileExtensionToSymbolConverter x:Key="FileExtensionToSymbolConverter" />
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="ContentControl.image">
@@ -27,8 +29,9 @@
         <Style Selector="ContentControl.file">
             <Setter Property="Content">
                 <Template>
-                    <Border x:DataType="attachment:IAttachmentViewModel">
-                        <avalonia:SymbolIcon Symbol="{Binding Extension, Converter={StaticResource FileExtensionToSymbolConverter}}" />
+                    <Border x:DataType="attachment:IAttachmentViewModel" IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}">
+                        <avalonia:SymbolIcon
+                            Symbol="{Binding Extension, Converter={StaticResource FileExtensionToSymbolConverter}}" />
                     </Border>
                 </Template>
             </Setter>
@@ -37,7 +40,7 @@
         <Style Selector=":is(Control).half-transparent">
             <Setter Property="Opacity" Value="0.35" />
         </Style>
-        
+
         <Style Selector=":is(Panel).file-actions Button">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
@@ -52,13 +55,33 @@
                             Classes.image="{Binding IsImage}"
                             Grid.Column="0" Width="64" Height="64" />
 
-            <Panel Grid.Column="0" Classes="file-actions" IsVisible="{Binding #Container.IsPointerOver}">
+            <Panel Grid.Column="0" Classes="file-actions">
+                <Panel.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="#Container.IsPointerOver" />
+                        <Binding Path="LoadProgress" Converter="{x:Static ObjectConverters.IsNull}" />
+                    </MultiBinding>
+                </Panel.IsVisible>
                 <Button Content="{markupExtensions:SymbolIcon Symbol=ArrowDownload}"
                         Command="{Binding DownloadAsync}"
-                        IsVisible="{Binding !IsDownloaded}"/>
+                        IsVisible="{Binding !IsDownloaded}" />
 
                 <Button Content="{markupExtensions:SymbolIcon Symbol=Open}" Command="{Binding Open}"
-                        IsVisible="{Binding IsDownloaded}"  />
+                        IsVisible="{Binding IsDownloaded}" />
+            </Panel>
+
+            <Panel Grid.Column="0" IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <avalonia:SymbolIcon
+                    Symbol="{Binding LoadProgress.LoadType, Mode=OneWay, Converter={x:Static attachment:AttachmentControl.LoadingIconConverter}}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <controls:ProgressRing Maximum="{Binding LoadProgress.Progress.TotalProgress^}"
+                                       Value="{Binding LoadProgress.Progress.CurrentProgress^}"
+                                       IsIndeterminate="False"
+                                       Width="NaN"
+                                       Height="NaN"
+                                       HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch" />
             </Panel>
 
             <TextBlock Grid.Column="1" Text="{Binding Name}"
@@ -72,12 +95,12 @@
             <StackPanel Grid.Column="2" Margin="4" IsVisible="{Binding #Container.IsPointerOver}" Spacing="4">
                 <Button Classes="icon small close"
                         Command="{Binding Remove}" />
-                
+
                 <Button Classes="icon small more">
                     <Button.Flyout>
                         <MenuFlyout>
-                            <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}"/>
-                            <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"/>
+                            <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
+                            <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}" />
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>

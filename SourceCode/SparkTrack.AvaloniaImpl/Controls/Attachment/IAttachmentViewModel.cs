@@ -15,6 +15,8 @@ public interface IAttachmentViewModel
     string Extension { get; }
     
     long Size { get; }
+
+    AttachmentLoadProgress? LoadProgress { get; }
     
     ICommand SaveAsCommand { get; }
 
