@@ -5,9 +5,9 @@ using Shared.Data.Entities;
 
 public interface ICommentsRepository
 {
-    Task<IReadOnlyPagedData<Comment>> GetPageAsync(Guid featureId, PageQuery pageQuery);
+    Task<IReadOnlyPagedData<Comment>> GetPageAsync(int featureId, PageQuery pageQuery);
 
-    Task AddAsync(Guid featureId, Comment comment);
+    Task AddAsync(int featureId, Comment comment);
 
     Task<Guid?> GetAuthorIdAsync(Guid commentId);
     

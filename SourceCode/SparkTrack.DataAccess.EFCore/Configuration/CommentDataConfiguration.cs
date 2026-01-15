@@ -15,9 +15,13 @@ public class CommentDataConfiguration : IEntityTypeConfiguration<CommentData>
         builder.Property(f => f.Text)
             .IsRequired();
         
-        // Связь с ProjectData
         builder.HasOne(f => f.User)
-            .WithMany();
+            .WithMany()
+            .HasForeignKey(it => it.UserId);
+        
+        builder.HasOne(f => f.Feature)
+            .WithMany()
+            .HasForeignKey(it => it.FeatureId);
         
         // Связь с AttachmentData
         builder.HasMany(f => f.AttachmentsList)

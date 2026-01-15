@@ -11,10 +11,10 @@ using Shared.Data.Entities;
 public class CommentsService(ICommentsRepository commentsRepository, IAuthorizationService authorizationService)
     : ICommentsService
 {
-    public Task<IReadOnlyPagedData<Comment>> GetPageAsync(Guid featureId, PageQuery pageQuery) =>
+    public Task<IReadOnlyPagedData<Comment>> GetPageAsync(int featureId, PageQuery pageQuery) =>
         commentsRepository.GetPageAsync(featureId, pageQuery);
 
-    public Task AddAsync(Guid featureId, CommentEdit commentEdit) =>
+    public Task AddAsync(int featureId, CommentEdit commentEdit) =>
         commentsRepository.AddAsync(featureId, ToComment(commentEdit, createdAt: DateTime.UtcNow));
 
     public async Task<Comment?> EditAsync(CommentEdit commentEdit)

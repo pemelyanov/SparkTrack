@@ -53,7 +53,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                 )
                 .ToList(),
             AttachmentsList = feature.AttachmentsList.Select(
-                    ToAttachmentData
+                    AttachmentsUtils.ToAttachmentData
                 )
                 .ToArray()
         };
@@ -63,16 +63,6 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         return addedFeature.Entity.Id;
     }
-
-    private static AttachmentData ToAttachmentData(Attachment a) => new()
-    {
-        Name = a.Name,
-        Extension = a.Extension,
-        Size = a.Size,
-        FileId = a.FileId,
-        IsImage = a.IsImage,
-        Checksum = a.Checksum
-    };
 
     private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
     {
@@ -102,34 +92,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         HandleSubTasks(feature, featureData);
         
-        HandleAttachments(feature, featureData);
+        AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
 
         await dbContext.SaveChangesAsync();
-    }
-
-    private void HandleAttachments(FeatureEdit feature, FeatureData featureData)
-    {
-        var existingAttachments = featureData.AttachmentsList
-            .ToDictionary(t => t.Id);
-
-        foreach (var attachment in feature.AttachmentsList)
-        {
-            if (attachment.Id == Guid.Empty)
-            {
-                featureData.AttachmentsList.Add(
-                    ToAttachmentData(attachment)
-                );
-
-                continue;
-            }
-
-            existingAttachments.Remove(attachment.Id, out AttachmentData _);
-        }
-
-        if (existingAttachments.Count > 0)
-        {
-            dbContext.Attachments.RemoveRange(existingAttachments.Values);
-        }
     }
 
     private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)

@@ -6,9 +6,9 @@ using Shared.Data.Entities;
 
 public interface ICommentsService
 {
-    Task<IReadOnlyPagedData<Comment>> GetPageAsync(Guid featureId, PageQuery pageQuery);
+    Task<IReadOnlyPagedData<Comment>> GetPageAsync(int featureId, PageQuery pageQuery);
 
-    Task AddAsync(Guid featureId, CommentEdit commentEdit);
+    Task AddAsync(int featureId, CommentEdit commentEdit);
     
     Task<Comment?> EditAsync(CommentEdit commentEdit);
 

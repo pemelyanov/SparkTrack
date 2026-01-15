@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
-public record FeatureData
+public record FeatureData : IAttachmentsOwner
 {
     public int Id { get; init; }
     

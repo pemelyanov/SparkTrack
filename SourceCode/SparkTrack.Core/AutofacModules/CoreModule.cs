@@ -4,6 +4,7 @@ using Autofac;
 using Seeding;
 using Seeding.Development;
 using Services.Authorization;
+using Services.Comments;
 using Services.Features;
 using Services.Files;
 using Services.PasswordHasher;
@@ -20,6 +21,7 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<PasswordHasher>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<CommentsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
         RegisterSeeders(builder);
     }

@@ -73,7 +73,7 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PagedDTO<CommentDTO>>> GetCommentsPageAsync(
-        [FromRoute] Guid featureId,
+        [FromRoute] int featureId,
         [FromQuery] PageQueryDTO? pageQuery = null
     )
     {
@@ -88,7 +88,7 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public Task<ActionResult> AddCommentAsync([FromRoute] Guid featureId, CommentEditDTO commentEdit)
+    public Task<ActionResult> AddCommentAsync([FromRoute] int featureId, CommentEditDTO commentEdit)
     {
         return this.CreatedWithDomainExceptionsHandling(
             () => commentsService.AddAsync(featureId, commentEdit.ToDomain())
