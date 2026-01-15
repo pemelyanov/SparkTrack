@@ -6,6 +6,7 @@ using Core.Client.Services.Configuration;
 using Data;
 using Interceptors;
 using Services.Authorization;
+using Services.Comments;
 using Services.Features;
 using Services.Files;
 using Services.Projects;
@@ -31,6 +32,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<UsersService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<ProjectsService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<FilesService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<CommentsService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterAllClientsFromAssembly<TClientBase>(ContainerBuilder builder, Assembly assembly)

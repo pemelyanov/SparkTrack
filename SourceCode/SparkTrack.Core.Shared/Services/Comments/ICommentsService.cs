@@ -1,8 +1,8 @@
-namespace SparkTrack.Core.Services.Comments;
+namespace SparkTrack.Core.Shared.Services.Comments;
 
-using Shared.Data;
-using Shared.Data.Edit;
-using Shared.Data.Entities;
+using Data;
+using Data.Edit;
+using Data.Entities;
 
 public interface ICommentsService
 {

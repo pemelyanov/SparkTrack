@@ -43,7 +43,11 @@ public class CommentsRepository(SparkTrackDbContext dbContext) : ICommentsReposi
 
     public async Task<Comment?> EditAsync(Comment comment)
     {
-        var existingComment = await dbContext.Comments.FindAsync(comment.Id);
+        var existingComment = await dbContext.Comments
+            .Where(it => it.Id == comment.Id)
+            .Include(it => it.User)
+            .Include(it => it.AttachmentsList)
+            .FirstOrDefaultAsync();
 
         if (existingComment is null) return null;
 

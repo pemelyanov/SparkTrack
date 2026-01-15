@@ -1,24 +1,60 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Controls.Comment;
 
 using CommentEdit;
+using Core.Shared.Services.Comments;
 using Fanatiki.MVVM.ViewModels;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using System.Reactive;
 using CommentModel = Core.Shared.Data.Entities.Comment;
 
-public class CommentViewModel(CommentModel model, Func<CommentModel?, CommentEditViewModel> editViewModelFactory) : ViewModelBase
+public class CommentViewModel : ViewModelBase
 {
-    [Reactive]
-    public CommentModel Model { get; private set; } = model;
-    
-    public CommentEditViewModel? EditViewModel { get; private set; }
+    private readonly Func<CommentModel?, CommentEditViewModel> m_editViewModelFactory;
+    private readonly ICommentsService                          m_commentsService;
 
-    public void Edit()
+    public CommentViewModel(
+        CommentModel model,
+        Func<CommentViewModel, Task> onDelete,
+        Func<CommentModel?, CommentEditViewModel> editViewModelFactory,
+        ICommentsService commentsService
+    )
     {
-        EditViewModel = editViewModelFactory.Invoke(Model);
+        m_editViewModelFactory = editViewModelFactory;
+        m_commentsService = commentsService;
+        Model = model;
+
+        DeleteCommand = ReactiveCommand.CreateFromTask(() => onDelete(this));
+        SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
     }
 
-    public async Task SaveAsync()
+    [Reactive]
+    public CommentModel Model { get; private set; }
+
+    [Reactive]
+    public CommentEditViewModel? EditViewModel { get; private set; }
+
+    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> DeleteCommand { get; }
+
+    public void Edit() => EditViewModel = m_editViewModelFactory.Invoke(Model);
+
+    public void CancelEdit() => EditViewModel = null;
+
+    private async Task SaveAsync()
     {
+        if (EditViewModel is null) return;
+
+        await EditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
+
+        var commentEdit = EditViewModel.ToModel();
+
+        var newModel = await m_commentsService.EditAsync(commentEdit);
+
+        if (newModel != null)
+            Model = newModel;
+
         EditViewModel = null;
     }
 }

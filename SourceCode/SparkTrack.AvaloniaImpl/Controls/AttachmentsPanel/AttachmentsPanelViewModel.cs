@@ -16,6 +16,16 @@ public class AttachmentsPanelViewModel(
 {
     public SuspendableObservableCollection<IAttachmentViewModel> AttachmentsList { get; } = [];
 
+    public Task UploadLocalAttachments()
+    {
+        var localAttachments =
+            AttachmentsList.OfType<LocalAttachmentViewModel>().Where(it => it.UploadedFileId is null);
+
+        var uploadingTasks = localAttachments.Select(it => it.UploadAsync());
+
+        return Task.WhenAll(uploadingTasks);
+    }
+
     public void ReplaceWithRemoteAttachments(IEnumerable<Attachment> attachmentsList)
     {
         var attachmentsViewModels =

@@ -6,6 +6,7 @@ using Autofac;
 using Controls.Account;
 using Controls.Attachment;
 using Controls.AttachmentsPanel;
+using Controls.Comment;
 using Controls.CommentEdit;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
@@ -37,6 +38,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<RemoteAttachmentViewModel>();
         builder.RegisterType<AttachmentsPanelViewModel>();
         builder.RegisterType<CommentEditViewModel>();
+        builder.RegisterType<CommentViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

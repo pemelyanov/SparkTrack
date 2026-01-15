@@ -1,12 +1,10 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
-using Core.Shared.Data.Entities;
-
 public record CommentData : IAttachmentsOwner
 {
     public Guid Id { get; init; }
 
-    public User User { get; set; } = null!;
+    public UserData User { get; set; } = null!;
     
     public Guid UserId { get; set; }
 

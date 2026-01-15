@@ -15,7 +15,7 @@
 
     <Border Classes="card">
         <Panel>
-            <StackPanel Spacing="8">
+            <StackPanel Spacing="8" IsVisible="{Binding EditViewModel, Converter={x:Static ObjectConverters.IsNull}}">
                 <Grid ColumnDefinitions="* Auto">
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                         <TextBlock Classes="subtitle" Text="{Binding Model.Author.Name}" />
@@ -23,9 +23,9 @@
                                              Text="{Binding Model.Author.Email, StringFormat='({0})'}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1">
-                        <Button Classes="icon edit" />
-                        <Button Classes="icon delete" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button Classes="icon edit" Command="{Binding Edit}" />
+                        <Button Classes="icon delete" Command="{Binding DeleteCommand}" />
                     </StackPanel>
                 </Grid>
 
@@ -51,10 +51,19 @@
                 </StackPanel>
             </StackPanel>
 
-            <StackPanel Spacing="8">
-                <commentEdit:CommentEdit />
+            <StackPanel Spacing="8" IsVisible="{Binding EditViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Classes="subtitle" FontSize="12" Text="{Binding Model.Author.Name}" />
+                    <SelectableTextBlock Classes="subtitle" FontSize="12" Opacity="0.7"
+                                         Text="{Binding Model.Author.Email, StringFormat='({0})'}" />
+                </StackPanel>
+                
+                <commentEdit:CommentEdit DataContext="{Binding EditViewModel}" />
 
-                <Button Classes="accent" Content="Сохранить" HorizontalAlignment="Right" />
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="accent" Content="Сохранить" HorizontalAlignment="Right" Command="{Binding SaveCommand}" />
+                    <Button Content="Отмена" Command="{Binding CancelEdit}"></Button>
+                </StackPanel>
             </StackPanel>
         </Panel>
     </Border>

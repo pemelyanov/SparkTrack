@@ -7,6 +7,7 @@ using Repositories;
 using Shared.Data;
 using Shared.Data.Edit;
 using Shared.Data.Entities;
+using Shared.Services.Comments;
 
 public class CommentsService(ICommentsRepository commentsRepository, IAuthorizationService authorizationService)
     : ICommentsService

@@ -23,7 +23,6 @@ public class CommentDataConfiguration : IEntityTypeConfiguration<CommentData>
             .WithMany()
             .HasForeignKey(it => it.FeatureId);
         
-        // Связь с AttachmentData
         builder.HasMany(f => f.AttachmentsList)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);

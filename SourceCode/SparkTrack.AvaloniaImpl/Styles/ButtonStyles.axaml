@@ -60,7 +60,7 @@
         </Setter>
     </Style>
     
-    <Style Selector="ToggleButton.edit">
+    <Style Selector=":is(Button).edit">
         <Setter Property="Content">
             <Template>
                 <avalonia:SymbolIcon Symbol="Edit" />
@@ -68,7 +68,7 @@
         </Setter>
     </Style>
     
-    <Style Selector="ToggleButton.delete">
+    <Style Selector=":is(Button).delete">
         <Setter Property="Content">
             <Template>
                 <avalonia:SymbolIcon Symbol="Delete" />
