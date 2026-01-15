@@ -4,6 +4,7 @@ using Controls.AttachmentsPanel;
 using Controls.Comment;
 using Controls.CommentEdit;
 using Controls.SubTask;
+using Core.Client.Services.Authorization;
 using Core.Client.Services.Users;
 using Core.Shared.Data;
 using Core.Shared.Data.Edit;
@@ -37,6 +38,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Func<Comment?, CommentEditViewModel> m_commentEditFactory;
     private readonly ICommentsService                     m_commentsService;
     private readonly CommentViewModelFactory              m_commentFactory;
+    private readonly IAuthorizationService                m_authorizationService;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -47,7 +49,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         AttachmentsPanelViewModel attachmentsPanelViewModel,
         Func<Comment?, CommentEditViewModel> commentEditFactory,
         ICommentsService commentsService,
-        CommentViewModelFactory commentFactory
+        CommentViewModelFactory commentFactory,
+        IAuthorizationService authorizationService
     ) : this(
         null,
         projectId,
@@ -57,7 +60,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         attachmentsPanelViewModel,
         commentEditFactory,
         commentsService,
-        commentFactory
+        commentFactory,
+        authorizationService
     ) { }
 
     public FeaturePageViewModel(
@@ -68,7 +72,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         AttachmentsPanelViewModel attachmentsPanelViewModel,
         Func<Comment?, CommentEditViewModel> commentEditFactory,
         ICommentsService commentsService,
-        CommentViewModelFactory commentFactory
+        CommentViewModelFactory commentFactory,
+        IAuthorizationService authorizationService
     ) : this(
         feature,
         feature.Project.Id,
@@ -78,7 +83,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         attachmentsPanelViewModel,
         commentEditFactory,
         commentsService,
-        commentFactory
+        commentFactory,
+        authorizationService
     ) { }
 
     private FeaturePageViewModel(
@@ -90,7 +96,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         AttachmentsPanelViewModel attachmentsPanelViewModel,
         Func<Comment?, CommentEditViewModel> commentEditFactory,
         ICommentsService commentsService,
-        CommentViewModelFactory commentFactory
+        CommentViewModelFactory commentFactory,
+        IAuthorizationService authorizationService
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -102,16 +109,18 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_commentEditFactory = commentEditFactory;
         m_commentsService = commentsService;
         m_commentFactory = commentFactory;
+        m_authorizationService = authorizationService;
 
         InitializeProperties(feature);
 
         if (feature is null) IsNameEditing = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
-        
+
         RefreshCommand = ReactiveCommand.CreateFromTask(
-            () => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()]));
-        
+            () => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()])
+        );
+
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
     }
@@ -134,9 +143,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public bool IsNameEditing { get; set; }
 
     public bool CanAddComments => m_feature is not null;
-    
+
     public AttachmentsPanelViewModel AttachmentsPanelViewModel { get; }
-    
+
     [Reactive]
     public CommentEditViewModel? CommentEditViewModel { get; private set; }
 
@@ -150,13 +159,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> RefreshCommentsCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
 
     public void CreateComment() => CommentEditViewModel = m_commentEditFactory(null);
-    
+
     public void CancelComment() => CommentEditViewModel = null;
 
     public void Back() => HostScreen.Router.BackOnUIThread();
@@ -182,8 +191,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         s_logger.Info("Refresh executed");
 
-        var availableEmployees = await m_usersService.GetPageAsync(ERole.Employee, PageQuery.All);
-        m_availableEmployeesList.OnNext(availableEmployees.Items);
+        if (m_authorizationService.CurrentUser.Value?.Role is not ERole.Employee)
+        {
+            var availableEmployees = await m_usersService.GetPageAsync(ERole.Employee, PageQuery.All);
+            m_availableEmployeesList.OnNext(availableEmployees.Items);   
+        }
 
         if (m_feature?.Id is not { } featureId) return;
 
@@ -233,14 +245,14 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             SubTasksList.Clear();
             SubTasksList.AddRange(subTasks);
         }
-        
+
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
     }
 
     private async Task RefreshCommentsAsync()
     {
         if (m_feature is null) return;
-        
+
         var page = await m_commentsService.GetPageAsync(m_feature.Id, PageQuery.All);
 
         var commentsViewModels = page.Items.Select(it => m_commentFactory(it, OnCommentDeleteAsync));
@@ -255,7 +267,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private async Task OnCommentDeleteAsync(CommentViewModel comment)
     {
         // TODO: Добавить модалку подтверждения
-        
+
         await m_commentsService.DeleteAsync(comment.Model.Id);
 
         CommentsList.Remove(comment);
@@ -263,17 +275,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task SaveCommentAsync()
     {
-        if(m_feature is null || CommentEditViewModel is null) return;
+        if (m_feature is null || CommentEditViewModel is null) return;
 
         await CommentEditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
-        
+
         var commentEdit = CommentEditViewModel.ToModel();
 
         await m_commentsService.AddAsync(m_feature.Id, commentEdit);
-        
+
         CommentEditViewModel = null;
 
         await RefreshCommentsCommand.Execute().ToTask();
     }
-
 }

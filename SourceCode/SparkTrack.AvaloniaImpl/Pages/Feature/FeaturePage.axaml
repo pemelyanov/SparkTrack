@@ -102,7 +102,7 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Border Classes="card"
+                <Border x:Name="CommentCreationControl" Classes="card"
                         IsVisible="{Binding CommentEditViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
                     <StackPanel Spacing="8">
                         <commentEdit:CommentEdit DataContext="{Binding CommentEditViewModel}" />
