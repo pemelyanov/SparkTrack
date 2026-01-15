@@ -1,5 +1,6 @@
 namespace SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel;
 
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -11,6 +12,19 @@ public partial class AttachmentsPanel : ReactiveUserControl<AttachmentsPanelView
     {
         InitializeComponent();
     }
+
+    #region IsReadOnly Property
+
+    public static readonly StyledProperty<bool> IsReadOnlyProperty =
+        AvaloniaProperty.Register<AttachmentsPanel, bool>(nameof(IsReadOnly));
+
+    public bool IsReadOnly
+    {
+        get => GetValue(IsReadOnlyProperty);
+        set => SetValue(IsReadOnlyProperty, value);
+    }
+
+    #endregion
     
     private void FilesPanel_OnLoaded(object? sender, RoutedEventArgs e)
     {

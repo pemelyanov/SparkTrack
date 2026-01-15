@@ -7,9 +7,11 @@
              xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
+             xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.Comment.Comment"
-             x:DataType="comment:CommentViewModel">
+             x:DataType="comment:CommentViewModel"
+             x:Name="Root">
     <UserControl.Resources>
         <converters:AttachmentsListToViewModelsConverter x:Key="AttachmentsListToViewModelsConverter" />
     </UserControl.Resources>
@@ -26,7 +28,8 @@
                                                      Text="{Binding Model.Author.Email, StringFormat='({0})'}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <StackPanel Grid.Column="1" IsVisible="{markupExtensions:CurrentUserIdIs {Binding #Root.ViewModel.Model.Author.Id}}"
+                                        Orientation="Horizontal" Spacing="8">
                                 <Button Classes="icon edit" Command="{Binding Edit}" />
                                 <Button Classes="icon delete" Command="{Binding DeleteCommand}" />
                             </StackPanel>
@@ -49,7 +52,7 @@
 
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <attachment:AttachmentControl />
+                                        <attachment:AttachmentControl IsReadOnly="True" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -60,7 +63,6 @@
         </Style>
         
          <Style Selector="ContentControl.edit-control">
-             
              <Style Selector="^ :is(TextBlock).subtitle.minimized">
                  <Setter Property="FontSize" Value="12" />
              </Style>

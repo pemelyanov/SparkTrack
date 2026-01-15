@@ -10,6 +10,7 @@
              xmlns:attachmentsPanel="clr-namespace:SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel"
              xmlns:commentEdit="clr-namespace:SparkTrack.AvaloniaImpl.Controls.CommentEdit"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia.Tight"
+             xmlns:localMarkupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel">
@@ -79,6 +80,7 @@
                             </Panel>
 
                             <ToggleButton Classes="icon"
+                                          IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
                                           Classes.edit="{Binding !IsNameEditing}"
                                           Classes.save="{Binding IsNameEditing}"
                                           IsChecked="{Binding IsNameEditing, Mode=TwoWay}" />
@@ -112,16 +114,17 @@
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="Описание:" VerticalAlignment="Center" />
-                            <ToggleSwitch Classes="markdown-view-switch"
+                            <ToggleSwitch Classes="markdown-view-switch" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
                                           IsChecked="{Binding IsDescriptionInPreviewMode, Mode=TwoWay}" />
                         </StackPanel>
 
                         <ContentControl Classes.description-edit="{Binding !IsDescriptionInPreviewMode}"
                                         Classes.description-view="{Binding IsDescriptionInPreviewMode}" />
-
                         <Separator />
 
-                        <attachmentsPanel:AttachmentsPanel DataContext="{Binding AttachmentsPanelViewModel}" />
+                        <attachmentsPanel:AttachmentsPanel 
+                            IsReadOnly="{localMarkupExtensions:CurrentUserInRole Employee}" 
+                            DataContext="{Binding AttachmentsPanelViewModel}" />
                     </StackPanel>
                 </Border>
 
@@ -165,7 +168,9 @@
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
             <Button Classes="icon reload" Command="{Binding RefreshCommand}" />
-            <Button Classes="accent" Content="Сохранить" Command="{Binding SaveCommand}" />
+            <Button Classes="accent" Content="Сохранить" 
+                    Command="{Binding SaveCommand}"
+                    IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"/>
         </StackPanel>
     </Panel>
 </UserControl>

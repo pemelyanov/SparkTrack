@@ -10,6 +10,7 @@
              xmlns:featuresList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.FeaturesList"
              xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
              xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
@@ -29,6 +30,7 @@
             </WrapPanel>
 
             <Button Grid.Column="1" Classes="accent" Content="Создать"
+                    IsVisible="{markupExtensions:CurrentUserInRole Admin}"
                     IsEnabled="{Binding ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}"
                     VerticalAlignment="Bottom" Command="{Binding CreateFeature}" />
         </Grid>

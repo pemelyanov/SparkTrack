@@ -94,6 +94,7 @@
 
             <StackPanel Grid.Column="2" Margin="4" IsVisible="{Binding #Container.IsPointerOver}" Spacing="4">
                 <Button Classes="icon small close"
+                        IsVisible="{Binding !#Root.IsReadOnly}"
                         Command="{Binding Remove}" />
 
                 <Button Classes="icon small more">

@@ -7,7 +7,8 @@
              xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel.AttachmentsPanel"
-             x:DataType="attachmentsPanel:AttachmentsPanelViewModel">
+             x:DataType="attachmentsPanel:AttachmentsPanelViewModel"
+             x:Name="Root">
     <UserControl.Styles>
         <Style Selector="Panel#FilesPanel Rectangle#DashRectangle">
             <Setter Property="IsVisible" Value="False" />
@@ -18,7 +19,7 @@
         </Style>
     </UserControl.Styles>
     <StackPanel Spacing="8">
-        <Panel HorizontalAlignment="Stretch">
+        <Panel HorizontalAlignment="Stretch" IsVisible="{Binding !#Root.IsReadOnly}">
             <TextBlock Text="Файлы: " HorizontalAlignment="Left" />
             <Button Content="Добавить" HorizontalAlignment="Right" Command="{Binding ChooseAttachmentsAsync}" />
         </Panel>
@@ -26,7 +27,7 @@
         <Panel x:Name="FilesPanel" Background="Transparent"
                Loaded="FilesPanel_OnLoaded"
                Unloaded="FilesPanel_OnUnloaded"
-               DragDrop.AllowDrop="True"
+               DragDrop.AllowDrop="{Binding !#Root.IsReadOnly}"
                behaviors:DragDropBehaviors.AddDragOverClass="True"
                MinHeight="50">
             <ItemsControl ItemsSource="{Binding AttachmentsList}">
@@ -38,13 +39,15 @@
                                 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <attachment:AttachmentControl />
+                        <attachment:AttachmentControl IsReadOnly="{Binding #Root.IsReadOnly}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Rectangle x:Name="DashRectangle" IsHitTestVisible="False" StrokeDashArray="5, 1"
-                       Stroke="{DynamicResource ButtonForeground}"
-                       StrokeThickness="2" RadiusX="8" RadiusY="8" Opacity="0.8" />
+            <Panel IsHitTestVisible="False" IsVisible="{Binding !#Root.IsReadOnly}">
+                <Rectangle x:Name="DashRectangle" StrokeDashArray="5, 1"
+                           Stroke="{DynamicResource ButtonForeground}"
+                           StrokeThickness="2" RadiusX="8" RadiusY="8" Opacity="0.8" />    
+            </Panel>
         </Panel>
     </StackPanel>
 </UserControl>
