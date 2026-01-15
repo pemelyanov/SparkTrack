@@ -8,6 +8,7 @@
              xmlns:comment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Comment"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:attachmentsPanel="clr-namespace:SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel"
+             xmlns:commentEdit="clr-namespace:SparkTrack.AvaloniaImpl.Controls.CommentEdit"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel">
@@ -18,19 +19,19 @@
         <Style Selector="TextBox">
             <Setter Property="UseFloatingWatermark" Value="True" />
         </Style>
-        
+
         <Style Selector="TextBox.title">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="24" />
         </Style>
-        
+
         <Style Selector=":is(Control).title-container">
             <Setter Property="Transitions">
                 <Transitions>
                     <ThicknessTransition Property="Margin" Duration="0:0:0.25" />
                 </Transitions>
             </Setter>
-            
+
             <Style Selector="^.back-offset">
                 <Setter Property="Margin" Value="32 0 0 0" />
             </Style>
@@ -43,12 +44,14 @@
                     <StackPanel Spacing="8">
                         <StackPanel Classes="title-container"
                                     Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=56}"
-                            Spacing="8" Orientation="Horizontal" MaxWidth="500" HorizontalAlignment="Left">
+                                    Spacing="8" Orientation="Horizontal" MaxWidth="500" HorizontalAlignment="Left">
                             <Panel>
-                                <TextBlock IsVisible="{Binding !IsNameEditing}" Classes="title" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                                <TextBox UseFloatingWatermark="False" IsVisible="{Binding IsNameEditing}" Classes="title" Text="{Binding Name}" />
+                                <TextBlock IsVisible="{Binding !IsNameEditing}" Classes="title" Text="{Binding Name}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBox UseFloatingWatermark="False" IsVisible="{Binding IsNameEditing}"
+                                         Classes="title" Text="{Binding Name}" />
                             </Panel>
-                            
+
                             <ToggleButton Classes.edit="{Binding !IsNameEditing}"
                                           Classes.save="{Binding IsNameEditing}"
                                           IsChecked="{Binding IsNameEditing, Mode=TwoWay}" />
@@ -76,12 +79,13 @@
                         </ScrollViewer>
                         <TextBox Watermark="Описание" AcceptsReturn="True" AcceptsTab="True" MinHeight="300"
                                  Text="{Binding Description}" />
-                        
+
                         <attachmentsPanel:AttachmentsPanel DataContext="{Binding AttachmentsPanelViewModel}" />
                     </StackPanel>
                 </Border>
 
-                <Button Content="Комментарий" HorizontalAlignment="Right" Margin="0 0 8 0" />
+                <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
+                        Command="{Binding CreateComment}" />
 
                 <ItemsControl ItemsSource="{Binding CommentsList}">
                     <ItemsControl.ItemsPanel>
@@ -96,13 +100,26 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <Border Classes="card"
+                        IsVisible="{Binding CommentEditViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <StackPanel Spacing="8">
+                        <commentEdit:CommentEdit DataContext="{Binding CommentEditViewModel}" />
+                        
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <Button Classes="accent" Content="Создать" Command="{Binding SaveCommentAsync}" />
+                            <Button Content="Отмена" Command="{Binding CancelComment}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
-        
-        <Button Classes="icon back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding Back}" />
-        
+
+        <Button Classes="icon back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top"
+                Command="{Binding Back}" />
+
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
-            <Button Classes="icon reload" Command="{Binding RefreshCommand}"/>
+            <Button Classes="icon reload" Command="{Binding RefreshCommand}" />
             <Button Classes="accent" Content="Сохранить" Command="{Binding SaveCommand}" />
         </StackPanel>
     </Panel>

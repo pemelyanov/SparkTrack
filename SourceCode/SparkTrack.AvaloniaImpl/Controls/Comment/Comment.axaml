@@ -3,17 +3,59 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:comment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Comment"
+             xmlns:commentEdit="clr-namespace:SparkTrack.AvaloniaImpl.Controls.CommentEdit"
+             xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.Comment.Comment"
              x:DataType="comment:CommentViewModel">
+    <UserControl.Resources>
+        <converters:AttachmentsListToViewModelsConverter x:Key="AttachmentsListToViewModelsConverter" />
+    </UserControl.Resources>
+
     <Border Classes="card">
-        <StackPanel Spacing="8">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Classes="subtitle" Text="{Binding Model.Author.Name}" />
-                <SelectableTextBlock Classes="subtitle" Opacity="0.7" Text="{Binding Model.Author.Email, StringFormat='({0})'}" />
+        <Panel>
+            <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="* Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="subtitle" Text="{Binding Model.Author.Name}" />
+                        <SelectableTextBlock Classes="subtitle" Opacity="0.7"
+                                             Text="{Binding Model.Author.Email, StringFormat='({0})'}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <Button Classes="icon edit" />
+                        <Button Classes="icon delete" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="{Binding Model.Text}" TextWrapping="Wrap" />
+
+                <StackPanel Spacing="8" IsVisible="{Binding Model.AttachmentsList.Count}">
+                    <Separator />
+
+                    <ItemsControl
+                        ItemsSource="{Binding Model.AttachmentsList, Converter={StaticResource AttachmentsListToViewModelsConverter}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <attachment:AttachmentControl />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </StackPanel>
-            
-            <TextBlock Text="{Binding Model.Text}" TextWrapping="Wrap"/>
-        </StackPanel>
+
+            <StackPanel Spacing="8">
+                <commentEdit:CommentEdit />
+
+                <Button Classes="accent" Content="Сохранить" HorizontalAlignment="Right" />
+            </StackPanel>
+        </Panel>
     </Border>
 </UserControl>

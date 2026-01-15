@@ -10,7 +10,7 @@
     <StackPanel Spacing="8">
         <TextBlock Text="Комментарий" Classes="subtitle" />
         
-        <TextBox AcceptsReturn="True" AcceptsTab="True" MinHeight="200" />
+        <TextBox AcceptsReturn="True" AcceptsTab="True" MinHeight="200" UseFloatingWatermark="False" />
         
         <attachmentsPanel:AttachmentsPanel DataContext="{Binding AttachmentsPanelViewModel}" />
     </StackPanel>

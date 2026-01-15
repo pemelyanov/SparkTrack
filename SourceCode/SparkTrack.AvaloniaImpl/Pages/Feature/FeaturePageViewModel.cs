@@ -4,6 +4,7 @@ using Controls.Attachment;
 using Controls.AttachmentsPanel;
 using System.Collections.ObjectModel;
 using Controls.Comment;
+using Controls.CommentEdit;
 using Controls.SubTask;
 using Core.Client.Services.Users;
 using Core.Shared.Data;
@@ -33,6 +34,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Lazy<IScreen>                        m_hostScreen;
     private readonly IFeaturesService                     m_featuresService;
     private readonly IUsersService                        m_usersService;
+    private readonly Func<Comment?, CommentEditViewModel> m_commentEditFactory;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -40,14 +42,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        AttachmentsPanelViewModel attachmentsPanelViewModel
+        AttachmentsPanelViewModel attachmentsPanelViewModel,
+        Func<Comment?, CommentEditViewModel> commentEditFactory
     ) : this(
         null,
         projectId,
         hostScreen,
         featuresService,
         usersService,
-        attachmentsPanelViewModel
+        attachmentsPanelViewModel,
+        commentEditFactory
     ) { }
 
     public FeaturePageViewModel(
@@ -55,14 +59,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        AttachmentsPanelViewModel attachmentsPanelViewModel
+        AttachmentsPanelViewModel attachmentsPanelViewModel,
+        Func<Comment?, CommentEditViewModel> commentEditFactory
     ) : this(
         feature,
         feature.Project.Id,
         hostScreen,
         featuresService,
         usersService,
-        attachmentsPanelViewModel
+        attachmentsPanelViewModel,
+        commentEditFactory
     ) { }
 
     private FeaturePageViewModel(
@@ -71,7 +77,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        AttachmentsPanelViewModel attachmentsPanelViewModel
+        AttachmentsPanelViewModel attachmentsPanelViewModel,
+        Func<Comment?, CommentEditViewModel> commentEditFactory
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -80,6 +87,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_hostScreen = hostScreen;
         m_featuresService = featuresService;
         m_usersService = usersService;
+        m_commentEditFactory = commentEditFactory;
 
         InitializeProperties(feature);
 
@@ -107,39 +115,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public bool IsNameEditing { get; set; }
     
     public AttachmentsPanelViewModel AttachmentsPanelViewModel { get; }
+    
+    [Reactive]
+    public CommentEditViewModel? CommentEditViewModel { get; private set; }
 
     public SuspendableObservableCollection<SubTaskViewModel> SubTasksList { get; } = [];
 
-    public ObservableCollection<CommentViewModel> CommentsList { get; } =
-    [
-        new(
-            new Comment
-            {
-                Author = new User
-                {
-                    Email = "max@asd",
-                    Name = "Максимка Деченский",
-                    Role = ERole.Employee,
-                },
-                Text = "Дело сделано",
-                CreatedAt = DateTime.Now
-            }
-        ),
-        new(
-            new Comment
-            {
-                Author = new User
-                {
-                    Email = "kons@asd",
-                    Name = "Костик Станиславский",
-                    Role = ERole.Employee,
-                },
-                Text = "Это полный провал",
-                CreatedAt = DateTime.Now.AddDays(-10),
-                EditedAt = DateTime.Now
-            }
-        )
-    ];
+    public ObservableCollection<CommentViewModel> CommentsList { get; } = [];
 
     [Reactive]
     public string Description { get; set; } = string.Empty;
@@ -147,6 +129,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
+
+    public void CreateComment() => CommentEditViewModel = m_commentEditFactory(null);
+
+    public async Task SaveCommentAsync()
+    {
+        CommentEditViewModel = null;
+    }
+
+    public void CancelComment() => CommentEditViewModel = null;
 
     public void Back() => HostScreen.Router.BackOnUIThread();
 

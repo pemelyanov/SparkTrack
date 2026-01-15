@@ -68,6 +68,14 @@
         </Setter>
     </Style>
     
+    <Style Selector="ToggleButton.delete">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="Delete" />
+            </Template>
+        </Setter>
+    </Style>
+    
     <Style Selector="ToggleButton.save">
         <Setter Property="Content">
             <Template>
