@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.Core.Shared.Data.Entities;
 
-public class Comment
+public record Comment
 {
     public Guid Id { get; init; }
     
