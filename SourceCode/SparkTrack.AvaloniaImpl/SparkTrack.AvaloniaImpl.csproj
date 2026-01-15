@@ -23,6 +23,7 @@
         <PackageReference Include="FluentAvalonia.ProgressRing" />
         <PackageReference Include="FluentAvaloniaUI" />
         <PackageReference Include="FluentIcons.Avalonia.Fluent" />
+        <PackageReference Include="Markdown.Avalonia" />
         <PackageReference Include="NLog" />
         <PackageReference Include="ReactiveUI.Fody" />
         <PackageReference Include="Xaml.Behaviors" />

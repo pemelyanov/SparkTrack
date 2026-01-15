@@ -2,9 +2,10 @@ namespace SparkTrack.AvaloniaImpl.Controls.CommentEdit;
 
 using AttachmentsPanel;
 using Core.Shared.Data.Entities;
+using Fanatiki.MVVM.ViewModels;
 using ReactiveUI.Fody.Helpers;
 
-public class CommentEditViewModel
+public class CommentEditViewModel : ViewModelBase
 {
     private readonly Comment? m_comment;
 
@@ -20,6 +21,9 @@ public class CommentEditViewModel
 
     [Reactive]
     public string Text { get; set; }
+
+    [Reactive]
+    public bool IsInPreviewMode { get; set; }
 
     public AttachmentsPanelViewModel AttachmentsPanelViewModel { get; }
 

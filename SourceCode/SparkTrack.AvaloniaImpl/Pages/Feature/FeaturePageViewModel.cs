@@ -110,6 +110,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_commentsService = commentsService;
         m_commentFactory = commentFactory;
         m_authorizationService = authorizationService;
+        IsDescriptionInPreviewMode = m_feature is not null;
 
         InitializeProperties(feature);
 
@@ -141,6 +142,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public bool IsNameEditing { get; set; }
+
+    [Reactive]
+    public bool IsDescriptionInPreviewMode { get; set; }
 
     public bool CanAddComments => m_feature is not null;
 
