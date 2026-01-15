@@ -2,6 +2,7 @@ namespace SparkTrack.Core.Services.Comments;
 
 using Authorization;
 using Exceptions;
+using Extensions;
 using Repositories;
 using Shared.Data;
 using Shared.Data.Edit;
@@ -13,7 +14,8 @@ public class CommentsService(ICommentsRepository commentsRepository, IAuthorizat
     public Task<IReadOnlyPagedData<Comment>> GetPageAsync(Guid featureId, PageQuery pageQuery) =>
         commentsRepository.GetPageAsync(featureId, pageQuery);
 
-    public Task AddAsync(Comment comment) => commentsRepository.AddAsync(comment);
+    public Task AddAsync(Guid featureId, CommentEdit commentEdit) =>
+        commentsRepository.AddAsync(featureId, ToComment(commentEdit, createdAt: DateTime.UtcNow));
 
     public async Task<Comment?> EditAsync(CommentEdit commentEdit)
     {
@@ -23,8 +25,27 @@ public class CommentsService(ICommentsRepository commentsRepository, IAuthorizat
 
         if (authorId != authorizationService.CurrentUser?.Id) throw new ForbiddenException();
 
-        return await commentsRepository.EditAsync(commentEdit);
+        return await commentsRepository.EditAsync(ToComment(commentEdit, editedAt: DateTime.UtcNow));
     }
 
-    public Task DeleteAsync(Guid id) => commentsRepository.DeleteAsync(id);
+    public async Task DeleteAsync(Guid id)
+    {
+        var authorId = await commentsRepository.GetAuthorIdAsync(id);
+
+        if (authorId is null) return;
+
+        if (authorId != authorizationService.CurrentUser?.Id) throw new ForbiddenException();
+        
+        await commentsRepository.DeleteAsync(id);
+    }
+
+    private Comment ToComment(CommentEdit commentEdit, DateTime? createdAt = null, DateTime? editedAt = null) => new()
+    {
+        Id = commentEdit.Id,
+        Text = commentEdit.Text,
+        Author = authorizationService.GetUserOrThrowIfUnauthorized(),
+        AttachmentsList = commentEdit.AttachmentsList,
+        CreatedAt = createdAt ?? default,
+        EditedAt = editedAt
+    };
 }

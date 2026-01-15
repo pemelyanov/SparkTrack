@@ -8,7 +8,7 @@ public interface ICommentsService
 {
     Task<IReadOnlyPagedData<Comment>> GetPageAsync(Guid featureId, PageQuery pageQuery);
 
-    Task AddAsync(Comment comment);
+    Task AddAsync(Guid featureId, CommentEdit commentEdit);
     
     Task<Comment?> EditAsync(CommentEdit commentEdit);
 

@@ -15,6 +15,8 @@ public static class ControllerExtensions
             {
                 var result = await action();
 
+                if (result is null) return controller.NotFound();
+
                 return controller.Ok(result);
             }
         );
