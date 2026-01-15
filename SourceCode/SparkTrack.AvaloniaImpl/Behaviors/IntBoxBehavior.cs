@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Behaviors;
 
-public class IntBoxBehaviorBase : NumberBoxBehaviorBase
+public class IntBoxBehavior : NumberBoxBehaviorBase
 {
     protected override bool CanInput(string? source, string? added) => true;
     

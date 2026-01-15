@@ -2,7 +2,7 @@
 
 using System.Linq;
 
-public class FloatBoxBehaviorBase : NumberBoxBehaviorBase
+public class FloatBoxBehavior : NumberBoxBehaviorBase
 {
     protected override bool CanInput(string? source, string? added)
     {

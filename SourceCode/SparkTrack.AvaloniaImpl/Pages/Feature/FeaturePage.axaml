@@ -18,10 +18,6 @@
         <converters:ComparisonConverter x:Key="LessOrEqualConverter" Operation="Elt" />
     </UserControl.Resources>
     <UserControl.Styles>
-        <Style Selector="TextBox">
-            <Setter Property="UseFloatingWatermark" Value="True" />
-        </Style>
-
         <Style Selector="TextBox.subtitle">
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FontSize" Value="20" />
@@ -100,11 +96,12 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <subTask:SubTask />
+                                            <subTask:SubTask IsForEmployee="{localMarkupExtensions:CurrentUserInRole Employee}" />
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <Button Content="{markupExtensions:SymbolIcon Symbol=Add}"
+                                <Button Classes="icon" Content="{markupExtensions:SymbolIcon Symbol=Add}"
+                                        IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
                                         Command="{Binding AddSubTask}"
                                         ToolTip.Tip="Добавить задачу" />
                             </StackPanel>
@@ -120,7 +117,6 @@
 
                         <ContentControl Classes.description-edit="{Binding !IsDescriptionInPreviewMode}"
                                         Classes.description-view="{Binding IsDescriptionInPreviewMode}" />
-                        <Separator />
 
                         <attachmentsPanel:AttachmentsPanel 
                             IsReadOnly="{localMarkupExtensions:CurrentUserInRole Employee}" 

@@ -23,7 +23,7 @@
     <Panel>
         <CheckBox
             IsVisible="{Binding #Root.SubTasksList.Count, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={StaticResource One}}"
-            ToolTip.Tip="Отметка о готовности" />
+            ToolTip.Tip="{Binding #Root.SubTasksList[0].Name}" />
         
         <ItemsControl IsVisible="{Binding #Root.SubTasksList.Count, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={StaticResource One}}"
                       ItemsSource="{Binding #Root.SubTasksList}">

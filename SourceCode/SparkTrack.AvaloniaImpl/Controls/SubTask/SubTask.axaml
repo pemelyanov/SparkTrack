@@ -3,56 +3,82 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:subTask="clr-namespace:SparkTrack.AvaloniaImpl.Controls.SubTask"
-             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.Fluent.MarkupExtensions;assembly=FluentIcons.Avalonia.Fluent"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
-             x:DataType="subTask:SubTaskViewModel">
+             x:DataType="subTask:SubTaskViewModel"
+             x:Name="Root">
     <UserControl.Styles>
-        <Style Selector="TextBox">
-            <Setter Property="UseFloatingWatermark" Value="True" />
+        <Style Selector="ContentControl.edit-control">
+            <Setter Property="Content">
+                <Template>
+                    <StackPanel IsVisible="{Binding IsInEditMode}" Spacing="8">
+                        <TextBox Watermark="Задача" Text="{Binding Name}" />
+                        <Grid ColumnDefinitions="Auto *">
+                            <TextBlock Text="Исполнитель: " VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding AvailableEmployees}"
+                                      SelectedItem="{Binding SelectedEmployee}"
+                                      DisplayMemberBinding="{Binding Name}"
+                                      Grid.Column="1" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto *">
+                            <TextBlock Text="Дедлайн: " VerticalAlignment="Center" />
+                            <CalendarDatePicker SelectedDate="{Binding Deadline}"
+                                                Grid.Column="1" HorizontalAlignment="Stretch"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto *">
+                            <TextBlock Text="Стоимость (₽): " VerticalAlignment="Center" />
+                            <TextBox Text="{Binding Cost, Converter={x:Static converters:StringToFloatConverter.Instance}}"
+                                     Grid.Column="1" HorizontalAlignment="Stretch">
+                                <Interaction.Behaviors>
+                                    <behaviors:FloatBoxBehavior />
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
+                    </StackPanel>
+                </Template>
+            </Setter>
         </Style>
-        <Style Selector="CalendarDatePicker">
-            <Setter Property="UseFloatingWatermark" Value="True" />
+
+        <Style Selector="ContentControl.view-control">
+            <Setter Property="Content">
+                <Template>
+                    <StackPanel IsVisible="{Binding !IsInEditMode}" Spacing="8">
+                        <TextBlock Classes="caption" Text="{Binding Name}" />
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
+                            <TextBlock Text="Исполнитель: " />
+                            <TextBlock Text="{Binding SelectedEmployee.Name}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Дедлайн: " />
+                            <TextBlock Text="{Binding Deadline, StringFormat='dd.MM.yyyy'}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Стоимость: " />
+                            <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Template>
+            </Setter>
         </Style>
     </UserControl.Styles>
     <Border Classes="card">
         <StackPanel Orientation="Horizontal" Spacing="8">
-            <Panel>
-                <StackPanel IsVisible="{Binding IsInEditMode}" Spacing="8">
-                    <TextBox Watermark="Задача" Text="{Binding Name}" />
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Исполнитель: " />
-                        <ComboBox ItemsSource="{Binding AvailableEmployees}" SelectedItem="{Binding SelectedEmployee}"
-                                  DisplayMemberBinding="{Binding Name}" />
-                    </StackPanel>
-                    <CalendarDatePicker Watermark="Дедлайн" SelectedDate="{Binding Deadline}" />
-                    <TextBox Watermark="Стоимость (₽)" Text="{Binding Cost}" />
-                </StackPanel>
 
-                <StackPanel IsVisible="{Binding !IsInEditMode}" Spacing="8">
-                    <TextBlock Classes="caption" Text="{Binding Name}" />
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Исполнитель: " />
-                        <TextBlock Text="{Binding SelectedEmployee.Name}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Дедлайн: " />
-                        <TextBlock Text="{Binding Deadline, StringFormat='dd.MM.yyyy'}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Стоимость: " />
-                        <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
-                    </StackPanel>
-                </StackPanel>
-            </Panel>
+            <ContentControl Width="300" Classes.edit-control="{Binding IsInEditMode}"
+                            Classes.view-control="{Binding !IsInEditMode}" />
 
-            <ToggleButton Classes.edit="{Binding !IsInEditMode}"
-                          Classes.save="{Binding IsInEditMode}"
-                          VerticalAlignment="Top"
-                          IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
-            
-            <Button Content="{markupExtensions:SymbolIcon Symbol=Delete}" VerticalAlignment="Top"
-                    Command="{Binding Delete}"/>
+            <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
+                <ToggleButton Classes="icon"
+                              Classes.edit="{Binding !IsInEditMode}"
+                              Classes.save="{Binding IsInEditMode}"
+                              VerticalAlignment="Top"
+                              IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
+
+                <Button Classes="icon delete" VerticalAlignment="Top"
+                        Command="{Binding Delete}" />
+            </StackPanel>
         </StackPanel>
     </Border>
 </UserControl>

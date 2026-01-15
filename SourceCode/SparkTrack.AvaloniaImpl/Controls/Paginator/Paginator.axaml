@@ -34,7 +34,7 @@
             <TextBox Width="16" TextAlignment="Center"
                      Text="{Binding $parent[paginator:Paginator].CurrentPage, Converter={x:Static converters:StringToIntConverter.Instance}}">
                 <Interaction.Behaviors>
-                    <behaviors:IntBoxBehaviorBase />
+                    <behaviors:IntBoxBehavior />
                 </Interaction.Behaviors>
                 
                 <TextBox.IsEnabled>
