@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:commentEdit="clr-namespace:SparkTrack.AvaloniaImpl.Controls.CommentEdit"
+             xmlns:attachmentsPanel="clr-namespace:SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.CommentEdit.CommentEdit"
+             x:DataType="commentEdit:CommentEditViewModel">
+    <StackPanel Spacing="8">
+        <TextBlock Text="Комментарий" Classes="subtitle" />
+        
+        <TextBox AcceptsReturn="True" AcceptsTab="True" MinHeight="200" />
+        
+        <attachmentsPanel:AttachmentsPanel DataContext="{Binding AttachmentsPanelViewModel}" />
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:attachmentsPanel="clr-namespace:SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel"
+             xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
+             xmlns:attachment="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Attachment"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.AttachmentsPanel.AttachmentsPanel"
+             x:DataType="attachmentsPanel:AttachmentsPanelViewModel">
+    <UserControl.Styles>
+        <Style Selector="Panel#FilesPanel Rectangle#DashRectangle">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <Style Selector=":is(Window):drag-over Panel#FilesPanel Rectangle#DashRectangle">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </UserControl.Styles>
+    <StackPanel Spacing="8">
+        <Panel HorizontalAlignment="Stretch">
+            <TextBlock Text="Файлы: " HorizontalAlignment="Left" />
+            <Button Content="Добавить" HorizontalAlignment="Right" Command="{Binding ChooseAttachmentsAsync}" />
+        </Panel>
+
+        <Panel x:Name="FilesPanel" Background="Transparent"
+               Loaded="FilesPanel_OnLoaded"
+               Unloaded="FilesPanel_OnUnloaded"
+               DragDrop.AllowDrop="True"
+               behaviors:DragDropBehaviors.AddDragOverClass="True"
+               MinHeight="50">
+            <ItemsControl ItemsSource="{Binding AttachmentsList}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                                
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <attachment:AttachmentControl />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Rectangle x:Name="DashRectangle" IsHitTestVisible="False" StrokeDashArray="5, 1"
+                       Stroke="{DynamicResource ButtonForeground}"
+                       StrokeThickness="2" RadiusX="8" RadiusY="8" Opacity="0.8" />
+        </Panel>
+    </StackPanel>
+</UserControl>

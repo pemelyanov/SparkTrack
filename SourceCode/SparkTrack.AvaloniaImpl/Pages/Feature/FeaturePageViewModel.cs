@@ -1,6 +1,7 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Pages.Feature;
 
 using Controls.Attachment;
+using Controls.AttachmentsPanel;
 using System.Collections.ObjectModel;
 using Controls.Comment;
 using Controls.SubTask;
@@ -10,14 +11,12 @@ using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.Features;
-using Delegates;
 using DynamicData;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services.LocalFilesManager;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
@@ -34,9 +33,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Lazy<IScreen>                        m_hostScreen;
     private readonly IFeaturesService                     m_featuresService;
     private readonly IUsersService                        m_usersService;
-    private readonly ILocalFilesManager                   m_localFilesManager;
-    private readonly LocalAttachmentViewModelFactory      m_localLocalAttachmentViewModelFactory;
-    private readonly RemoteAttachmentViewModelFactory     m_remoteAttachmentViewModelFactory;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -44,18 +40,14 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
-        RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
+        AttachmentsPanelViewModel attachmentsPanelViewModel
     ) : this(
         null,
         projectId,
         hostScreen,
         featuresService,
         usersService,
-        localFilesManager,
-        localLocalAttachmentViewModelFactory,
-        remoteAttachmentViewModelFactory
+        attachmentsPanelViewModel
     ) { }
 
     public FeaturePageViewModel(
@@ -63,18 +55,14 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
-        RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
+        AttachmentsPanelViewModel attachmentsPanelViewModel
     ) : this(
         feature,
         feature.Project.Id,
         hostScreen,
         featuresService,
         usersService,
-        localFilesManager,
-        localLocalAttachmentViewModelFactory,
-        remoteAttachmentViewModelFactory
+        attachmentsPanelViewModel
     ) { }
 
     private FeaturePageViewModel(
@@ -83,19 +71,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> hostScreen,
         IFeaturesService featuresService,
         IUsersService usersService,
-        ILocalFilesManager localFilesManager,
-        LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
-        RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
+        AttachmentsPanelViewModel attachmentsPanelViewModel
     )
     {
+        AttachmentsPanelViewModel = attachmentsPanelViewModel;
         m_feature = feature;
         m_projectId = projectId;
         m_hostScreen = hostScreen;
         m_featuresService = featuresService;
         m_usersService = usersService;
-        m_localFilesManager = localFilesManager;
-        m_localLocalAttachmentViewModelFactory = localLocalAttachmentViewModelFactory;
-        m_remoteAttachmentViewModelFactory = remoteAttachmentViewModelFactory;
 
         InitializeProperties(feature);
 
@@ -121,10 +105,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public bool IsNameEditing { get; set; }
+    
+    public AttachmentsPanelViewModel AttachmentsPanelViewModel { get; }
 
     public SuspendableObservableCollection<SubTaskViewModel> SubTasksList { get; } = [];
-
-    public SuspendableObservableCollection<IAttachmentViewModel> AttachmentsList { get; } = [];
 
     public ObservableCollection<CommentViewModel> CommentsList { get; } =
     [
@@ -164,21 +148,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
-    public async Task ChooseAttachmentsAsync()
-    {
-        var files = await m_localFilesManager.ChooseFilesForOpenAsync();
-
-        foreach (var file in files.Where(it => !string.IsNullOrEmpty(it)))
-            AddAttachment(file);
-    }
-
-    public void AddAttachment(string path)
-    {
-        var attachment = m_localLocalAttachmentViewModelFactory.Invoke(path, OnAttachmentDelete);
-
-        AttachmentsList.Add(attachment);
-    }
-
     public void Back() => HostScreen.Router.BackOnUIThread();
 
     public void AddSubTask()
@@ -215,7 +184,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private async Task SaveAsync()
     {
         var localAttachments =
-            AttachmentsList.OfType<LocalAttachmentViewModel>().Where(it => it.UploadedFileId is null);
+            AttachmentsPanelViewModel.AttachmentsList.OfType<LocalAttachmentViewModel>().Where(it => it.UploadedFileId is null);
 
         var uploadingTasks = localAttachments.Select(it => it.UploadAsync());
 
@@ -242,7 +211,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Name = Name,
         ProjectId = m_projectId,
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
-        AttachmentsList = AttachmentsList.Select(it => it.ToModel()).ToArray(),
+        AttachmentsList = AttachmentsPanelViewModel.AttachmentsList.Select(it => it.ToModel()).ToArray(),
         Description = Description
     };
 
@@ -258,16 +227,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             SubTasksList.Clear();
             SubTasksList.AddRange(subTasks);
         }
-
-        var attachments =
-            feature?.AttachmentsList.Select(it => m_remoteAttachmentViewModelFactory(it, OnAttachmentDelete)) ?? [];
-
-        using (AttachmentsList.SuspendNotifications())
-        {
-            AttachmentsList.Clear();
-            AttachmentsList.AddRange(attachments);
-        }
+        
+        AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
     }
-    
-    private void OnAttachmentDelete(IAttachmentViewModel a) => AttachmentsList.Remove(a);
 }
