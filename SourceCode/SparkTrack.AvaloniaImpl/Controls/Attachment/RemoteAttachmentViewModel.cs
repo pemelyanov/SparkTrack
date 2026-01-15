@@ -87,15 +87,14 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
     public long Size { get; }
 
+    [Reactive]
     public AttachmentLoadProgress? LoadProgress { get; private set; }
 
     public ICommand SaveAsCommand { get; }
 
     public async Task DownloadAsync()
     {
-        if (IsDownloaded) return;
-
-        IsDownloaded = true;
+        if (IsDownloaded || LoadProgress is not null) return;
 
         try
         {
@@ -104,6 +103,8 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
             LoadProgress = progress;
 
             await m_filesService.DownloadAsync(m_attachment.FileId, Uri, progress.Progress);
+            
+            IsDownloaded = true;
 
             IsImage = CheckIsImage();
 
