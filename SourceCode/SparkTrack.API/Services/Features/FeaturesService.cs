@@ -38,6 +38,7 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
     {
         using var clientWrapper = featuresClientFactory();
 
+        // TODO: Добавить обработку конфликта
         await clientWrapper.Client.EditAsync(feature.ToDTO());
     }
 

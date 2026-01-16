@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.EditDates.EditDates"
+             x:Name="Root">
+    <UserControl.Styles>
+        <Style Selector=":is(Panel).edit-dates TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Opacity" Value="0.7" />
+        </Style>
+    </UserControl.Styles>
+    <StackPanel Classes="edit-dates" Orientation="Horizontal" Spacing="16">
+        <TextBlock IsVisible="{Binding #Root.CreatedAt, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <Run Text="Создано:" />
+            <Run Text="{Binding #Root.CreatedAt, StringFormat={x:Static constants:DateFormats.LongRu}}" />
+        </TextBlock>
+                            
+        <TextBlock IsVisible="{Binding #Root.EditedAt, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <Run Text="Изменено:" />
+            <Run Text="{Binding #Root.EditedAt, StringFormat={x:Static constants:DateFormats.LongRu}}" />
+        </TextBlock>
+    </StackPanel>
+</UserControl>

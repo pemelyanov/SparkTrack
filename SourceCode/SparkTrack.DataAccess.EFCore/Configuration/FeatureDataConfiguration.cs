@@ -22,22 +22,24 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
         builder.Property(f => f.Description)
             .IsRequired(false);
         
-        // Связь с ProjectData
         builder.HasOne(f => f.Project)
             .WithMany()
             .HasForeignKey(f => f.ProjectId)
             .OnDelete(DeleteBehavior.Restrict);
-        
-        // Связь с SubTaskData
+
         builder.HasMany(f => f.TasksList)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
         
-        // Связь с AttachmentData
         builder.HasMany(f => f.AttachmentsList)
             .WithOne()
             .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasIndex(f => f.ProjectId);
+        
+        builder.Property(t => t.Version)
+            .IsRequired()
+            .ValueGeneratedOnUpdate()
+            .IsConcurrencyToken();
     }
 }

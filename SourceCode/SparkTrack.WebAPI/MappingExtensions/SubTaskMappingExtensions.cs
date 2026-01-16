@@ -15,7 +15,8 @@ public static class SubTaskMappingExtensions
         Deadline = it.Deadline,
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus,
+        Version = it.Version
     };
 
     public static SubTaskEdit ToDomain(this SubTaskEditDTO it) => new()
@@ -26,7 +27,8 @@ public static class SubTaskMappingExtensions
         Cost = it.Cost,
         Deadline = it.Deadline,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus,
+        Version = it.Version
     };
     
     public static SubTaskDTO ToDTO(this SubTask it) => new()
@@ -37,6 +39,7 @@ public static class SubTaskMappingExtensions
         Deadline = it.Deadline,
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus,
+        Version = it.Version
     };
 }

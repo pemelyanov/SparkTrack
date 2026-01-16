@@ -15,4 +15,6 @@ public record FeatureEdit
     public string Description { get; init; } = string.Empty;
 
     public IReadOnlyList<Attachment> AttachmentsList { get; init; } = [];
+    
+    public Guid Version { get; init; }
 }

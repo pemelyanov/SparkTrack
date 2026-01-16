@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.Core.Shared.Data.Edit;
 
+using Enums;
+
 public record SubTaskEdit
 {
     public Guid Id { get; init; }
@@ -14,5 +16,7 @@ public record SubTaskEdit
     
     public bool IsCompleted { get; init; }
     
-    public bool OnPayment { get; init; }
+    public EPaymentStatus PaymentStatus { get; init; }
+    
+    public Guid Version { get; init; }
 }

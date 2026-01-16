@@ -15,4 +15,6 @@ public record FeatureEditDTO
     public string Description { get; init; } = string.Empty;
 
     public IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; } = [];
+    
+    public Guid Version { get; init; }
 }

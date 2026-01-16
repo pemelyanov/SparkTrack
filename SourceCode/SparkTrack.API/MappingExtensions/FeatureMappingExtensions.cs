@@ -13,7 +13,8 @@ public static class FeatureMappingExtensions
         ProjectId = it.ProjectId,
         TasksList = it.TasksList.Select(task => task.ToDTO()).ToArray(),
         Description = it.Description,
-        AttachmentsList = it.AttachmentsList.Select(a => a.ToDTO()).ToArray()
+        AttachmentsList = it.AttachmentsList.Select(a => a.ToDTO()).ToArray(),
+        Version = it.Version
     };
 
     public static FeatureEdit ToDomain(this FeatureEditDTO it) => new()
@@ -23,17 +24,8 @@ public static class FeatureMappingExtensions
         ProjectId = it.ProjectId,
         TasksList = it.TasksList.Select(task => task.ToDomain()).ToArray(),
         Description = it.Description,
-        AttachmentsList = it.AttachmentsList.Select(a => a.ToDomain()).ToArray()
-    };
-    
-    public static FeatureDTO ToDTO(this Feature it) => new()
-    {
-        Id = it.Id,
-        Name = it.Name,
-        Project = it.Project.ToDTO(),
-        TasksList = it.TasksList.Select(task => task.ToDTO()).ToArray(),
-        Description = it.Description,
-        AttachmentsList = it.AttachmentsList.Select(file => file.ToDTO()).ToArray()
+        AttachmentsList = it.AttachmentsList.Select(a => a.ToDomain()).ToArray(),
+        Version = it.Version
     };
     
     public static Feature ToDomain(this FeatureDTO it) => new()
@@ -43,6 +35,9 @@ public static class FeatureMappingExtensions
         Project = it.Project.ToDomain(),
         TasksList = it.TasksList.Select(task => task.ToDomain()).ToArray(),
         Description = it.Description,
-        AttachmentsList = it.AttachmentsList.Select(file => file.ToDomain()).ToArray()
+        AttachmentsList = it.AttachmentsList.Select(file => file.ToDomain()).ToArray(),
+        CreatedAt = it.CreatedAt.ToLocalTime(),
+        EditedAt = it.EditedAt?.ToLocalTime(),
+        Version = it.Version
     };
 }

@@ -13,4 +13,10 @@ public record Feature
     public string Description { get; init; } = string.Empty;
 
     public IReadOnlyList<Attachment> AttachmentsList { get; init; } = [];
+    
+    public DateTime CreatedAt { get; init; }
+    
+    public DateTime? EditedAt { get; init; }
+    
+    public Guid Version { get; init; }
 }

@@ -63,6 +63,7 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public Task<ActionResult> EditAsync(FeatureEditDTO featureEdit)
     {
         return this.OkWithDomainExceptionsHandling(() => featuresService.EditAsync(featureEdit.ToDomain()));

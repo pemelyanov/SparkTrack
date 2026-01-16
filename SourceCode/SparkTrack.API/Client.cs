@@ -1263,6 +1263,16 @@ namespace SparkTrack.API
                             throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
+                        if (status_ == 409)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
                         {
                             var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
                             throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
@@ -3253,6 +3263,15 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
         public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+        public System.DateTime CreatedAt { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("editedAt")]
+        public System.DateTime? EditedAt { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("version")]
+        public System.Guid Version { get; init; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3292,8 +3311,11 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("isCompleted")]
         public bool IsCompleted { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("onPayment")]
-        public bool OnPayment { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("paymentStatus")]
+        public EPaymentStatus PaymentStatus { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("version")]
+        public System.Guid Version { get; init; }
 
     }
 
@@ -3312,6 +3334,18 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("email")]
         public string Email { get; init; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum EPaymentStatus
+    {
+
+        None = 0,
+
+        OnPayment = 1,
+
+        Paid = 2,
 
     }
 
@@ -3376,6 +3410,9 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
         public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("version")]
+        public System.Guid Version { get; init; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -3400,8 +3437,11 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("isCompleted")]
         public bool IsCompleted { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("onPayment")]
-        public bool OnPayment { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("paymentStatus")]
+        public EPaymentStatus PaymentStatus { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("version")]
+        public System.Guid Version { get; init; }
 
     }
 

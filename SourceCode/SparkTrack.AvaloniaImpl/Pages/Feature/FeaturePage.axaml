@@ -11,6 +11,7 @@
              xmlns:commentEdit="clr-namespace:SparkTrack.AvaloniaImpl.Controls.CommentEdit"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia.Tight"
              xmlns:localMarkupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
+             xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel">
@@ -123,6 +124,9 @@
                         <attachmentsPanel:AttachmentsPanel 
                             IsReadOnly="{localMarkupExtensions:CurrentUserInRole Employee}" 
                             DataContext="{Binding AttachmentsPanelViewModel}" />
+                        
+
+                        <editDates:EditDates CreatedAt="{Binding CreatedAt}" EditedAt="{Binding EditedAt}" />
                     </StackPanel>
                 </Border>
 

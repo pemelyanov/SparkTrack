@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
+using Core.Shared.Enums;
+
 public record SubTaskData
 {
     public Guid Id { get; init; }
@@ -16,5 +18,7 @@ public record SubTaskData
     
     public bool IsCompleted { get; set; }
     
-    public bool OnPayment { get; set; }
+    public EPaymentStatus PaymentStatus { get; set; }
+    
+    public Guid Version { get; set; }
 }

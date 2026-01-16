@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Repositories;
 
+using Core.Exceptions;
 using System.Linq.Expressions;
 using Core.Repositories;
 using Core.Shared.Data;
@@ -55,7 +56,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             AttachmentsList = feature.AttachmentsList.Select(
                     AttachmentsUtils.ToAttachmentData
                 )
-                .ToArray()
+                .ToArray(),
+            CreatedAt = DateTime.UtcNow
         };
 
         var addedFeature = await dbContext.Features.AddAsync(featureData);
@@ -72,7 +74,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Deadline = t.Deadline,
         Cost = t.Cost,
         IsCompleted = t.IsCompleted,
-        OnPayment = t.OnPayment
+        PaymentStatus = t.PaymentStatus,
+        Version = t.Version
     };
 
     public async Task EditAsync(FeatureEdit feature)
@@ -89,12 +92,21 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         featureData.Name = feature.Name;
         featureData.Description = feature.Description;
+        featureData.Version = feature.Version;
+        featureData.EditedAt = DateTime.UtcNow;
 
         HandleSubTasks(feature, featureData);
         
         AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
 
-        await dbContext.SaveChangesAsync();
+        try
+        {
+            await dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException e)
+        {
+            throw new ConflictException("Feature was modified early", e);
+        }
     }
 
     private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
@@ -122,7 +134,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             existingTask.ExecutorEmployeeId = taskEdit.ExecutorEmployeeId;
             existingTask.Cost = taskEdit.Cost;
             existingTask.IsCompleted = taskEdit.IsCompleted;
-            existingTask.OnPayment = taskEdit.OnPayment;
+            existingTask.PaymentStatus = taskEdit.PaymentStatus;
+            existingTask.Version = taskEdit.Version;
 
             existingTasks.Remove(taskEdit.Id);
         }
@@ -180,7 +193,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                         Name = t.ExecutorEmployee.Name,
                         Role = t.ExecutorEmployee.Role,
                         Email = t.ExecutorEmployee.Email
-                    }
+                    },
+                    PaymentStatus = t.PaymentStatus,
+                    Version = t.Version
                 }
             )
             .ToArray(),
@@ -197,6 +212,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                     Checksum = a.Checksum
                 }
             )
-            .ToArray()
+            .ToArray(),
+        CreatedAt = f.CreatedAt,
+        EditedAt = f.EditedAt,
+        Version = f.Version
     };
 }

@@ -147,6 +147,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public bool IsDescriptionInPreviewMode { get; set; }
 
     public bool CanAddComments => m_feature is not null;
+    
+    [Reactive]
+    public DateTime? CreatedAt { get; private set; }
+    
+    [Reactive]
+    public DateTime? EditedAt { get; private set; }
 
     public AttachmentsPanelViewModel AttachmentsPanelViewModel { get; }
 
@@ -234,13 +240,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         ProjectId = m_projectId,
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
         AttachmentsList = AttachmentsPanelViewModel.AttachmentsList.Select(it => it.ToModel()).ToArray(),
-        Description = Description
+        Description = Description,
+        Version = m_feature?.Version ?? Guid.Empty
     };
 
     private void InitializeProperties(Feature? feature)
     {
         Name = feature?.Name ?? "Название идеи";
         Description = feature?.Description ?? string.Empty;
+        CreatedAt = feature?.CreatedAt;
+        EditedAt = feature?.EditedAt;
 
         var subTasks = feature?.TasksList.Select(CreateSubTaskViewModel) ?? [];
 

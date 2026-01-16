@@ -78,5 +78,9 @@ public static class ControllerExtensions
         {
             return (controller.Forbid() as TResult)!;
         }
+        catch (ConflictException)
+        {
+            return (controller.Conflict() as TResult)!;
+        }
     }
 }

@@ -14,7 +14,8 @@ public static class SubTaskMappingExtensions
         Deadline = it.Deadline.ToUniversalTime(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus.Cast<EPaymentStatus>(),
+        Version = it.Version
     };
 
     public static SubTaskEdit ToDomain(this SubTaskEditDTO it) => new()
@@ -25,7 +26,8 @@ public static class SubTaskMappingExtensions
         Deadline = it.Deadline.ToLocalTime(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus.Cast<Core.Shared.Enums.EPaymentStatus>(),
+        Version = it.Version
     };
     
     public static SubTaskDTO ToDTO(this SubTask it) => new()
@@ -36,7 +38,8 @@ public static class SubTaskMappingExtensions
         Deadline = it.Deadline.ToUniversalTime(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus.Cast<EPaymentStatus>(),
+        Version = it.Version
     };
     
     public static SubTask ToDomain(this SubTaskDTO it) => new()
@@ -47,6 +50,7 @@ public static class SubTaskMappingExtensions
         Deadline = it.Deadline.ToLocalTime(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
-        OnPayment = it.OnPayment
+        PaymentStatus = it.PaymentStatus.Cast<Core.Shared.Enums.EPaymentStatus>(),
+        Version = it.Version
     };
 }

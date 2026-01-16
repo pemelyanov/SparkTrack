@@ -28,10 +28,14 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
         builder.Property(t => t.IsCompleted)
             .IsRequired();
         
-        builder.Property(t => t.OnPayment)
+        builder.Property(t => t.PaymentStatus)
             .IsRequired();
         
-        // Связь с UserData
+        builder.Property(t => t.Version)
+            .IsRequired()
+            .ValueGeneratedOnUpdate()
+            .IsConcurrencyToken();
+
         builder.HasOne(t => t.ExecutorEmployee)
             .WithMany()
             .HasForeignKey(t => t.ExecutorEmployeeId)

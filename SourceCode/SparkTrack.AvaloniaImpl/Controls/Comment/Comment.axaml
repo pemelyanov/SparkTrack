@@ -8,6 +8,7 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
              xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
+             xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.Comment.Comment"
              x:DataType="comment:CommentViewModel"
@@ -57,6 +58,8 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </StackPanel>
+                        
+                        <editDates:EditDates CreatedAt="{Binding Model.CreatedAt}" EditedAt="{Binding Model.EditedAt}"/>
                     </StackPanel>
                 </Template>
             </Setter>

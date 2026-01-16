@@ -19,23 +19,13 @@ public static class CommentMappingExtensions
         AttachmentsList = it.AttachmentsList.Select(a => a.ToDomain()).ToArray()
     };
     
-    public static CommentDTO ToDTO(this Comment it) => new()
-    {
-        Id = it.Id,
-        Text = it.Text,
-        Author = it.Author.ToDTO(),
-        CreatedAt = it.CreatedAt,
-        EditedAt = it.EditedAt,
-        AttachmentsList = it.AttachmentsList.Select(a => a.ToDTO()).ToArray()
-    };
-    
     public static Comment ToDomain(this CommentDTO it) => new()
     {
         Id = it.Id,
         Text = it.Text,
         Author = it.Author.ToDomain(),
-        CreatedAt = it.CreatedAt,
-        EditedAt = it.EditedAt,
+        CreatedAt = it.CreatedAt.ToLocalTime(),
+        EditedAt = it.EditedAt?.ToLocalTime(),
         AttachmentsList = it.AttachmentsList.Select(a => a.ToDomain()).ToArray()
     };
 }

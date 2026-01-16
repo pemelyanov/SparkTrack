@@ -62,5 +62,6 @@ public class SubTaskViewModel(
         ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NullReferenceException("Select employee"),
         Deadline = Deadline,
         Cost = Cost,
+        Version = subTask?.Version ?? Guid.Empty
     };
 }
