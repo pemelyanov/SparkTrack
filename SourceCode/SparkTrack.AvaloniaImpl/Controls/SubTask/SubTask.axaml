@@ -5,6 +5,7 @@
              xmlns:subTask="clr-namespace:SparkTrack.AvaloniaImpl.Controls.SubTask"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
+             xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
              x:DataType="subTask:SubTaskViewModel"
@@ -20,17 +21,18 @@
                             <ComboBox ItemsSource="{Binding AvailableEmployees}"
                                       SelectedItem="{Binding SelectedEmployee}"
                                       DisplayMemberBinding="{Binding Name}"
-                                      Grid.Column="1" HorizontalAlignment="Stretch"/>
+                                      Grid.Column="1" HorizontalAlignment="Stretch" />
                         </Grid>
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Дедлайн: " VerticalAlignment="Center" />
                             <CalendarDatePicker SelectedDate="{Binding Deadline}"
-                                                Grid.Column="1" HorizontalAlignment="Stretch"/>
+                                                Grid.Column="1" HorizontalAlignment="Stretch" />
                         </Grid>
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Стоимость (₽): " VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Cost, Converter={x:Static converters:StringToFloatConverter.Instance}}"
-                                     Grid.Column="1" HorizontalAlignment="Stretch">
+                            <TextBox
+                                Text="{Binding Cost, Converter={x:Static converters:StringToFloatConverter.Instance}}"
+                                Grid.Column="1" HorizontalAlignment="Stretch">
                                 <Interaction.Behaviors>
                                     <behaviors:FloatBoxBehavior />
                                 </Interaction.Behaviors>
@@ -64,21 +66,33 @@
         </Style>
     </UserControl.Styles>
     <Border Classes="card">
-        <StackPanel Orientation="Horizontal" Spacing="8">
+        <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
 
-            <ContentControl Width="300" Classes.edit-control="{Binding IsInEditMode}"
-                            Classes.view-control="{Binding !IsInEditMode}" />
+                <ContentControl Width="300" Classes.edit-control="{Binding IsInEditMode}"
+                                Classes.view-control="{Binding !IsInEditMode}" />
+            
+                <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
+                            HorizontalAlignment="Right">
+                    <ToggleButton Classes="icon"
+                                  Classes.edit="{Binding !IsInEditMode}"
+                                  Classes.save="{Binding IsInEditMode}"
+                                  VerticalAlignment="Top"
+                                  IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
 
-            <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
-                <ToggleButton Classes="icon"
-                              Classes.edit="{Binding !IsInEditMode}"
-                              Classes.save="{Binding IsInEditMode}"
-                              VerticalAlignment="Top"
-                              IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
-
-                <Button Classes="icon delete" VerticalAlignment="Top"
-                        Command="{Binding Delete}" />
+                    <Button Classes="icon delete" VerticalAlignment="Top"
+                            Command="{Binding Delete}" />
+                </StackPanel>
             </StackPanel>
+            
+            <Separator />
+            
+            <WrapPanel ItemSpacing="16" LineSpacing="8">
+                <CheckBox Content="Выполнено" HorizontalAlignment="Right" />
+
+                <CheckBox Content="На оплате" HorizontalAlignment="Right"
+                          IsEnabled="{markupExtensions:CurrentUserInRole Admin}" />
+            </WrapPanel>
         </StackPanel>
     </Border>
 </UserControl>

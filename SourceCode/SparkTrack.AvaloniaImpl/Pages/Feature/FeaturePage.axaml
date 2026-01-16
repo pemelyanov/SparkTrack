@@ -117,6 +117,8 @@
 
                         <ContentControl Classes.description-edit="{Binding !IsDescriptionInPreviewMode}"
                                         Classes.description-view="{Binding IsDescriptionInPreviewMode}" />
+                        
+                        <Separator />
 
                         <attachmentsPanel:AttachmentsPanel 
                             IsReadOnly="{localMarkupExtensions:CurrentUserInRole Employee}" 

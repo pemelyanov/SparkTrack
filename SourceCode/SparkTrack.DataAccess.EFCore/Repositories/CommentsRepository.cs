@@ -13,6 +13,7 @@ public class CommentsRepository(SparkTrackDbContext dbContext) : ICommentsReposi
     public Task<IReadOnlyPagedData<Comment>> GetPageAsync(int featureId, PageQuery pageQuery) => dbContext.Comments
         .AsNoTracking()
         .Where(it => it.FeatureId == featureId)
+        .OrderBy(it => it.CreatedAt)
         .Select(
             GetCommentMappingExpression()
         )
