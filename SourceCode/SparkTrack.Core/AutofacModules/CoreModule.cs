@@ -9,6 +9,7 @@ using Services.Features;
 using Services.Files;
 using Services.PasswordHasher;
 using Services.Projects;
+using Services.SubTasks;
 using Services.Users;
 
 public class CoreModule(bool isDevelopment) : Module
@@ -22,6 +23,7 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<UsersService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<SubTasksService>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
         RegisterSeeders(builder);
     }
