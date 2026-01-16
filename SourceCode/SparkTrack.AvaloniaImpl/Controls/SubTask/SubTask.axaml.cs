@@ -1,6 +1,8 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Controls.SubTask;
 
 using Avalonia;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 
 public partial class SubTask : ReactiveUserControl<SubTaskViewModel>
@@ -22,4 +24,14 @@ public partial class SubTask : ReactiveUserControl<SubTaskViewModel>
     }
 
     #endregion
+
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+    }
+
+    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        e.Handled = true;
+    }
 }

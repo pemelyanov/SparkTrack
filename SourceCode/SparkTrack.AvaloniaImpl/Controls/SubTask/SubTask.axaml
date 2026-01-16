@@ -6,6 +6,8 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
              xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
+             xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
+             xmlns:enums="clr-namespace:SparkTrack.Core.Shared.Enums;assembly=SparkTrack.Core.Shared"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
              x:DataType="subTask:SubTaskViewModel"
@@ -64,6 +66,14 @@
                 </Template>
             </Setter>
         </Style>
+
+        <Style Selector=":is(CheckBox).on-payment">
+            <Setter Property="Content" Value="На оплате" />
+        </Style>
+
+        <Style Selector=":is(CheckBox).paid">
+            <Setter Property="Content" Value="Оплачено" />
+        </Style>
     </UserControl.Styles>
     <Border Classes="card">
         <StackPanel Spacing="8">
@@ -71,7 +81,7 @@
 
                 <ContentControl Width="300" Classes.edit-control="{Binding IsInEditMode}"
                                 Classes.view-control="{Binding !IsInEditMode}" />
-            
+
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
                             HorizontalAlignment="Right">
                     <ToggleButton Classes="icon"
@@ -84,14 +94,20 @@
                             Command="{Binding Delete}" />
                 </StackPanel>
             </StackPanel>
-            
-            <Separator />
-            
-            <WrapPanel ItemSpacing="16" LineSpacing="8">
-                <CheckBox Content="Выполнено" HorizontalAlignment="Right" />
 
-                <CheckBox Content="На оплате" HorizontalAlignment="Right"
-                          IsEnabled="{markupExtensions:CurrentUserInRole Admin}" />
+            <Separator />
+
+            <WrapPanel ItemSpacing="16" LineSpacing="8">
+                <manualCheckBox:ManualCheckBox Content="Выполнено" HorizontalAlignment="Right"
+                                               IsChecked="{Binding IsCompleted}"
+                                               Command="{Binding ToggleCompletionStatusCommand}" />
+
+                <manualCheckBox:ManualCheckBox HorizontalAlignment="Right"
+                                               IsChecked="{Binding PaymentStatus, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static enums:EPaymentStatus.None}}"
+                                               IsEnabled="{markupExtensions:CurrentUserInRole Admin}"
+                                               Command="{Binding TogglePaymentStatusCommand}"
+                                               Classes.on-payment="{Binding PaymentStatus, Converter={x:Static ObjectConverters.NotEqual}, ConverterParameter={x:Static enums:EPaymentStatus.Paid}}"
+                                               Classes.paid="{Binding PaymentStatus, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static enums:EPaymentStatus.Paid}}" />
             </WrapPanel>
         </StackPanel>
     </Border>
