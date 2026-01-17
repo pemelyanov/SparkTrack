@@ -15,7 +15,8 @@ public static class SubTaskMappingExtensions
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
         PaymentStatus = it.PaymentStatus.Cast<EPaymentStatus>(),
-        Version = it.Version
+        Version = it.Version,
+        TimelyBonus = it.TimelyBonus
     };
 
     public static SubTaskEdit ToDomain(this SubTaskEditDTO it) => new()
@@ -27,19 +28,8 @@ public static class SubTaskMappingExtensions
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
         PaymentStatus = it.PaymentStatus.Cast<Core.Shared.Enums.EPaymentStatus>(),
-        Version = it.Version
-    };
-    
-    public static SubTaskDTO ToDTO(this SubTask it) => new()
-    {
-        Id = it.Id,
-        Name = it.Name,
-        ExecutorEmployee = it.ExecutorEmployee.ToDTO(),
-        Deadline = it.Deadline.ToUniversalTime(),
-        Cost = it.Cost,
-        IsCompleted = it.IsCompleted,
-        PaymentStatus = it.PaymentStatus.Cast<EPaymentStatus>(),
-        Version = it.Version
+        Version = it.Version,
+        TimelyBonus = it.TimelyBonus
     };
     
     public static SubTask ToDomain(this SubTaskDTO it) => new()
@@ -51,6 +41,9 @@ public static class SubTaskMappingExtensions
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
         PaymentStatus = it.PaymentStatus.Cast<Core.Shared.Enums.EPaymentStatus>(),
-        Version = it.Version
+        Version = it.Version,
+        TimelyBonus = it.TimelyBonus,
+        CompletedAt = it.CompletedAt,
+        IsTimelyBonusApproved = it.IsTimelyBonusApproved
     };
 }

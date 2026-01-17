@@ -8,6 +8,15 @@ using EPaymentStatus = EPaymentStatus;
 
 public class SubTasksService(ClientFactory<SubTasksClient> subTasksClientFactory) : ISubTasksService
 {
+    public async Task<SubTask?> SetIsTimelyBonusApprovedAsync(Guid id, bool value, Guid currentVersion)
+    {
+        using var wrapper = subTasksClientFactory();
+
+        var dto = await wrapper.Client.SetIsTimelyBonusApprovedAsync(id, value, currentVersion);
+
+        return dto?.ToDomain();
+    }
+
     public async Task<SubTask?> SetIsCompletedAsync(Guid id, bool value, Guid currentVersion)
     {
         using var wrapper = subTasksClientFactory();

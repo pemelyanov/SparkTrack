@@ -25,6 +25,15 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
         builder.Property(t => t.Cost)
             .IsRequired();
         
+        builder.Property(t => t.TimelyBonus)
+            .IsRequired();
+        
+        builder.Property(t => t.IsTimelyBonusApproved)
+            .IsRequired();
+        
+        builder.Property(t => t.CompletedAt)
+            .IsRequired(false);
+        
         builder.Property(t => t.IsCompleted)
             .IsRequired();
         

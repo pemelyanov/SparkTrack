@@ -14,6 +14,12 @@ public record SubTaskDTO
     
     public float Cost { get; init; }
     
+    public float TimelyBonus { get; init; }
+    
+    public bool IsTimelyBonusApproved { get; init; }
+    
+    public DateTime? CompletedAt { get; init; }
+    
     public bool IsCompleted { get; init; }
     
     public EPaymentStatus PaymentStatus { get; init; }

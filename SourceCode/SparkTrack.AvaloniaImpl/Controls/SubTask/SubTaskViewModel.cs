@@ -73,6 +73,9 @@ public class SubTaskViewModel : ViewModelBase
     public float Cost { get; set; }
     
     [Reactive]
+    public float TimelyBonus { get; set; }
+    
+    [Reactive]
     public bool IsCompleted { get; private set; }
     
     [Reactive]
@@ -91,7 +94,8 @@ public class SubTaskViewModel : ViewModelBase
         ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NullReferenceException("Select employee"),
         Deadline = Deadline,
         Cost = Cost,
-        Version = m_subTask?.Version ?? Guid.Empty
+        Version = m_subTask?.Version ?? Guid.Empty,
+        TimelyBonus = m_subTask?.TimelyBonus ?? 0
     };
 
     private async Task ToggleCompletionStatusAsync()
@@ -130,5 +134,6 @@ public class SubTaskViewModel : ViewModelBase
         Cost = subTask?.Cost ?? 0;
         IsCompleted = subTask?.IsCompleted ?? false;
         PaymentStatus = subTask?.PaymentStatus ?? EPaymentStatus.None;
+        TimelyBonus = subTask?.TimelyBonus ?? 0;
     }
 }

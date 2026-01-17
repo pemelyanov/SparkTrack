@@ -75,7 +75,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Cost = t.Cost,
         IsCompleted = t.IsCompleted,
         PaymentStatus = t.PaymentStatus,
-        Version = t.Version
+        Version = t.Version,
+        TimelyBonus = t.TimelyBonus,
     };
 
     public async Task EditAsync(FeatureEdit feature)
@@ -194,7 +195,10 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                     },
                     PaymentStatus = t.PaymentStatus,
                     IsCompleted = t.IsCompleted,
-                    Version = t.Version
+                    Version = t.Version,
+                    CompletedAt = t.CompletedAt,
+                    TimelyBonus = t.TimelyBonus,
+                    IsTimelyBonusApproved = t.IsTimelyBonusApproved
                 }
             )
             .ToArray(),

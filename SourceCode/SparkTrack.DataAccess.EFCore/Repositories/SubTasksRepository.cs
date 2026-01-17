@@ -30,6 +30,9 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
             subTaskData.ExecutorEmployeeId = subTask.ExecutorEmployee.Id;
             subTaskData.PaymentStatus = subTask.PaymentStatus;
             subTaskData.Version = subTask.Version;
+            subTaskData.TimelyBonus = subTask.TimelyBonus;
+            subTaskData.IsTimelyBonusApproved = subTaskData.IsTimelyBonusApproved;
+            subTaskData.CompletedAt = subTask.CompletedAt;
         }
     }
     
@@ -74,6 +77,9 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
         Cost = data.Cost,
         Version = data.Version,
         IsCompleted = data.IsCompleted,
-        PaymentStatus = data.PaymentStatus
+        PaymentStatus = data.PaymentStatus,
+        CompletedAt = data.CompletedAt,
+        TimelyBonus = data.TimelyBonus,
+        IsTimelyBonusApproved = data.IsTimelyBonusApproved
     };
 }

@@ -11,6 +11,21 @@ using Shared.Services.SubTasks;
 public class SubTasksService(IAuthorizationService authorizationService, ISubTasksRepository subTasksRepository)
     : ISubTasksService
 {
+    public async Task<SubTask?> SetIsTimelyBonusApprovedAsync(Guid id, bool value, Guid currentVersion)
+    {
+        var subTask = await subTasksRepository.GetAsync(id);
+
+        if (subTask is null) return null;
+
+        subTask = subTask with
+        {
+            IsTimelyBonusApproved = value,
+            Version = currentVersion
+        };
+        
+        return await subTasksRepository.EditAsync(subTask);
+    }
+
     public async Task<SubTask?> SetIsCompletedAsync(Guid id, bool value, Guid currentVersion)
     {
         var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
@@ -24,24 +39,26 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
         if (!canEdit) throw new ForbiddenException();
 
         var isCompleted = subTask.IsCompleted;
-        EPaymentStatus paymentStatus;
+        var paymentStatus = EPaymentStatus.None;
+        DateTime? completedAt = null;
         
         if (isCompleted)
         {
             isCompleted = false;
-            paymentStatus = EPaymentStatus.None;
         }
         else
         {
             isCompleted = true;
-            paymentStatus = EPaymentStatus.OnPayment;   
+            paymentStatus = EPaymentStatus.OnPayment;  
+            completedAt = DateTime.UtcNow;
         }
 
         subTask = subTask with
         {
             IsCompleted = isCompleted,
             PaymentStatus = paymentStatus,
-            Version = currentVersion
+            Version = currentVersion,
+            CompletedAt = completedAt
         };
 
         return await subTasksRepository.EditAsync(subTask);

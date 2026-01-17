@@ -40,6 +40,16 @@
                                 </Interaction.Behaviors>
                             </TextBox>
                         </Grid>
+                        <Grid ColumnDefinitions="Auto *">
+                            <TextBlock Text="Премия за срок (₽): " VerticalAlignment="Center" />
+                            <TextBox
+                                Text="{Binding TimelyBonus, Converter={x:Static converters:StringToFloatConverter.Instance}}"
+                                Grid.Column="1" HorizontalAlignment="Stretch">
+                                <Interaction.Behaviors>
+                                    <behaviors:FloatBoxBehavior />
+                                </Interaction.Behaviors>
+                            </TextBox>
+                        </Grid>
                     </StackPanel>
                 </Template>
             </Setter>
@@ -61,6 +71,11 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Стоимость: " />
                             <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
+                        </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding TimelyBonus}">
+                            <TextBlock Text="Премия за срок: " />
+                            <TextBlock Text="{Binding TimelyBonus, StringFormat='{}{0:C}'}" />
                         </StackPanel>
                     </StackPanel>
                 </Template>

@@ -16,6 +16,12 @@ public record SubTaskData
     
     public float Cost { get; set; }
     
+    public float TimelyBonus { get; set; }
+    
+    public bool IsTimelyBonusApproved { get; set; }
+    
+    public DateTime? CompletedAt { get; set; }
+    
     public bool IsCompleted { get; set; }
     
     public EPaymentStatus PaymentStatus { get; set; }

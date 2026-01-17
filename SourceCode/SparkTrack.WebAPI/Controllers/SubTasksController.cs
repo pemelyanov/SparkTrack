@@ -28,18 +28,43 @@ public class SubTasksController(ISubTasksService subTasksService) : Controller
             }
         );
     }
-    
+
     [HttpPatch("{id}/payment-status")]
     [Authorize(Roles = nameof(ERole.Admin))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult<SubTaskDTO>> SetPaymentStatusAsync([FromRoute] Guid id, EPaymentStatus value, Guid currentVersion)
+    public Task<ActionResult<SubTaskDTO>> SetPaymentStatusAsync(
+        [FromRoute] Guid id,
+        EPaymentStatus value,
+        Guid currentVersion
+    )
     {
         return this.OkWithDomainExceptionsHandling(
             async () =>
             {
                 var subTask = await subTasksService.SetPaymentStatusAsync(id, value, currentVersion);
+
+                return subTask?.ToDTO()!;
+            }
+        );
+    }
+
+    [HttpPatch("{id}/is-timely-bonus-approved")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult<SubTaskDTO>> SetIsTimelyBonusApprovedAsync(
+        [FromRoute] Guid id,
+        bool value,
+        Guid currentVersion
+    )
+    {
+        return this.OkWithDomainExceptionsHandling(
+            async () =>
+            {
+                var subTask = await subTasksService.SetIsTimelyBonusApprovedAsync(id, value, currentVersion);
 
                 return subTask?.ToDTO()!;
             }
