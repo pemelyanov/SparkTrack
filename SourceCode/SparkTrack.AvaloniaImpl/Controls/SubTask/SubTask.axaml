@@ -72,7 +72,7 @@
                             <TextBlock Text="Стоимость: " />
                             <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
                         </StackPanel>
-                        
+
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding TimelyBonus}">
                             <TextBlock Text="Премия за срок: " />
                             <TextBlock Text="{Binding TimelyBonus, StringFormat='{}{0:C}'}" />

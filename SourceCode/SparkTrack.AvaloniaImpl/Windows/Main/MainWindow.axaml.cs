@@ -1,9 +1,14 @@
 namespace SparkTrack.AvaloniaImpl.Windows.Main;
 
+using API.MappingExtensions;
 using Avalonia.Controls;
 using Avalonia.Controls.Notifications;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using Avalonia.VisualTree;
+using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
@@ -17,12 +22,30 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogHo
     {
         InitializeComponent();
 
-        m_notificationManager = new WindowNotificationManager(this)
+        m_notificationManager = new WindowNotificationManager
         {
-            Position = NotificationPosition.BottomRight
+            Position = NotificationPosition.BottomCenter,
+            ZIndex = 1000
         };
+        
     }
-    
+
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        InitializeWindowNotificationManagerViaOverlay();
+    }
+
+    private void InitializeWindowNotificationManagerViaOverlay()
+    {
+        var visualLayerManager = this.FindDescendantOfType<VisualLayerManager>();
+        
+        if(visualLayerManager?.OverlayLayer is null || visualLayerManager.OverlayLayer.Children.Contains(m_notificationManager)) return;
+        
+        visualLayerManager.OverlayLayer.Children.Add(m_notificationManager);
+    }
+
     private void NavigationItem_OnTapped(object? sender, TappedEventArgs e)
     {
         if (sender is not Control { Tag: Type type }) return;
@@ -51,14 +74,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogHo
         _ => null
     };
 
-    public void Notification(string message, string? title = null)
+    public void Show(ENotificationType type, string message, string? title = null)
     {
-        m_notificationManager.Show(CreateNotification(message, title, NotificationType.Information));
-    }
-
-    public void Error(string message, string? title = null)
-    {
-        m_notificationManager.Show(CreateNotification(message, title, NotificationType.Error));
+        m_notificationManager.Show(CreateNotification(message, title, type.Cast<NotificationType>()));
     }
 
     private Notification CreateNotification(string message, string? title, NotificationType type) => new()

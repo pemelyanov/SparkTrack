@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Pages.Authorization;
 
+using Core.Client.Enums;
 using System.Reactive;
 using System.Reactive.Disposables;
 using Core.Client.Services.Authorization;
@@ -68,17 +69,20 @@ public class AuthorizationPageViewModel : ViewModelBase, IRoutableViewModel
     {
         if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
         {
-            m_popupNotificationService.Error("Введите логин и пароль", "Ошибка авторизации");
+            m_popupNotificationService.Show(ENotificationType.Warning, "Введите логин и пароль", "Ошибка авторизации");
             return;
         }
 
         if (!await m_authorizationService.LogInAsync(Login, Password))
         {
-            m_popupNotificationService.Error("Неверный логин или пароль", "Ошибка авторизации");
+            m_popupNotificationService.Show(ENotificationType.Error, "Неверный логин или пароль", "Ошибка авторизации");
             return;
         }
 
         NavigateToDefaultPage();
+
+        Login = string.Empty;
+        Password = string.Empty;
     }
 
     private void NavigateToDefaultPage()

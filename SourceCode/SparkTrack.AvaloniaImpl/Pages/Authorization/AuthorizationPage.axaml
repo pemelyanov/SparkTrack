@@ -18,7 +18,7 @@
             
                 <TextBox Watermark="Логин" Text="{Binding Login}" />
                 
-                <TextBox Watermark="Пароль" Text="{Binding Password}" PasswordChar="*" />
+                <TextBox Classes="password" Watermark="Пароль" Text="{Binding Password}" />
                 
                 <Button Classes="accent" Content="Войти" HorizontalAlignment="Right"
                         HotKey="Enter"

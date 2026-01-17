@@ -25,6 +25,20 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
+    
+    <Window.Styles>
+        <Style Selector="WindowNotificationManager">
+            <Setter Property="Width" Value="{Binding $parent[OverlayLayer].Bounds.Width}" />
+            <Setter Property="Height" Value="{Binding $parent[OverlayLayer].Bounds.Height}" />
+            
+            <!-- NOTE: Почему-то из коробки оно не работает -->
+            <Style Selector="^:bottomcenter /template/ ReversibleStackPanel#PART_Items">
+                <Setter Property="ReverseOrder" Value="True" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+            </Style>
+        </Style>
+    </Window.Styles>
 
     <controls:NavigationView x:Name="NavigationView" IsPaneOpen="False" IsSettingsVisible="False"
                              Background="Transparent" 

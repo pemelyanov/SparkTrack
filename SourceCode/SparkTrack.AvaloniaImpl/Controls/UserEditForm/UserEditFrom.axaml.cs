@@ -22,10 +22,12 @@ public partial class UserEditFrom : ReactiveContentDialog<UserEditFormViewModel>
         args.Cancel = true;
     }
 
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    private void CopyPassword_OnClick(object? sender, RoutedEventArgs e)
     {
         if(ViewModel?.GeneratedPassword is not {} generatedPassword) return;
 
         TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(generatedPassword);
+        
+        ViewModel.NotifyPasswordCopied();
     }
 }

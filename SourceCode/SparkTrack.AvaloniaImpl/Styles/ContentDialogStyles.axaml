@@ -10,6 +10,10 @@
     <Style Selector=":is(controls|ContentDialog)">
         <Setter Property="Theme" Value="{DynamicResource {x:Type controls:ContentDialog}}" />
         
+        <Style Selector="^ TextBox">
+            <Setter Property="UseFloatingWatermark" Value="True" />
+        </Style>
+        
         <Style Selector="^ /template/ Button#PrimaryButton">
             <Setter Property="Command" Value="{Binding $parent[controls:ContentDialog].PrimaryButtonCommand}" />
             <Setter Property="CommandParameter" Value="{Binding $parent[controls:ContentDialog].PrimaryButtonCommandParameter}" />

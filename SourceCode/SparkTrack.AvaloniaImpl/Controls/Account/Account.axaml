@@ -18,9 +18,13 @@
                 <TextBlock Text="{Binding CurrentUser.Value.Role}" />
             </StackPanel>
 
-            <Button Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Content="Выйти" 
+            <Button Grid.Column="0" Grid.Row="1" Content="Выйти" 
                     HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"
                     Command="{Binding LogOutAsync}"/>
+            
+            <Button Grid.Column="1" Grid.Row="1" Content="Сменить пароль" 
+                    Command="{Binding ChangePasswordAsync}"
+                    HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" />
         </Grid>
     </Border>
 </UserControl>

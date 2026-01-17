@@ -17,5 +17,6 @@
         <StyleInclude Source="Styles/DataGridStyles.axaml" />
         <StyleInclude Source="Styles/MarkdownStyles.axaml" />
         <StyleInclude Source="Styles/CheckBoxStyles.axaml" />
+        <StyleInclude Source="Styles/TextBoxStyles.axaml" />
     </Application.Styles>
 </Application>

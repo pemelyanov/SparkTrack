@@ -4,13 +4,15 @@ using Core.Client.Services.Authorization;
 using Core.Client.Services.Configuration;
 using Core.Shared.Data.Entities;
 using Data;
+using Delegates;
 using MappingExtensions;
 using NLog;
 using Reactive;
+using System.Net;
 
 internal class AuthorizationService(
-    Func<ClientWrapper<AuthorizationClient>> authorizationClientFactory,
-    Func<ClientWrapper<ProfileClient>> profileClientFactory,
+    ClientFactory<AuthorizationClient> authorizationClientFactory,
+    ClientFactory<ProfileClient> profileClientFactory,
     IConfigurationService<TokensConfiguration> configurationService
 ) : IAuthorizationService
 {
@@ -96,6 +98,28 @@ internal class AuthorizationService(
         );
 
         m_currentUser.Value = null;
+    }
+
+    public async Task<bool> ChangePasswordAsync(string oldPassword, string newPassword)
+    {
+        using var authorizationClientWrapper = authorizationClientFactory();
+
+        try
+        {
+            await authorizationClientWrapper.Client.ChangePasswordAsync(
+                new ChangePasswordDTO
+                {
+                    NewPassword = newPassword,
+                    OldPassword = oldPassword
+                }
+            );
+
+            return true;
+        }
+        catch (ApiException e) when (e.StatusCode == (int)HttpStatusCode.BadRequest)
+        {
+            return false;
+        }
     }
 
     private async Task<User> GetCurrentProfileAsync()

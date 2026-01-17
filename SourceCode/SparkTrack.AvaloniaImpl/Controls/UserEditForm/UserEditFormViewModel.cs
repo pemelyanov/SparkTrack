@@ -1,8 +1,10 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
 
+using Core.Client.Enums;
 using System.Reactive;
 using System.Reactive.Linq;
 using Core.Client.Services.Authorization;
+using Core.Client.Services.PopupNotification;
 using Core.Client.Services.Users;
 using Core.Shared.Data.Edit;
 using Core.Shared.Enums;
@@ -13,12 +15,14 @@ using ReactiveUI.Fody.Helpers;
 
 public class UserEditFormViewModel : ViewModelBase
 {
-    private readonly IUsersService         m_usersService;
-    private readonly IAuthorizationService m_authorizationService;
+    private readonly IUsersService             m_usersService;
+    private readonly IPopupNotificationService m_popupNotificationService;
+    private readonly IAuthorizationService     m_authorizationService;
 
-    public UserEditFormViewModel(IAuthorizationService authorizationService, IUsersService usersService)
+    public UserEditFormViewModel(IAuthorizationService authorizationService, IUsersService usersService, IPopupNotificationService popupNotificationService)
     {
         m_usersService = usersService;
+        m_popupNotificationService = popupNotificationService;
         m_authorizationService = authorizationService;
 
         CreateUserCommand = InitializeCreateUserCommand();
@@ -66,6 +70,11 @@ public class UserEditFormViewModel : ViewModelBase
         Email = string.Empty;
         Name = string.Empty;
         GeneratedPassword = string.Empty;
+    }
+
+    public void NotifyPasswordCopied()
+    {
+        m_popupNotificationService.Show(ENotificationType.Information, "Пароль скопирован в буфер обмена");
     }
 
     private IObservable<bool> GetIsEmailValidObservable()

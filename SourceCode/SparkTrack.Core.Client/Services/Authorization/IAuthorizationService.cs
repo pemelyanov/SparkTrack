@@ -12,4 +12,6 @@ public interface IAuthorizationService
     Task<bool> TryAuthorizeExistingCredentials();
 
     Task LogOutAsync();
+
+    Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
 }
