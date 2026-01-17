@@ -4,10 +4,12 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using Controls.UserEditForm;
+using Core.Client.Events;
 using Core.Client.Services.Authorization;
 using Core.Client.Services.Users;
 using Core.Shared.Data;
 using Core.Shared.Data.Entities;
+using Core.Shared.Eventing;
 using Core.Shared.Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
@@ -15,7 +17,7 @@ using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using ViewModels;
 
-public class UsersPageViewModel : ViewModelBase, IRoutableViewModel
+public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandler<LogoutEvent>
 {
     private readonly Lazy<IScreen>         m_hostScreen;
     private readonly IUsersService         m_usersService;
@@ -70,5 +72,12 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel
         await m_dialogHost.ShowAsync(m_userEditFormViewModel);
 
         await ReloadTableCommand.Execute().ToTask();
+    }
+
+    public Task HandleAsync(LogoutEvent eventData)
+    {
+        m_userEditFormViewModel.Reset();
+        
+        return Task.CompletedTask;
     }
 }

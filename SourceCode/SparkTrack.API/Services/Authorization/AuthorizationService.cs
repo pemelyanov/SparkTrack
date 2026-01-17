@@ -1,8 +1,11 @@
 ﻿namespace SparkTrack.API.Services.Authorization;
 
+using Core.Client.Events;
 using Core.Client.Services.Authorization;
 using Core.Client.Services.Configuration;
 using Core.Shared.Data.Entities;
+using Core.Shared.Eventing;
+using Core.Shared.Extensions;
 using Data;
 using Delegates;
 using MappingExtensions;
@@ -13,7 +16,8 @@ using System.Net;
 internal class AuthorizationService(
     ClientFactory<AuthorizationClient> authorizationClientFactory,
     ClientFactory<ProfileClient> profileClientFactory,
-    IConfigurationService<TokensConfiguration> configurationService
+    IConfigurationService<TokensConfiguration> configurationService,
+    IEventEmitter eventEmitter
 ) : IAuthorizationService
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
@@ -46,6 +50,8 @@ internal class AuthorizationService(
             
             m_currentUser.Value = await GetCurrentProfileAsync();
 
+            await eventEmitter.RaiseAsync<LogoutEvent>();
+            
             return true;
         }
         catch

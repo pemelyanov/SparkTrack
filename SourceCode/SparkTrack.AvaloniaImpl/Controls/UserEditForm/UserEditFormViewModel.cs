@@ -19,7 +19,11 @@ public class UserEditFormViewModel : ViewModelBase
     private readonly IPopupNotificationService m_popupNotificationService;
     private readonly IAuthorizationService     m_authorizationService;
 
-    public UserEditFormViewModel(IAuthorizationService authorizationService, IUsersService usersService, IPopupNotificationService popupNotificationService)
+    public UserEditFormViewModel(
+        IAuthorizationService authorizationService,
+        IUsersService usersService,
+        IPopupNotificationService popupNotificationService
+    )
     {
         m_usersService = usersService;
         m_popupNotificationService = popupNotificationService;
@@ -27,7 +31,7 @@ public class UserEditFormViewModel : ViewModelBase
 
         CreateUserCommand = InitializeCreateUserCommand();
     }
-    
+
     [Reactive]
     public string Name { get; set; } = string.Empty;
 
