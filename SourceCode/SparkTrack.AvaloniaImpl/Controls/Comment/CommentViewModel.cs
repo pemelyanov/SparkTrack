@@ -2,9 +2,11 @@
 
 using CommentEdit;
 using Core.Shared.Services.Comments;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
 using System.Reactive;
 using CommentModel = Core.Shared.Data.Entities.Comment;
 
@@ -17,14 +19,25 @@ public class CommentViewModel : ViewModelBase
         CommentModel model,
         Func<CommentViewModel, Task> onDelete,
         Func<CommentModel?, CommentEditViewModel> editViewModelFactory,
-        ICommentsService commentsService
+        ICommentsService commentsService,
+        IDialogHost dialogHost
     )
     {
         m_editViewModelFactory = editViewModelFactory;
         m_commentsService = commentsService;
         Model = model;
 
-        DeleteCommand = ReactiveCommand.CreateFromTask(() => onDelete(this));
+        DeleteCommand = ReactiveCommand.CreateFromTask(
+            async () =>
+            {
+                if (!await dialogHost.ConfirmAsync(
+                    "Вы уверены что хотите удалить комментарий?",
+                    "Удаление комментария"
+                )) return;
+
+                await onDelete(this);
+            }
+        );
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
     }
 

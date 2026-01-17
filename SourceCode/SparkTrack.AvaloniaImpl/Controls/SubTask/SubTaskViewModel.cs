@@ -5,29 +5,34 @@ using SubTaskData = Core.Shared.Data.Entities.SubTask;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.SubTasks;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
 
 public class SubTaskViewModel : ViewModelBase
 {
     private          bool                             m_isUserInitiallySet;
-    private SubTaskData?                     m_subTask;
+    private          SubTaskData?                     m_subTask;
     private readonly IObservable<IReadOnlyList<User>> m_availableEmployees;
-    private readonly Action<SubTaskViewModel>         m_onDelete;
+    private readonly Action<SubTaskViewModel>         m_onRemove;
     private readonly ISubTasksService                 m_subTasksService;
+    private readonly IDialogHost                      m_dialogHost;
 
     public SubTaskViewModel(SubTaskData? subTask,
                             IObservable<IReadOnlyList<User>> availableEmployees,
-                            Action<SubTaskViewModel> onDelete,
-                            ISubTasksService subTasksService)
+                            Action<SubTaskViewModel> onRemove,
+                            ISubTasksService subTasksService,
+                            IDialogHost dialogHost)
     {
         m_subTask = subTask;
         m_availableEmployees = availableEmployees;
-        m_onDelete = onDelete;
+        m_onRemove = onRemove;
         m_subTasksService = subTasksService;
+        m_dialogHost = dialogHost;
         UpdateProperties(subTask);
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
@@ -85,7 +90,15 @@ public class SubTaskViewModel : ViewModelBase
     
     public ReactiveCommand<Unit, Unit> TogglePaymentStatusCommand { get; }
 
-    public void Delete() => m_onDelete(this);
+    public async Task RemoveAsync()
+    {
+        if (!await m_dialogHost.ConfirmAsync(
+            "Вы уверены что хотите удалить задачу?",
+            "Удаление задачи"
+        )) return;
+        
+        m_onRemove(this);
+    }
 
     public SubTaskEdit MapToEdit() => new()
     {

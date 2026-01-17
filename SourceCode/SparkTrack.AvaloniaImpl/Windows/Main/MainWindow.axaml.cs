@@ -61,7 +61,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogHo
         m_notificationManager.Show(CreateNotification(message, title, NotificationType.Error));
     }
 
-    private Notification CreateNotification(string message, string? title, NotificationType type) => new Notification
+    private Notification CreateNotification(string message, string? title, NotificationType type) => new()
     {
         Title = title,
         Message = message,

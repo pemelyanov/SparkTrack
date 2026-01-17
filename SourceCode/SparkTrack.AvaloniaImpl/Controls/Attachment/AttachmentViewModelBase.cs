@@ -19,8 +19,13 @@ public abstract class AttachmentViewModelBase(
 
     public string Name { get; protected set; } = string.Empty;
     
-    public void Remove()
+    public async Task RemoveAsync()
     {
+        if (!await dialogHost.ConfirmAsync(
+            "Вы действительно хотите удалить файл?",
+            "Удаление файла"
+        )) return;
+        
         onRemove.Invoke(GetThis());
     }
 

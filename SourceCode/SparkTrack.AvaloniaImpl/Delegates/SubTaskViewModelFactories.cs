@@ -6,4 +6,4 @@ using SubTask = Core.Shared.Data.Entities.SubTask;
 
 public delegate SubTaskViewModel SubTaskViewModelFactory(SubTask? subTask,
                                                          IObservable<IReadOnlyList<User>> availableEmployees,
-                                                         Action<SubTaskViewModel> onDelete);
+                                                         Action<SubTaskViewModel> onRemove);

@@ -21,7 +21,7 @@ public interface IAttachmentViewModel
     
     ICommand SaveAsCommand { get; }
 
-    void Remove();
+    Task RemoveAsync();
 
     Task DownloadAsync();
 

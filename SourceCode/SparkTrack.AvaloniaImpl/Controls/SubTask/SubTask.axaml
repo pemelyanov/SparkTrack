@@ -106,7 +106,7 @@
                                   IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
 
                     <Button Classes="icon delete" VerticalAlignment="Top"
-                            Command="{Binding Delete}" />
+                            Command="{Binding RemoveAsync}" />
                 </StackPanel>
             </StackPanel>
 
