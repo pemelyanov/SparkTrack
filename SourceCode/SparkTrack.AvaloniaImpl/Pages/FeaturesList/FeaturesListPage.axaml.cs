@@ -5,7 +5,9 @@ using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using ViewModels;
 using Core.Shared.Data.Entities;
+using ReactiveUI;
 
+[SingleInstanceView]
 public partial class FeaturesListPage : ReactiveUserControl<FeaturesListPageViewModel>
 {
     public FeaturesListPage()

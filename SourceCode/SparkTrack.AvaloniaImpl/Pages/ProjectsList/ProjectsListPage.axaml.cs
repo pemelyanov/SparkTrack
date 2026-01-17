@@ -4,8 +4,10 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using Core.Shared.Data.Entities;
+using ReactiveUI;
 using ViewModels;
 
+[SingleInstanceView]
 public partial class ProjectsListPage : ReactiveUserControl<ProjectsListPageViewModel>
 {
     public ProjectsListPage()

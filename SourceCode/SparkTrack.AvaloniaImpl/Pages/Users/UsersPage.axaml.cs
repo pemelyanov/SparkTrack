@@ -3,7 +3,9 @@
 namespace SparkTrack.AvaloniaImpl.Pages.Users;
 
 using Avalonia.ReactiveUI;
+using ReactiveUI;
 
+[SingleInstanceView]
 public partial class UsersPage : ReactiveUserControl<UsersPageViewModel>
 {
     public UsersPage()

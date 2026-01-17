@@ -66,6 +66,8 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <paginator:Paginator Grid.Row="4" />
+        <paginator:Paginator Grid.Row="4" PagesQuantity="{Binding PaginatorViewModel.PagesQuantity}"
+                             CurrentPage="{Binding PaginatorViewModel.CurrentPage}"
+                             ItemsPerPage="{Binding PaginatorViewModel.ItemsPerPage}" />
     </Grid>
 </UserControl>

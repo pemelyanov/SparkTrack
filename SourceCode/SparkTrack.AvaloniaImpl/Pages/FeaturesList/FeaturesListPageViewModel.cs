@@ -7,11 +7,11 @@ using ReactiveUI.Fody.Helpers;
 using Extensions;
 using Feature;
 using ViewModels;
-using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using SparkTrack.Core.Shared.Services.Features;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 {
@@ -41,7 +41,13 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     {
         base.OnActivated(disposables);
 
-        ReloadTableCommand.Execute().Subscribe().DisposeWith(disposables);
+        ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
+            .CombineLatest(PaginatorViewModel.WhenChanged())
+            .Throttle(TimeSpan.FromMilliseconds(50))
+            .Select(_ => ReloadTableCommand.Execute())
+            .Switch()
+            .Subscribe()
+            .DisposeWith(disposables);
     }
 
     public string UrlPathSegment => "features";
@@ -52,6 +58,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public IReadOnlyList<SelectableViewModel<Feature>> CurrentPageData { get; private set; } = [];
+
+    public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
 
@@ -73,10 +81,11 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             var page = await m_featuresService.GetPageAsync(
                 ProjectsFilterViewModel.SelectedProject?.Id,
                 true,
-                PageQuery.All
+                PaginatorViewModel.ToQuery()
             );
-
+            
             CurrentPageData = page.Items.Select(it => new SelectableViewModel<Feature>(it)).ToArray();
+            PaginatorViewModel.SetPagesQuantity(page.Total);
         }
     );
 }
