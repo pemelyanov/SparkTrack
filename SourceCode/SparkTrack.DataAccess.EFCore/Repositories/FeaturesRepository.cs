@@ -193,6 +193,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                         Email = t.ExecutorEmployee.Email
                     },
                     PaymentStatus = t.PaymentStatus,
+                    IsCompleted = t.IsCompleted,
                     Version = t.Version
                 }
             )

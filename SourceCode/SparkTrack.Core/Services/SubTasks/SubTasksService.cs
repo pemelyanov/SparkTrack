@@ -15,19 +15,50 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
     {
         var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
 
-        var executor = await subTasksRepository.GetExecutorAsync(id);
+        var subTask = await subTasksRepository.GetAsync(id);
 
-        if (executor is null) return null;
+        if (subTask is null) return null;
 
-        var canEdit = currentUser.Role is ERole.Admin || currentUser.Id == executor.Id;
+        var canEdit = currentUser.Role is ERole.Admin || currentUser.Id == subTask.ExecutorEmployee.Id;
 
         if (!canEdit) throw new ForbiddenException();
 
-        return await subTasksRepository.SetIsCompletedAsync(id, value, currentVersion);
+        var isCompleted = subTask.IsCompleted;
+        EPaymentStatus paymentStatus;
+        
+        if (isCompleted)
+        {
+            isCompleted = false;
+            paymentStatus = EPaymentStatus.None;
+        }
+        else
+        {
+            isCompleted = true;
+            paymentStatus = EPaymentStatus.OnPayment;   
+        }
+
+        subTask = subTask with
+        {
+            IsCompleted = isCompleted,
+            PaymentStatus = paymentStatus,
+            Version = currentVersion
+        };
+
+        return await subTasksRepository.EditAsync(subTask);
     }
 
-    public Task<SubTask?> SetPaymentStatusAsync(Guid id, EPaymentStatus value, Guid currentVersion)
+    public async Task<SubTask?> SetPaymentStatusAsync(Guid id, EPaymentStatus value, Guid currentVersion)
     {
-        return subTasksRepository.SetPaymentStatusAsync(id, value, currentVersion);
+        var subTask = await subTasksRepository.GetAsync(id);
+
+        if (subTask is null) return null;
+
+        subTask = subTask with
+        {
+            PaymentStatus = value,
+            Version = currentVersion
+        };
+        
+        return await subTasksRepository.EditAsync(subTask);
     }
 }

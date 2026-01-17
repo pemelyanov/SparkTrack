@@ -5,6 +5,7 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:entities="clr-namespace:SparkTrack.Core.Shared.Data.Entities;assembly=SparkTrack.Core.Shared"
              xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.FeatureStatus.FeatureStatus"
              x:Name="Root">
@@ -21,7 +22,7 @@
         </Style>
     </UserControl.Styles>
     <Panel>
-        <CheckBox
+        <manualCheckBox:ManualCheckBox IsChecked="{Binding #Root.SubTasksList[0].IsCompleted}"
             IsVisible="{Binding #Root.SubTasksList.Count, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={StaticResource One}}"
             ToolTip.Tip="{Binding #Root.SubTasksList[0].Name}" />
         

@@ -39,6 +39,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly ICommentsService                     m_commentsService;
     private readonly CommentViewModelFactory              m_commentFactory;
     private readonly IAuthorizationService                m_authorizationService;
+    private readonly SubTaskViewModelFactory              m_subTaskViewModelFactory;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -50,7 +51,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<Comment?, CommentEditViewModel> commentEditFactory,
         ICommentsService commentsService,
         CommentViewModelFactory commentFactory,
-        IAuthorizationService authorizationService
+        IAuthorizationService authorizationService,
+        SubTaskViewModelFactory subTaskViewModelFactory
     ) : this(
         null,
         projectId,
@@ -61,7 +63,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         commentEditFactory,
         commentsService,
         commentFactory,
-        authorizationService
+        authorizationService,
+        subTaskViewModelFactory
     ) { }
 
     public FeaturePageViewModel(
@@ -73,7 +76,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<Comment?, CommentEditViewModel> commentEditFactory,
         ICommentsService commentsService,
         CommentViewModelFactory commentFactory,
-        IAuthorizationService authorizationService
+        IAuthorizationService authorizationService,
+        SubTaskViewModelFactory subTaskViewModelFactory
     ) : this(
         feature,
         feature.Project.Id,
@@ -84,7 +88,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         commentEditFactory,
         commentsService,
         commentFactory,
-        authorizationService
+        authorizationService,
+        subTaskViewModelFactory
     ) { }
 
     private FeaturePageViewModel(
@@ -97,7 +102,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<Comment?, CommentEditViewModel> commentEditFactory,
         ICommentsService commentsService,
         CommentViewModelFactory commentFactory,
-        IAuthorizationService authorizationService
+        IAuthorizationService authorizationService,
+        SubTaskViewModelFactory subTaskViewModelFactory
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -110,6 +116,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_commentsService = commentsService;
         m_commentFactory = commentFactory;
         m_authorizationService = authorizationService;
+        m_subTaskViewModelFactory = subTaskViewModelFactory;
         IsDescriptionInPreviewMode = m_feature is not null;
 
         InitializeProperties(feature);
@@ -191,7 +198,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         SubTasksList.Add(subTask);
     }
 
-    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null) => new(
+    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null) => m_subTaskViewModelFactory.Invoke(
         subTask,
         m_availableEmployeesList,
         it => SubTasksList.Remove(it)

@@ -3,57 +3,45 @@ namespace SparkTrack.DataAccess.EFCore.Repositories;
 using Core.Exceptions;
 using Core.Repositories;
 using Core.Shared.Data.Entities;
-using Core.Shared.Enums;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksRepository
 {
-    public Task<User?> GetExecutorAsync(Guid id) => dbContext.SubTasks
+    public Task<SubTask?> GetAsync(Guid id) => dbContext.SubTasks
         .AsNoTracking()
         .Where(it => it.Id == id)
         .Select(
-            it => new User
-            {
-                Id = it.ExecutorEmployee.Id,
-                Email = it.ExecutorEmployee.Email,
-                Name = it.ExecutorEmployee.Name,
-                Role = it.ExecutorEmployee.Role
-            }
+            GetToSubTaskExpression()
         )
         .FirstOrDefaultAsync();
 
-    public async Task<SubTask?> SetIsCompletedAsync(Guid id, bool value, Guid currentVersion)
+    public Task<SubTask?> EditAsync(SubTask subTask)
     {
-        return await UpdateSubTaskAsync(id, UpdateAction);
+        return UpdateSubTaskAsync(subTask, UpdateAction);
 
-        void UpdateAction(SubTaskData subTask)
+        void UpdateAction(SubTaskData subTaskData)
         {
-            subTask.IsCompleted = value;
-            subTask.Version = currentVersion;
+            subTaskData.Cost = subTask.Cost;
+            subTaskData.Deadline = subTask.Deadline;
+            subTaskData.Name = subTask.Name;
+            subTaskData.IsCompleted = subTask.IsCompleted;
+            subTaskData.ExecutorEmployeeId = subTask.ExecutorEmployee.Id;
+            subTaskData.PaymentStatus = subTask.PaymentStatus;
+            subTaskData.Version = subTask.Version;
         }
     }
-
-    public async Task<SubTask?> SetPaymentStatusAsync(Guid id, EPaymentStatus value, Guid currentVersion)
+    
+    private async Task<SubTask?> UpdateSubTaskAsync(SubTask subTask, Action<SubTaskData> updateAction)
     {
-        return await UpdateSubTaskAsync(id, UpdateAction);
-
-        void UpdateAction(SubTaskData subTask)
-        {
-            subTask.PaymentStatus = value;
-            subTask.Version = currentVersion;
-        }
-    }
-
-    private async Task<SubTask?> UpdateSubTaskAsync(Guid id, Action<SubTaskData> updateAction)
-    {
-        var subTask = await dbContext.SubTasks.Where(it => it.Id == id)
+        var subTaskData = await dbContext.SubTasks.Where(it => it.Id == subTask.Id)
             .Include(it => it.ExecutorEmployee)
             .FirstOrDefaultAsync();
 
-        if (subTask is null) return null;
+        if (subTaskData is null) return null;
 
-        updateAction(subTask);
+        updateAction(subTaskData);
 
         try
         {
@@ -64,10 +52,14 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
             throw new ConflictException("SubTask was modified early", e);
         }
         
-        return ToSubTask(subTask);
+        subTaskData = await dbContext.SubTasks.Where(it => it.Id == subTask.Id)
+            .Include(it => it.ExecutorEmployee)
+            .FirstOrDefaultAsync();
+        
+        return GetToSubTaskExpression().Compile().Invoke(subTaskData!);
     }
 
-    private SubTask ToSubTask(SubTaskData data) => new()
+    private Expression<Func<SubTaskData, SubTask>> GetToSubTaskExpression() => data => new SubTask
     {
         Id = data.Id,
         Name = data.Name,

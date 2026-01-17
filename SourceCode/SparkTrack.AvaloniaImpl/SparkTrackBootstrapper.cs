@@ -10,6 +10,7 @@ using Controls.Comment;
 using Controls.CommentEdit;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
+using Controls.SubTask;
 using Controls.UserEditForm;
 using Core.Client.AutofacModules;
 using Fanatiki.MVVM;
@@ -39,6 +40,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<AttachmentsPanelViewModel>();
         builder.RegisterType<CommentEditViewModel>();
         builder.RegisterType<CommentViewModel>();
+        builder.RegisterType<SubTaskViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

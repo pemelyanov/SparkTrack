@@ -10,6 +10,7 @@ using Services.Comments;
 using Services.Features;
 using Services.Files;
 using Services.Projects;
+using Services.SubTasks;
 using Services.Users;
 using System.Reflection;
 using Module = Autofac.Module;
@@ -33,6 +34,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<ProjectsService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<FilesService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<SubTasksService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterAllClientsFromAssembly<TClientBase>(ContainerBuilder builder, Assembly assembly)

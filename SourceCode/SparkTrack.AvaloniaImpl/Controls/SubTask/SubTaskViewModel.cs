@@ -4,6 +4,7 @@ using Core.Shared.Data.Edit;
 using SubTaskData = Core.Shared.Data.Entities.SubTask;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
+using Core.Shared.Services.SubTasks;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -13,17 +14,20 @@ using System.Reactive.Disposables;
 public class SubTaskViewModel : ViewModelBase
 {
     private          bool                             m_isUserInitiallySet;
-    private readonly SubTaskData?                     m_subTask;
+    private SubTaskData?                     m_subTask;
     private readonly IObservable<IReadOnlyList<User>> m_availableEmployees;
     private readonly Action<SubTaskViewModel>         m_onDelete;
+    private readonly ISubTasksService                 m_subTasksService;
 
     public SubTaskViewModel(SubTaskData? subTask,
                             IObservable<IReadOnlyList<User>> availableEmployees,
-                            Action<SubTaskViewModel> onDelete)
+                            Action<SubTaskViewModel> onDelete,
+                            ISubTasksService subTasksService)
     {
         m_subTask = subTask;
         m_availableEmployees = availableEmployees;
         m_onDelete = onDelete;
+        m_subTasksService = subTasksService;
         UpdateProperties(subTask);
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
@@ -92,30 +96,31 @@ public class SubTaskViewModel : ViewModelBase
 
     private async Task ToggleCompletionStatusAsync()
     {
-        await Task.Delay(1000);
+        if(m_subTask is null) return;
 
-        if (IsCompleted)
-        {
-            IsCompleted = false;
-            PaymentStatus = EPaymentStatus.None;
-            return;
-        }
-
-        IsCompleted = true;
-        PaymentStatus = EPaymentStatus.OnPayment;
+        m_subTask = await m_subTasksService.SetIsCompletedAsync(m_subTask.Id, !IsCompleted, m_subTask.Version);
+        
+        UpdateProperties(m_subTask);
     }
     
     private async Task TogglePaymentStatusAsync()
     {
-        await Task.Delay(1000);
+        if(m_subTask is null) return;
 
-        if (PaymentStatus is EPaymentStatus.None)
+        var paymentStatus = PaymentStatus;
+
+        if (paymentStatus is EPaymentStatus.None)
         {
-            PaymentStatus = EPaymentStatus.OnPayment;
-            return;
+            paymentStatus = EPaymentStatus.OnPayment;
+        }
+        else
+        {
+            paymentStatus = EPaymentStatus.None;
         }
         
-        PaymentStatus = EPaymentStatus.None;
+        m_subTask = await m_subTasksService.SetPaymentStatusAsync(m_subTask.Id, paymentStatus, m_subTask.Version);
+        
+        UpdateProperties(m_subTask);
     }
     
     private void UpdateProperties(SubTaskData? subTask)
@@ -124,6 +129,6 @@ public class SubTaskViewModel : ViewModelBase
         Deadline = subTask?.Deadline ?? DateTime.Now;
         Cost = subTask?.Cost ?? 0;
         IsCompleted = subTask?.IsCompleted ?? false;
-        PaymentStatus = EPaymentStatus.Paid;
+        PaymentStatus = subTask?.PaymentStatus ?? EPaymentStatus.None;
     }
 }
