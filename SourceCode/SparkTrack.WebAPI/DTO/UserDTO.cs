@@ -11,4 +11,6 @@ public record UserDTO
     public required ERole Role { get; init; }
     
     public required string Email { get; init; }
+    
+    public string? TelegramTag { get; init; }
 }

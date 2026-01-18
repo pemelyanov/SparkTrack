@@ -24,7 +24,8 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
             Email = user.Email,
             Name = user.Name,
             Role = user.Role,
-            PasswordHash = user.PasswordHash ?? throw new NullReferenceException(nameof(User.PasswordHash))
+            PasswordHash = user.PasswordHash ?? throw new NullReferenceException(nameof(User.PasswordHash)),
+            TelegramTag = user.TelegramTag
         };
 
         await dbContext.Users.AddAsync(userData);
@@ -47,6 +48,7 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
         userData.Name = user.Name;
         userData.Role = user.Role;
         userData.PasswordHash = user.PasswordHash ?? userData.PasswordHash;
+        userData.TelegramTag = user.TelegramTag;
 
         await dbContext.SaveChangesAsync();
     }
@@ -72,7 +74,8 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
             Email = it.Email,
             Name = it.Name,
             Role = it.Role,
-            PasswordHash = it.PasswordHash
+            PasswordHash = it.PasswordHash,
+            TelegramTag = it.TelegramTag
         };
     }
 }

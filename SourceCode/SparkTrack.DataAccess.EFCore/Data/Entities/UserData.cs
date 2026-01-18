@@ -12,5 +12,7 @@ public record UserData
     
     public required string Email { get; set; }
     
+    public string? TelegramTag { get; set; }
+    
     public required string PasswordHash { get; set; }
 }

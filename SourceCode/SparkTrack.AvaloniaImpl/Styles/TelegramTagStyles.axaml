@@ -1,0 +1,18 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="telegramTag|TelegramTag">
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackground}" />
+        
+        <Style Selector="^:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource AccentButtonBackgroundPointerOver}" />
+            <Setter Property="TextDecorations" Value="Underline" />
+        </Style>
+    </Style>
+</Styles>

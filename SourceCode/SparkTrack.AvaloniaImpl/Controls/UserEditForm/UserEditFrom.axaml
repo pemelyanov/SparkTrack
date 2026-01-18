@@ -12,7 +12,7 @@
                         Title="Создание пользователя"
                         DefaultButton="Primary"
                         PrimaryButtonText="Создать"
-                        PrimaryButtonCommand="{Binding CreateUserCommand}"
+                        PrimaryButtonCommand="{Binding SaveUserCommand}"
                         SecondaryButtonText="Сброс"
                         SecondaryButtonCommand="{Binding Reset}"
                         CloseButtonText="Закрыть">
@@ -21,6 +21,8 @@
                  behaviors:FocusBehaviors.FocusOnLoaded="True"
                  IsReadOnly="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         <TextBox Watermark="Email" Text="{Binding Email}"
+                 IsReadOnly="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <TextBox Watermark="Telegram Tag (необязательно)" Text="{Binding TelegramTag}"
                  IsReadOnly="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
         <StackPanel IsVisible="{Binding GeneratedPassword, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
@@ -31,6 +33,8 @@
                 <SelectableTextBlock Text="{Binding GeneratedPassword}" VerticalAlignment="Center" />
                 <Button Content="{markupExtensions:SymbolIcon Symbol=Copy}" VerticalAlignment="Center" Click="CopyPassword_OnClick" />
             </StackPanel>
+            <TextBlock Text="Для создания нового пользователя сбросьте форму"
+                       TextAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
         </StackPanel>
     </StackPanel>
 </controls:ContentDialog>

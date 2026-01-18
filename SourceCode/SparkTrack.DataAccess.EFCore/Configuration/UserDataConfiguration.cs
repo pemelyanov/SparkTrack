@@ -20,5 +20,8 @@ public class UserDataConfiguration : IEntityTypeConfiguration<UserData>
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(50);
+
+        builder.Property(u => u.TelegramTag)
+            .IsRequired(false);
     }
 }

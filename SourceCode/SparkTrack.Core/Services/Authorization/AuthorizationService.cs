@@ -32,7 +32,8 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
             Email = userEdit.Email,
             Name = userEdit.Name,
             Role = role,
-            PasswordHash = await passwordHasher.HashAsync(password)
+            PasswordHash = await passwordHasher.HashAsync(password),
+            TelegramTag = userEdit.TelegramTag
         };
 
         await usersRepository.AddAsync(user);
@@ -74,7 +75,8 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
             Email = userData.Email,
             Name = userData.Name,
             Role = ERole.God,
-            PasswordHash = await passwordHasher.HashAsync(password)
+            PasswordHash = await passwordHasher.HashAsync(password),
+            TelegramTag = userData.TelegramTag
         };
 
         await usersRepository.AddAsync(god);

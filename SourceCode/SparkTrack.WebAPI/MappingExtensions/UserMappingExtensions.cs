@@ -12,12 +12,14 @@ public static class UserMappingExtensions
         Id = it.Id,
         Name = it.Name,
         Role = it.Role,
-        Email = it.Email
+        Email = it.Email,
+        TelegramTag = it.TelegramTag
     };
     
     public static UserEdit ToDomain(this UserEditDTO it) => new()
     {
         Name = it.Name,
-        Email = it.Email
+        Email = it.Email,
+        TelegramTag = it.TelegramTag
     };
 }

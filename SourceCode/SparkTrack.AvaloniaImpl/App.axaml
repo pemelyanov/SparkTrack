@@ -18,5 +18,6 @@
         <StyleInclude Source="Styles/MarkdownStyles.axaml" />
         <StyleInclude Source="Styles/CheckBoxStyles.axaml" />
         <StyleInclude Source="Styles/TextBoxStyles.axaml" />
+        <StyleInclude Source="Styles/TelegramTagStyles.axaml" />
     </Application.Styles>
 </Application>

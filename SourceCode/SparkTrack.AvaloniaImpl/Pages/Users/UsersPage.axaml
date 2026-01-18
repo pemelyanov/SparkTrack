@@ -7,6 +7,7 @@
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Users"
              xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
+             xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Users.UsersPage"
              x:DataType="users:UsersPageViewModel"
@@ -22,22 +23,30 @@
                 HorizontalAlignment="Right" />
         
         <DataGrid Grid.Row="3"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="False"
-                  CanUserReorderColumns="False"
-                  CanUserResizeColumns="True"
-                  CanUserSortColumns="True"
+                  Classes="readonly"
                   Sorting="DataGrid_OnSorting"
+                  LoadingRow="DataGrid_OnLoadingRow"
+                  UnloadingRow="DataGrid_OnUnloadingRow"
                   ItemsSource="{Binding CurrentPageData}">
             <DataGrid.Columns>
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
-                <DataGridTextColumn Width="*" IsReadOnly="True"
-                                    Header="Имя" Binding="{Binding Model.Name}" />
-                <DataGridTextColumn Width="220" IsReadOnly="True"
+                <DataGridTemplateColumn Width="*" IsReadOnly="True"
+                                    Header="Имя">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Model.Name}"/>
+                                <telegramTag:TelegramTag Text="{Binding Model.TelegramTag, StringFormat='@{0}'}"
+                                                         IsVisible="{Binding Model.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Width="120" IsReadOnly="True"
+                                    Header="Почта" Binding="{Binding Model.Email}" />
+                <DataGridTextColumn Width="120" IsReadOnly="True"
                                     Header="Роль" Binding="{Binding Model.Role}" />
             </DataGrid.Columns>
         </DataGrid>
-        
-        <paginator:Paginator Grid.Row="4" />
     </Grid>
 </UserControl>
