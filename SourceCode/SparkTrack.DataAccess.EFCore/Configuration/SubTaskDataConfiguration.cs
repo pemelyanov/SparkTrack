@@ -49,6 +49,9 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
             .WithMany()
             .HasForeignKey(t => t.ExecutorEmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(t => t.Feature)
+            .WithMany(it => it.TasksList);
         
         builder.HasIndex(t => t.ExecutorEmployeeId);
         builder.HasIndex(t => t.IsCompleted);

@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:adminFinance="clr-namespace:SparkTrack.AvaloniaImpl.Pages.AdminFinance"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
+             xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
+             xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
+             xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.AdminFinancePage"
+             x:DataType="adminFinance:AdminFinancePageViewModel"
+             x:Name="Root">
+    <Grid RowDefinitions="Auto Auto Auto * Auto" RowSpacing="8">
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type adminFinance:AdminFinancePageViewModel}"
+                   x:DataType="system:Type"
+                   Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="* Auto">
+            <!-- TODO: Filters block -->
+            <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
+
+        </Grid>
+
+        <StackPanel Grid.Row="2" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Оплатить" Classes="accent" Command="{Binding PayForSelectionCommand}" />
+            <Button Content="Одобрить премию" Command="{Binding ApproveBonusForSelectionCommand}" />
+            <Button Content="Убрать премию" Command="{Binding UnapproveBonusForSelectionCommand}" />
+            <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
+        </StackPanel>
+
+        <DataGrid Grid.Row="3" ItemsSource="{Binding CurrentPageData}"
+                  Classes="readonly">
+            <DataGrid.Columns>
+                <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected}" />
+                <DataGridTextColumn Header="Идея" Width="*" IsReadOnly="True" Binding="{Binding Model.Feature.Name}" />
+                <DataGridTextColumn Header="Задача" IsReadOnly="True" Binding="{Binding Model.SubTask.Name}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
+                                    Header="Канал" Binding="{Binding Model.Feature.Project.Name}" />
+                <DataGridTextColumn Header="Дедлайн" IsReadOnly="True"
+                                    Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
+                <DataGridTemplateColumn Header="Исполнитель" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Model.SubTask.ExecutorEmployee.Name}"/>
+                                <telegramTag:TelegramTag Text="{Binding Model.SubTask.ExecutorEmployee.TelegramTag, StringFormat='@{0}'}"
+                                                         IsVisible="{Binding Model.SubTask.ExecutorEmployee.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Дата выполнения" IsReadOnly="True"
+                                    Binding="{Binding Model.SubTask.CompletedAt, StringFormat={x:Static constants:DateFormats.ShortRu},
+                                    TargetNullValue={x:Static constants:CommonStrings.EmptyValue}}" />
+                <DataGridTextColumn Header="Стоимость" IsReadOnly="True"
+                                    Binding="{Binding Model.SubTask.Cost, StringFormat='{}{0:C}'}" />
+                <DataGridTextColumn Header="Премия за срок" IsReadOnly="True"
+                                    Binding="{Binding Model.SubTask.TimelyBonus, StringFormat='{}{0:C}'}" />
+                <DataGridTemplateColumn Header="Одобрение премии" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <manualCheckBox:ManualCheckBox
+                                Command="{Binding #Root.ViewModel.ToggleIsBonusApprovedCommand}"
+                                CommandParameter="{Binding Model}"
+                                IsChecked="{Binding Model.IsTimelyBonusApproved}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <paginator:Paginator Grid.Row="4" PagesQuantity="{Binding PaginatorViewModel.PagesQuantity}"
+                             CurrentPage="{Binding PaginatorViewModel.CurrentPage}"
+                             ItemsPerPage="{Binding PaginatorViewModel.ItemsPerPage}" />
+    </Grid>
+</UserControl>

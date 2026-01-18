@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
+using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 
 public record SubTaskData
@@ -13,6 +14,8 @@ public record SubTaskData
     public required Guid ExecutorEmployeeId { get; set; }
     
     public required DateTime Deadline { get; set; }
+
+    public FeatureData Feature { get; set; } = null!;
     
     public float Cost { get; set; }
     

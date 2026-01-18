@@ -43,7 +43,7 @@ public static class SubTaskMappingExtensions
         PaymentStatus = it.PaymentStatus.Cast<Core.Shared.Enums.EPaymentStatus>(),
         Version = it.Version,
         TimelyBonus = it.TimelyBonus,
-        CompletedAt = it.CompletedAt,
+        CompletedAt = it.CompletedAt == DateTime.MinValue ? null : it.CompletedAt?.ToLocalTime(),
         IsTimelyBonusApproved = it.IsTimelyBonusApproved
     };
 }

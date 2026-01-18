@@ -9,6 +9,7 @@ using Services.Authorization;
 using Services.Comments;
 using Services.Features;
 using Services.Files;
+using Services.PaymentBills;
 using Services.Projects;
 using Services.SubTasks;
 using Services.Users;
@@ -35,6 +36,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<FilesService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<SubTasksService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<PaymentBillsService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterAllClientsFromAssembly<TClientBase>(ContainerBuilder builder, Assembly assembly)

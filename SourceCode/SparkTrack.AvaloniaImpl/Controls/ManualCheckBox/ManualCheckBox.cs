@@ -7,9 +7,16 @@ public class ManualCheckBox : CheckBox
     protected override void OnClick()
     {
         var valueBeforeClick = IsChecked;
-        
-        base.OnClick();
 
+        try
+        {
+            base.OnClick();
+        }
+        catch
+        {
+            // ignore
+        }
+        
         IsChecked = valueBeforeClick;
     }
 }

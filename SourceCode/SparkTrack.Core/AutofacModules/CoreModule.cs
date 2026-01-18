@@ -8,6 +8,7 @@ using Services.Comments;
 using Services.Features;
 using Services.Files;
 using Services.PasswordHasher;
+using Services.PaymentBills;
 using Services.Projects;
 using Services.SubTasks;
 using Services.Users;
@@ -24,6 +25,7 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<SubTasksService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<PaymentBillsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
         RegisterSeeders(builder);
     }

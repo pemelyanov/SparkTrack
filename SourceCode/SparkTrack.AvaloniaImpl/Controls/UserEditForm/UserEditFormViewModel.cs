@@ -29,7 +29,7 @@ public class UserEditFormViewModel : ViewModelBase
         m_popupNotificationService = popupNotificationService;
         m_authorizationService = authorizationService;
 
-        CreateUserCommand = InitializeCreateUserCommand();
+        SaveUserCommand = InitializeSaveUserCommand();
     }
 
     [Reactive]
@@ -37,13 +37,16 @@ public class UserEditFormViewModel : ViewModelBase
 
     [Reactive]
     public string Email { get; set; } = string.Empty;
+    
+    [Reactive]
+    public string? TelegramTag { get; set; }
 
     [Reactive]
     public string? GeneratedPassword { get; private set; }
 
-    public ReactiveCommand<Unit, Unit> CreateUserCommand { get; }
+    public ReactiveCommand<Unit, Unit> SaveUserCommand { get; }
 
-    private ReactiveCommand<Unit, Unit> InitializeCreateUserCommand() => ReactiveCommand.CreateFromTask(
+    private ReactiveCommand<Unit, Unit> InitializeSaveUserCommand() => ReactiveCommand.CreateFromTask(
         async () =>
         {
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Email)
@@ -56,7 +59,8 @@ public class UserEditFormViewModel : ViewModelBase
             var userEdit = new UserEdit
             {
                 Name = Name,
-                Email = Email
+                Email = Email,
+                TelegramTag = TelegramTag?.TrimStart('@')
             };
 
             GeneratedPassword = await m_usersService.AddAsync(userEdit, createdUserRole);
@@ -68,11 +72,12 @@ public class UserEditFormViewModel : ViewModelBase
                 (isEmailValid, isNameValid, isPasswordGenerated) => isEmailValid && isNameValid && !isPasswordGenerated
             )
     );
-
+    
     public void Reset()
     {
         Email = string.Empty;
         Name = string.Empty;
+        TelegramTag = null;
         GeneratedPassword = string.Empty;
     }
 

@@ -134,6 +134,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             existingTask.Name = taskEdit.Name;
             existingTask.ExecutorEmployeeId = taskEdit.ExecutorEmployeeId;
             existingTask.Cost = taskEdit.Cost;
+            existingTask.TimelyBonus = taskEdit.TimelyBonus;
             existingTask.Version = taskEdit.Version;
 
             existingTasks.Remove(taskEdit.Id);

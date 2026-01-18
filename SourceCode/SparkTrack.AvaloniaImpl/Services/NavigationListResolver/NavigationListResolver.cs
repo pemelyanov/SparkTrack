@@ -3,6 +3,7 @@
 using System.Reactive.Linq;
 using Core.Client.Services.Authorization;
 using Core.Shared.Enums;
+using Pages.AdminFinance;
 using Pages.FeaturesList;
 using Pages.ProjectsList;
 using Pages.Users;
@@ -14,7 +15,7 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
 
     private readonly Dictionary<ERole, IReadOnlyList<Type>> m_navigationListByRoleMap = new()
     {
-        [ERole.Admin] = [typeof(FeaturesListPageViewModel), typeof(UsersPageViewModel)],
+        [ERole.Admin] = [typeof(FeaturesListPageViewModel), typeof(UsersPageViewModel), typeof(AdminFinancePageViewModel)],
         [ERole.Employee] = [typeof(FeaturesListPageViewModel)],
         [ERole.God] = [typeof(UsersPageViewModel), typeof(ProjectsListPageViewModel)]
     };

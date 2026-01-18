@@ -48,14 +48,14 @@
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
-                <DataGridTextColumn Width="220" IsReadOnly="True"
+                <DataGridTextColumn IsReadOnly="True"
                                     IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
                                     Header="Канал" Binding="{Binding Model.Project.Name}" />
-                <DataGridTextColumn Width="220" IsReadOnly="True"
+                <DataGridTextColumn IsReadOnly="True"
                                     Header="Дедлайн"
                                     Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
                                     StringFormat={x:Static constants:DateFormats.ShortRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTemplateColumn Width="220" IsReadOnly="True"
+                <DataGridTemplateColumn IsReadOnly="True" Width="150"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

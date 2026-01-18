@@ -7,8 +7,8 @@ public record Feature
     public required string Name { get; init; }
     
     public required Project Project { get; init; }
-    
-    public required IReadOnlyList<SubTask> TasksList { get; init; }
+
+    public IReadOnlyList<SubTask> TasksList { get; init; } = [];
 
     public string Description { get; init; } = string.Empty;
 

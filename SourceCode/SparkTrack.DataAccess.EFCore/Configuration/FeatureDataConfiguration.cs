@@ -28,7 +28,7 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(f => f.TasksList)
-            .WithOne()
+            .WithOne(it => it.Feature)
             .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasMany(f => f.AttachmentsList)

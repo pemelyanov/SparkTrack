@@ -31,7 +31,7 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
             subTaskData.PaymentStatus = subTask.PaymentStatus;
             subTaskData.Version = subTask.Version;
             subTaskData.TimelyBonus = subTask.TimelyBonus;
-            subTaskData.IsTimelyBonusApproved = subTaskData.IsTimelyBonusApproved;
+            subTaskData.IsTimelyBonusApproved = subTask.IsTimelyBonusApproved;
             subTaskData.CompletedAt = subTask.CompletedAt;
         }
     }

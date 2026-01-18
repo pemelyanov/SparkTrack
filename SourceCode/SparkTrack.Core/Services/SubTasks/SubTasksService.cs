@@ -41,6 +41,7 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
         var isCompleted = subTask.IsCompleted;
         var paymentStatus = EPaymentStatus.None;
         DateTime? completedAt = null;
+        var isBonusApproved = subTask.IsTimelyBonusApproved;
         
         if (isCompleted)
         {
@@ -51,6 +52,7 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
             isCompleted = true;
             paymentStatus = EPaymentStatus.OnPayment;  
             completedAt = DateTime.UtcNow;
+            if (completedAt <= subTask.Deadline) isBonusApproved = true;
         }
 
         subTask = subTask with
@@ -58,7 +60,8 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
             IsCompleted = isCompleted,
             PaymentStatus = paymentStatus,
             Version = currentVersion,
-            CompletedAt = completedAt
+            CompletedAt = completedAt,
+            IsTimelyBonusApproved = isBonusApproved
         };
 
         return await subTasksRepository.EditAsync(subTask);

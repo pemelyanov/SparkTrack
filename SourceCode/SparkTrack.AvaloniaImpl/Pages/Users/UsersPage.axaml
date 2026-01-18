@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
-             xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Users"
              xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
              xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
@@ -42,7 +41,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Width="120" IsReadOnly="True"
+                <DataGridTextColumn IsReadOnly="True"
                                     Header="Почта" Binding="{Binding Model.Email}" />
                 <DataGridTextColumn Width="120" IsReadOnly="True"
                                     Header="Роль" Binding="{Binding Model.Role}" />

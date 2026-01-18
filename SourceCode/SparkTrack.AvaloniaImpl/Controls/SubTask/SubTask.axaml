@@ -8,6 +8,7 @@
              xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
              xmlns:enums="clr-namespace:SparkTrack.Core.Shared.Enums;assembly=SparkTrack.Core.Shared"
+             xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
              x:DataType="subTask:SubTaskViewModel"
@@ -63,6 +64,8 @@
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
                             <TextBlock Text="Исполнитель: " />
                             <TextBlock Text="{Binding SelectedEmployee.Name}" />
+                            <telegramTag:TelegramTag Text="{Binding SelectedEmployee.TelegramTag, StringFormat='@{0}'}"
+                                                     IsVisible="{Binding SelectedEmployee.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Дедлайн: " />

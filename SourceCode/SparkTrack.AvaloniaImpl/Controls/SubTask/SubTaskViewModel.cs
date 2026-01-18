@@ -108,7 +108,7 @@ public class SubTaskViewModel : ViewModelBase
         Deadline = Deadline,
         Cost = Cost,
         Version = m_subTask?.Version ?? Guid.Empty,
-        TimelyBonus = m_subTask?.TimelyBonus ?? 0
+        TimelyBonus = TimelyBonus
     };
 
     private async Task ToggleCompletionStatusAsync()

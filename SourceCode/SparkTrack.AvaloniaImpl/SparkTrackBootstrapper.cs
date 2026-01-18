@@ -18,6 +18,7 @@ using Core.Client.Events;
 using Core.Shared.Eventing;
 using Fanatiki.MVVM;
 using Installers;
+using Pages.AdminFinance;
 using Pages.Authorization;
 using Pages.Feature;
 using Pages.FeaturesList;
@@ -45,6 +46,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<CommentViewModel>();
         builder.RegisterType<SubTaskViewModel>();
         builder.RegisterType<ChangePasswordFormViewModel>();
+        builder.RegisterType<AdminFinancePageViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
