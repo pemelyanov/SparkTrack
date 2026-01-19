@@ -16,7 +16,7 @@ public class AccountViewModel(
     Lazy<IScreen> screen,
     Func<AuthorizationPageViewModel> authorizationPageFactory,
     Func<ChangePasswordFormViewModel> changePasswordFormViewModelFactory,
-    IDialogHost dialogHost
+    IDialogService dialogService
 ) : ViewModelBase
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
@@ -28,7 +28,7 @@ public class AccountViewModel(
         {
             s_logger.Info("LogOut executed");
             
-            if(!await dialogHost.ConfirmAsync("Вы уверены что хотите сменить пользователя?", "Выход")) return;
+            if(!await dialogService.ConfirmAsync("Вы уверены что хотите сменить пользователя?", "Выход")) return;
             
             await authorizationService.LogOutAsync();
         }
@@ -44,6 +44,6 @@ public class AccountViewModel(
     {
         var viewModel = changePasswordFormViewModelFactory.Invoke();
 
-        await dialogHost.ShowAsync(viewModel);
+        await dialogService.ShowAsync(viewModel);
     }
 }

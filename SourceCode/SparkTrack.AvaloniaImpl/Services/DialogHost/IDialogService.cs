@@ -2,7 +2,7 @@
 
 using ReactiveUI;
 
-public interface IDialogHost
+public interface IDialogService
 {
     Task<bool?> ShowAsync(ReactiveObject viewModel);
 }

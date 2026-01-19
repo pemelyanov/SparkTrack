@@ -14,7 +14,7 @@ using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using Services.DialogHost;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogHost, IPopupNotificationService
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService
 {
     private readonly WindowNotificationManager m_notificationManager;
     

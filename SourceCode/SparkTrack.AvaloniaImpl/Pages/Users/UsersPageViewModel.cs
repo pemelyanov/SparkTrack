@@ -22,7 +22,7 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
     private readonly Lazy<IScreen>               m_hostScreen;
     private readonly IUsersService               m_usersService;
     private readonly IAuthorizationService       m_authorizationService;
-    private readonly IDialogHost                 m_dialogHost;
+    private readonly IDialogService                 m_dialogService;
     private readonly Func<UserEditFormViewModel> m_userEditFactory;
     private readonly UserEditFormViewModel       m_userEditFormViewModel;
 
@@ -30,13 +30,13 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
                               UserEditFormViewModel userEditFormViewModel,
                               IUsersService usersService,
                               IAuthorizationService authorizationService,
-                              IDialogHost dialogHost,
+                              IDialogService dialogService,
                               Func<UserEditFormViewModel> userEditFactory)
     {
         m_hostScreen = hostScreen;
         m_usersService = usersService;
         m_authorizationService = authorizationService;
-        m_dialogHost = dialogHost;
+        m_dialogService = dialogService;
         m_userEditFactory = userEditFactory;
         m_userEditFormViewModel = userEditFormViewModel;
 
@@ -79,7 +79,7 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
 
     public async Task OpenUserAddAsync()
     {
-        await m_dialogHost.ShowAsync(m_userEditFormViewModel);
+        await m_dialogService.ShowAsync(m_userEditFormViewModel);
 
         await ReloadTableCommand.Execute().ToTask();
     }

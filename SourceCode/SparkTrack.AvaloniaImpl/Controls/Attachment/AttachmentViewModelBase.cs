@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 public abstract class AttachmentViewModelBase(
     Action<IAttachmentViewModel> onRemove,
-    IDialogHost dialogHost
+    IDialogService dialogService
 ) : ViewModelBase
 {
     [Reactive]
@@ -21,7 +21,7 @@ public abstract class AttachmentViewModelBase(
     
     public async Task RemoveAsync()
     {
-        if (!await dialogHost.ConfirmAsync(
+        if (!await dialogService.ConfirmAsync(
             "Вы действительно хотите удалить файл?",
             "Удаление файла"
         )) return;
@@ -55,7 +55,7 @@ public abstract class AttachmentViewModelBase(
 
         var imageViewModel = new ImageDialogViewModel(Name, Uri);
 
-        dialogHost.ShowAsync(imageViewModel);
+        dialogService.ShowAsync(imageViewModel);
     }
 
     public void OpenInExplorer()

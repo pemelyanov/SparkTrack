@@ -20,19 +20,19 @@ public class SubTaskViewModel : ViewModelBase
     private readonly IObservable<IReadOnlyList<User>> m_availableEmployees;
     private readonly Action<SubTaskViewModel>         m_onRemove;
     private readonly ISubTasksService                 m_subTasksService;
-    private readonly IDialogHost                      m_dialogHost;
+    private readonly IDialogService                      m_dialogService;
 
     public SubTaskViewModel(SubTaskData? subTask,
                             IObservable<IReadOnlyList<User>> availableEmployees,
                             Action<SubTaskViewModel> onRemove,
                             ISubTasksService subTasksService,
-                            IDialogHost dialogHost)
+                            IDialogService dialogService)
     {
         m_subTask = subTask;
         m_availableEmployees = availableEmployees;
         m_onRemove = onRemove;
         m_subTasksService = subTasksService;
-        m_dialogHost = dialogHost;
+        m_dialogService = dialogService;
         UpdateProperties(subTask);
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
@@ -92,7 +92,7 @@ public class SubTaskViewModel : ViewModelBase
 
     public async Task RemoveAsync()
     {
-        if (!await m_dialogHost.ConfirmAsync(
+        if (!await m_dialogService.ConfirmAsync(
             "Вы уверены что хотите удалить задачу?",
             "Удаление задачи"
         )) return;

@@ -1,12 +1,14 @@
 namespace SparkTrack.AvaloniaImpl.Pages.AdminFinance;
 
 using Controls.ProjectsFilter;
-using Core.Shared.Data.Entities;
 using Core.Shared.Services.PaymentBills;
 using Core.Shared.Services.SubTasks;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
+using Reactive;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -18,53 +20,41 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Lazy<IScreen>        m_hostScreen;
     private readonly IPaymentBillsService m_paymentBillsService;
     private readonly ISubTasksService     m_subTasksService;
+    private readonly IDialogService       m_dialogService;
+
+    private readonly BehaviorObservableSubject<IReadOnlyList<PaymentBillViewModel>> m_selectedBills = new([]);
 
     public AdminFinancePageViewModel(
         Lazy<IScreen> hostScreen,
         IPaymentBillsService paymentBillsService,
         ProjectsFilterViewModel projectsFilterViewModel,
-        ISubTasksService subTasksService
+        ISubTasksService subTasksService,
+        IDialogService dialogService
     )
     {
         m_hostScreen = hostScreen;
         m_paymentBillsService = paymentBillsService;
         m_subTasksService = subTasksService;
+        m_dialogService = dialogService;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
         ReloadTableCommand = CreateReloadTableCommand();
         ToggleIsBonusApprovedCommand =
             ReactiveCommand.CreateFromTask<PaymentBillViewModel, Unit>(ToggleIsBonusApprovedAsync);
 
-        var selectedItemsPipe = this.WhenAnyValue(it => it.CurrentPageData)
-            .Select(
-                list => list.Select(
-                        it => it.WhenAnyValue(v => v.IsSelected)
-                            .Select(
-                                isSelected => new
-                                {
-                                    it,
-                                    isSelected
-                                }
-                            )
-                    )
-                    .CombineLatest()
-            )
-            .Switch()
-            .Select(list => list.Where(it => it.isSelected).Select(it => it.it).ToArray())
-            .Throttle(TimeSpan.FromMilliseconds(50))
-            .ObserveOn(RxApp.MainThreadScheduler);
-
         PayForSelectionCommand = ReactiveCommand.CreateFromTask(
             PayForSelectionAsync,
-            selectedItemsPipe.Select(it => it.Length > 0)
+            m_selectedBills.Select(it => it.Count > 0)
         );
+
         ApproveBonusForSelectionCommand = ReactiveCommand.CreateFromTask(
             () => SetBonusApprovementForSelectionAsync(true),
-            selectedItemsPipe.Select(selection => selection.Any(it => !it.Model.IsTimelyBonusApproved))
+            m_selectedBills.Select(selection => selection.Any(it => !it.IsTimelyBonusApproved))
         );
+
         UnapproveBonusForSelectionCommand = ReactiveCommand.CreateFromTask(
             () => SetBonusApprovementForSelectionAsync(false),
-            selectedItemsPipe.Select(selection => selection.Any(it => it.Model.IsTimelyBonusApproved))
+            m_selectedBills.Select(selection => selection.Any(it => it.IsTimelyBonusApproved))
         );
     }
 
@@ -79,6 +69,37 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             .Switch()
             .Subscribe()
             .DisposeWith(disposables);
+
+        this.WhenAnyValue(it => it.CurrentPageData)
+            .Select(
+                list => list.Select(
+                        it => it.WhenAnyValue(v => v.IsSelected)
+                            .Select(
+                                isSelected => new
+                                {
+                                    it,
+                                    isSelected
+                                }
+                            )
+                    )
+                    .CombineLatest()
+            )
+            .Switch()
+            .Select(list => list.Where(it => it.isSelected).Select(it => it.it.Model).ToArray())
+            .Throttle(TimeSpan.FromMilliseconds(50))
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(m_selectedBills)
+            .DisposeWith(disposables);
+
+        m_selectedBills
+            .Select(
+                it => it.Sum(
+                    b
+                        => b.SubTask.Cost + (b.SubTask.IsTimelyBonusApproved ? b.SubTask.TimelyBonus : 0)
+                )
+            )
+            .Subscribe(value => TotalBill = value)
+            .DisposeWith(disposables);
     }
 
     public string UrlPathSegment => "admin-finance";
@@ -87,6 +108,9 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public IReadOnlyList<SelectableViewModel<PaymentBillViewModel>> CurrentPageData { get; set; } = [];
+
+    [Reactive]
+    public float TotalBill { get; private set; }
 
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
@@ -137,6 +161,11 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task PayForSelectionAsync()
     {
+        if (!await m_dialogService.ConfirmAsync(
+            $"Выбранные задачи ({m_selectedBills.Value.Count}) на сумму {TotalBill:C} будут помечены как оплаченные. Продолжить?",
+            "Оплата задач"
+        )) return;
+
         await ReloadTableCommand.Execute().ToTask();
     }
 

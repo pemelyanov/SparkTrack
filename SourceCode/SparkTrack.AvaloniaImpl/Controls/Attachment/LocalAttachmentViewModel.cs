@@ -17,9 +17,9 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
     public LocalAttachmentViewModel(
         string path,
         Action<IAttachmentViewModel> onRemove,
-        IDialogHost dialogHost,
+        IDialogService dialogService,
         IFilesService filesService
-    ) : base(onRemove, dialogHost)
+    ) : base(onRemove, dialogService)
     {
         m_filesService = filesService;
         using var stream = File.OpenRead(path);

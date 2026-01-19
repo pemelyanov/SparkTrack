@@ -25,11 +25,11 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     public RemoteAttachmentViewModel(
         Attachment attachment,
         Action<IAttachmentViewModel> onRemove,
-        IDialogHost dialogHost,
+        IDialogService dialogService,
         ILocalFilesManager localFilesManager,
         IFilesService filesService
     )
-        : base(onRemove, dialogHost)
+        : base(onRemove, dialogService)
     {
         m_attachment = attachment;
         m_filesService = filesService;

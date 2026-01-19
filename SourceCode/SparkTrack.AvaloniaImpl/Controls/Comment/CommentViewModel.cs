@@ -20,7 +20,7 @@ public class CommentViewModel : ViewModelBase
         Func<CommentViewModel, Task> onDelete,
         Func<CommentModel?, CommentEditViewModel> editViewModelFactory,
         ICommentsService commentsService,
-        IDialogHost dialogHost
+        IDialogService dialogService
     )
     {
         m_editViewModelFactory = editViewModelFactory;
@@ -30,7 +30,7 @@ public class CommentViewModel : ViewModelBase
         DeleteCommand = ReactiveCommand.CreateFromTask(
             async () =>
             {
-                if (!await dialogHost.ConfirmAsync(
+                if (!await dialogService.ConfirmAsync(
                     "Вы уверены что хотите удалить комментарий?",
                     "Удаление комментария"
                 )) return;

@@ -91,7 +91,6 @@ public class DataGridSelectionColumn : DataGridBoundColumn
     {
         var checkBox = new CheckBox
         {
-            DataContext = dataItem,
             Name = "CellSelectionCheckBox",
         };
 

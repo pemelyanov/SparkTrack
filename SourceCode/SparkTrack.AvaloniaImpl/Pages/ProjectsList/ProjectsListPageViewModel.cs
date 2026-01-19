@@ -17,14 +17,14 @@ public class ProjectsListPageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Lazy<IScreen>                            m_hostScreen;
     private readonly IProjectsService                         m_projectsService;
     private readonly Func<Project?, ProjectEditFormViewModel> m_projectEditFormFactory;
-    private readonly IDialogHost                              m_dialogHost;
+    private readonly IDialogService                              m_dialogService;
 
-    public ProjectsListPageViewModel(Lazy<IScreen> hostScreen, IProjectsService projectsService, Func<Project?, ProjectEditFormViewModel> projectEditFormFactory, IDialogHost dialogHost)
+    public ProjectsListPageViewModel(Lazy<IScreen> hostScreen, IProjectsService projectsService, Func<Project?, ProjectEditFormViewModel> projectEditFormFactory, IDialogService dialogService)
     {
         m_hostScreen = hostScreen;
         m_projectsService = projectsService;
         m_projectEditFormFactory = projectEditFormFactory;
-        m_dialogHost = dialogHost;
+        m_dialogService = dialogService;
 
         ReloadTableCommand = ReactiveCommand.CreateFromTask(ReloadTableAsync);
     }
@@ -59,7 +59,7 @@ public class ProjectsListPageViewModel : ViewModelBase, IRoutableViewModel
     {
         var projectFormViewModel = m_projectEditFormFactory(project);
 
-        if(await m_dialogHost.ShowAsync(projectFormViewModel) is not true) return;
+        if(await m_dialogService.ShowAsync(projectFormViewModel) is not true) return;
 
         await ReloadTableCommand.Execute().ToTask();
     }
