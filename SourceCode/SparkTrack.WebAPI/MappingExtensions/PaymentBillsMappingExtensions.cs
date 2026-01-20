@@ -13,7 +13,6 @@ public static class PaymentBillsMappingExtensions
 
     public static UserRemainingPaymentDTO ToDTO(this UserRemainingPayment data) => new()
     {
-        Project = data.Project.ToDTO(),
         User = data.User.ToDTO(),
         RemainingPayment = data.RemainingPayment
     };

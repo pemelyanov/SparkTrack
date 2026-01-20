@@ -15,30 +15,53 @@
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.AdminFinancePage"
              x:DataType="adminFinance:AdminFinancePageViewModel"
              x:Name="Root">
-    <Grid RowDefinitions="Auto Auto Auto Auto * Auto" RowSpacing="8">
+    <Grid RowDefinitions="Auto Auto Auto Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type adminFinance:AdminFinancePageViewModel}"
                    x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
-
-        <Grid Grid.Row="1" ColumnDefinitions="* Auto">
+        
+        <WrapPanel Grid.Row="1">
             <!-- TODO: Filters block -->
             <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
+        </WrapPanel>
+        
+        <StackPanel Grid.Row="2" >
+            <Grid ColumnDefinitions="Auto *" >
+                <DataGrid Classes="readonly" ItemsSource="{Binding RemainingPayments}" HorizontalAlignment="Left">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Сотрудник" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding User.Name}"/>
+                                        <telegramTag:TelegramTag Text="{Binding User.TelegramTag, StringFormat='@{0}'}"
+                                                                 IsVisible="{Binding User.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Зарплата" Binding="{Binding RemainingPayment, StringFormat='{}{0:C}'}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            
+                <TextBlock Grid.Column="1" Classes="subtitle" HorizontalAlignment="Right" Text="{Binding TotalRemainingPayments, StringFormat='Общий долг по зарплатам: {0:C}'}" />
+            </Grid>
+            <Separator Margin="0 8" />
+        </StackPanel>
 
-        </Grid>
-
-        <StackPanel Grid.Row="2" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="3" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Оплатить" Classes="accent" Command="{Binding PayForSelectionCommand}" />
             <Button Content="Одобрить премию" Command="{Binding ApproveBonusForSelectionCommand}" />
             <Button Content="Убрать премию" Command="{Binding UnapproveBonusForSelectionCommand}" />
             <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
         </StackPanel>
         
-        <StackPanel Grid.Row="3" HorizontalAlignment="Right" Orientation="Horizontal">
+        <StackPanel Grid.Row="4" HorizontalAlignment="Right" Orientation="Horizontal">
             <TextBlock Text="Выбрано для оплаты: "/>
             <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Bold"/>
         </StackPanel>
 
-        <DataGrid Grid.Row="4" ItemsSource="{Binding CurrentPageData}"
+        <DataGrid Grid.Row="5" ItemsSource="{Binding CurrentPageData}"
                   Classes="readonly child-checkboxes-handle-tapped" CanUserSortColumns="False"
                   LoadingRow="DataGrid_OnLoadingRow"
                   UnloadingRow="DataGrid_OnUnloadingRow">
@@ -82,7 +105,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <paginator:Paginator Grid.Row="5" PagesQuantity="{Binding PaginatorViewModel.PagesQuantity}"
+        <paginator:Paginator Grid.Row="6" PagesQuantity="{Binding PaginatorViewModel.PagesQuantity}"
                              CurrentPage="{Binding PaginatorViewModel.CurrentPage}"
                              ItemsPerPage="{Binding PaginatorViewModel.ItemsPerPage}" />
     </Grid>

@@ -1,3 +1,5 @@
+using SparkTrack.Core.Shared.Data.Entities;
+
 namespace SparkTrack.AvaloniaImpl.Pages.AdminFinance;
 
 using Controls.ProjectsFilter;
@@ -100,6 +102,11 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             )
             .Subscribe(value => TotalBill = value)
             .DisposeWith(disposables);
+
+        this.WhenAnyValue(it => it.RemainingPayments)
+            .Select(it => it.Sum(p => p.RemainingPayment))
+            .Subscribe(value => TotalRemainingPayments = value)
+            .DisposeWith(disposables);
     }
 
     public string UrlPathSegment => "admin-finance";
@@ -107,7 +114,13 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     public IScreen HostScreen => m_hostScreen.Value;
 
     [Reactive]
-    public IReadOnlyList<SelectableViewModel<PaymentBillViewModel>> CurrentPageData { get; set; } = [];
+    public IReadOnlyList<SelectableViewModel<PaymentBillViewModel>> CurrentPageData { get; private set; } = [];
+
+    [Reactive]
+    public IReadOnlyList<UserRemainingPayment> RemainingPayments { get; private set; } = [];
+    
+    [Reactive]
+    public float TotalRemainingPayments { get; private set; }
 
     [Reactive]
     public float TotalBill { get; private set; }
@@ -127,20 +140,31 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> PayForSelectionCommand { get; }
 
     private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(
-        async () =>
-        {
-            var page = await m_paymentBillsService.GetPageAsync(
-                false,
-                ProjectsFilterViewModel.SelectedProject?.Id,
-                PaginatorViewModel.ToQuery()
-            );
-
-            CurrentPageData = page.Items
-                .Select(it => new SelectableViewModel<PaymentBillViewModel>(new PaymentBillViewModel(it)))
-                .ToArray();
-            PaginatorViewModel.SetPagesQuantity(page.Total);
-        }
+        () => Task.WhenAll(ReloadTableAsync(), ReloadRemainingPaymentsAsync())
     );
+
+    private async Task ReloadTableAsync()
+    {
+        var page = await m_paymentBillsService.GetPageAsync(
+            false,
+            ProjectsFilterViewModel.SelectedProject?.Id,
+            PaginatorViewModel.ToQuery()
+        );
+
+        CurrentPageData = page.Items
+            .Select(it => new SelectableViewModel<PaymentBillViewModel>(new PaymentBillViewModel(it)))
+            .ToArray();
+        PaginatorViewModel.SetPagesQuantity(page.Total);
+    }
+    
+    private async Task ReloadRemainingPaymentsAsync()
+    {
+        var payments =
+            await m_paymentBillsService.GetUsersRemainingPaymentsAsync(ProjectsFilterViewModel.SelectedProject?.Id);
+
+        RemainingPayments = payments;
+    }
+
 
     private async Task<Unit> ToggleIsBonusApprovedAsync(PaymentBillViewModel paymentBillViewModel)
     {
@@ -155,6 +179,8 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
         if (updatedTask is null) return Unit.Default;
 
         paymentBillViewModel.Update(updatedTask);
+
+        await ReloadRemainingPaymentsAsync();
 
         return Unit.Default;
     }

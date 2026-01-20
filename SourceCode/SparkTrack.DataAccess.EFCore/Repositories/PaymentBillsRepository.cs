@@ -73,24 +73,19 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         return await dbContext.SubTasks
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
+            .GroupBy(it => it.ExecutorEmployee)
             .Select(
-                data => new UserRemainingPayment
+                grouping => new UserRemainingPayment
                 {
                     User = new User
                     {
-                        Id = data.ExecutorEmployee.Id,
-                        Email = data.ExecutorEmployee.Email,
-                        Name = data.ExecutorEmployee.Name,
-                        Role = data.ExecutorEmployee.Role,
-                        TelegramTag = data.ExecutorEmployee.TelegramTag
+                        Id = grouping.Key.Id,
+                        Email = grouping.Key.Email,
+                        Name = grouping.Key.Name,
+                        Role = grouping.Key.Role,
+                        TelegramTag = grouping.Key.TelegramTag
                     },
-                    Project = new Project
-                    {
-                        Id = data.Feature.Project.Id,
-                        Name = data.Feature.Project.Name,
-                        Link = data.Feature.Project.Link
-                    },
-                    RemainingPayment = data.IsTimelyBonusApproved ? data.Cost + data.TimelyBonus : data.Cost
+                    RemainingPayment = grouping.Sum(it => it.IsTimelyBonusApproved ? it.Cost + it.TimelyBonus : it.Cost)
                 }
             )
             .ToArrayAsync();

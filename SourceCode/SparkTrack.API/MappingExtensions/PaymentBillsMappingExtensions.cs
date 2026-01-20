@@ -12,7 +12,6 @@ public static class PaymentBillsMappingExtensions
 
     public static UserRemainingPayment ToDomain(this UserRemainingPaymentDTO data) => new()
     {
-        Project = data.Project.ToDomain(),
         User = data.User.ToDomain(),
         RemainingPayment = data.RemainingPayment
     };
