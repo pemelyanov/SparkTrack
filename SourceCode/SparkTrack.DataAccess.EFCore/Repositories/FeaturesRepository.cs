@@ -28,6 +28,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             !showCompleted,
             f => f.TasksList.Any(t => !t.IsCompleted)
         )
+        .OrderBy(it => it.CreatedAt)
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .AsPaginated(pageQuery)
         .CollectAsync();

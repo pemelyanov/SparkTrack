@@ -1,6 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox">
+        xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
+        xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors">
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -9,5 +10,15 @@
 
     <Style Selector="manualCheckBox|ManualCheckBox">
         <Setter Property="Theme" Value="{DynamicResource {x:Type CheckBox}}" />
+    </Style>
+    
+    <Style Selector=":is(Control).child-checkboxes-handle-tapped :is(CheckBox)">
+        <Setter Property="Interaction.Behaviors">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <behaviors:TappedHandledBehavior />
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
     </Style>
 </Styles>

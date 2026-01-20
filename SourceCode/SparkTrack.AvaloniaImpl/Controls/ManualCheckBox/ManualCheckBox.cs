@@ -1,3 +1,5 @@
+using Avalonia.Input;
+
 namespace SparkTrack.AvaloniaImpl.Controls.ManualCheckBox;
 
 using Avalonia.Controls;

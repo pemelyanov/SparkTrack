@@ -35,11 +35,13 @@
         
         <StackPanel Grid.Row="3" HorizontalAlignment="Right" Orientation="Horizontal">
             <TextBlock Text="Выбрано для оплаты: "/>
-            <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Black"/>
+            <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Bold"/>
         </StackPanel>
 
         <DataGrid Grid.Row="4" ItemsSource="{Binding CurrentPageData}"
-                  Classes="readonly" CanUserSortColumns="False">
+                  Classes="readonly child-checkboxes-handle-tapped" CanUserSortColumns="False"
+                  LoadingRow="DataGrid_OnLoadingRow"
+                  UnloadingRow="DataGrid_OnUnloadingRow">
             <DataGrid.Columns>
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected}" />
                 <DataGridTextColumn Header="Идея" Width="*" IsReadOnly="True" Binding="{Binding Model.Feature.Name}" />
