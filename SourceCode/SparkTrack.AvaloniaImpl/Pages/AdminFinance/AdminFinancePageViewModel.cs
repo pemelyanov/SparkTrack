@@ -1,3 +1,4 @@
+using SparkTrack.AvaloniaImpl.Controls.PaymentForm;
 using SparkTrack.Core.Shared.Data.Entities;
 
 namespace SparkTrack.AvaloniaImpl.Pages.AdminFinance;
@@ -187,10 +188,13 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task PayForSelectionAsync()
     {
-        if (!await m_dialogService.ConfirmAsync(
-            $"Выбранные задачи ({m_selectedBills.Value.Count}) на сумму {TotalBill:C} будут помечены как оплаченные. Продолжить?",
-            "Оплата задач"
-        )) return;
+        var paymentViewModel = new PaymentFormViewModel
+        {
+            TotalCost = m_selectedBills.Value.Sum(it => it.SubTask.Cost),
+            TotalTimelyBonus = m_selectedBills.Value.Sum(it => it.SubTask.TimelyBonus)
+        };
+
+        await m_dialogService.ShowAsync(paymentViewModel);
 
         await ReloadTableCommand.Execute().ToTask();
     }

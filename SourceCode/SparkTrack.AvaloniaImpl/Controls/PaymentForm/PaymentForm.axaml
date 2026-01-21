@@ -1,0 +1,56 @@
+<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:paymentForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.PaymentForm"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.PaymentForm.PaymentForm"
+             x:DataType="paymentForm:PaymentFormViewModel"
+             Title="Оплата"
+             PrimaryButtonText="Оплатить"
+             CloseButtonText="Отмена"
+             DefaultButton="Primary">
+    <controls:ContentDialog.Styles>
+        <Style Selector="StackPanel">
+            <Setter Property="Spacing" Value="8" />
+        </Style>
+        
+        <Style Selector="TextBox">
+            <Setter Property="UseFloatingWatermark" Value="True" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Interaction.Behaviors">
+                <BehaviorCollectionTemplate>
+                    <BehaviorCollection>
+                        <behaviors:FloatBoxBehavior />
+                    </BehaviorCollection>
+                </BehaviorCollectionTemplate>
+            </Setter>
+        </Style>
+        
+        <Style Selector="Slider">
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="Maximum" Value="1" />
+            <Setter Property="IsSnapToTickEnabled" Value="True" />
+            <Setter Property="TickFrequency" Value="0.1" />
+            <Setter Property="TickPlacement" Value="TopLeft" />
+        </Style>
+    </controls:ContentDialog.Styles>
+    <StackPanel>
+        <StackPanel>
+            <TextBox Watermark="{Binding TotalCost, StringFormat='Основной оклад (макс. {0:C})'}" 
+                     Text="{Binding EnteredCost, Converter={x:Static converters:StringToFloatConverter.Instance}}" />
+            <Slider Value="{Binding CostRatio}" />
+        </StackPanel>
+        
+        <StackPanel>
+            <TextBox Watermark="{Binding TotalTimelyBonus, StringFormat='Бонус за срок (макс. {0:C})'}" 
+                     Text="{Binding EnteredTimelyBonus, Converter={x:Static converters:StringToFloatConverter.Instance}}" />
+            <Slider Value="{Binding TimelyBonusRatio}" />
+        </StackPanel>
+        
+        <TextBox Watermark="Бонусная премия" Text="{Binding EnteredBonus}" />
+    </StackPanel>
+</controls:ContentDialog>

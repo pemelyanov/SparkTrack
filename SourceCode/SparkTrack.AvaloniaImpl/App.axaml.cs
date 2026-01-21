@@ -17,6 +17,7 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        
         var ruCulture = CultureInfo.GetCultureInfo("ru-RU");
         CultureInfo.CurrentCulture = ruCulture;
         CultureInfo.CurrentUICulture = ruCulture;

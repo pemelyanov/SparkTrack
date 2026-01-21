@@ -27,7 +27,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
             Position = NotificationPosition.BottomCenter,
             ZIndex = 1000
         };
-        
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
