@@ -35,7 +35,39 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
             subTaskData.CompletedAt = subTask.CompletedAt;
         }
     }
-    
+
+    public async Task<IReadOnlyList<SubTask>> EditRangeAsync(IReadOnlyList<SubTask> subTasksList)
+    {
+        var transaction = await dbContext.Database.BeginTransactionAsync();
+        var editedTasks = new List<SubTask>();
+
+        try
+        {
+            foreach (var subTask in subTasksList)
+            {
+                try
+                {
+                    if (await EditAsync(subTask) is not { } edited) continue;
+
+                    editedTasks.Add(edited);
+                }
+                catch (ConflictException)
+                {
+                    // ignore
+                }
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            return [];
+        }
+
+        return editedTasks;
+    }
+
     private async Task<SubTask?> UpdateSubTaskAsync(SubTask subTask, Action<SubTaskData> updateAction)
     {
         var subTaskData = await dbContext.SubTasks.Where(it => it.Id == subTask.Id)
@@ -54,11 +86,11 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
         {
             throw new ConflictException("SubTask was modified early", e);
         }
-        
+
         subTaskData = await dbContext.SubTasks.Where(it => it.Id == subTask.Id)
             .Include(it => it.ExecutorEmployee)
             .FirstOrDefaultAsync();
-        
+
         return GetToSubTaskExpression().Compile().Invoke(subTaskData!);
     }
 

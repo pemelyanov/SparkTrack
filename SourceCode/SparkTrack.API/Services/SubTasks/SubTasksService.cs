@@ -1,5 +1,6 @@
 namespace SparkTrack.API.Services.SubTasks;
 
+using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using Core.Shared.Services.SubTasks;
 using Delegates;
@@ -34,4 +35,6 @@ public class SubTasksService(ClientFactory<SubTasksClient> subTasksClientFactory
 
         return dto?.ToDomain();
     }
+
+    public Task<IReadOnlyList<SubTask>> SetIsTimelyBonusApprovedAsync(IReadOnlyList<EditableEntityIdentity> identitiesList, bool value) => throw new NotImplementedException();
 }

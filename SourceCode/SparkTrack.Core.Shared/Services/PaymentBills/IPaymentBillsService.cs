@@ -5,7 +5,11 @@ using Data.Entities;
 
 public interface IPaymentBillsService
 {
-    public Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery);
+    Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery);
 
-    public Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
+    Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
+
+    Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment);
+
+    Task PayBonusAsync(Guid employeeId, float payment);
 }

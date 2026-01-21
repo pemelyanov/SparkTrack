@@ -4,6 +4,7 @@ using Authorization;
 using Exceptions;
 using Extensions;
 using Repositories;
+using Shared.Data;
 using Shared.Data.Entities;
 using Shared.Enums;
 using Shared.Services.SubTasks;
@@ -22,7 +23,7 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
             IsTimelyBonusApproved = value,
             Version = currentVersion
         };
-        
+
         return await subTasksRepository.EditAsync(subTask);
     }
 
@@ -42,7 +43,7 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
         var paymentStatus = EPaymentStatus.None;
         DateTime? completedAt = null;
         var isBonusApproved = subTask.IsTimelyBonusApproved;
-        
+
         if (isCompleted)
         {
             isCompleted = false;
@@ -50,7 +51,7 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
         else
         {
             isCompleted = true;
-            paymentStatus = EPaymentStatus.OnPayment;  
+            paymentStatus = EPaymentStatus.OnPayment;
             completedAt = DateTime.UtcNow;
             if (completedAt <= subTask.Deadline) isBonusApproved = true;
         }
@@ -78,7 +79,32 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
             PaymentStatus = value,
             Version = currentVersion
         };
-        
+
         return await subTasksRepository.EditAsync(subTask);
+    }
+
+    public async Task<IReadOnlyList<SubTask>> SetIsTimelyBonusApprovedAsync(
+        IReadOnlyList<EditableEntityIdentity> identitiesList,
+        bool value
+    )
+    {
+        var subTasksTasks = identitiesList.Select(
+            async identity =>
+            {
+                var subTask = await subTasksRepository.GetAsync(identity.Id);
+
+                if (subTask is null) return null;
+
+                return subTask with
+                {
+                    IsTimelyBonusApproved = value,
+                    Version = identity.Version
+                };
+            }
+        );
+
+        var subTasks = (await Task.WhenAll(subTasksTasks)).Where(it => it is not null).Select(it => it!).ToArray();
+
+        return await subTasksRepository.EditRangeAsync(subTasks);
     }
 }

@@ -23,4 +23,11 @@ public class PaymentBillsService(
 
     public Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId) =>
         paymentBillsRepository.GetUsersRemainingPaymentsAsync(projectId);
+
+    public Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task PayBonusAsync(Guid employeeId, float payment) => throw new NotImplementedException();
 }
