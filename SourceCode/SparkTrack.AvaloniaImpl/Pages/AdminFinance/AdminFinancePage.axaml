@@ -49,12 +49,16 @@
             <Separator Margin="0 8" />
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Оплатить" Classes="accent" Command="{Binding PayForSelectionCommand}" />
-            <Button Content="Одобрить премию" Command="{Binding ApproveBonusForSelectionCommand}" />
-            <Button Content="Убрать премию" Command="{Binding UnapproveBonusForSelectionCommand}" />
-            <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
-        </StackPanel>
+        <Grid Grid.Row="3" ColumnDefinitions="Auto *" ColumnSpacing="8">
+            <Button Grid.Column="0" Classes="accent" Content="Бонусная премия" Command="{Binding PayBonusCommand}" />
+            
+            <StackPanel Grid.Column="1" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Оплатить" Classes="accent" Command="{Binding PayForSelectionCommand}" />
+                <Button Content="Одобрить премию" Command="{Binding ApproveBonusForSelectionCommand}" />
+                <Button Content="Убрать премию" Command="{Binding UnapproveBonusForSelectionCommand}" />
+                <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
+            </StackPanel>
+        </Grid>
         
         <StackPanel Grid.Row="4" HorizontalAlignment="Right" Orientation="Horizontal">
             <TextBlock Text="Выбрано для оплаты: "/>

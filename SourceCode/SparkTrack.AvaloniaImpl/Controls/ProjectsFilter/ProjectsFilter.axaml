@@ -11,7 +11,7 @@
         <converters:NullValueToListConverter x:Key="NullValueToListConverter" />
     </UserControl.Resources>
     <Grid ColumnDefinitions="Auto *">
-        <TextBlock Grid.Column="0" Text="Проект: " VerticalAlignment="Center"/>
+        <TextBlock Grid.Column="0" Text="Канал: " VerticalAlignment="Center"/>
         <ComboBox Grid.Column="1" VerticalAlignment="Center" 
                   ItemsSource="{Binding ProjectsList, Converter={StaticResource NullValueToListConverter}}"
                   SelectedItem="{Binding SelectedProject}"

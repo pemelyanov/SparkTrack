@@ -3,6 +3,7 @@ using SparkTrack.Core.Shared.Data.Entities;
 
 namespace SparkTrack.AvaloniaImpl.Pages.AdminFinance;
 
+using Controls.BonusForm;
 using Controls.ProjectsFilter;
 using Core.Shared.Services.PaymentBills;
 using Core.Shared.Services.SubTasks;
@@ -59,6 +60,8 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             () => SetBonusApprovementForSelectionAsync(false),
             m_selectedBills.Select(selection => selection.Any(it => it.IsTimelyBonusApproved))
         );
+
+        PayBonusCommand = ReactiveCommand.CreateFromTask(PayBonusAsync);
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -139,6 +142,8 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> UnapproveBonusForSelectionCommand { get; }
 
     public ReactiveCommand<Unit, Unit> PayForSelectionCommand { get; }
+    
+    public ReactiveCommand<Unit, Unit> PayBonusCommand { get; }
 
     private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(
         () => Task.WhenAll(ReloadTableAsync(), ReloadRemainingPaymentsAsync())
@@ -200,4 +205,13 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     }
 
     private async Task SetBonusApprovementForSelectionAsync(bool value) { }
+
+    private async Task PayBonusAsync()
+    {
+        var bonusViewModel = new BonusFormViewModel();
+        
+        await m_dialogService.ShowAsync(bonusViewModel);
+
+        await ReloadTableCommand.Execute().ToTask();
+    }
 }
