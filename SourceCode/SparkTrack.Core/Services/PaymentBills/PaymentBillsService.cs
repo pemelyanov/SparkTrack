@@ -7,11 +7,13 @@ using Shared.Data;
 using Shared.Data.Entities;
 using Shared.Enums;
 using Shared.Services.PaymentBills;
+using Transactions;
 
 public class PaymentBillsService(
     IPaymentBillsRepository paymentBillsRepository,
     ISubTasksRepository subTasksRepository,
-    IAuthorizationService authorizationService
+    IAuthorizationService authorizationService,
+    ITransactionWrapper transactionWrapper
 ) : IPaymentBillsService
 {
     public Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery)
@@ -45,9 +47,13 @@ public class PaymentBillsService(
         var timelyBonusPaymentRatio = timelyBonusPayment / totalTimelyBonusPayments;
 
         var paymentsList = new List<PaymentInfo>();
+        var paidTasks = new List<SubTask>();
 
         foreach (var task in tasks)
         {
+            bool isMainPaymentCompleted = false;
+            bool isTimelyBonusPaymentCompleted = false;
+            
             var currentMainPayment = task.RemainingMainPayment * mainPaymentsRatio;
 
             if (currentMainPayment > 0)
@@ -58,7 +64,9 @@ public class PaymentBillsService(
                     Payment = currentMainPayment,
                     PaymentType = EPaymentType.Main,
                     TaskId = task.Id
-                });   
+                });
+
+                isMainPaymentCompleted = task.RemainingMainPayment - currentMainPayment <= 0;
             }
 
             var currentTimelyBonusPayment = task.RemainingTimelyBonusPayment * timelyBonusPaymentRatio;
@@ -72,10 +80,24 @@ public class PaymentBillsService(
                     PaymentType = EPaymentType.TimelyBonus,
                     TaskId = task.Id
                 }); 
+                
+                isTimelyBonusPaymentCompleted = task.RemainingTimelyBonusPayment - currentTimelyBonusPayment <= 0;
             }
+
+            if (isMainPaymentCompleted && isTimelyBonusPaymentCompleted)
+                paidTasks.Add(task with
+                {
+                    PaymentStatus = EPaymentStatus.Paid
+                });
         }
 
-        await paymentBillsRepository.AddPaymentsRangeAsync(paymentsList);
+        await transactionWrapper.ExecuteInTransactionAsync(async () =>
+            {
+                await paymentBillsRepository.AddPaymentsRangeAsync(paymentsList);
+
+                await subTasksRepository.EditRangeAsync(paidTasks);
+            }
+        );
     }
 
     public Task PayBonusAsync(Guid employeeId, float payment, string? comment)

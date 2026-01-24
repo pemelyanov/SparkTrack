@@ -112,7 +112,7 @@ app.MapControllers();
 
 var database = app.Services.GetRequiredService<SparkTrackDbContext>().Database;
 
-//database.EnsureDeleted();
+database.EnsureDeleted();
 database.EnsureCreated();
 
 var seeders = app.Services.GetServices<IDataSeeder>();

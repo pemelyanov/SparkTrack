@@ -46,7 +46,7 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksRepo
 
     public async Task<IReadOnlyList<SubTask>> EditRangeAsync(IReadOnlyList<SubTask> subTasksList)
     {
-        var transaction = await dbContext.Database.BeginTransactionAsync();
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
         var editedTasks = new List<SubTask>();
 
         try

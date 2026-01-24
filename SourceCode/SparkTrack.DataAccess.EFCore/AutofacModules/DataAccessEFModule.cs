@@ -3,6 +3,7 @@
 using Authentication.DataAccess.EFCore;
 using Autofac;
 using Repositories;
+using Transactions;
 
 public class DataAccessEFModule : Module
 {
@@ -16,5 +17,6 @@ public class DataAccessEFModule : Module
         builder.RegisterType<CommentsRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<SubTasksRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PaymentBillsRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<TransactionWrapper>().AsImplementedInterfaces().InstancePerLifetimeScope();
     }
 }
