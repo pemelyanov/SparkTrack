@@ -1,13 +1,15 @@
 namespace SparkTrack.DataAccess.EFCore.Repositories;
 
+using Core.Data.Entities;
 using Core.Exceptions;
 using Core.Repositories;
 using Core.Shared.Data.Entities;
+using Core.Shared.Enums;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksRepository
+internal class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksRepository
 {
     public Task<SubTask?> GetAsync(Guid id) => dbContext.SubTasks
         .AsNoTracking()
@@ -16,6 +18,12 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
             GetToSubTaskExpression()
         )
         .FirstOrDefaultAsync();
+
+    public async Task<IReadOnlyList<SubTaskWithPayments>> GetListAsync(IReadOnlyList<Guid> idList) => await dbContext
+        .SubTasks
+        .Where(it => idList.Contains(it.Id))
+        .Select(GetToSubTaskWithPaymentsExpression())
+        .ToArrayAsync();
 
     public Task<SubTask?> EditAsync(SubTask subTask)
     {
@@ -114,4 +122,54 @@ public class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksReposi
         TimelyBonus = data.TimelyBonus,
         IsTimelyBonusApproved = data.IsTimelyBonusApproved
     };
+
+    private Expression<Func<SubTaskData, SubTaskWithPayments>> GetToSubTaskWithPaymentsExpression() => data =>
+        new SubTaskWithPayments
+        {
+            Id = data.Id,
+            Name = data.Name,
+            ExecutorEmployee = new User
+            {
+                Id = data.ExecutorEmployee.Id,
+                Email = data.ExecutorEmployee.Email,
+                Name = data.ExecutorEmployee.Name,
+                Role = data.ExecutorEmployee.Role
+            },
+            Deadline = data.Deadline,
+            Cost = data.Cost,
+            Version = data.Version,
+            IsCompleted = data.IsCompleted,
+            PaymentStatus = data.PaymentStatus,
+            CompletedAt = data.CompletedAt,
+            TimelyBonus = data.TimelyBonus,
+            IsTimelyBonusApproved = data.IsTimelyBonusApproved,
+            Payments = data.Payments.Select(
+                    p => new PaymentInfo
+                    {
+                        Id = p.Id,
+                        Payment = p.Payment,
+                        PaymentType = p.PaymentType,
+                        TaskId = p.TaskId,
+                        Admin = new User
+                        {
+                            Id = p.Admin.Id,
+                            Email = p.Admin.Email,
+                            Name = p.Admin.Name,
+                            Role = p.Admin.Role,
+                            TelegramTag = p.Admin.TelegramTag
+                        }
+                    }
+                )
+                .ToArray(),
+            RemainingMainPayment =
+                Math.Max(
+                    data.Cost - data.Payments.Where(p => p.PaymentType == EPaymentType.Main).Sum(p => p.Payment),
+                    0
+                ),
+            RemainingTimelyBonusPayment = Math.Max(
+                data.TimelyBonus - data.Payments.Where(p => p.PaymentType == EPaymentType.TimelyBonus)
+                    .Sum(p => p.Payment),
+                0
+            )
+        };
 }

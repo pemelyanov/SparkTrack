@@ -5,4 +5,6 @@ public record PaymentBillDTO
     public required FeatureDTO Feature { get; init; }
     
     public required SubTaskDTO SubTask { get; init; }
+    
+    public required IReadOnlyList<PaymentDTO> PaymentsList { get; init; }
 }

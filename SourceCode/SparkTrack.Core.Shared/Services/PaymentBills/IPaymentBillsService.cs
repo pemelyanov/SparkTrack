@@ -9,7 +9,11 @@ public interface IPaymentBillsService
 
     Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
 
-    Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment);
+    Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment);
 
-    Task PayBonusAsync(Guid employeeId, float payment);
+    Task PayBonusAsync(Guid employeeId, float payment, string? comment);
+
+    Task DeleteBillAsync(Guid id);
+
+    Task DeleteBonusAsync(Guid id);
 }

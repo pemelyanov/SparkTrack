@@ -49,4 +49,52 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
             }
         );
     }
+
+    [HttpPut("bills")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            () => paymentBillsService.PayBillsAsync(tasksIdList, payment, timelyBonusPayment)
+        );
+    }
+
+    [HttpPut("bonus")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> PayBonusAsync(Guid employeeId, float payment, string? comment)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            () => paymentBillsService.PayBonusAsync(employeeId, payment, comment)
+        );
+    }
+
+    [HttpDelete("bill/{id}")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> DeleteBillAsync(Guid id)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            () => paymentBillsService.DeleteBillAsync(id)
+        );
+    }
+
+    [HttpGet("bonus/{id}")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> DeleteBonusAsync(Guid id)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            () => paymentBillsService.DeleteBonusAsync(id)
+        );
+    }
 }

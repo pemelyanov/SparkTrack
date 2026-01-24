@@ -16,6 +16,8 @@ public record SubTaskData
     public required DateTime Deadline { get; set; }
 
     public FeatureData Feature { get; set; } = null!;
+
+    public ICollection<PaymentData> Payments { get; } = [];
     
     public float Cost { get; set; }
     

@@ -26,7 +26,11 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return list.Select(it => it.ToDomain()).ToArray();
     }
 
-    public Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment) => throw new NotImplementedException();
+    public Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment) => throw new NotImplementedException();
 
-    public Task PayBonusAsync(Guid employeeId, float payment) => throw new NotImplementedException();
+    public Task PayBonusAsync(Guid employeeId, float payment, string? comment) => throw new NotImplementedException();
+
+    public Task DeleteBillAsync(Guid id) => throw new NotImplementedException();
+
+    public Task DeleteBonusAsync(Guid id) => throw new NotImplementedException();
 }

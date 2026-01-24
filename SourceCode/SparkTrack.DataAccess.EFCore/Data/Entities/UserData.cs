@@ -15,4 +15,6 @@ public record UserData
     public string? TelegramTag { get; set; }
     
     public required string PasswordHash { get; set; }
+    
+    public ICollection<BonusPaymentData> Bonuses { get; } = [];
 }

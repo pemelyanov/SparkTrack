@@ -8,12 +8,22 @@ public static class PaymentBillsMappingExtensions
     public static PaymentBillDTO ToDTO(this PaymentBill data) => new()
     {
         Feature = data.Feature.ToDTO(),
-        SubTask = data.SubTask.ToDTO()
+        SubTask = data.SubTask.ToDTO(),
+        PaymentsList = data.PaymentsList.Select(it => it.ToDTO()).ToArray()
     };
 
     public static UserRemainingPaymentDTO ToDTO(this UserRemainingPayment data) => new()
     {
         User = data.User.ToDTO(),
         RemainingPayment = data.RemainingPayment
+    };
+
+    public static PaymentDTO ToDTO(this PaymentInfo data) => new()
+    {
+        Id = data.Id,
+        Admin = data.Admin.ToDTO(),
+        Payment = data.Payment,
+        PaymentType = data.PaymentType,
+        TaskId = data.TaskId
     };
 }

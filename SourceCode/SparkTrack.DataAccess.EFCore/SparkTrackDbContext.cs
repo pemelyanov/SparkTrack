@@ -21,6 +21,10 @@ public class SparkTrackDbContext(
     public DbSet<AttachmentData> Attachments => Set<AttachmentData>();
     
     public DbSet<CommentData> Comments => Set<CommentData>();
+    
+    public DbSet<PaymentData> Payments => Set<PaymentData>();
+    
+    public DbSet<BonusPaymentData> Bonuses => Set<BonusPaymentData>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

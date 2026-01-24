@@ -4,6 +4,7 @@ using Core.Repositories;
 using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
+using Data.Entities;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
     )
     {
         var targetPaymentStatus = isPaid ? EPaymentStatus.Paid : EPaymentStatus.OnPayment;
-        
+
         var page = await dbContext.SubTasks
             .AsNoTracking()
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
@@ -59,7 +60,25 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         CompletedAt = data.CompletedAt,
                         TimelyBonus = data.TimelyBonus,
                         IsTimelyBonusApproved = data.IsTimelyBonusApproved
-                    }
+                    },
+                    PaymentsList = data.Payments.Select(
+                            p => new PaymentInfo
+                            {
+                                Id = p.Id,
+                                Admin = new User
+                                {
+                                    Id = p.Admin.Id,
+                                    Email = p.Admin.Email,
+                                    Name = p.Admin.Name,
+                                    Role = p.Admin.Role,
+                                    TelegramTag = p.Admin.TelegramTag
+                                },
+                                Payment = p.Payment,
+                                PaymentType = p.PaymentType,
+                                TaskId = p.TaskId
+                            }
+                        )
+                        .ToArray()
                 }
             )
             .AsPaginated(pageQuery)
@@ -85,9 +104,66 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Role = grouping.Key.Role,
                         TelegramTag = grouping.Key.TelegramTag
                     },
-                    RemainingPayment = grouping.Sum(it => it.IsTimelyBonusApproved ? it.Cost + it.TimelyBonus : it.Cost)
+                    RemainingPayment = grouping.Sum(
+                        it => it.IsTimelyBonusApproved
+                            ? Math.Max(
+                                it.Cost - it.Payments.Where(p => p.PaymentType == EPaymentType.Main)
+                                    .Sum(p => p.Payment),
+                                0
+                            ) + Math.Max(
+                                it.TimelyBonus - it.Payments.Where(p => p.PaymentType == EPaymentType.TimelyBonus)
+                                    .Sum(p => p.Payment),
+                                0
+                            )
+                            : Math.Max(
+                                it.Cost - it.Payments.Where(p => p.PaymentType == EPaymentType.Main)
+                                    .Sum(p => p.Payment),
+                                0
+                            )
+                    )
                 }
             )
             .ToArrayAsync();
     }
+
+    public async Task AddPaymentsRangeAsync(IReadOnlyList<PaymentInfo> paymentsList)
+    {
+        var paymentsDataList = paymentsList.Select(
+                it => new PaymentData
+                {
+                    Id = it.Id,
+                    AdminId = it.Admin.Id,
+                    Payment = it.Payment,
+                    CreatedAt = DateTime.UtcNow,
+                    PaymentType = it.PaymentType,
+                    TaskId = it.TaskId
+                }
+            )
+            .ToArray();
+
+        await dbContext.Payments.AddRangeAsync(paymentsDataList);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task AddBonusPaymentAsync(BonusPaymentInfo bonusPaymentInfo)
+    {
+        var bonusPaymentDate = new BonusPaymentData
+        {
+            Id = bonusPaymentInfo.Id,
+            AdminId = bonusPaymentInfo.Admin.Id,
+            Comment = bonusPaymentInfo.Comment,
+            Payment = bonusPaymentInfo.Payment,
+            CreatedAt = DateTime.Now,
+            EmployeeId = bonusPaymentInfo.EmployeeId
+        };
+
+        await dbContext.Bonuses.AddAsync(bonusPaymentDate);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    public Task DeletePaymentAsync(Guid id) => throw new NotImplementedException();
+
+    public Task DeleteBonusPaymentAsync(Guid id) => throw new NotImplementedException();
 }
