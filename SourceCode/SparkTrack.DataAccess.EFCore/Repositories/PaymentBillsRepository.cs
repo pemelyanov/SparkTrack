@@ -88,14 +88,14 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         return page;
     }
 
-    public async Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId)
+    public async Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId)
     {
         return await dbContext.SubTasks
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
             .GroupBy(it => it.ExecutorEmployee)
             .Select(
-                grouping => new UserRemainingPayment
+                grouping => new UserPayment
                 {
                     User = new User
                     {
@@ -105,7 +105,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Role = grouping.Key.Role,
                         TelegramTag = grouping.Key.TelegramTag
                     },
-                    RemainingPayment = grouping.Sum(
+                    Payment = grouping.Sum(
                         it => it.IsTimelyBonusApproved
                             ? Math.Max(
                                 it.Cost - it.Payments.Where(p => p.PaymentType == EPaymentType.Main)
@@ -124,7 +124,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     )
                 }
             )
-            .Where(it => it.RemainingPayment > 0)
+            .Where(it => it.Payment > 0)
             .ToArrayAsync();
     }
 

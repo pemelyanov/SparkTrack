@@ -1,8 +1,8 @@
 namespace SparkTrack.Core.Shared.Data.Entities;
 
-public record UserRemainingPayment
+public record UserPayment
 {
     public required User User { get; init; }
     
-    public float RemainingPayment { get; init; }
+    public float Payment { get; init; }
 }

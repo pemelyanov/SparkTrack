@@ -20,6 +20,7 @@ using Core.Shared.Eventing;
 using Fanatiki.MVVM;
 using Installers;
 using Pages.AdminFinance;
+using Pages.AdminFinance.Tabs.PendingPayments;
 using Pages.Authorization;
 using Pages.Feature;
 using Pages.FeaturesList;
@@ -49,6 +50,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<ChangePasswordFormViewModel>();
         builder.RegisterType<AdminFinancePageViewModel>();
         builder.RegisterType<BonusFormViewModel>();
+        builder.RegisterType<PendingPaymentsViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

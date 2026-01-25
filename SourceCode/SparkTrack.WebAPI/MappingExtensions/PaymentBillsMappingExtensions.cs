@@ -12,10 +12,10 @@ public static class PaymentBillsMappingExtensions
         PaymentsList = data.PaymentsList.Select(it => it.ToDTO()).ToArray()
     };
 
-    public static UserRemainingPaymentDTO ToDTO(this UserRemainingPayment data) => new()
+    public static UserRemainingPaymentDTO ToDTO(this UserPayment data) => new()
     {
         User = data.User.ToDTO(),
-        RemainingPayment = data.RemainingPayment
+        RemainingPayment = data.Payment
     };
 
     public static PaymentDTO ToDTO(this PaymentInfo data) => new()

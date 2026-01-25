@@ -17,7 +17,7 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return new ReadOnlyPagedData<PaymentBill>(page.Items.Select(it => it.ToDomain()).ToArray(), page.Total);
     }
 
-    public async Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId)
+    public async Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId)
     {
         using var wrapper = financeClientFactory.Invoke();
 

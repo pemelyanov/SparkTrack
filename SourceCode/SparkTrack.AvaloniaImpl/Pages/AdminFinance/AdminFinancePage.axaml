@@ -5,119 +5,22 @@
              xmlns:adminFinance="clr-namespace:SparkTrack.AvaloniaImpl.Pages.AdminFinance"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
-             xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
-             xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
-             xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
-             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
-             xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
-             xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
-             xmlns:remainingPaymentCell="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RemainingPaymentCell"
+             xmlns:pendingPayments="clr-namespace:SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PendingPayments"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.AdminFinancePage"
              x:DataType="adminFinance:AdminFinancePageViewModel"
              x:Name="Root">
-    <Grid RowDefinitions="Auto Auto Auto Auto Auto * Auto" RowSpacing="8">
+    <Grid RowDefinitions="Auto *" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type adminFinance:AdminFinancePageViewModel}"
                    x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
 
-        <WrapPanel Grid.Row="1">
-            <!-- TODO: Filters block -->
-            <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
-        </WrapPanel>
-
-        <StackPanel Grid.Row="2">
-            <Grid ColumnDefinitions="Auto *">
-                <DataGrid Classes="readonly" ItemsSource="{Binding RemainingPayments}" HorizontalAlignment="Left">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Сотрудник" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <userName:UserName User="{Binding User}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Ожидаемая выплата"
-                                            Binding="{Binding RemainingPayment, StringFormat='{}{0:C}'}" />
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <TextBlock Grid.Column="1" Classes="subtitle" HorizontalAlignment="Right"
-                           Text="{Binding TotalRemainingPayments, StringFormat='Общий долг по зарплатам: {0:C}'}" />
-            </Grid>
-            <Separator Margin="0 8" />
-        </StackPanel>
-
-        <Grid Grid.Row="3" ColumnDefinitions="Auto *" ColumnSpacing="8">
-            <Button Grid.Column="0" Classes="accent" Content="Бонусная премия" Command="{Binding PayBonusCommand}" />
-
-            <StackPanel Grid.Column="1" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Оплатить" Classes="accent" Command="{Binding PayForSelectionCommand}" />
-                <Button Content="Одобрить премию" Command="{Binding ApproveBonusForSelectionCommand}" />
-                <Button Content="Убрать премию" Command="{Binding UnapproveBonusForSelectionCommand}" />
-                <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
-            </StackPanel>
-        </Grid>
-
-        <StackPanel Grid.Row="4" HorizontalAlignment="Right" Orientation="Horizontal">
-            <TextBlock Text="Выбрано для оплаты: " />
-            <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Bold" />
-        </StackPanel>
-
-        <DataGrid Grid.Row="5" ItemsSource="{Binding CurrentPageData}"
-                  Classes="readonly child-checkboxes-handle-tapped" CanUserSortColumns="False"
-                  LoadingRow="DataGrid_OnLoadingRow"
-                  UnloadingRow="DataGrid_OnUnloadingRow">
-            <DataGrid.Columns>
-                <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected}" />
-                <DataGridTextColumn Header="Идея" Width="*" IsReadOnly="True" Binding="{Binding Model.Feature.Name}" />
-                <DataGridTextColumn Header="Задача" IsReadOnly="True" Binding="{Binding Model.SubTask.Name}" />
-                <DataGridTemplateColumn Header="Исполнитель" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <userName:UserName User="{Binding Model.SubTask.ExecutorEmployee}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True"
-                                    IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
-                                    Header="Канал" Binding="{Binding Model.Feature.Project.Name}" />
-                <DataGridTextColumn Header="Дедлайн" IsReadOnly="True"
-                                    Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
-                <DataGridTextColumn Header="Дата выполнения" IsReadOnly="True"
-                                    Binding="{Binding Model.SubTask.CompletedAt, StringFormat={x:Static constants:DateFormats.ShortRu},
-                                    TargetNullValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTemplateColumn Header="Стоимость (опл./всего)" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <remainingPaymentCell:RemainingPaymentCell PaymentType="Main" 
-                                                                       PaymentBill="{Binding Model}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Премия за срок (опл./всего)" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <remainingPaymentCell:RemainingPaymentCell PaymentType="TimelyBonus"
-                                                                       PaymentBill="{Binding Model}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Одобрение премии" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <manualCheckBox:ManualCheckBox
-                                Command="{Binding #Root.ViewModel.ToggleIsBonusApprovedCommand}"
-                                CommandParameter="{Binding Model}"
-                                IsChecked="{Binding Model.IsTimelyBonusApproved}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <paginator:Paginator Grid.Row="6" PagesQuantity="{Binding PaginatorViewModel.PagesQuantity}"
-                             CurrentPage="{Binding PaginatorViewModel.CurrentPage}"
-                             ItemsPerPage="{Binding PaginatorViewModel.ItemsPerPage}" />
+        <TabControl Grid.Row="1">
+            <TabItem Header="Оплата">
+                <pendingPayments:PendingPayments DataContext="{Binding PendingPaymentsViewModel}" />
+            </TabItem>
+            
+            <TabItem Header="История платежей" />
+        </TabControl>
     </Grid>
 </UserControl>

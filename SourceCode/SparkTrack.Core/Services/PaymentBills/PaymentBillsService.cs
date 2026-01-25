@@ -25,7 +25,7 @@ public class PaymentBillsService(
         return paymentBillsRepository.GetPageAsync(isPaid, employeeId, projectId, pageQuery);
     }
 
-    public Task<IReadOnlyList<UserRemainingPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId) =>
+    public Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId) =>
         paymentBillsRepository.GetUsersRemainingPaymentsAsync(projectId);
 
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
