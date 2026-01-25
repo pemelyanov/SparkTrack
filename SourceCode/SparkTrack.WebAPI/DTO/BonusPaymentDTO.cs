@@ -11,4 +11,6 @@ public record BonusPaymentDTO
     public string? Comment { get; init; }
     
     public float Payment { get; init; }
+    
+    public required DateTime CreatedAt { get; init; }
 }

@@ -156,7 +156,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
             AdminId = bonusPaymentInfo.Admin.Id,
             Comment = bonusPaymentInfo.Comment,
             Payment = bonusPaymentInfo.Payment,
-            CreatedAt = DateTime.Now,
+            CreatedAt = bonusPaymentInfo.CreatedAt,
             EmployeeId = bonusPaymentInfo.EmployeeId
         };
 

@@ -6,6 +6,7 @@ using Autofac;
 using Controls.Account;
 using Controls.Attachment;
 using Controls.AttachmentsPanel;
+using Controls.BonusForm;
 using Controls.ChangePasswordForm;
 using Controls.Comment;
 using Controls.CommentEdit;
@@ -47,6 +48,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<SubTaskViewModel>();
         builder.RegisterType<ChangePasswordFormViewModel>();
         builder.RegisterType<AdminFinancePageViewModel>();
+        builder.RegisterType<BonusFormViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

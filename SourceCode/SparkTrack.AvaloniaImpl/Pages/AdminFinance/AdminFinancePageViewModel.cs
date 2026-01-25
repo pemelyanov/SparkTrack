@@ -22,10 +22,11 @@ using ViewModels;
 
 public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 {
-    private readonly Lazy<IScreen>        m_hostScreen;
-    private readonly IPaymentBillsService m_paymentBillsService;
-    private readonly ISubTasksService     m_subTasksService;
-    private readonly IDialogService       m_dialogService;
+    private readonly Lazy<IScreen>            m_hostScreen;
+    private readonly IPaymentBillsService     m_paymentBillsService;
+    private readonly ISubTasksService         m_subTasksService;
+    private readonly IDialogService           m_dialogService;
+    private readonly Func<BonusFormViewModel> m_bonusFormViewModelFactory;
 
     private readonly BehaviorObservableSubject<IReadOnlyList<PaymentBillViewModel>> m_selectedBills = new([]);
 
@@ -34,13 +35,15 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
         IPaymentBillsService paymentBillsService,
         ProjectsFilterViewModel projectsFilterViewModel,
         ISubTasksService subTasksService,
-        IDialogService dialogService
+        IDialogService dialogService,
+        Func<BonusFormViewModel> bonusFormViewModelFactory
     )
     {
         m_hostScreen = hostScreen;
         m_paymentBillsService = paymentBillsService;
         m_subTasksService = subTasksService;
         m_dialogService = dialogService;
+        m_bonusFormViewModelFactory = bonusFormViewModelFactory;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
         ReloadTableCommand = CreateReloadTableCommand();
@@ -212,9 +215,17 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task PayBonusAsync()
     {
-        var bonusViewModel = new BonusFormViewModel();
+        var bonusViewModel = m_bonusFormViewModelFactory.Invoke();
 
         await m_dialogService.ShowAsync(bonusViewModel);
+        
+        if(bonusViewModel.SelectedUser is null || bonusViewModel.Payment <= 0) return;
+
+        await m_paymentBillsService.PayBonusAsync(
+            bonusViewModel.SelectedUser.Id,
+            bonusViewModel.Payment,
+            bonusViewModel.Comment
+        );
 
         await ReloadTableCommand.Execute().ToTask();
     }

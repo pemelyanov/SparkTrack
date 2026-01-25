@@ -118,7 +118,8 @@ public class PaymentBillsService(
                 Comment = comment,
                 Payment = payment,
                 Admin = admin,
-                EmployeeId = employeeId
+                EmployeeId = employeeId,
+                CreatedAt = DateTime.UtcNow
             }
         );
     }
