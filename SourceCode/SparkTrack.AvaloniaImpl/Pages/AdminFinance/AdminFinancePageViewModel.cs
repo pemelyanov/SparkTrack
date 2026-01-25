@@ -78,25 +78,25 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             .DisposeWith(disposables);
 
         this.WhenAnyValue(it => it.CurrentPageData)
-            .Select(list => list.Select(it => it.WhenAnyValue(v => v.IsSelected)
-                    .Select(isSelected => new
-                        {
-                            it,
-                            isSelected
-                        }
+            .Select(list => list.Count == 0
+                ? Observable.Return<IList<SelectableViewModel<PaymentBillViewModel>>>([])
+                : list.Select(it => it.WhenAnyValue(v => v.IsSelected)
+                        .Select(_ => it
+                        )
                     )
-                )
-                .CombineLatest()
+                    .CombineLatest()
             )
             .Switch()
-            .Select(list => list.Where(it => it.isSelected).Select(it => it.it.Model).ToArray())
+            .Select(list => list.Where(it => it.IsSelected).Select(it => it.Model).ToArray())
             .Throttle(TimeSpan.FromMilliseconds(50))
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(m_selectedBills)
             .DisposeWith(disposables);
 
         m_selectedBills
-            .Select(it => it.Sum(b
+            .Select(it => it.Count == 0
+                ? 0
+                : it.Sum(b
                     => b.SubTask.Cost
                     - b.PaymentsList.Where(p => p.PaymentType is EPaymentType.Main).Sum(p => p.Payment)
                     + (b.SubTask.IsTimelyBonusApproved

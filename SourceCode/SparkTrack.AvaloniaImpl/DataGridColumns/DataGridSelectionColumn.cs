@@ -17,10 +17,11 @@ public class DataGridSelectionColumn : DataGridBoundColumn
     // HACK: Внутренний чекбокс для изменения и получения значения в ячейках. При использовании
     // нужно установить в DataContext нужный айтем и выполнить привязку Binding.
     // После выполнения всех операций биндинг нужно задиспоузить
-    private readonly CheckBox  m_tempCellCheckBox = new();
-    private          CheckBox? m_headerCheckBox;
-    private          bool      m_updatingByHeaderValue;
-    private          bool      m_updatingByCellValue;
+    private readonly CheckBox     m_tempCellCheckBox = new();
+    private          CheckBox?    m_headerCheckBox;
+    private          bool         m_updatingByHeaderValue;
+    private          bool         m_updatingByCellValue;
+    private          IDisposable? m_itemsSourceSubscription;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="T:Avalonia.Controls.DataGridTextColumn" /> class.
@@ -43,6 +44,9 @@ public class DataGridSelectionColumn : DataGridBoundColumn
 
                 checkBox.IsCheckedChanged += HeaderCheckBox_IsCheckedChanged;
                 checkBox.Bind(InputElement.IsEnabledProperty, GetItemsSourceIsNotEmptyObservable());
+                
+                if(m_itemsSourceSubscription is null)
+                    m_itemsSourceSubscription = GetItemsSourceIsNotEmptyObservable().Subscribe(_ => OnCellValueUpdated());
 
                 m_headerCheckBox = checkBox;
 
@@ -105,39 +109,41 @@ public class DataGridSelectionColumn : DataGridBoundColumn
     private void CellCheckBox_OnIsCheckedChanged(object? sender, RoutedEventArgs e)
     {
         Dispatcher.UIThread.Post(
-            () =>
-            {
-                if (Binding is null || m_headerCheckBox is null || m_updatingByHeaderValue) return;
+            OnCellValueUpdated);
+    }
 
-                m_updatingByCellValue = true;
-                var selectedQuantity = 0;
-                var unselectedQuantity = 0;
-                var totalQuantity = 0;
+    private void OnCellValueUpdated()
+    {
+        if (Binding is null || m_headerCheckBox is null || m_updatingByHeaderValue) return;
 
-                foreach (var item in OwningGrid.ItemsSource)
-                {
-                    m_tempCellCheckBox.DataContext = item;
+        m_updatingByCellValue = true;
+        var selectedQuantity = 0;
+        var unselectedQuantity = 0;
+        var totalQuantity = 0;
 
-                    var binding = m_tempCellCheckBox.Bind(ToggleButton.IsCheckedProperty, Binding);
+        foreach (var item in OwningGrid.ItemsSource)
+        {
+            m_tempCellCheckBox.DataContext = item;
 
-                    if (m_tempCellCheckBox.IsChecked is true)
-                        selectedQuantity++;
-                    else if (m_tempCellCheckBox.IsChecked is false)
-                        unselectedQuantity++;
+            var binding = m_tempCellCheckBox.Bind(ToggleButton.IsCheckedProperty, Binding);
 
-                    totalQuantity++;
+            if (m_tempCellCheckBox.IsChecked is true)
+                selectedQuantity++;
+            else if (m_tempCellCheckBox.IsChecked is false)
+                unselectedQuantity++;
 
-                    binding.Dispose();
-                }
+            totalQuantity++;
 
-                m_headerCheckBox.IsChecked = selectedQuantity == totalQuantity
-                    ? true
-                    : unselectedQuantity == totalQuantity
-                        ? false
-                        : null;
+            binding.Dispose();
+        }
+
+        m_headerCheckBox.IsChecked = selectedQuantity == totalQuantity
+            ? true
+            : unselectedQuantity == totalQuantity
+                ? false
+                : null;
         
-                m_updatingByCellValue = false;
-            });
+        m_updatingByCellValue = false;
     }
 
     /// <summary>Called when the cell in the column enters editing mode.</summary>
@@ -178,7 +184,7 @@ public class DataGridSelectionColumn : DataGridBoundColumn
 
     private IObservable<bool> GetItemsSourceIsNotEmptyObservable()
     {
-        return  OwningGrid.WhenAnyValue(it => it.ItemsSource)
+        return OwningGrid.WhenAnyValue(it => it.ItemsSource)
             .Select(
                 it => it is INotifyCollectionChanged notifyCollectionChanged
                     ? notifyCollectionChanged.ObserveCollectionChanges()

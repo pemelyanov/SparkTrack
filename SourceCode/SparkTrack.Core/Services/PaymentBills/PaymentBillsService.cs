@@ -31,16 +31,14 @@ public class PaymentBillsService(
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {
         var admin = authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);
-        
+
         var tasks = await subTasksRepository.GetListAsync(tasksIdList);
 
-        var totalMainPayments = tasks.Sum(
-            it => it.RemainingMainPayment
+        var totalMainPayments = tasks.Sum(it => it.RemainingMainPayment
         );
 
         var totalTimelyBonusPayments = tasks.Where(it => it is { IsTimelyBonusApproved: true, TimelyBonus: > 0 })
-            .Sum(
-                it => it.RemainingTimelyBonusPayment
+            .Sum(it => it.RemainingTimelyBonusPayment
             );
 
         var mainPaymentsRatio = payment / totalMainPayments;
@@ -53,44 +51,50 @@ public class PaymentBillsService(
         {
             bool isMainPaymentCompleted = false;
             bool isTimelyBonusPaymentCompleted = false;
-            
+
             var currentMainPayment = task.RemainingMainPayment * mainPaymentsRatio;
 
             if (currentMainPayment > 0)
             {
-                paymentsList.Add(new PaymentInfo
-                {
-                    Admin = admin,
-                    Payment = currentMainPayment,
-                    PaymentType = EPaymentType.Main,
-                    TaskId = task.Id,
-                    CreatedAt = DateTime.UtcNow
-                });
-
-                isMainPaymentCompleted = task.RemainingMainPayment - currentMainPayment <= 0;
+                paymentsList.Add(
+                    new PaymentInfo
+                    {
+                        Admin = admin,
+                        Payment = currentMainPayment,
+                        PaymentType = EPaymentType.Main,
+                        TaskId = task.Id,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                );
             }
+            
+            isMainPaymentCompleted = task.RemainingMainPayment - currentMainPayment <= 0;
 
             var currentTimelyBonusPayment = task.RemainingTimelyBonusPayment * timelyBonusPaymentRatio;
 
             if (currentTimelyBonusPayment > 0)
             {
-                paymentsList.Add(new PaymentInfo
-                {
-                    Admin = admin,
-                    Payment = currentTimelyBonusPayment,
-                    PaymentType = EPaymentType.TimelyBonus,
-                    TaskId = task.Id,
-                    CreatedAt = DateTime.UtcNow
-                }); 
-                
-                isTimelyBonusPaymentCompleted = task.RemainingTimelyBonusPayment - currentTimelyBonusPayment <= 0;
+                paymentsList.Add(
+                    new PaymentInfo
+                    {
+                        Admin = admin,
+                        Payment = currentTimelyBonusPayment,
+                        PaymentType = EPaymentType.TimelyBonus,
+                        TaskId = task.Id,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                );
             }
+            
+            isTimelyBonusPaymentCompleted = task.RemainingTimelyBonusPayment - currentTimelyBonusPayment <= 0;
 
             if (isMainPaymentCompleted && isTimelyBonusPaymentCompleted)
-                paidTasks.Add(task with
-                {
-                    PaymentStatus = EPaymentStatus.Paid
-                });
+                paidTasks.Add(
+                    task with
+                    {
+                        PaymentStatus = EPaymentStatus.Paid
+                    }
+                );
         }
 
         await transactionWrapper.ExecuteInTransactionAsync(async () =>
@@ -104,8 +108,8 @@ public class PaymentBillsService(
 
     public Task PayBonusAsync(Guid employeeId, float payment, string? comment)
     {
-        if(payment <= 0) return Task.CompletedTask;
-        
+        if (payment <= 0) return Task.CompletedTask;
+
         var admin = authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);
 
         return paymentBillsRepository.AddBonusPaymentAsync(
