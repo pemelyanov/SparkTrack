@@ -151,7 +151,8 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
                             Name = p.Admin.Name,
                             Role = p.Admin.Role,
                             TelegramTag = p.Admin.TelegramTag
-                        }
+                        },
+                        CreatedAt = p.CreatedAt
                     }
                 )
                 .ToArray(),

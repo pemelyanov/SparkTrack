@@ -1,0 +1,53 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             xmlns:entities="clr-namespace:SparkTrack.Core.Shared.Data.Entities;assembly=SparkTrack.Core.Shared"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.RemainingPaymentCell.RemainingPaymentCell"
+             x:Name="Root">
+    <UserControl.Resources>
+        <converters:PaymentSumConverter x:Key="PaymentSumConverter" />
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="Grid.payment-row">
+            <Style Selector="^>:is(Control)">
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
+
+    <Panel VerticalAlignment="Center">
+        <StackPanel IsVisible="{Binding #Root.TotalPayment}"  Orientation="Horizontal" Background="Transparent" ToolTip.Placement="Bottom" ToolTip.VerticalOffset="0">
+            <TextBlock IsVisible="{Binding #Root.PaymentsList.Count, FallbackValue={x:False}}" Margin="0 0 8 0"
+                       Text="{Binding #Root.PaymentsList, Converter={StaticResource PaymentSumConverter}, StringFormat='{}{0:C}'}" />
+            <TextBlock Text="/" IsVisible="{Binding #Root.PaymentsList.Count, FallbackValue={x:False}}"  Margin="0 0 8 0" />
+            <TextBlock Text="{Binding #Root.TotalPayment, StringFormat='{}{0:C}'}" />
+
+            <ToolTip.Tip>
+                <ItemsControl ItemsSource="{Binding #Root.PaymentsList}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="entities:PaymentInfo">
+                            <Grid ColumnDefinitions="Auto Auto * Auto" ColumnSpacing="8">
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding CreatedAt, 
+                            StringFormat={x:Static constants:DateFormats.ShortRu}}"
+                                           Opacity="0.7" />
+                                <userName:UserName Grid.Column="1" User="{Binding Admin}" />
+
+                                <TextBlock Grid.Column="2" HorizontalAlignment="Right" Margin="16 0 0 0"
+                                           Text="{Binding Payment, StringFormat='+{0:C}'}"
+                                           Foreground="Green"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ToolTip.Tip>
+        </StackPanel>
+        
+        <TextBlock IsVisible="{Binding !#Root.TotalPayment}" Text="{x:Static constants:CommonStrings.EmptyValue}" />
+    </Panel>
+</UserControl>

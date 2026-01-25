@@ -17,6 +17,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using Core.Shared.Enums;
 using ViewModels;
 
 public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
@@ -77,18 +78,15 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             .DisposeWith(disposables);
 
         this.WhenAnyValue(it => it.CurrentPageData)
-            .Select(
-                list => list.Select(
-                        it => it.WhenAnyValue(v => v.IsSelected)
-                            .Select(
-                                isSelected => new
-                                {
-                                    it,
-                                    isSelected
-                                }
-                            )
+            .Select(list => list.Select(it => it.WhenAnyValue(v => v.IsSelected)
+                    .Select(isSelected => new
+                        {
+                            it,
+                            isSelected
+                        }
                     )
-                    .CombineLatest()
+                )
+                .CombineLatest()
             )
             .Switch()
             .Select(list => list.Where(it => it.isSelected).Select(it => it.it.Model).ToArray())
@@ -98,10 +96,13 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             .DisposeWith(disposables);
 
         m_selectedBills
-            .Select(
-                it => it.Sum(
-                    b
-                        => b.SubTask.Cost + (b.SubTask.IsTimelyBonusApproved ? b.SubTask.TimelyBonus : 0)
+            .Select(it => it.Sum(b
+                    => b.SubTask.Cost
+                    - b.PaymentsList.Where(p => p.PaymentType is EPaymentType.Main).Sum(p => p.Payment)
+                    + (b.SubTask.IsTimelyBonusApproved
+                        ? b.SubTask.TimelyBonus - b.PaymentsList.Where(p => p.PaymentType is EPaymentType.TimelyBonus)
+                            .Sum(p => p.Payment)
+                        : 0)
                 )
             )
             .Subscribe(value => TotalBill = value)
@@ -122,7 +123,7 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public IReadOnlyList<UserRemainingPayment> RemainingPayments { get; private set; } = [];
-    
+
     [Reactive]
     public float TotalRemainingPayments { get; private set; }
 
@@ -142,12 +143,12 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> UnapproveBonusForSelectionCommand { get; }
 
     public ReactiveCommand<Unit, Unit> PayForSelectionCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> PayBonusCommand { get; }
 
-    private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(
-        () => Task.WhenAll(ReloadTableAsync(), ReloadRemainingPaymentsAsync())
-    );
+    private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() =>
+        ReactiveCommand.CreateFromTask(() => Task.WhenAll(ReloadTableAsync(), ReloadRemainingPaymentsAsync())
+        );
 
     private async Task ReloadTableAsync()
     {
@@ -162,7 +163,7 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
             .ToArray();
         PaginatorViewModel.SetPagesQuantity(page.Total);
     }
-    
+
     private async Task ReloadRemainingPaymentsAsync()
     {
         var payments =
@@ -170,7 +171,6 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
         RemainingPayments = payments;
     }
-
 
     private async Task<Unit> ToggleIsBonusApprovedAsync(PaymentBillViewModel paymentBillViewModel)
     {
@@ -195,7 +195,7 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     {
         var paymentViewModel = new PaymentFormViewModel(m_selectedBills.Value);
 
-        if(await m_dialogService.ShowAsync(paymentViewModel) is not true) return;
+        if (await m_dialogService.ShowAsync(paymentViewModel) is not true) return;
 
         var taskIds = m_selectedBills.Value.Select(it => it.SubTask.Id).ToArray();
 
@@ -213,7 +213,7 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
     private async Task PayBonusAsync()
     {
         var bonusViewModel = new BonusFormViewModel();
-        
+
         await m_dialogService.ShowAsync(bonusViewModel);
 
         await ReloadTableCommand.Execute().ToTask();

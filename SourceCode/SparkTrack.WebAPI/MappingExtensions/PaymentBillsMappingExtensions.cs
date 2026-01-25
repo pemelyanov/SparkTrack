@@ -24,6 +24,7 @@ public static class PaymentBillsMappingExtensions
         Admin = data.Admin.ToDTO(),
         Payment = data.Payment,
         PaymentType = data.PaymentType,
-        TaskId = data.TaskId
+        TaskId = data.TaskId,
+        CreatedAt = data.CreatedAt
     };
 }

@@ -10,7 +10,8 @@
              xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
              xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
-             xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
+             xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
+             xmlns:remainingPaymentCell="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RemainingPaymentCell"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.AdminFinancePage"
              x:DataType="adminFinance:AdminFinancePageViewModel"
@@ -19,39 +20,37 @@
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type adminFinance:AdminFinancePageViewModel}"
                    x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
-        
+
         <WrapPanel Grid.Row="1">
             <!-- TODO: Filters block -->
             <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
         </WrapPanel>
-        
-        <StackPanel Grid.Row="2" >
-            <Grid ColumnDefinitions="Auto *" >
+
+        <StackPanel Grid.Row="2">
+            <Grid ColumnDefinitions="Auto *">
                 <DataGrid Classes="readonly" ItemsSource="{Binding RemainingPayments}" HorizontalAlignment="Left">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Сотрудник" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding User.Name}"/>
-                                        <telegramTag:TelegramTag Text="{Binding User.TelegramTag, StringFormat='@{0}'}"
-                                                                 IsVisible="{Binding User.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                                    </StackPanel>
+                                    <userName:UserName User="{Binding User}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Зарплата" Binding="{Binding RemainingPayment, StringFormat='{}{0:C}'}" />
+                        <DataGridTextColumn Header="Ожидаемая выплата"
+                                            Binding="{Binding RemainingPayment, StringFormat='{}{0:C}'}" />
                     </DataGrid.Columns>
                 </DataGrid>
-            
-                <TextBlock Grid.Column="1" Classes="subtitle" HorizontalAlignment="Right" Text="{Binding TotalRemainingPayments, StringFormat='Общий долг по зарплатам: {0:C}'}" />
+
+                <TextBlock Grid.Column="1" Classes="subtitle" HorizontalAlignment="Right"
+                           Text="{Binding TotalRemainingPayments, StringFormat='Общий долг по зарплатам: {0:C}'}" />
             </Grid>
             <Separator Margin="0 8" />
         </StackPanel>
 
         <Grid Grid.Row="3" ColumnDefinitions="Auto *" ColumnSpacing="8">
             <Button Grid.Column="0" Classes="accent" Content="Бонусная премия" Command="{Binding PayBonusCommand}" />
-            
+
             <StackPanel Grid.Column="1" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Оплатить" Classes="accent" Command="{Binding PayForSelectionCommand}" />
                 <Button Content="Одобрить премию" Command="{Binding ApproveBonusForSelectionCommand}" />
@@ -59,10 +58,10 @@
                 <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
             </StackPanel>
         </Grid>
-        
+
         <StackPanel Grid.Row="4" HorizontalAlignment="Right" Orientation="Horizontal">
-            <TextBlock Text="Выбрано для оплаты: "/>
-            <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Bold"/>
+            <TextBlock Text="Выбрано для оплаты: " />
+            <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Bold" />
         </StackPanel>
 
         <DataGrid Grid.Row="5" ItemsSource="{Binding CurrentPageData}"
@@ -73,29 +72,37 @@
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected}" />
                 <DataGridTextColumn Header="Идея" Width="*" IsReadOnly="True" Binding="{Binding Model.Feature.Name}" />
                 <DataGridTextColumn Header="Задача" IsReadOnly="True" Binding="{Binding Model.SubTask.Name}" />
+                <DataGridTemplateColumn Header="Исполнитель" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <userName:UserName User="{Binding Model.SubTask.ExecutorEmployee}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True"
                                     IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
                                     Header="Канал" Binding="{Binding Model.Feature.Project.Name}" />
                 <DataGridTextColumn Header="Дедлайн" IsReadOnly="True"
                                     Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
-                <DataGridTemplateColumn Header="Исполнитель" IsReadOnly="True">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Model.SubTask.ExecutorEmployee.Name}"/>
-                                <telegramTag:TelegramTag Text="{Binding Model.SubTask.ExecutorEmployee.TelegramTag, StringFormat='@{0}'}"
-                                                         IsVisible="{Binding Model.SubTask.ExecutorEmployee.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Дата выполнения" IsReadOnly="True"
                                     Binding="{Binding Model.SubTask.CompletedAt, StringFormat={x:Static constants:DateFormats.ShortRu},
                                     TargetNullValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTextColumn Header="Стоимость" IsReadOnly="True"
-                                    Binding="{Binding Model.SubTask.Cost, StringFormat='{}{0:C}'}" />
-                <DataGridTextColumn Header="Премия за срок" IsReadOnly="True"
-                                    Binding="{Binding Model.SubTask.TimelyBonus, StringFormat='{}{0:C}'}" />
+                <DataGridTemplateColumn Header="Стоимость (опл./всего)" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <remainingPaymentCell:RemainingPaymentCell PaymentType="Main" 
+                                                                       PaymentBill="{Binding Model}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Премия за срок (опл./всего)" IsReadOnly="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <remainingPaymentCell:RemainingPaymentCell PaymentType="TimelyBonus"
+                                                                       PaymentBill="{Binding Model}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Одобрение премии" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

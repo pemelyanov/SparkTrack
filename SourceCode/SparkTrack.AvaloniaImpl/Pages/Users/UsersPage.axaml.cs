@@ -2,6 +2,7 @@
 
 namespace SparkTrack.AvaloniaImpl.Pages.Users;
 
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using Core.Shared.Data.Entities;
@@ -15,7 +16,7 @@ public partial class UsersPage : ReactiveUserControl<UsersPageViewModel>
     {
         InitializeComponent();
     }
-
+    
     private void DataGrid_OnSorting(object? sender, DataGridColumnEventArgs e)
     {
         throw new NotImplementedException();
@@ -34,7 +35,5 @@ public partial class UsersPage : ReactiveUserControl<UsersPageViewModel>
     private void RowOnDoubleTapped(object? sender, TappedEventArgs e)
     {
         if(sender is not Control { DataContext: SelectableViewModel<User> userViewModel }) return;
-        
-        
     }
 }

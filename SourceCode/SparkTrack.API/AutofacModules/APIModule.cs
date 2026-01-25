@@ -28,7 +28,8 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
         builder.RegisterType<JsonConfigurationService<TokensConfiguration>>()
             .AsImplementedInterfaces()
-            .WithParameter(new TypedParameter(typeof(string), tokensConfigPath));
+            .WithParameter(new TypedParameter(typeof(string), tokensConfigPath))
+            .SingleInstance();
         
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().SingleInstance();

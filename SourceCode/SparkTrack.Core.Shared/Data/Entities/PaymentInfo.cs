@@ -13,4 +13,6 @@ public record PaymentInfo
     public float Payment { get; init; }
     
     public EPaymentType PaymentType { get; init; }
+    
+    public required DateTime CreatedAt { get; init; }
 }

@@ -63,7 +63,8 @@ public class PaymentBillsService(
                     Admin = admin,
                     Payment = currentMainPayment,
                     PaymentType = EPaymentType.Main,
-                    TaskId = task.Id
+                    TaskId = task.Id,
+                    CreatedAt = DateTime.UtcNow
                 });
 
                 isMainPaymentCompleted = task.RemainingMainPayment - currentMainPayment <= 0;
@@ -78,7 +79,8 @@ public class PaymentBillsService(
                     Admin = admin,
                     Payment = currentTimelyBonusPayment,
                     PaymentType = EPaymentType.TimelyBonus,
-                    TaskId = task.Id
+                    TaskId = task.Id,
+                    CreatedAt = DateTime.UtcNow
                 }); 
                 
                 isTimelyBonusPaymentCompleted = task.RemainingTimelyBonusPayment - currentTimelyBonusPayment <= 0;

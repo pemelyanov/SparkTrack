@@ -75,7 +75,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                                 },
                                 Payment = p.Payment,
                                 PaymentType = p.PaymentType,
-                                TaskId = p.TaskId
+                                TaskId = p.TaskId,
+                                CreatedAt = p.CreatedAt
                             }
                         )
                         .ToArray()
@@ -135,7 +136,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     Id = it.Id,
                     AdminId = it.Admin.Id,
                     Payment = it.Payment,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = it.CreatedAt,
                     PaymentType = it.PaymentType,
                     TaskId = it.TaskId
                 }
