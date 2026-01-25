@@ -55,7 +55,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult> PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
+    public Task<ActionResult> PayBillsAsync([FromQuery] IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {
         return this.OkWithDomainExceptionsHandling(
             () => paymentBillsService.PayBillsAsync(tasksIdList, payment, timelyBonusPayment)

@@ -193,13 +193,17 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task PayForSelectionAsync()
     {
-        var paymentViewModel = new PaymentFormViewModel
-        {
-            TotalCost = m_selectedBills.Value.Sum(it => it.SubTask.Cost),
-            TotalTimelyBonus = m_selectedBills.Value.Sum(it => it.SubTask.TimelyBonus)
-        };
+        var paymentViewModel = new PaymentFormViewModel(m_selectedBills.Value);
 
-        await m_dialogService.ShowAsync(paymentViewModel);
+        if(await m_dialogService.ShowAsync(paymentViewModel) is not true) return;
+
+        var taskIds = m_selectedBills.Value.Select(it => it.SubTask.Id).ToArray();
+
+        await m_paymentBillsService.PayBillsAsync(
+            taskIds,
+            DefaultIfNaN(paymentViewModel.EnteredCost),
+            DefaultIfNaN(paymentViewModel.EnteredBonus)
+        );
 
         await ReloadTableCommand.Execute().ToTask();
     }
@@ -214,4 +218,6 @@ public class AdminFinancePageViewModel : ViewModelBase, IRoutableViewModel
 
         await ReloadTableCommand.Execute().ToTask();
     }
+
+    private float DefaultIfNaN(float number) => float.IsNaN(number) ? 0 : number;
 }

@@ -14,6 +14,9 @@ public class PaymentBillViewModel(PaymentBill bill) : ReactiveObject
     [Reactive]
     public bool IsTimelyBonusApproved { get; private set; } = bill.SubTask.IsTimelyBonusApproved;
 
+    [Reactive]
+    public IReadOnlyList<PaymentInfo> PaymentsList { get; private set; } = bill.PaymentsList;
+
     public void Update(SubTask subTask)
     {
         SubTask = subTask;

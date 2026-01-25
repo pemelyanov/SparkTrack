@@ -123,6 +123,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     )
                 }
             )
+            .Where(it => it.RemainingPayment > 0)
             .ToArrayAsync();
     }
 

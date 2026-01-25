@@ -2306,14 +2306,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task PayBillsAsync(float? payment, float? timelyBonusPayment)
+        public virtual System.Threading.Tasks.Task PayBillsAsync(System.Collections.Generic.IReadOnlyList<System.Guid> tasksIdList, float? payment, float? timelyBonusPayment)
         {
-            return PayBillsAsync(payment, timelyBonusPayment, System.Threading.CancellationToken.None);
+            return PayBillsAsync(tasksIdList, payment, timelyBonusPayment, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task PayBillsAsync(float? payment, float? timelyBonusPayment, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task PayBillsAsync(System.Collections.Generic.IReadOnlyList<System.Guid> tasksIdList, float? payment, float? timelyBonusPayment, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2329,6 +2329,10 @@ namespace SparkTrack.API
                     // Operation Path: "finance/bills"
                     urlBuilder_.Append("finance/bills");
                     urlBuilder_.Append('?');
+                    if (tasksIdList != null)
+                    {
+                            foreach (var item_ in tasksIdList) { urlBuilder_.Append(System.Uri.EscapeDataString("tasksIdList")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(item_, System.Globalization.CultureInfo.InvariantCulture))).Append('&'); }
+                    }
                     if (payment != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("payment")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(payment, System.Globalization.CultureInfo.InvariantCulture))).Append('&');

@@ -5,11 +5,12 @@ using Core.Exceptions;
 using Core.Repositories;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
+using Core.Transactions;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-internal class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksRepository
+internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWrapper transactionWrapper) : ISubTasksRepository
 {
     public Task<SubTask?> GetAsync(Guid id) => dbContext.SubTasks
         .AsNoTracking()
@@ -46,32 +47,25 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext) : ISubTasksRepo
 
     public async Task<IReadOnlyList<SubTask>> EditRangeAsync(IReadOnlyList<SubTask> subTasksList)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync();
         var editedTasks = new List<SubTask>();
 
-        try
-        {
-            foreach (var subTask in subTasksList)
+        await transactionWrapper.ExecuteInTransactionAsync(async () =>
             {
-                try
+                foreach (var subTask in subTasksList)
                 {
-                    if (await EditAsync(subTask) is not { } edited) continue;
+                    try
+                    {
+                        if (await EditAsync(subTask) is not { } edited) continue;
 
-                    editedTasks.Add(edited);
-                }
-                catch (ConflictException)
-                {
-                    // ignore
+                        editedTasks.Add(edited);
+                    }
+                    catch (ConflictException)
+                    {
+                        // ignore
+                    }
                 }
             }
-
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            return [];
-        }
+        );
 
         return editedTasks;
     }

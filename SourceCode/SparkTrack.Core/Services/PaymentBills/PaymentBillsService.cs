@@ -44,7 +44,7 @@ public class PaymentBillsService(
             );
 
         var mainPaymentsRatio = payment / totalMainPayments;
-        var timelyBonusPaymentRatio = timelyBonusPayment / totalTimelyBonusPayments;
+        var timelyBonusPaymentRatio = totalTimelyBonusPayments is 0 ? 0 : timelyBonusPayment / totalTimelyBonusPayments;
 
         var paymentsList = new List<PaymentInfo>();
         var paidTasks = new List<SubTask>();
