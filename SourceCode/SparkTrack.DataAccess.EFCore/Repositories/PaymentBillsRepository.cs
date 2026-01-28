@@ -128,6 +128,39 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
             .ToArrayAsync();
     }
 
+    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId)
+    {
+        var userRemainingPayments = await GetUsersRemainingPaymentsAsync(projectId);
+
+        var adminPaidPayments = await dbContext.SubTasks
+            .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
+            .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
+            .SelectMany(it => it.Payments)
+            .GroupBy(it => it.Admin)
+            .Select(grouping => new UserPayment
+                {
+                    User = new User
+                    {
+                        Id = grouping.Key.Id,
+                        Email = grouping.Key.Email,
+                        Name = grouping.Key.Name,
+                        Role = grouping.Key.Role,
+                        TelegramTag = grouping.Key.TelegramTag
+                    },
+                    Payment = grouping.Sum(it => it.Payment
+                    )
+                }
+            )
+            .Where(it => it.Payment > 0)
+            .ToArrayAsync();
+
+        return new PendingPaymentsSummary
+        {
+            AdminPayments = adminPaidPayments,
+            RemainingPayments = userRemainingPayments
+        };
+    }
+
     public async Task AddPaymentsRangeAsync(IReadOnlyList<PaymentInfo> paymentsList)
     {
         var paymentsDataList = paymentsList.Select(
