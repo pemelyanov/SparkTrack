@@ -28,6 +28,9 @@ public class PaymentBillsService(
     public Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId) =>
         paymentBillsRepository.GetUsersRemainingPaymentsAsync(projectId);
 
+    public Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId) =>
+        paymentBillsRepository.GetPendingPaymentsSummaryAsync(projectId);
+
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {
         var admin = authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);

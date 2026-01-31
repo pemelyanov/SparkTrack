@@ -12,7 +12,7 @@ public static class PaymentBillsMappingExtensions
         PaymentsList = data.PaymentsList.Select(it => it.ToDTO()).ToArray()
     };
 
-    public static UserRemainingPaymentDTO ToDTO(this UserPayment data) => new()
+    public static UserPaymentDTO ToDTO(this UserPayment data) => new()
     {
         User = data.User.ToDTO(),
         RemainingPayment = data.Payment
@@ -26,5 +26,11 @@ public static class PaymentBillsMappingExtensions
         PaymentType = data.PaymentType,
         TaskId = data.TaskId,
         CreatedAt = data.CreatedAt
+    };
+    
+    public static PendingPaymentsSummaryDTO ToDTO(this PendingPaymentsSummary data) => new()
+    {
+        AdminPayments = data.AdminPayments.Select(it => it.ToDTO()).ToArray(),
+        RemainingPayments = data.RemainingPayments.Select(it => it.ToDTO()).ToArray()
     };
 }

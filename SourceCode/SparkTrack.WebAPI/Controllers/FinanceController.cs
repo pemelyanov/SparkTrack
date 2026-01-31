@@ -38,14 +38,31 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult<IReadOnlyList<UserRemainingPaymentDTO>>> GetUsersRemainingPaymentsAsync(Guid? projectId)
+    public Task<ActionResult<IReadOnlyList<UserPaymentDTO>>> GetUsersRemainingPaymentsAsync(Guid? projectId)
     {
         return this.OkWithDomainExceptionsHandling(
             async () =>
             {
                 var data = await paymentBillsService.GetUsersRemainingPaymentsAsync(projectId);
 
-                return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<UserRemainingPaymentDTO>;
+                return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<UserPaymentDTO>;
+            }
+        );
+    }
+    
+    [HttpGet("pending-payments-summary")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult<PendingPaymentsSummaryDTO>> GetPendingPaymentsSummaryAsync(Guid? projectId)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            async () =>
+            {
+                var data = await paymentBillsService.GetPendingPaymentsSummaryAsync(projectId);
+
+                return data.ToDTO();
             }
         );
     }

@@ -1,6 +1,6 @@
 namespace SparkTrack.WebAPI.DTO;
 
-public record UserRemainingPaymentDTO
+public record UserPaymentDTO
 {
     public required UserDTO User { get; init; }
     

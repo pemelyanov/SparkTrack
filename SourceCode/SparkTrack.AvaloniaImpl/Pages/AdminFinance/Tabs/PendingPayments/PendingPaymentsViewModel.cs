@@ -106,8 +106,8 @@ public class PendingPaymentsViewModel : ViewModelBase
             .Subscribe(value => TotalBill = value)
             .DisposeWith(disposables);
 
-        this.WhenAnyValue(it => it.RemainingPayments)
-            .Select(it => it.Sum(p => p.Payment))
+        this.WhenAnyValue(it => it.PendingPaymentsSummary)
+            .Select(it => it is null ? 0 : it.RemainingPayments.Sum(p => p.Payment))
             .Subscribe(value => TotalRemainingPayments = value)
             .DisposeWith(disposables);
     }
@@ -116,7 +116,7 @@ public class PendingPaymentsViewModel : ViewModelBase
     public IReadOnlyList<SelectableViewModel<PaymentBillViewModel>> CurrentPageData { get; private set; } = [];
 
     [Reactive]
-    public IReadOnlyList<UserPayment> RemainingPayments { get; private set; } = [];
+    public PendingPaymentsSummary? PendingPaymentsSummary { get; private set; }
 
     [Reactive]
     public float TotalRemainingPayments { get; private set; }
@@ -161,9 +161,9 @@ public class PendingPaymentsViewModel : ViewModelBase
     private async Task ReloadRemainingPaymentsAsync()
     {
         var payments =
-            await m_paymentBillsService.GetUsersRemainingPaymentsAsync(ProjectsFilterViewModel.SelectedProject?.Id);
+            await m_paymentBillsService.GetPendingPaymentsSummaryAsync(ProjectsFilterViewModel.SelectedProject?.Id);
 
-        RemainingPayments = payments;
+        PendingPaymentsSummary = payments;
     }
 
     private async Task<Unit> ToggleIsBonusApprovedAsync(PaymentBillViewModel paymentBillViewModel)

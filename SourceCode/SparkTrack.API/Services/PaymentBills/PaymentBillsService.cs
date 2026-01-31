@@ -26,6 +26,14 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return list.Select(it => it.ToDomain()).ToArray();
     }
 
+    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId) {
+        using var wrapper = financeClientFactory.Invoke();
+
+        var dto = await wrapper.Client.GetPendingPaymentsSummaryAsync(projectId);
+
+        return dto.ToDomain();
+    }
+
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {
         using var wrapper = financeClientFactory.Invoke();

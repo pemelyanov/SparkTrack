@@ -21,8 +21,8 @@
         </WrapPanel>
 
         <StackPanel Grid.Row="2">
-            <Grid ColumnDefinitions="Auto *">
-                <DataGrid Classes="readonly" ItemsSource="{Binding RemainingPayments}" HorizontalAlignment="Left">
+            <Grid ColumnDefinitions="Auto Auto *" ColumnSpacing="16">
+                <DataGrid Classes="readonly" ItemsSource="{Binding PendingPaymentsSummary.RemainingPayments}" HorizontalAlignment="Left">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Сотрудник" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
@@ -36,7 +36,21 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <TextBlock Grid.Column="1" Classes="subtitle" HorizontalAlignment="Right"
+                <DataGrid Grid.Column="1" Classes="readonly" ItemsSource="{Binding PendingPaymentsSummary.AdminPayments}" HorizontalAlignment="Left">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Админ" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <userName:UserName User="{Binding User}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Оплаченная часть"
+                                            Binding="{Binding Payment, StringFormat='{}{0:C}'}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <TextBlock Grid.Column="2" Classes="subtitle" HorizontalAlignment="Right"
                            Text="{Binding TotalRemainingPayments, StringFormat='Общий долг по зарплатам: {0:C}'}" />
             </Grid>
             <Separator Margin="0 8" />

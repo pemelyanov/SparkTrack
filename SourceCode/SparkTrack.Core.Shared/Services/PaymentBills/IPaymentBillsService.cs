@@ -8,6 +8,8 @@ public interface IPaymentBillsService
     Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery);
 
     Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
+    
+    Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
 
     Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment);
 
