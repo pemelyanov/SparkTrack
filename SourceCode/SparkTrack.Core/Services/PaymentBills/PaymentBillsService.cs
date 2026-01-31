@@ -138,7 +138,29 @@ public class PaymentBillsService(
         if (!await paymentBillsRepository.IsPaymentPaidByThisUser(id, currentUser.Id))
             throw new ForbiddenException($"Payment isn't paid by user {currentUser.Id}");
 
-        await paymentBillsRepository.DeletePaymentAsync(id);
+        await transactionWrapper.ExecuteInTransactionAsync(async () =>
+            {
+                var payment = await paymentBillsRepository.GetPaymentAsync(id);
+
+                if (payment is null) return;
+
+                var task = await subTasksRepository.GetAsync(payment.TaskId);
+
+                if (task is null) return;
+
+                if (task.PaymentStatus is EPaymentStatus.Paid)
+                {
+                    await subTasksRepository.EditAsync(
+                        task with
+                        {
+                            PaymentStatus = EPaymentStatus.OnPayment
+                        }
+                    );
+                }
+
+                await paymentBillsRepository.DeletePaymentAsync(id);
+            }
+        );
     }
 
     public async Task DeleteBonusAsync(Guid id)

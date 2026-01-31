@@ -43,7 +43,7 @@ public static class PaymentBillsMappingExtensions
         TaskId = data.TaskId,
         CreatedAt = data.CreatedAt,
         Task = data.Task.ToDomain(),
-        Project = data.Project.ToDomain()
+        Feature = data.Feature.ToDomain()
     };
     
     public static BonusPaymentInfo ToDomain(this BonusPaymentDTO data) => new()

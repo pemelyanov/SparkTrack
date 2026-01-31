@@ -5206,8 +5206,8 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("task")]
         public SubTaskDTO Task { get; init; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("project")]
-        public ProjectDTO Project { get; init; }
+        [System.Text.Json.Serialization.JsonPropertyName("feature")]
+        public FeatureDTO Feature { get; init; }
 
     }
 

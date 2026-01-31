@@ -11,9 +11,10 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PaymentsHistory.PaymentsHistory"
-             x:DataType="paymentsHistory:PaymentsHistoryViewModel">
+             x:DataType="paymentsHistory:PaymentsHistoryViewModel"
+             x:Name="Root">
     <UserControl.Resources>
-        <converters:PaymentTypeConverter x:Key="PaymentTypeConverter"/>
+        <converters:PaymentTypeConverter x:Key="PaymentTypeConverter" />
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="userName|UserName.subtitle">
@@ -22,7 +23,7 @@
                 <Setter Property="FontWeight" Value="SemiBold" />
             </Style>
         </Style>
-        
+
         <Style Selector="ItemsControl.main">
             <Setter Property="ItemsSource" Value="{Binding PaymentDetailsPageData}" />
             <Setter Property="ItemTemplate">
@@ -31,14 +32,17 @@
                         <Grid ColumnDefinitions="Auto *" ColumnSpacing="8">
                             <StackPanel Grid.Column="0" Spacing="8">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock Classes="subtitle" Text="{Binding PaymentType, Converter={StaticResource PaymentTypeConverter}}" />
-                                    <TextBlock Text=">" VerticalAlignment="Bottom"/>
-                                    <userName:UserName User="{Binding Task.ExecutorEmployee}" VerticalAlignment="Bottom" />
-                                </StackPanel> 
-                                <TextBlock Text="{Binding Task.Name, StringFormat='Задача: {0}'}"/>
-                                <TextBlock Text="{Binding Project.Name, StringFormat='Канал: {0}'}"/>
+                                    <TextBlock Classes="subtitle"
+                                               Text="{Binding PaymentType, Converter={StaticResource PaymentTypeConverter}}" />
+                                    <TextBlock Text=">" VerticalAlignment="Bottom" />
+                                    <userName:UserName User="{Binding Task.ExecutorEmployee}"
+                                                       VerticalAlignment="Bottom" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding Feature.Name, StringFormat='Идея: {0}'}" />
+                                <TextBlock Text="{Binding Task.Name, StringFormat='Задача: {0}'}" />
+                                <TextBlock Text="{Binding Feature.Project.Name, StringFormat='Канал: {0}'}" />
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock 
+                                    <TextBlock
                                         Text="{Binding CreatedAt, 
                                     StringFormat={x:Static constants:DateFormats.ShortRu}}"
                                         Opacity="0.7" />
@@ -46,8 +50,10 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1"  VerticalAlignment="Top" HorizontalAlignment="Right" Spacing="8">
-                                <Button Classes="icon delete" HorizontalAlignment="Right" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Spacing="8">
+                                <Button Classes="icon delete" HorizontalAlignment="Right"
+                                        Command="{Binding #Root.ViewModel.DeleteEntryCommand}"
+                                        CommandParameter="{Binding}" />
                                 <TextBlock Classes="subtitle" HorizontalAlignment="Right"
                                            Text="{Binding Payment, StringFormat='{}{0:C}'}" />
                             </StackPanel>
@@ -66,10 +72,11 @@
                             <StackPanel Grid.Column="0" Spacing="8">
                                 <userName:UserName Classes="subtitle" User="{Binding Employee}" />
 
-                                <TextBlock Text="{Binding Comment, StringFormat='Комментарий: {0}'}" TextWrapping="Wrap" MaxLines="2"
-                                           TextTrimming="CharacterEllipsis" IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                <TextBlock Text="{Binding Comment, StringFormat='Комментарий: {0}'}"
+                                           TextWrapping="Wrap" MaxLines="2"
+                                           TextTrimming="CharacterEllipsis"
+                                           IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                            ToolTip.Tip="{Binding Comment}" />
-                                
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock
                                         Text="{Binding CreatedAt, 
@@ -80,7 +87,9 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Spacing="8">
-                                <Button Classes="icon delete" HorizontalAlignment="Right" />
+                                <Button Classes="icon delete" HorizontalAlignment="Right"
+                                        Command="{Binding #Root.ViewModel.DeleteEntryCommand}"
+                                        CommandParameter="{Binding}" />
                                 <TextBlock Classes="subtitle" HorizontalAlignment="Right"
                                            Text="{Binding Payment, StringFormat='{}{0:C}'}" />
                             </StackPanel>
@@ -99,15 +108,16 @@
                       SelectedItem="{Binding SelectedPaymentKind}"
                       DisplayMemberBinding="{Binding Name}" />
         </WrapPanel>
-        
+
         <StackPanel Grid.Row="1" HorizontalAlignment="Right">
             <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
         </StackPanel>
 
         <ScrollViewer Grid.Row="2">
-            <ItemsControl  Classes.main="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
+            <ItemsControl
+                Classes.main="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
                       ConverterParameter={x:Static paymentsHistory:PaymentKind+Primary.Instance}}"
-                           Classes.bonus="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
+                Classes.bonus="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
                       ConverterParameter={x:Static paymentsHistory:PaymentKind+Bonus.Instance}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

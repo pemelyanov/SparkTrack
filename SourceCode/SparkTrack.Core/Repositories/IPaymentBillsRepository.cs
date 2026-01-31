@@ -5,6 +5,10 @@ using Shared.Data.Entities;
 
 public interface IPaymentBillsRepository
 {
+    Task<PaymentInfo?> GetPaymentAsync(Guid id);
+
+    Task<BonusPaymentInfo?> GetBonusPaymentAsync(Guid id);
+    
     Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? employeeId, Guid? projectId, PageQuery pageQuery);
 
     Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);

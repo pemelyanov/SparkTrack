@@ -3,24 +3,39 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using Controls.ProjectsFilter;
 using Core.Shared.Data.Entities;
 using Core.Shared.Services.PaymentBills;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
 using ViewModels;
 
 public class PaymentsHistoryViewModel : ViewModelBase
 {
     private readonly IPaymentBillsService m_paymentBillsService;
+    private readonly IDialogService       m_dialogService;
 
-    public PaymentsHistoryViewModel(ProjectsFilterViewModel projectsFilterViewModel, IPaymentBillsService paymentBillsService)
+    public PaymentsHistoryViewModel(
+        ProjectsFilterViewModel projectsFilterViewModel,
+        IPaymentBillsService paymentBillsService,
+        IDialogService dialogService
+    )
     {
         m_paymentBillsService = paymentBillsService;
+        m_dialogService = dialogService;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
         ReloadTableCommand = ReactiveCommand.CreateFromTask(ReloadTableAsync);
+        DeleteEntryCommand = ReactiveCommand.CreateFromTask<object, Unit>(async (entry) =>
+            {
+                await DeleteEntryAsync(entry);
+                return Unit.Default;
+            }
+        );
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -41,7 +56,8 @@ public class PaymentsHistoryViewModel : ViewModelBase
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
 
-    public IReadOnlyList<PaymentKind> PaymentKinds { get; } = [PaymentKind.Primary.Instance, PaymentKind.Bonus.Instance];
+    public IReadOnlyList<PaymentKind> PaymentKinds { get; } =
+        [PaymentKind.Primary.Instance, PaymentKind.Bonus.Instance];
 
     [Reactive]
     public PaymentKind SelectedPaymentKind { get; set; } = PaymentKind.Primary.Instance;
@@ -51,9 +67,22 @@ public class PaymentsHistoryViewModel : ViewModelBase
 
     [Reactive]
     public IReadOnlyList<BonusPaymentInfo> BonusPaymentsPageData { get; private set; } = [];
-    
+
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
     
+    public ReactiveCommand<Object, Unit> DeleteEntryCommand { get; }
+
+    private async Task DeleteEntryAsync(object entry)
+    {
+        if(!await m_dialogService.ConfirmAsync("Вы уверены что хотите удалить платеж?")) return;
+        
+        if (entry is PaymentDetails paymentDetails) await m_paymentBillsService.DeleteBillAsync(paymentDetails.Id);
+        if (entry is BonusPaymentInfo bonusPaymentInfo)
+            await m_paymentBillsService.DeleteBonusAsync(bonusPaymentInfo.Id);
+
+        await ReloadTableCommand.Execute().ToTask();
+    }
+
     private async Task ReloadTableAsync()
     {
         if (SelectedPaymentKind is PaymentKind.Bonus)
@@ -61,7 +90,7 @@ public class PaymentsHistoryViewModel : ViewModelBase
             await LoadBonusHistory();
             return;
         }
-        
+
         await LoadPrimaryHistory();
     }
 
@@ -76,7 +105,7 @@ public class PaymentsHistoryViewModel : ViewModelBase
         PaymentDetailsPageData = page.Items;
         PaginatorViewModel.SetPagesQuantity(page.Total);
     }
-    
+
     private async Task LoadBonusHistory()
     {
         var page = await m_paymentBillsService.GetPaidBonusPaymentsListAsync(

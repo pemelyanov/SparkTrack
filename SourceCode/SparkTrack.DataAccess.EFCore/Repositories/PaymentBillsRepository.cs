@@ -10,6 +10,55 @@ using Microsoft.EntityFrameworkCore;
 
 public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBillsRepository
 {
+    public Task<PaymentInfo?> GetPaymentAsync(Guid id) => dbContext.Payments.AsNoTracking()
+        .Where(it => it.Id == id)
+        .Select(it => new PaymentInfo
+            {
+                Id = it.Id,
+                Admin = new User
+                {
+                    Id = it.Admin.Id,
+                    Email = it.Admin.Email,
+                    Name = it.Admin.Name,
+                    Role = it.Admin.Role,
+                    TelegramTag = it.Admin.TelegramTag
+                },
+                Payment = it.Payment,
+                PaymentType = it.PaymentType,
+                TaskId = it.TaskId,
+                CreatedAt = it.CreatedAt
+            }
+        )
+        .FirstOrDefaultAsync();
+
+    public Task<BonusPaymentInfo?> GetBonusPaymentAsync(Guid id) => dbContext.Bonuses.AsNoTracking()
+        .Where(it => it.Id == id)
+        .Select(it => new BonusPaymentInfo
+            {
+                Id = it.Id,
+                Admin = new User
+                {
+                    Id = it.Admin.Id,
+                    Email = it.Admin.Email,
+                    Name = it.Admin.Name,
+                    Role = it.Admin.Role,
+                    TelegramTag = it.Admin.TelegramTag
+                },
+                Employee = new User
+                {
+                    Id = it.Employee.Id,
+                    Email = it.Employee.Email,
+                    Name = it.Employee.Name,
+                    Role = it.Employee.Role,
+                    TelegramTag = it.Employee.TelegramTag
+                },
+                Payment = it.Payment,
+                CreatedAt = it.CreatedAt,
+                Comment = it.Comment,
+            }
+        )
+        .FirstOrDefaultAsync();
+
     public async Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(
         bool isPaid,
         Guid? employeeId,
@@ -199,14 +248,22 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     TimelyBonus = data.Task.TimelyBonus,
                     IsTimelyBonusApproved = data.Task.IsTimelyBonusApproved
                 },
-                Project = new Project
+                Feature = new Feature
                 {
-                    Id = data.Task.Feature.ProjectId,
-                    Name = data.Task.Feature.Project.Name,
-                    Link = data.Task.Feature.Project.Link
+                    Id = data.Task.Feature.Id,
+                    Name = data.Task.Feature.Name,
+                    Project = new Project
+                    {
+                        Id = data.Task.Feature.Project.Id,
+                        Name = data.Task.Feature.Project.Name,
+                        Link = data.Task.Feature.Project.Link
+                    },
+                    CreatedAt = data.Task.Feature.CreatedAt,
+                    EditedAt = data.Task.Feature.EditedAt
                 }
             }
         )
+        .OrderByDescending(it => it.CreatedAt)
         .AsPaginated(pageQuery)
         .CollectAsync();
 
@@ -239,6 +296,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     Comment = data.Comment,
                 }
             )
+            .OrderByDescending(it => it.CreatedAt)
             .AsPaginated(pageQuery)
             .CollectAsync();
 
@@ -278,9 +336,25 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         await dbContext.SaveChangesAsync();
     }
 
-    public Task DeletePaymentAsync(Guid id) => throw new NotImplementedException();
+    public async Task DeletePaymentAsync(Guid id)
+    {
+        var entity = await dbContext.Payments.FindAsync(id);
+        
+        if(entity is null) return;
 
-    public Task DeleteBonusPaymentAsync(Guid id) => throw new NotImplementedException();
+        dbContext.Payments.Remove(entity);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteBonusPaymentAsync(Guid id)
+    {
+        var entity = await dbContext.Bonuses.FindAsync(id);
+        
+        if(entity is null) return;
+
+        dbContext.Bonuses.Remove(entity);
+        await dbContext.SaveChangesAsync();
+    }
 
     public async Task<bool> IsPaymentPaidByThisUser(Guid paymentId, Guid userId)
     {

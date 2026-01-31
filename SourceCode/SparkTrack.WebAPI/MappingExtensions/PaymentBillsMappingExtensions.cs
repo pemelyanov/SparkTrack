@@ -37,7 +37,7 @@ public static class PaymentBillsMappingExtensions
         TaskId = data.TaskId,
         CreatedAt = data.CreatedAt,
         Task = data.Task.ToDTO(),
-        Project = data.Project.ToDTO()
+        Feature = data.Feature.ToDTO()
     };
     
     public static BonusPaymentDTO ToDTO(this BonusPaymentInfo data) => new()
