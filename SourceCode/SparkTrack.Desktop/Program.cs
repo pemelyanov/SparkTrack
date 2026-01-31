@@ -43,6 +43,7 @@ sealed class Program
         .WithInterFont()
         .LogToTrace()
         .UseReactiveUI()
+        .With(() => new SkiaOptions { UseOpacitySaveLayer = true, MaxGpuResourceSizeBytes = 512 * 1024 * 1024})
         .UseBootstrapper<SparkTrackBootstrapper>([typeof(App).Assembly]);
     
     private static void SetupLogger()
