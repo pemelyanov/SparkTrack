@@ -1,0 +1,23 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:usersFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UsersFilter"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.UsersFilter.UserFilter"
+             x:DataType="usersFilter:UserFilterViewModel">
+    <UserControl.Resources>
+        <converters:RoleConverter x:Key="RoleConverter" />
+        <converters:NullValueToListConverter x:Key="NullValueToListConverter" />
+    </UserControl.Resources>
+    <Grid ColumnDefinitions="Auto *">
+        <TextBlock Grid.Column="0"
+                   Text="{Binding UserRole, StringFormat='Пользователь ({0}): ', Converter={StaticResource RoleConverter}}"
+                   VerticalAlignment="Center" IsVisible="{Binding ShowLabel}" />
+        <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding UsersList, Converter={StaticResource NullValueToListConverter}}"
+                  DisplayMemberBinding="{Binding Name, FallbackValue='Все'}" PlaceholderText="Все"
+                  SelectedItem="{Binding SelectedUser}" VerticalAlignment="Center" />
+    </Grid>
+</UserControl>

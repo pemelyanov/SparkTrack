@@ -33,7 +33,7 @@ public class UsersService(
         {
             ERole.Admin => clientWrapper.Client.GetAdminsListAsync(pageQuery.Page, pageQuery.ItemsPerPage),
             ERole.Employee => clientWrapper.Client.GetEmployeesListAsync(pageQuery.Page, pageQuery.ItemsPerPage),
-            _ => throw new NotSupportedException()
+            _ => throw new NotSupportedException(role.ToString())
         };
 
         var dto = await task;

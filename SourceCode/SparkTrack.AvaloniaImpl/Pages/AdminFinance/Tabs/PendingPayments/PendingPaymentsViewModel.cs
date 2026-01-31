@@ -210,10 +210,10 @@ public class PendingPaymentsViewModel : ViewModelBase
 
         await m_dialogService.ShowAsync(bonusViewModel);
         
-        if(bonusViewModel.SelectedUser is null || bonusViewModel.Payment <= 0) return;
+        if(bonusViewModel.UserFilterViewModel.SelectedUser is null || bonusViewModel.Payment <= 0) return;
 
         await m_paymentBillsService.PayBonusAsync(
-            bonusViewModel.SelectedUser.Id,
+            bonusViewModel.UserFilterViewModel.SelectedUser.Id,
             bonusViewModel.Payment,
             bonusViewModel.Comment
         );

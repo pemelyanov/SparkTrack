@@ -207,11 +207,19 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         };
     }
 
-    public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId, PageQuery pageQuery) => await dbContext
+    public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync( Guid? adminId,
+                                                                                    Guid? employeeId,
+                                                                                    Guid? projectId,
+                                                                                    DateTime? startDate,
+                                                                                    DateTime? endDate,
+                                                                                    PageQuery pageQuery) => await dbContext
         .Payments
         .AsNoTracking()
         .WhereIf(adminId is not null, it => it.AdminId == adminId)
         .WhereIf(projectId is not null, it => it.Task.Feature.ProjectId == projectId)
+        .WhereIf(employeeId is not null, it => it.Task.ExecutorEmployeeId == employeeId)
+        .WhereIf(startDate is not null, it => it.CreatedAt >= startDate)
+        .WhereIf(endDate is not null, it => it.CreatedAt <= endDate)
         .Select(data => new PaymentDetails
             {
                 Id = data.Id,
@@ -267,11 +275,18 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         .AsPaginated(pageQuery)
         .CollectAsync();
 
-    public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, PageQuery pageQuery) =>
+    public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId,
+                                                                                          Guid? employeeId,
+                                                                                          DateTime? startDate,
+                                                                                          DateTime? endDate,
+                                                                                          PageQuery pageQuery) =>
         await dbContext
             .Bonuses
             .AsNoTracking()
             .WhereIf(adminId is not null, it => it.AdminId == adminId)
+            .WhereIf(employeeId is not null, it => it.EmployeeId == employeeId)
+            .WhereIf(startDate is not null, it => it.CreatedAt >= startDate)
+            .WhereIf(endDate is not null, it => it.CreatedAt <= endDate)
             .Select(data => new BonusPaymentInfo
                 {
                     Id = data.Id,

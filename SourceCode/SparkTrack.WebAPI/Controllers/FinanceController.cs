@@ -71,13 +71,23 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<PagedDTO<PaymentDetailsDTO>>> GetAdminPaymentsHistoryAsync(
         Guid? adminId,
+        Guid? employeeId,
         Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
         [FromQuery] PageQueryDTO pageQuery
     )
     {
         return this.OkWithDomainExceptionsHandling(async () =>
             {
-                var data = await paymentBillsService.GetPaidPaymentsListAsync(adminId, projectId, pageQuery.ToDomain());
+                var data = await paymentBillsService.GetPaidPaymentsListAsync(
+                    adminId,
+                    employeeId,
+                    projectId,
+                    startDate,
+                    endDate,
+                    pageQuery.ToDomain()
+                );
 
                 return data.ToDTO(it => it.ToDTO());
             }
@@ -91,6 +101,9 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<PagedDTO<BonusPaymentDTO>>> GetAdminBonusPaymentsHistoryAsync(
         Guid? adminId,
+        Guid? employeeId,
+        DateTime? startDate,
+        DateTime? endDate,
         [FromQuery] PageQueryDTO pageQuery
     )
     {
@@ -98,6 +111,9 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
             {
                 var data = await paymentBillsService.GetPaidBonusPaymentsListAsync(
                     adminId,
+                    employeeId,
+                    startDate,
+                    endDate,
                     pageQuery.ToDomain()
                 );
 

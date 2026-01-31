@@ -14,6 +14,7 @@ using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.SubTask;
 using Controls.UserEditForm;
+using Controls.UsersFilter;
 using Core.Client.AutofacModules;
 using Core.Client.Events;
 using Core.Shared.Eventing;
@@ -53,6 +54,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<BonusFormViewModel>();
         builder.RegisterType<PendingPaymentsViewModel>();
         builder.RegisterType<PaymentsHistoryViewModel>();
+        builder.RegisterType<UserFilterViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

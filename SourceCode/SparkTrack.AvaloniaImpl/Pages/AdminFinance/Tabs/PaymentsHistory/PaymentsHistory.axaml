@@ -9,6 +9,9 @@
              xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:usersFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UsersFilter"
+             xmlns:disablingWrapper="clr-namespace:SparkTrack.AvaloniaImpl.Controls.DisablingWrapper"
+             xmlns:rangeDatePicker="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RangeDatePicker"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PaymentsHistory.PaymentsHistory"
              x:DataType="paymentsHistory:PaymentsHistoryViewModel"
@@ -100,13 +103,21 @@
         </Style>
     </UserControl.Styles>
     <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
-        <WrapPanel Grid.Row="0" ItemSpacing="8" LineSpacing="8">
-            <!-- TODO: Filters block -->
+        <WrapPanel Grid.Row="0" ItemSpacing="24" LineSpacing="8">
             <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
 
             <ComboBox SelectedIndex="0" ItemsSource="{Binding PaymentKinds}"
                       SelectedItem="{Binding SelectedPaymentKind}"
                       DisplayMemberBinding="{Binding Name}" />
+
+            <usersFilter:UserFilter DataContext="{Binding AdminFilterViewModel}" />
+
+            <usersFilter:UserFilter DataContext="{Binding EmployeeFilterViewModel}" />
+
+            <disablingWrapper:DisablingWrapper IsContentEnabled="{Binding DateRangeViewModel.IsSelected}">
+                <rangeDatePicker:RangeDatePicker StartDate="{Binding DateRangeViewModel.Model.StartDate}"
+                                                 EndDate="{Binding DateRangeViewModel.Model.EndDate}" />
+            </disablingWrapper:DisablingWrapper>
         </WrapPanel>
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Right">

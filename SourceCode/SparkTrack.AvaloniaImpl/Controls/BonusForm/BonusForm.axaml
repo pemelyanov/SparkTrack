@@ -5,6 +5,7 @@
                         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
                         xmlns:bonusForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.BonusForm"
                         xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
+                        xmlns:usersFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UsersFilter"
                         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                         x:Class="SparkTrack.AvaloniaImpl.Controls.BonusForm.BonusForm"
                         x:DataType="bonusForm:BonusFormViewModel"
@@ -21,8 +22,7 @@
     </controls:ContentDialog.Styles>
     <StackPanel Spacing="8">
         <TextBlock Text="Выберите сотрудника для выдачи премии:" />
-        <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding UsersList}" DisplayMemberBinding="{Binding Name}"
-                  SelectedItem="{Binding SelectedUser}" />
+        <usersFilter:UserFilter DataContext="{Binding UserFilterViewModel}"/>
         <TextBox Watermark="Премия (₽)" Text="{Binding Payment}">
             <Interaction.Behaviors>
                 <behaviors:FloatBoxBehavior />

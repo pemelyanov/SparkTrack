@@ -5,7 +5,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Controls.ProjectsFilter;
+using Controls.UsersFilter;
 using Core.Shared.Data.Entities;
+using Core.Shared.Enums;
 using Core.Shared.Services.PaymentBills;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
@@ -22,12 +24,19 @@ public class PaymentsHistoryViewModel : ViewModelBase
     public PaymentsHistoryViewModel(
         ProjectsFilterViewModel projectsFilterViewModel,
         IPaymentBillsService paymentBillsService,
-        IDialogService dialogService
+        IDialogService dialogService,
+        UserFilterViewModel adminFilterViewModel,
+        UserFilterViewModel employeeFilterViewModel
     )
     {
         m_paymentBillsService = paymentBillsService;
         m_dialogService = dialogService;
+        AdminFilterViewModel = adminFilterViewModel;
+        EmployeeFilterViewModel = employeeFilterViewModel;
         ProjectsFilterViewModel = projectsFilterViewModel;
+
+        adminFilterViewModel.UserRole = ERole.Admin;
+        employeeFilterViewModel.UserRole = ERole.Employee;
 
         ReloadTableCommand = ReactiveCommand.CreateFromTask(ReloadTableAsync);
         DeleteEntryCommand = ReactiveCommand.CreateFromTask<object, Unit>(async (entry) =>
@@ -45,6 +54,11 @@ public class PaymentsHistoryViewModel : ViewModelBase
         ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
             .CombineLatest(this.WhenAnyValue(it => it.SelectedPaymentKind))
             .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(AdminFilterViewModel.WhenAnyValue(it => it.SelectedUser))
+            .CombineLatest(EmployeeFilterViewModel.WhenAnyValue(it => it.SelectedUser))
+            .CombineLatest(DateRangeViewModel.WhenAnyValue(it => it.IsSelected))
+            .CombineLatest(DateRangeViewModel.Model.WhenAnyValue(it => it.StartDate))
+            .CombineLatest(DateRangeViewModel.Model.WhenAnyValue(it => it.EndDate))
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
@@ -55,6 +69,15 @@ public class PaymentsHistoryViewModel : ViewModelBase
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
+
+    public UserFilterViewModel AdminFilterViewModel { get; }
+
+    public UserFilterViewModel EmployeeFilterViewModel { get; }
+
+    public SelectableViewModel<DateRangeViewModel> DateRangeViewModel { get; } = new(new DateRangeViewModel())
+    {
+        IsSelected = true
+    };
 
     public IReadOnlyList<PaymentKind> PaymentKinds { get; } =
         [PaymentKind.Primary.Instance, PaymentKind.Bonus.Instance];
@@ -69,13 +92,13 @@ public class PaymentsHistoryViewModel : ViewModelBase
     public IReadOnlyList<BonusPaymentInfo> BonusPaymentsPageData { get; private set; } = [];
 
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
-    
+
     public ReactiveCommand<Object, Unit> DeleteEntryCommand { get; }
 
     private async Task DeleteEntryAsync(object entry)
     {
-        if(!await m_dialogService.ConfirmAsync("Вы уверены что хотите удалить платеж?")) return;
-        
+        if (!await m_dialogService.ConfirmAsync("Вы уверены что хотите удалить платеж?")) return;
+
         if (entry is PaymentDetails paymentDetails) await m_paymentBillsService.DeleteBillAsync(paymentDetails.Id);
         if (entry is BonusPaymentInfo bonusPaymentInfo)
             await m_paymentBillsService.DeleteBonusAsync(bonusPaymentInfo.Id);
@@ -97,8 +120,11 @@ public class PaymentsHistoryViewModel : ViewModelBase
     private async Task LoadPrimaryHistory()
     {
         var page = await m_paymentBillsService.GetPaidPaymentsListAsync(
-            null,
+            AdminFilterViewModel.SelectedUser?.Id,
+            EmployeeFilterViewModel.SelectedUser?.Id,
             ProjectsFilterViewModel.SelectedProject?.Id,
+            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.StartDate : null,
+            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.EndDate : null,
             PaginatorViewModel.ToQuery()
         );
 
@@ -109,7 +135,10 @@ public class PaymentsHistoryViewModel : ViewModelBase
     private async Task LoadBonusHistory()
     {
         var page = await m_paymentBillsService.GetPaidBonusPaymentsListAsync(
-            null,
+            AdminFilterViewModel.SelectedUser?.Id,
+            EmployeeFilterViewModel.SelectedUser?.Id,
+            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.StartDate : null,
+            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.EndDate : null,
             PaginatorViewModel.ToQuery()
         );
 

@@ -2615,14 +2615,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentDetailsDTO> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId, int? page, int? itemsPerPage)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentDetailsDTO> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage)
         {
-            return GetAdminPaymentsHistoryAsync(adminId, projectId, page, itemsPerPage, System.Threading.CancellationToken.None);
+            return GetAdminPaymentsHistoryAsync(adminId, employeeId, projectId, startDate, endDate, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentDetailsDTO> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentDetailsDTO> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2642,9 +2642,21 @@ namespace SparkTrack.API
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("adminId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(adminId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
+                    if (employeeId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("employeeId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(employeeId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
                     if (projectId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (startDate != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("startDate")).Append('=').Append(System.Uri.EscapeDataString(startDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (endDate != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("endDate")).Append('=').Append(System.Uri.EscapeDataString(endDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     if (page != null)
                     {
@@ -2729,14 +2741,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PagedDTOOfBonusPaymentDTO> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, int? page, int? itemsPerPage)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfBonusPaymentDTO> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, System.Guid? employeeId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage)
         {
-            return GetAdminBonusPaymentsHistoryAsync(adminId, page, itemsPerPage, System.Threading.CancellationToken.None);
+            return GetAdminBonusPaymentsHistoryAsync(adminId, employeeId, startDate, endDate, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PagedDTOOfBonusPaymentDTO> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfBonusPaymentDTO> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, System.Guid? employeeId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2755,6 +2767,18 @@ namespace SparkTrack.API
                     if (adminId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("adminId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(adminId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (employeeId != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("employeeId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(employeeId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (startDate != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("startDate")).Append('=').Append(System.Uri.EscapeDataString(startDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (endDate != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("endDate")).Append('=').Append(System.Uri.EscapeDataString(endDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     if (page != null)
                     {

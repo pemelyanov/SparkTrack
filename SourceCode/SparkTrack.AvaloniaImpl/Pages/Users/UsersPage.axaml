@@ -11,6 +11,9 @@
              x:Class="SparkTrack.AvaloniaImpl.Pages.Users.UsersPage"
              x:DataType="users:UsersPageViewModel"
              x:Name="Root">
+    <UserControl.Resources>
+        <converters:RoleConverter x:Key="RoleConverter" />
+    </UserControl.Resources>
     <Grid RowDefinitions="Auto Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type users:UsersPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
@@ -44,7 +47,7 @@
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="Почта" Binding="{Binding Model.Email}" />
                 <DataGridTextColumn Width="120" IsReadOnly="True"
-                                    Header="Роль" Binding="{Binding Model.Role}" />
+                                    Header="Роль" Binding="{Binding Model.Role, Converter={StaticResource RoleConverter}}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -38,7 +38,10 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
 
     public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
         Guid? adminId,
+        Guid? employeeId,
         Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
         PageQuery pageQuery
     )
     {
@@ -46,7 +49,10 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
 
         var page = await wrapper.Client.GetAdminPaymentsHistoryAsync(
             adminId,
+            employeeId,
             projectId,
+            startDate?.ToUniversalTime(),
+            endDate?.ToUniversalTime(),
             pageQuery.Page,
             pageQuery.ItemsPerPage
         );
@@ -56,6 +62,9 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
 
     public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(
         Guid? adminId,
+        Guid? employeeId,
+        DateTime? startDate,
+        DateTime? endDate,
         PageQuery pageQuery
     )
     {
@@ -63,6 +72,9 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
 
         var page = await wrapper.Client.GetAdminBonusPaymentsHistoryAsync(
             adminId,
+            employeeId,
+            startDate?.ToUniversalTime(),
+            endDate?.ToUniversalTime(),
             pageQuery.Page,
             pageQuery.ItemsPerPage
         );

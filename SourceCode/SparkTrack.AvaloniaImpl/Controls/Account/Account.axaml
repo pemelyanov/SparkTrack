@@ -4,9 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
              xmlns:account="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Account"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.Account.Account"
              x:DataType="account:AccountViewModel">
+    <UserControl.Resources>
+        <converters:RoleConverter x:Key="RoleConverter" />
+    </UserControl.Resources>
     <Border Classes="card">
         <Grid ColumnDefinitions="Auto *" RowDefinitions="Auto Auto" ColumnSpacing="8" RowSpacing="8">
             <ContentControl Content="{markupExtensions:SymbolIcon Symbol=Person}"  Width="64" Height="64" 
@@ -15,7 +19,7 @@
             <StackPanel Grid.Column="1" Grid.Row="0" Spacing="8">
                 <TextBlock Text="{Binding CurrentUser.Value.Name}" />
                 <SelectableTextBlock Text="{Binding CurrentUser.Value.Email}" />
-                <TextBlock Text="{Binding CurrentUser.Value.Role}" />
+                <TextBlock Text="{Binding CurrentUser.Value.Role, Converter={StaticResource RoleConverter}}" />
             </StackPanel>
 
             <Button Grid.Column="0" Grid.Row="1" Content="Выйти" 

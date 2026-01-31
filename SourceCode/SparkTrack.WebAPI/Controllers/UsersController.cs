@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 [Route("users")]
 public class UsersController(IUsersService usersService) : Controller
 {
-    [Authorize(Roles = nameof(ERole.God))]
+    [Authorize(Roles = $"{nameof(ERole.God)}, {nameof(ERole.Admin)}")]
     [HttpGet("admins")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
