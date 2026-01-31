@@ -6,6 +6,7 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:pendingPayments="clr-namespace:SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PendingPayments"
+             xmlns:paymentsHistory="clr-namespace:SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PaymentsHistory"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.AdminFinancePage"
              x:DataType="adminFinance:AdminFinancePageViewModel"
@@ -20,7 +21,9 @@
                 <pendingPayments:PendingPayments DataContext="{Binding PendingPaymentsViewModel}" />
             </TabItem>
             
-            <TabItem Header="История платежей" />
+            <TabItem Header="История платежей">
+                <paymentsHistory:PaymentsHistory DataContext="{Binding PaymentsHistoryViewModel}" Margin="0 8 0 0"/>
+            </TabItem>
         </TabControl>
     </Grid>
 </UserControl>

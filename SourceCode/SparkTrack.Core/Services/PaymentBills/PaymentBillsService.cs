@@ -32,11 +32,11 @@ public class PaymentBillsService(
     public Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId) =>
         paymentBillsRepository.GetPendingPaymentsSummaryAsync(projectId);
 
-    public Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId) =>
-        paymentBillsRepository.GetPaidPaymentsListAsync(adminId, projectId);
+    public Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId, PageQuery pageQuery) =>
+        paymentBillsRepository.GetPaidPaymentsListAsync(adminId, projectId, pageQuery);
 
-    public Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId) =>
-        paymentBillsRepository.GetPaidBonusPaymentsListAsync(adminId, projectId);
+    public Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, PageQuery pageQuery) =>
+        paymentBillsRepository.GetPaidBonusPaymentsListAsync(adminId, pageQuery);
 
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {

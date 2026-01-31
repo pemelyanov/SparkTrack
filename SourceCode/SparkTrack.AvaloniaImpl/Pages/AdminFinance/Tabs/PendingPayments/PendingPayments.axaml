@@ -14,7 +14,7 @@
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PendingPayments.PendingPayments"
              x:DataType="pendingPayments:PendingPaymentsViewModel"
              x:Name="Root">
-        <Grid RowDefinitions="Auto Auto Auto Auto Auto * Auto" RowSpacing="8">
+    <Grid RowDefinitions="Auto Auto Auto Auto Auto * Auto" RowSpacing="8">
         <WrapPanel Grid.Row="1">
             <!-- TODO: Filters block -->
             <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
@@ -22,7 +22,8 @@
 
         <StackPanel Grid.Row="2">
             <Grid ColumnDefinitions="Auto Auto *" ColumnSpacing="16">
-                <DataGrid Classes="readonly" ItemsSource="{Binding PendingPaymentsSummary.RemainingPayments}" HorizontalAlignment="Left">
+                <DataGrid Classes="readonly" ItemsSource="{Binding PendingPaymentsSummary.RemainingPayments}"
+                          HorizontalAlignment="Left">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Сотрудник" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
@@ -36,7 +37,8 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <DataGrid Grid.Column="1" Classes="readonly" ItemsSource="{Binding PendingPaymentsSummary.AdminPayments}" HorizontalAlignment="Left">
+                <DataGrid Grid.Column="1" Classes="readonly"
+                          ItemsSource="{Binding PendingPaymentsSummary.AdminPayments}" HorizontalAlignment="Left">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Админ" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
@@ -49,7 +51,7 @@
                                             Binding="{Binding Payment, StringFormat='{}{0:C}'}" />
                     </DataGrid.Columns>
                 </DataGrid>
-                
+
                 <TextBlock Grid.Column="2" Classes="subtitle" HorizontalAlignment="Right"
                            Text="{Binding TotalRemainingPayments, StringFormat='Общий долг по зарплатам: {0:C}'}" />
             </Grid>
@@ -98,12 +100,12 @@
                 <DataGridTemplateColumn Header="Стоимость (опл./всего)" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <remainingPaymentCell:RemainingPaymentCell PaymentType="Main" 
+                            <remainingPaymentCell:RemainingPaymentCell PaymentType="Main"
                                                                        PaymentBill="{Binding Model}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Премия за срок (опл./всего)" IsReadOnly="True">
+                <DataGridTemplateColumn Header="Бонус за срок (опл./всего)" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <remainingPaymentCell:RemainingPaymentCell PaymentType="TimelyBonus"

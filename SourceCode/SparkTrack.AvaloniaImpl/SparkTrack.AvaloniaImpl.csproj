@@ -45,8 +45,4 @@
     <ItemGroup>
       <EmbeddedResource Include="NLog.config" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Pages\AdminFinance\Tabs\PaidPayments\" />
-    </ItemGroup>
 </Project>

@@ -1,0 +1,124 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
+             xmlns:paginator="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Paginator"
+             xmlns:paymentsHistory="clr-namespace:SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PaymentsHistory"
+             xmlns:entities="clr-namespace:SparkTrack.Core.Shared.Data.Entities;assembly=SparkTrack.Core.Shared"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PaymentsHistory.PaymentsHistory"
+             x:DataType="paymentsHistory:PaymentsHistoryViewModel">
+    <UserControl.Resources>
+        <converters:PaymentTypeConverter x:Key="PaymentTypeConverter"/>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="userName|UserName.subtitle">
+            <Style Selector="^ :is(TextBlock)">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+        </Style>
+        
+        <Style Selector="ItemsControl.main">
+            <Setter Property="ItemsSource" Value="{Binding PaymentDetailsPageData}" />
+            <Setter Property="ItemTemplate">
+                <DataTemplate x:DataType="entities:PaymentDetails">
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="Auto *" ColumnSpacing="8">
+                            <StackPanel Grid.Column="0" Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Classes="subtitle" Text="{Binding PaymentType, Converter={StaticResource PaymentTypeConverter}}" />
+                                    <TextBlock Text=">" VerticalAlignment="Bottom"/>
+                                    <userName:UserName User="{Binding Task.ExecutorEmployee}" VerticalAlignment="Bottom" />
+                                </StackPanel> 
+                                <TextBlock Text="{Binding Task.Name, StringFormat='Задача: {0}'}"/>
+                                <TextBlock Text="{Binding Project.Name, StringFormat='Канал: {0}'}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock 
+                                        Text="{Binding CreatedAt, 
+                                    StringFormat={x:Static constants:DateFormats.ShortRu}}"
+                                        Opacity="0.7" />
+                                    <userName:UserName User="{Binding Admin}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1"  VerticalAlignment="Top" HorizontalAlignment="Right" Spacing="8">
+                                <Button Classes="icon delete" HorizontalAlignment="Right" />
+                                <TextBlock Classes="subtitle" HorizontalAlignment="Right"
+                                           Text="{Binding Payment, StringFormat='{}{0:C}'}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </Setter>
+        </Style>
+
+        <Style Selector="ItemsControl.bonus">
+            <Setter Property="ItemsSource" Value="{Binding BonusPaymentsPageData}" />
+            <Setter Property="ItemTemplate">
+                <DataTemplate x:DataType="entities:BonusPaymentInfo">
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="Auto *" ColumnSpacing="8">
+                            <StackPanel Grid.Column="0" Spacing="8">
+                                <userName:UserName Classes="subtitle" User="{Binding Employee}" />
+
+                                <TextBlock Text="{Binding Comment, StringFormat='Комментарий: {0}'}" TextWrapping="Wrap" MaxLines="2"
+                                           TextTrimming="CharacterEllipsis" IsVisible="{Binding Comment, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                           ToolTip.Tip="{Binding Comment}" />
+                                
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock
+                                        Text="{Binding CreatedAt, 
+                                    StringFormat={x:Static constants:DateFormats.ShortRu}}"
+                                        Opacity="0.7" />
+                                    <userName:UserName User="{Binding Admin}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Spacing="8">
+                                <Button Classes="icon delete" HorizontalAlignment="Right" />
+                                <TextBlock Classes="subtitle" HorizontalAlignment="Right"
+                                           Text="{Binding Payment, StringFormat='{}{0:C}'}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
+        <WrapPanel Grid.Row="0" ItemSpacing="8" LineSpacing="8">
+            <!-- TODO: Filters block -->
+            <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
+
+            <ComboBox SelectedIndex="0" ItemsSource="{Binding PaymentKinds}"
+                      SelectedItem="{Binding SelectedPaymentKind}"
+                      DisplayMemberBinding="{Binding Name}" />
+        </WrapPanel>
+        
+        <StackPanel Grid.Row="1" HorizontalAlignment="Right">
+            <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2">
+            <ItemsControl  Classes.main="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
+                      ConverterParameter={x:Static paymentsHistory:PaymentKind+Primary.Instance}}"
+                           Classes.bonus="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
+                      ConverterParameter={x:Static paymentsHistory:PaymentKind+Bonus.Instance}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <paginator:Paginator Grid.Row="3" PagesQuantity="{Binding PaginatorViewModel.PagesQuantity}"
+                             CurrentPage="{Binding PaginatorViewModel.CurrentPage}"
+                             ItemsPerPage="{Binding PaginatorViewModel.ItemsPerPage}" />
+    </Grid>
+</UserControl>

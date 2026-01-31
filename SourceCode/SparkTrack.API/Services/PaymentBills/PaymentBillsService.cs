@@ -2,6 +2,7 @@ namespace SparkTrack.API.Services.PaymentBills;
 
 using Core.Shared.Data;
 using Core.Shared.Data.Entities;
+using Core.Shared.Extensions;
 using Core.Shared.Services.PaymentBills;
 using Delegates;
 using MappingExtensions;
@@ -26,7 +27,8 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return list.Select(it => it.ToDomain()).ToArray();
     }
 
-    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId) {
+    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId)
+    {
         using var wrapper = financeClientFactory.Invoke();
 
         var dto = await wrapper.Client.GetPendingPaymentsSummaryAsync(projectId);
@@ -34,22 +36,38 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return dto.ToDomain();
     }
 
-    public async Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId)
+    public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
+        Guid? adminId,
+        Guid? projectId,
+        PageQuery pageQuery
+    )
     {
         using var wrapper = financeClientFactory.Invoke();
 
-        var list = await wrapper.Client.GetAdminPaymentsHistoryAsync(adminId, projectId);
+        var page = await wrapper.Client.GetAdminPaymentsHistoryAsync(
+            adminId,
+            projectId,
+            pageQuery.Page,
+            pageQuery.ItemsPerPage
+        );
 
-        return list.Select(it => it.ToDomain()).ToArray();
+        return page.ReflectionConvert<PaymentDetailsDTO, PaymentDetails>(it => it.ToDomain());
     }
 
-    public async Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId)
+    public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(
+        Guid? adminId,
+        PageQuery pageQuery
+    )
     {
         using var wrapper = financeClientFactory.Invoke();
 
-        var list = await wrapper.Client.GetAdminBonusPaymentsHistoryAsync(adminId, projectId);
+        var page = await wrapper.Client.GetAdminBonusPaymentsHistoryAsync(
+            adminId,
+            pageQuery.Page,
+            pageQuery.ItemsPerPage
+        );
 
-        return list.Select(it => it.ToDomain()).ToArray();
+        return page.ReflectionConvert<BonusPaymentDTO, BonusPaymentInfo>(it => it.ToDomain());
     }
 
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)

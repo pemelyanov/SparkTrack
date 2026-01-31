@@ -121,6 +121,13 @@ public class DataGridSelectionColumn : DataGridBoundColumn
         var unselectedQuantity = 0;
         var totalQuantity = 0;
 
+        if (OwningGrid.ItemsSource is null)
+        {
+            m_headerCheckBox.IsChecked = false;
+            m_updatingByCellValue = false;
+            return;
+        }
+
         foreach (var item in OwningGrid.ItemsSource)
         {
             m_tempCellCheckBox.DataContext = item;

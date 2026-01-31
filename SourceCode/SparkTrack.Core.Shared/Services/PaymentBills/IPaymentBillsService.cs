@@ -11,9 +11,9 @@ public interface IPaymentBillsService
     
     Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
     
-    Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId);
+    Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId, PageQuery pageQuery);
     
-    Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId);
+    Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, PageQuery pageQuery);
 
     Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment);
 

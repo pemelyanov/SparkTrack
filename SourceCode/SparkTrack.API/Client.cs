@@ -2615,14 +2615,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PaymentDetailsDTO>> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentDetailsDTO> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId, int? page, int? itemsPerPage)
         {
-            return GetAdminPaymentsHistoryAsync(adminId, projectId, System.Threading.CancellationToken.None);
+            return GetAdminPaymentsHistoryAsync(adminId, projectId, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<PaymentDetailsDTO>> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentDetailsDTO> GetAdminPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2645,6 +2645,14 @@ namespace SparkTrack.API
                     if (projectId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (page != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("Page")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (itemsPerPage != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ItemsPerPage")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(itemsPerPage, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 
@@ -2673,7 +2681,7 @@ namespace SparkTrack.API
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.IReadOnlyList<PaymentDetailsDTO>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<PagedDTOOfPaymentDetailsDTO>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -2721,14 +2729,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<BonusPaymentDTO>> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfBonusPaymentDTO> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, int? page, int? itemsPerPage)
         {
-            return GetAdminBonusPaymentsHistoryAsync(adminId, projectId, System.Threading.CancellationToken.None);
+            return GetAdminBonusPaymentsHistoryAsync(adminId, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<BonusPaymentDTO>> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, System.Guid? projectId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfBonusPaymentDTO> GetAdminBonusPaymentsHistoryAsync(System.Guid? adminId, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2748,9 +2756,13 @@ namespace SparkTrack.API
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("adminId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(adminId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
-                    if (projectId != null)
+                    if (page != null)
                     {
-                        urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                        urlBuilder_.Append(System.Uri.EscapeDataString("Page")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(page, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (itemsPerPage != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("ItemsPerPage")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(itemsPerPage, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 
@@ -2779,7 +2791,7 @@ namespace SparkTrack.API
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<System.Collections.Generic.IReadOnlyList<BonusPaymentDTO>>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            var objectResponse_ = await ReadObjectResponseAsync<PagedDTOOfBonusPaymentDTO>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -5176,6 +5188,18 @@ namespace SparkTrack.API
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PagedDTOOfPaymentDetailsDTO
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        public System.Collections.Generic.IReadOnlyList<PaymentDetailsDTO> Items { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; init; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class PaymentDetailsDTO : PaymentDTO
     {
 
@@ -5184,6 +5208,18 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("project")]
         public ProjectDTO Project { get; init; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PagedDTOOfBonusPaymentDTO
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        public System.Collections.Generic.IReadOnlyList<BonusPaymentDTO> Items { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; init; }
 
     }
 

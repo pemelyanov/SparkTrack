@@ -129,6 +129,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         var userRemainingPayments = await GetUsersRemainingPaymentsAsync(projectId);
 
         var adminPaidPayments = await dbContext.SubTasks
+            .AsNoTracking()
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
             .SelectMany(it => it.Payments)
@@ -157,62 +158,64 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         };
     }
 
-    public async Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId) =>
-        await dbContext
-            .Payments
-            .WhereIf(adminId is not null, it => it.AdminId == adminId)
-            .WhereIf(projectId is not null, it => it.Task.Feature.ProjectId == projectId)
-            .Select(data => new PaymentDetails
+    public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId, PageQuery pageQuery) => await dbContext
+        .Payments
+        .AsNoTracking()
+        .WhereIf(adminId is not null, it => it.AdminId == adminId)
+        .WhereIf(projectId is not null, it => it.Task.Feature.ProjectId == projectId)
+        .Select(data => new PaymentDetails
+            {
+                Id = data.Id,
+                Admin = new User
                 {
-                    Id = data.Id,
-                    Admin = new User
+                    Id = data.Admin.Id,
+                    Email = data.Admin.Email,
+                    Name = data.Admin.Name,
+                    Role = data.Admin.Role,
+                    TelegramTag = data.Admin.TelegramTag
+                },
+                Payment = data.Payment,
+                PaymentType = data.PaymentType,
+                TaskId = data.TaskId,
+                CreatedAt = data.CreatedAt,
+                Task = new SubTask
+                {
+                    Id = data.Task.Id,
+                    Name = data.Task.Name,
+                    ExecutorEmployee = new User
                     {
-                        Id = data.Admin.Id,
-                        Email = data.Admin.Email,
-                        Name = data.Admin.Name,
-                        Role = data.Admin.Role,
-                        TelegramTag = data.Admin.TelegramTag
+                        Id = data.Task.ExecutorEmployee.Id,
+                        Email = data.Task.ExecutorEmployee.Email,
+                        Name = data.Task.ExecutorEmployee.Name,
+                        Role = data.Task.ExecutorEmployee.Role,
+                        TelegramTag = data.Task.ExecutorEmployee.TelegramTag
                     },
-                    Payment = data.Payment,
-                    PaymentType = data.PaymentType,
-                    TaskId = data.TaskId,
-                    CreatedAt = data.CreatedAt,
-                    Task = new SubTask
-                    {
-                        Id = data.Task.Id,
-                        Name = data.Task.Name,
-                        ExecutorEmployee = new User
-                        {
-                            Id = data.Task.ExecutorEmployee.Id,
-                            Email = data.Task.ExecutorEmployee.Email,
-                            Name = data.Task.ExecutorEmployee.Name,
-                            Role = data.Task.ExecutorEmployee.Role,
-                            TelegramTag = data.Task.ExecutorEmployee.TelegramTag
-                        },
-                        Deadline = data.Task.Deadline,
-                        Cost = data.Task.Cost,
-                        Version = data.Task.Version,
-                        IsCompleted = data.Task.IsCompleted,
-                        PaymentStatus = data.Task.PaymentStatus,
-                        CompletedAt = data.Task.CompletedAt,
-                        TimelyBonus = data.Task.TimelyBonus,
-                        IsTimelyBonusApproved = data.Task.IsTimelyBonusApproved
-                    },
-                    Project = new Project
-                    {
-                        Id = data.Task.Feature.ProjectId,
-                        Name = data.Task.Feature.Project.Name,
-                        Link = data.Task.Feature.Project.Link
-                    }
+                    Deadline = data.Task.Deadline,
+                    Cost = data.Task.Cost,
+                    Version = data.Task.Version,
+                    IsCompleted = data.Task.IsCompleted,
+                    PaymentStatus = data.Task.PaymentStatus,
+                    CompletedAt = data.Task.CompletedAt,
+                    TimelyBonus = data.Task.TimelyBonus,
+                    IsTimelyBonusApproved = data.Task.IsTimelyBonusApproved
+                },
+                Project = new Project
+                {
+                    Id = data.Task.Feature.ProjectId,
+                    Name = data.Task.Feature.Project.Name,
+                    Link = data.Task.Feature.Project.Link
                 }
-            )
-            .ToArrayAsync();
+            }
+        )
+        .AsPaginated(pageQuery)
+        .CollectAsync();
 
-    public async Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId) =>
+    public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, PageQuery pageQuery) =>
         await dbContext
             .Bonuses
+            .AsNoTracking()
             .WhereIf(adminId is not null, it => it.AdminId == adminId)
-            .Select(data => new BonusPaymentInfo()
+            .Select(data => new BonusPaymentInfo
                 {
                     Id = data.Id,
                     Admin = new User
@@ -233,9 +236,11 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     },
                     Payment = data.Payment,
                     CreatedAt = data.CreatedAt,
+                    Comment = data.Comment,
                 }
             )
-            .ToArrayAsync();
+            .AsPaginated(pageQuery)
+            .CollectAsync();
 
     public async Task AddPaymentsRangeAsync(IReadOnlyList<PaymentInfo> paymentsList)
     {
@@ -279,7 +284,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
 
     public async Task<bool> IsPaymentPaidByThisUser(Guid paymentId, Guid userId)
     {
-        var payerId = await dbContext.Payments.Where(it => it.Id == paymentId)
+        var payerId = await dbContext.Payments.AsNoTracking().Where(it => it.Id == paymentId)
             .Select(it => it.AdminId)
             .FirstOrDefaultAsync();
 
@@ -288,7 +293,7 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
 
     public async Task<bool> IsBonusPaymentPaidByThisUser(Guid paymentId, Guid userId)
     {
-        var payerId = await dbContext.Bonuses.Where(it => it.Id == paymentId)
+        var payerId = await dbContext.Bonuses.AsNoTracking().Where(it => it.Id == paymentId)
             .Select(it => it.AdminId)
             .FirstOrDefaultAsync();
 

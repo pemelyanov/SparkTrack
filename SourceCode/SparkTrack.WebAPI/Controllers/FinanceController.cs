@@ -23,8 +23,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
         [FromQuery] PageQuery pageQuery
     )
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var page = await paymentBillsService.GetPageAsync(isPaid, projectId, pageQuery);
 
@@ -40,8 +39,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<IReadOnlyList<UserPaymentDTO>>> GetUsersRemainingPaymentsAsync(Guid? projectId)
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var data = await paymentBillsService.GetUsersRemainingPaymentsAsync(projectId);
 
@@ -49,7 +47,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
             }
         );
     }
-    
+
     [HttpGet("pending-payments-summary")]
     [Authorize(Roles = nameof(ERole.Admin))]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -57,8 +55,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<PendingPaymentsSummaryDTO>> GetPendingPaymentsSummaryAsync(Guid? projectId)
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var data = await paymentBillsService.GetPendingPaymentsSummaryAsync(projectId);
 
@@ -66,37 +63,45 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
             }
         );
     }
-    
+
     [HttpGet("payments-history")]
     [Authorize(Roles = nameof(ERole.Admin))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult<IReadOnlyList<PaymentDetailsDTO>>> GetAdminPaymentsHistoryAsync(Guid adminId, Guid? projectId)
+    public Task<ActionResult<PagedDTO<PaymentDetailsDTO>>> GetAdminPaymentsHistoryAsync(
+        Guid? adminId,
+        Guid? projectId,
+        [FromQuery] PageQueryDTO pageQuery
+    )
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
-                var data = await paymentBillsService.GetPaidPaymentsListAsync(adminId, projectId);
+                var data = await paymentBillsService.GetPaidPaymentsListAsync(adminId, projectId, pageQuery.ToDomain());
 
-                return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<PaymentDetailsDTO>;
+                return data.ToDTO(it => it.ToDTO());
             }
         );
     }
-    
+
     [HttpGet("bonus-history")]
     [Authorize(Roles = nameof(ERole.Admin))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult<IReadOnlyList<BonusPaymentDTO>>> GetAdminBonusPaymentsHistoryAsync(Guid adminId, Guid? projectId)
+    public Task<ActionResult<PagedDTO<BonusPaymentDTO>>> GetAdminBonusPaymentsHistoryAsync(
+        Guid? adminId,
+        [FromQuery] PageQueryDTO pageQuery
+    )
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
-                var data = await paymentBillsService.GetPaidBonusPaymentsListAsync(adminId, projectId);
+                var data = await paymentBillsService.GetPaidBonusPaymentsListAsync(
+                    adminId,
+                    pageQuery.ToDomain()
+                );
 
-                return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<BonusPaymentDTO>;
+                return data.ToDTO(it => it.ToDTO());
             }
         );
     }
@@ -106,10 +111,14 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult> PayBillsAsync([FromQuery] IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
+    public Task<ActionResult> PayBillsAsync(
+        [FromQuery] IReadOnlyList<Guid> tasksIdList,
+        float payment,
+        float timelyBonusPayment
+    )
     {
-        return this.OkWithDomainExceptionsHandling(
-            () => paymentBillsService.PayBillsAsync(tasksIdList, payment, timelyBonusPayment)
+        return this.OkWithDomainExceptionsHandling(() =>
+            paymentBillsService.PayBillsAsync(tasksIdList, payment, timelyBonusPayment)
         );
     }
 
@@ -120,8 +129,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult> PayBonusAsync(Guid employeeId, float payment, string? comment)
     {
-        return this.OkWithDomainExceptionsHandling(
-            () => paymentBillsService.PayBonusAsync(employeeId, payment, comment)
+        return this.OkWithDomainExceptionsHandling(() => paymentBillsService.PayBonusAsync(employeeId, payment, comment)
         );
     }
 
@@ -132,8 +140,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult> DeleteBillAsync(Guid id)
     {
-        return this.OkWithDomainExceptionsHandling(
-            () => paymentBillsService.DeleteBillAsync(id)
+        return this.OkWithDomainExceptionsHandling(() => paymentBillsService.DeleteBillAsync(id)
         );
     }
 
@@ -144,8 +151,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult> DeleteBonusAsync(Guid id)
     {
-        return this.OkWithDomainExceptionsHandling(
-            () => paymentBillsService.DeleteBonusAsync(id)
+        return this.OkWithDomainExceptionsHandling(() => paymentBillsService.DeleteBonusAsync(id)
         );
     }
 }

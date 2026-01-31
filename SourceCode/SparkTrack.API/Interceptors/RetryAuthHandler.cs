@@ -22,35 +22,34 @@ public class RetryAuthHandler(
         request.Headers.Authorization = GetAuthenticationHeader(token);
 
         var response = await base.SendAsync(request, cancellationToken);
+
+        if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
         
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            s_logger.Info("Refreshing token...");
+        s_logger.Info("Refreshing token...");
 
-            var refreshToken = tokensConfiguration.Config.RefreshToken;
+        var refreshToken = tokensConfiguration.Config.RefreshToken;
 
-            var authorizationClientWrapper = authorizationClientFactory.Invoke();
+        var authorizationClientWrapper = authorizationClientFactory.Invoke();
 
-            var tokensDTO = await authorizationClientWrapper.Client.RefreshTokensAsync(
-                new TokenRefreshDTO
-                {
-                    RefreshToken = refreshToken
-                },
-                cancellationToken
-            );
+        var tokensDTO = await authorizationClientWrapper.Client.RefreshTokensAsync(
+            new TokenRefreshDTO
+            {
+                RefreshToken = refreshToken
+            },
+            cancellationToken
+        );
             
-            request.Headers.Authorization = GetAuthenticationHeader(tokensDTO.AccessToken);
+        tokensConfiguration.UpdateConfig(
+            new TokensConfiguration
+            {
+                AccessToken = tokensDTO.AccessToken,
+                RefreshToken = tokensDTO.RefreshToken
+            }
+        );
             
-            response = await base.SendAsync(request, cancellationToken);
-
-            tokensConfiguration.UpdateConfig(
-                new TokensConfiguration
-                {
-                    AccessToken = tokensDTO.AccessToken,
-                    RefreshToken = tokensDTO.RefreshToken
-                }
-            );
-        }
+        request.Headers.Authorization = GetAuthenticationHeader(tokensDTO.AccessToken);
+            
+        response = await base.SendAsync(request, cancellationToken);
 
         return response;
     }
