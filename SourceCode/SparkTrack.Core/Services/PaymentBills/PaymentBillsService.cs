@@ -1,6 +1,7 @@
 namespace SparkTrack.Core.Services.PaymentBills;
 
 using Authorization;
+using Exceptions;
 using Extensions;
 using Repositories;
 using Shared.Data;
@@ -31,6 +32,12 @@ public class PaymentBillsService(
     public Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId) =>
         paymentBillsRepository.GetPendingPaymentsSummaryAsync(projectId);
 
+    public Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId) =>
+        paymentBillsRepository.GetPaidPaymentsListAsync(adminId, projectId);
+
+    public Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId) =>
+        paymentBillsRepository.GetPaidBonusPaymentsListAsync(adminId, projectId);
+
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {
         var admin = authorizationService.GetUserOrThrowIfNotInRole(ERole.Admin);
@@ -52,9 +59,6 @@ public class PaymentBillsService(
 
         foreach (var task in tasks)
         {
-            bool isMainPaymentCompleted = false;
-            bool isTimelyBonusPaymentCompleted = false;
-
             var currentMainPayment = task.RemainingMainPayment * mainPaymentsRatio;
 
             if (currentMainPayment > 0)
@@ -70,8 +74,8 @@ public class PaymentBillsService(
                     }
                 );
             }
-            
-            isMainPaymentCompleted = task.RemainingMainPayment - currentMainPayment <= 0;
+
+            bool isMainPaymentCompleted = task.RemainingMainPayment - currentMainPayment <= 0;
 
             var currentTimelyBonusPayment = task.RemainingTimelyBonusPayment * timelyBonusPaymentRatio;
 
@@ -88,8 +92,8 @@ public class PaymentBillsService(
                     }
                 );
             }
-            
-            isTimelyBonusPaymentCompleted = task.RemainingTimelyBonusPayment - currentTimelyBonusPayment <= 0;
+
+            bool isTimelyBonusPaymentCompleted = task.RemainingTimelyBonusPayment - currentTimelyBonusPayment <= 0;
 
             if (isMainPaymentCompleted && isTimelyBonusPaymentCompleted)
                 paidTasks.Add(
@@ -121,13 +125,29 @@ public class PaymentBillsService(
                 Comment = comment,
                 Payment = payment,
                 Admin = admin,
-                EmployeeId = employeeId,
+                Employee = User.Empty(employeeId),
                 CreatedAt = DateTime.UtcNow
             }
         );
     }
 
-    public Task DeleteBillAsync(Guid id) => paymentBillsRepository.DeletePaymentAsync(id);
+    public async Task DeleteBillAsync(Guid id)
+    {
+        var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
 
-    public Task DeleteBonusAsync(Guid id) => paymentBillsRepository.DeleteBonusPaymentAsync(id);
+        if (!await paymentBillsRepository.IsPaymentPaidByThisUser(id, currentUser.Id))
+            throw new ForbiddenException($"Payment isn't paid by user {currentUser.Id}");
+
+        await paymentBillsRepository.DeletePaymentAsync(id);
+    }
+
+    public async Task DeleteBonusAsync(Guid id)
+    {
+        var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
+
+        if (!await paymentBillsRepository.IsBonusPaymentPaidByThisUser(id, currentUser.Id))
+            throw new ForbiddenException($"Bonus isn't paid by user {currentUser.Id}");
+
+        await paymentBillsRepository.DeleteBonusPaymentAsync(id);
+    }
 }

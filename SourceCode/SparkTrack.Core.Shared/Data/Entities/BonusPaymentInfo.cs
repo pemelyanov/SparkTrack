@@ -4,7 +4,7 @@ public record BonusPaymentInfo
 {
     public Guid Id { get; init; }
     
-    public Guid EmployeeId { get; init; }
+    public User Employee { get; init; }
     
     public required User Admin { get; init; }
     

@@ -7,6 +7,8 @@ public record PaymentData
     public Guid Id { get; init; }
     
     public Guid TaskId { get; set; }
+
+    public SubTaskData Task { get; set; } = null!;
     
     public Guid AdminId { get; set; }
 

@@ -28,9 +28,33 @@ public static class PaymentBillsMappingExtensions
         CreatedAt = data.CreatedAt
     };
     
+    public static PaymentDetailsDTO ToDTO(this PaymentDetails data) => new()
+    {
+        Id = data.Id,
+        Admin = data.Admin.ToDTO(),
+        Payment = data.Payment,
+        PaymentType = data.PaymentType,
+        TaskId = data.TaskId,
+        CreatedAt = data.CreatedAt,
+        Task = data.Task.ToDTO(),
+        Project = data.Project.ToDTO()
+    };
+    
+    public static BonusPaymentDTO ToDTO(this BonusPaymentInfo data) => new()
+    {
+        Id = data.Id,
+        Admin = data.Admin.ToDTO(),
+        Payment = data.Payment,
+        CreatedAt = data.CreatedAt,
+        Employee = data.Employee.ToDTO(),
+        Comment = data.Comment
+    };
+    
     public static PendingPaymentsSummaryDTO ToDTO(this PendingPaymentsSummary data) => new()
     {
         AdminPayments = data.AdminPayments.Select(it => it.ToDTO()).ToArray(),
         RemainingPayments = data.RemainingPayments.Select(it => it.ToDTO()).ToArray()
     };
+    
+
 }

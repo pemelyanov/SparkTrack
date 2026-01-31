@@ -17,7 +17,7 @@ public class PaymentDataConfiguration : IEntityTypeConfiguration<PaymentData>
             .HasForeignKey(it => it.AdminId)
             .IsRequired();
 
-        builder.HasOne<SubTaskData>()
+        builder.HasOne(it => it.Task)
             .WithMany(it => it.Payments)
             .HasForeignKey(it => it.TaskId)
             .IsRequired();

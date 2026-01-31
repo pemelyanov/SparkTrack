@@ -66,6 +66,40 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
             }
         );
     }
+    
+    [HttpGet("payments-history")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult<IReadOnlyList<PaymentDetailsDTO>>> GetAdminPaymentsHistoryAsync(Guid adminId, Guid? projectId)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            async () =>
+            {
+                var data = await paymentBillsService.GetPaidPaymentsListAsync(adminId, projectId);
+
+                return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<PaymentDetailsDTO>;
+            }
+        );
+    }
+    
+    [HttpGet("bonus-history")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult<IReadOnlyList<BonusPaymentDTO>>> GetAdminBonusPaymentsHistoryAsync(Guid adminId, Guid? projectId)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            async () =>
+            {
+                var data = await paymentBillsService.GetPaidBonusPaymentsListAsync(adminId, projectId);
+
+                return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<BonusPaymentDTO>;
+            }
+        );
+    }
 
     [HttpPut("bills")]
     [Authorize(Roles = nameof(ERole.Admin))]

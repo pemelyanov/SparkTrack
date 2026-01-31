@@ -4,7 +4,7 @@ public record BonusPaymentDTO
 {
     public Guid Id { get; init; }
     
-    public Guid EmployeeId { get; init; }
+    public required UserDTO Employee { get; init; }
     
     public required UserDTO Admin { get; init; }
     

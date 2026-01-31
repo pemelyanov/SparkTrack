@@ -34,6 +34,24 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return dto.ToDomain();
     }
 
+    public async Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId)
+    {
+        using var wrapper = financeClientFactory.Invoke();
+
+        var list = await wrapper.Client.GetAdminPaymentsHistoryAsync(adminId, projectId);
+
+        return list.Select(it => it.ToDomain()).ToArray();
+    }
+
+    public async Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId)
+    {
+        using var wrapper = financeClientFactory.Invoke();
+
+        var list = await wrapper.Client.GetAdminBonusPaymentsHistoryAsync(adminId, projectId);
+
+        return list.Select(it => it.ToDomain()).ToArray();
+    }
+
     public async Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment)
     {
         using var wrapper = financeClientFactory.Invoke();

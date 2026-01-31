@@ -18,7 +18,7 @@ public class BonusPaymentDataConfiguration : IEntityTypeConfiguration<BonusPayme
             .HasForeignKey(it => it.AdminId)
             .IsRequired();
 
-        builder.HasOne<UserData>()
+        builder.HasOne(it => it.Employee)
             .WithMany(it => it.Bonuses)
             .HasForeignKey(it => it.EmployeeId)
             .IsRequired();

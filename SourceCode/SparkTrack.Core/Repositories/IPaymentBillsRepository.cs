@@ -5,17 +5,25 @@ using Shared.Data.Entities;
 
 public interface IPaymentBillsRepository
 {
-    public Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? employeeId, Guid? projectId, PageQuery pageQuery);
+    Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? employeeId, Guid? projectId, PageQuery pageQuery);
 
-    public Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
+    Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
     
-    public Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
+    Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
 
-    public Task AddPaymentsRangeAsync(IReadOnlyList<PaymentInfo> paymentsList);
+    Task<IReadOnlyList<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId, Guid? projectId);
+    
+    Task<IReadOnlyList<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId, Guid? projectId);
 
-    public Task AddBonusPaymentAsync(BonusPaymentInfo bonusPaymentInfo);
+    Task AddPaymentsRangeAsync(IReadOnlyList<PaymentInfo> paymentsList);
 
-    public Task DeletePaymentAsync(Guid id);
+    Task AddBonusPaymentAsync(BonusPaymentInfo bonusPaymentInfo);
 
-    public Task DeleteBonusPaymentAsync(Guid id);
+    Task DeletePaymentAsync(Guid id);
+
+    Task DeleteBonusPaymentAsync(Guid id);
+    
+    Task<bool> IsPaymentPaidByThisUser(Guid paymentId, Guid userId);
+    
+    Task<bool> IsBonusPaymentPaidByThisUser(Guid paymentId, Guid userId);
 }

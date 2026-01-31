@@ -5,6 +5,8 @@ public record BonusPaymentData
     public Guid Id { get; init; }
     
     public Guid EmployeeId { get; set; }
+
+    public UserData Employee { get; set; } = null!;
     
     public Guid AdminId { get; set; }
 

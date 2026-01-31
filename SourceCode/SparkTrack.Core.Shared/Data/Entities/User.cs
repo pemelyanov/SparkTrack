@@ -15,4 +15,12 @@ public record User
     public string? TelegramTag { get; init; }
     
     public string? PasswordHash { get; init; }
+
+    public static User Empty(Guid id) => new()
+    {
+        Id = id,
+        Email = string.Empty,
+        Name = string.Empty,
+        Role = ERole.None
+    };
 }
