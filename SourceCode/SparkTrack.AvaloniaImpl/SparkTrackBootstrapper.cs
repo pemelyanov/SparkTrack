@@ -20,6 +20,7 @@ using Core.Client.Events;
 using Core.Shared.Eventing;
 using Fanatiki.MVVM;
 using Installers;
+using Microsoft.Extensions.Configuration;
 using Pages.AdminFinance;
 using Pages.AdminFinance.Tabs.PaymentsHistory;
 using Pages.AdminFinance.Tabs.PendingPayments;
@@ -31,6 +32,8 @@ using Pages.Users;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
+    private static readonly IConfiguration s_configuration = InitializeConfiguration();
+
     protected override void RegisterViewModels(ContainerBuilder builder)
     {
         builder.RegisterType<MainWindowViewModel>().AsImplementedInterfaces().AsSelf().SingleInstance();
@@ -63,11 +66,11 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
         builder.RegisterAvaloniaServices();
         builder.RegisterModule<CoreClientModule>();
-        // TODO: Вынести BaseAPI в файл конфигурации
         // TODO: Вынести путь до настроек в файл конфигурации
         builder.RegisterModule(
             new APIModule(
-                "http://localhost:5196/",
+                s_configuration.GetRequiredSection("ApiBaseUrl").Get<string>()
+                ?? throw new InvalidOperationException("Api base url not found"),
                 Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "SparkTrack",
@@ -75,5 +78,12 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                 )
             )
         );
+    }
+
+    private static IConfiguration InitializeConfiguration()
+    {
+        return new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true)
+            .Build();
     }
 }

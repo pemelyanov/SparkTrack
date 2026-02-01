@@ -24,6 +24,9 @@
         <PackageReference Include="FluentAvaloniaUI" />
         <PackageReference Include="FluentIcons.Avalonia.Fluent" />
         <PackageReference Include="Markdown.Avalonia" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
         <PackageReference Include="NLog" />
         <PackageReference Include="ReactiveUI.Fody" />
         <PackageReference Include="Xaml.Behaviors" />
@@ -44,5 +47,11 @@
 
     <ItemGroup>
       <EmbeddedResource Include="NLog.config" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>
