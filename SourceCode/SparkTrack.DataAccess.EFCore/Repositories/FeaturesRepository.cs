@@ -6,6 +6,7 @@ using Core.Repositories;
 using Core.Shared.Data;
 using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
+using Core.Shared.Enums;
 using Data.Entities;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         )
         .WhereIf(
             !showCompleted,
-            f => f.TasksList.Any(t => !t.IsCompleted)
+            f => f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
         )
         .OrderBy(it => it.CreatedAt)
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
