@@ -11,6 +11,8 @@
              xmlns:projectsFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ProjectsFilter"
              xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
+             xmlns:disablingWrapper="clr-namespace:SparkTrack.AvaloniaImpl.Controls.DisablingWrapper"
+             xmlns:rangeDatePicker="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RangeDatePicker"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
@@ -24,9 +26,17 @@
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
 
         <Grid Grid.Row="1" ColumnDefinitions="* Auto">
-            <WrapPanel Grid.Column="0">
-                <projectsFilter:ProjectsFilter Width="400" MaxWidth="400"
-                                               DataContext="{Binding ProjectsFilterViewModel}" />
+            <WrapPanel Grid.Column="0" ItemSpacing="24" LineSpacing="8">
+                <projectsFilter:ProjectsFilter DataContext="{Binding ProjectsFilterViewModel}" />
+
+                <disablingWrapper:DisablingWrapper IsContentEnabled="{Binding DateRangeViewModel.IsSelected}">
+                    <rangeDatePicker:RangeDatePicker Label="Период создания:"
+                                                     StartDate="{Binding DateRangeViewModel.Model.StartDate}"
+                                                     EndDate="{Binding DateRangeViewModel.Model.EndDate}" />
+                </disablingWrapper:DisablingWrapper>
+
+                <ToggleSwitch OffContent="Показывать незакрытые" OnContent="Показывать все"
+                              IsChecked="{Binding ShowCompleted, Mode=TwoWay}" />
             </WrapPanel>
 
             <Button Grid.Column="1" Classes="accent" Content="Создать"

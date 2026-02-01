@@ -8,7 +8,7 @@
     <UserControl.Template>
         <ControlTemplate TargetType="disablingWrapper:DisablingWrapper">
             <Grid ColumnDefinitions="Auto *">
-                <CheckBox Grid.Column="0" VerticalAlignment="Center" IsChecked="{TemplateBinding IsContentEnabled, Mode=TwoWay}"/>
+                <CheckBox Margin="0 0 8 0" Padding="0" Grid.Column="0" VerticalAlignment="Center" IsChecked="{TemplateBinding IsContentEnabled, Mode=TwoWay}"/>
                 
                 <ContentPresenter Grid.Column="1" VerticalAlignment="Center" 
                                   IsEnabled="{TemplateBinding IsContentEnabled}"

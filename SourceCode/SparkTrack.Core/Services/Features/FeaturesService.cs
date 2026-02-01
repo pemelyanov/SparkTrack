@@ -15,6 +15,8 @@ internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthoriz
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         Guid? projectId,
         bool showCompleted,
+        DateTime? startDate,
+        DateTime? endDate,
         PageQuery pageQuery
     )
     {
@@ -22,7 +24,7 @@ internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthoriz
 
         Guid? employeeFilter = currentUser.GetEmployeeIdOrNull();
 
-        return featuresRepository.GetPageAsync(projectId, showCompleted, employeeFilter, pageQuery);
+        return featuresRepository.GetPageAsync(projectId, showCompleted, employeeFilter, startDate, endDate, pageQuery);
     }
 
     public Task<Feature?> GetAsync(int id)

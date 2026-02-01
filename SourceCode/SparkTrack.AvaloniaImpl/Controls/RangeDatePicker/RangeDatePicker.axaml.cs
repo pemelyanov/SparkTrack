@@ -38,4 +38,17 @@ public partial class RangeDatePicker : UserControl
     }
 
     #endregion
+
+    #region Label Property
+
+    public static readonly StyledProperty<string?> LabelProperty =
+        AvaloniaProperty.Register<RangeDatePicker, string?>(nameof(Label));
+
+    public string? Label
+    {
+        get => GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
+    }
+
+    #endregion
 }

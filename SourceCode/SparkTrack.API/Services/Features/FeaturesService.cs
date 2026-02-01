@@ -8,10 +8,23 @@ using MappingExtensions;
 
 internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClientFactory) : IFeaturesService
 {
-    public async Task<IReadOnlyPagedData<Feature>> GetPageAsync(Guid? projectId, bool showCompleted, PageQuery pageQuery)
+    public async Task<IReadOnlyPagedData<Feature>> GetPageAsync(
+        Guid? projectId,
+        bool showCompleted,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    )
     {
         using var clientWrapper = featuresClientFactory();
-        var dto = await clientWrapper.Client.GetPageAsync(projectId, showCompleted, pageQuery.Page, pageQuery.ItemsPerPage);
+        var dto = await clientWrapper.Client.GetPageAsync(
+            projectId,
+            showCompleted,
+            startDate,
+            endDate,
+            pageQuery.Page,
+            pageQuery.ItemsPerPage
+        );
 
         var list = dto.Items.Select(it => it.ToDomain()).ToArray();
 

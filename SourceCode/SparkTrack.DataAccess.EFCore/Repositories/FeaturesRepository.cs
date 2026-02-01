@@ -16,10 +16,14 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Guid? projectId,
         bool showCompleted,
         Guid? subTaskEmployeeId,
+        DateTime? startDate,
+        DateTime? endDate,
         PageQuery pageQuery
     ) => dbContext.Features
         .AsNoTracking()
         .WhereIf(projectId is not null, f => f.ProjectId == projectId)
+        .WhereIf(startDate is not null, it => it.CreatedAt >= startDate)
+        .WhereIf(endDate is not null, it => it.CreatedAt <= endDate)
         .WhereIf(
             subTaskEmployeeId is not null,
             f => f.TasksList.Any(t => t.ExecutorEmployeeId == subTaskEmployeeId)

@@ -43,6 +43,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
         ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
             .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowCompleted))
+            .CombineLatest(DateRangeViewModel.GetChangingObservable())
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
@@ -55,6 +57,14 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     public IScreen HostScreen => m_screen.Value;
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
+    
+    public SelectableViewModel<DateRangeViewModel> DateRangeViewModel { get; } = new(new DateRangeViewModel())
+    {
+        IsSelected = true
+    };
+    
+    [Reactive]
+    public bool ShowCompleted { get; set; }
 
     [Reactive]
     public IReadOnlyList<SelectableViewModel<Feature>> CurrentPageData { get; private set; } = [];
@@ -80,7 +90,9 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         {
             var page = await m_featuresService.GetPageAsync(
                 ProjectsFilterViewModel.SelectedProject?.Id,
-                true,
+                ShowCompleted,
+                DateRangeViewModel.TryGetStartDate(),
+                DateRangeViewModel.TryGetEndDate(),
                 PaginatorViewModel.ToQuery()
             );
             

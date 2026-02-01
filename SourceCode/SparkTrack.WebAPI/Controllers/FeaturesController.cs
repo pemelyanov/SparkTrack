@@ -36,10 +36,18 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     public async Task<ActionResult<PagedDTO<FeatureDTO>>> GetPageAsync(
         Guid? projectId = null,
         bool showCompleted = false,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
         [FromQuery] PageQueryDTO? pageQuery = null
     )
     {
-        var page = await featuresService.GetPageAsync(projectId, showCompleted, pageQuery?.ToDomain() ?? PageQuery.All);
+        var page = await featuresService.GetPageAsync(
+            projectId,
+            showCompleted,
+            startDate?.ToUniversalTime(),
+            endDate?.ToUniversalTime(),
+            pageQuery?.ToDomain() ?? PageQuery.All
+        );
 
         var mappedPage = page.ToDTO(it => it.ToDTO());
 
@@ -53,8 +61,7 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<int>> AddAsync(FeatureEditDTO featureEdit)
     {
-        return this.CreatedWithDomainExceptionsHandling(
-            () => featuresService.AddAsync(featureEdit.ToDomain())
+        return this.CreatedWithDomainExceptionsHandling(() => featuresService.AddAsync(featureEdit.ToDomain())
         );
     }
 
@@ -91,8 +98,10 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public Task<ActionResult> AddCommentAsync([FromRoute] int featureId, CommentEditDTO commentEdit)
     {
-        return this.CreatedWithDomainExceptionsHandling(
-            () => commentsService.AddAsync(featureId, commentEdit.ToDomain())
+        return this.CreatedWithDomainExceptionsHandling(() => commentsService.AddAsync(
+                featureId,
+                commentEdit.ToDomain()
+            )
         );
     }
 
@@ -103,8 +112,7 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<CommentDTO>> EditCommentAsync(CommentEditDTO commentEdit)
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var comment = await commentsService.EditAsync(commentEdit.ToDomain());
 

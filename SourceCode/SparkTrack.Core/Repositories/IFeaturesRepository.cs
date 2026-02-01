@@ -13,8 +13,11 @@ public interface IFeaturesRepository
     /// <param name="showCompleted">Попадут ли в выборку завершенные фичи</param>
     /// <param name="subTaskEmployeeId">Id сотрудника для фильтрации списка подзадач в фиче. Если null - будет выведен список всех подзадач</param>
     /// <param name="pageQuery">Параметры пагинации</param>
+    ///     /// <param name="endDate">Максимальная дата создания</param>
+    /// <param name="startDate">Минимальная дата создания</param>
     /// <returns></returns>
-    Task<IReadOnlyPagedData<Feature>> GetPageAsync(Guid? projectId, bool showCompleted, Guid? subTaskEmployeeId, PageQuery pageQuery);
+    Task<IReadOnlyPagedData<Feature>> GetPageAsync(Guid? projectId, bool showCompleted, Guid? subTaskEmployeeId, DateTime? startDate,
+                                                   DateTime? endDate, PageQuery pageQuery);
 
     /// <summary>
     /// Возфращает ифнормацию по фиче

@@ -6,6 +6,7 @@
              x:Class="SparkTrack.AvaloniaImpl.Controls.RangeDatePicker.RangeDatePicker"
              x:Name="Root">
     <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="{Binding #Root.Label}" IsVisible="{Binding #Root.Label, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" VerticalAlignment="Center" />
         <CalendarDatePicker SelectedDate="{Binding #Root.StartDate}" DisplayDateEnd="{Binding #Root.EndDate}" Width="180" Watermark="ДД.ММ.ГГГГ"/>
         <TextBlock VerticalAlignment="Center" Text="—" />
         <CalendarDatePicker SelectedDate="{Binding #Root.EndDate}" DisplayDateStart="{Binding #Root.StartDate}" Width="180" Watermark="ДД.ММ.ГГГГ" />

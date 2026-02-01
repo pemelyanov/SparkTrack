@@ -57,7 +57,8 @@ public class FeaturesSeeder(
         foreach (var project in projectsList)
         {
             projectNumber++;
-            var existingFeatures = (await featuresService.GetPageAsync(project.Id, true, PageQuery.None)).Total;
+            var existingFeatures = (await featuresService.GetPageAsync(project.Id, true, null, null, PageQuery.None))
+                .Total;
 
             if (existingFeatures > 0) continue;
 
@@ -68,8 +69,7 @@ public class FeaturesSeeder(
                     Name = $"Идея {i + 1}_{projectNumber}",
                     ProjectId = project.Id,
                     TasksList = s_availableTasks.Take(Random.Shared.Next(2, 4))
-                        .Select(
-                            it => it with
+                        .Select(it => it with
                             {
                                 ExecutorEmployeeId = employeesList[Random.Shared.Next(0, employeesList.Count)].Id
                             }
