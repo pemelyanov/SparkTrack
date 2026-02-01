@@ -5,24 +5,36 @@ using Data.Entities;
 
 public interface IPaymentBillsService
 {
-    Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery);
+    Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(
+        bool isPaid,
+        Guid? employeeId,
+        Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    );
 
+    [Obsolete("Use GetPendingPaymentsSummaryAsync")]
     Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
-    
+
     Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
-    
-    Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(Guid? adminId,
-                                                                      Guid? employeeId,
-                                                                      Guid? projectId,
-                                                                      DateTime? startDate,
-                                                                      DateTime? endDate,
-                                                                      PageQuery pageQuery);
-    
-    Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId,
-                                                                             Guid? employeeId,
-                                                                             DateTime? startDate,
-                                                                             DateTime? endDate,
-                                                                             PageQuery pageQuery);
+
+    Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
+        Guid? adminId,
+        Guid? employeeId,
+        Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    );
+
+    Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(
+        Guid? adminId,
+        Guid? employeeId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    );
 
     Task PayBillsAsync(IReadOnlyList<Guid> tasksIdList, float payment, float timelyBonusPayment);
 

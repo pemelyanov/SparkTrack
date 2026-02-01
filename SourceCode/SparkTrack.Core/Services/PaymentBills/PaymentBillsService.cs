@@ -17,13 +17,16 @@ public class PaymentBillsService(
     ITransactionWrapper transactionWrapper
 ) : IPaymentBillsService
 {
-    public Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery)
+    public Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(
+        bool isPaid,
+        Guid? employeeId,
+        Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    )
     {
-        var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
-
-        var employeeId = currentUser.GetEmployeeIdOrNull();
-
-        return paymentBillsRepository.GetPageAsync(isPaid, employeeId, projectId, pageQuery);
+        return paymentBillsRepository.GetPageAsync(isPaid, employeeId, projectId, startDate, endDate, pageQuery);
     }
 
     public Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId) =>

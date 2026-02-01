@@ -63,6 +63,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         bool isPaid,
         Guid? employeeId,
         Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
         PageQuery pageQuery
     )
     {
@@ -72,6 +74,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
             .AsNoTracking()
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .WhereIf(employeeId is not null, it => it.ExecutorEmployeeId == employeeId)
+            .WhereIf(startDate is not null, it => it.Feature.CreatedAt >= startDate)
+            .WhereIf(endDate is not null, it => it.Feature.CreatedAt <= endDate)
             .Where(it => it.PaymentStatus == targetPaymentStatus)
             .Select(data => new PaymentBill
                 {

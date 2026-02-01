@@ -9,11 +9,26 @@ using MappingExtensions;
 
 public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFactory) : IPaymentBillsService
 {
-    public async Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(bool isPaid, Guid? projectId, PageQuery pageQuery)
+    public async Task<IReadOnlyPagedData<PaymentBill>> GetPageAsync(
+        bool isPaid,
+        Guid? employeeId,
+        Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    )
     {
         using var wrapper = financeClientFactory.Invoke();
 
-        var page = await wrapper.Client.GetBillsPageAsync(isPaid, projectId, pageQuery.Page, pageQuery.ItemsPerPage);
+        var page = await wrapper.Client.GetBillsPageAsync(
+            isPaid,
+            employeeId,
+            projectId,
+            startDate?.ToUniversalTime(),
+            endDate?.ToUniversalTime(),
+            pageQuery.Page,
+            pageQuery.ItemsPerPage
+        );
 
         return new ReadOnlyPagedData<PaymentBill>(page.Items.Select(it => it.ToDomain()).ToArray(), page.Total);
     }

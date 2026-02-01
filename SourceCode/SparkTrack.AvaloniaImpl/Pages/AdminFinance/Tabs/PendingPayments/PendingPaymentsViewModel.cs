@@ -7,10 +7,12 @@ using System.Reactive.Threading.Tasks;
 using Controls.BonusForm;
 using Controls.PaymentForm;
 using Controls.ProjectsFilter;
+using Controls.UsersFilter;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.PaymentBills;
 using Core.Shared.Services.SubTasks;
+using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using Reactive;
 using ReactiveUI;
@@ -32,14 +34,18 @@ public class PendingPaymentsViewModel : ViewModelBase
         ProjectsFilterViewModel projectsFilterViewModel,
         ISubTasksService subTasksService,
         IDialogService dialogService,
-        Func<BonusFormViewModel> bonusFormViewModelFactory
+        Func<BonusFormViewModel> bonusFormViewModelFactory,
+        UserFilterViewModel employeeFilterViewModel
     )
     {
         m_paymentBillsService = paymentBillsService;
         m_subTasksService = subTasksService;
         m_dialogService = dialogService;
         m_bonusFormViewModelFactory = bonusFormViewModelFactory;
+        EmployeeFilterViewModel = employeeFilterViewModel;
         ProjectsFilterViewModel = projectsFilterViewModel;
+
+        employeeFilterViewModel.UserRole = ERole.Employee;
 
         ReloadTableCommand = CreateReloadTableCommand();
         ToggleIsBonusApprovedCommand =
@@ -69,6 +75,9 @@ public class PendingPaymentsViewModel : ViewModelBase
 
         ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
             .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(EmployeeFilterViewModel.WhenAnyValue(it => it.SelectedUser))
+            .CombineLatest(DateRangeViewModel.GetChangingObservable())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowPaid))
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
@@ -123,10 +132,20 @@ public class PendingPaymentsViewModel : ViewModelBase
 
     [Reactive]
     public float TotalBill { get; private set; }
+    
+    [Reactive]
+    public bool ShowPaid { get; set; }
 
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
+    
+    public UserFilterViewModel EmployeeFilterViewModel { get; }
+
+    public SelectableViewModel<DateRangeViewModel> DateRangeViewModel { get; } = new(new DateRangeViewModel())
+    {
+        IsSelected = true
+    };
 
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
 
@@ -147,8 +166,11 @@ public class PendingPaymentsViewModel : ViewModelBase
     private async Task ReloadTableAsync()
     {
         var page = await m_paymentBillsService.GetPageAsync(
-            false,
+            ShowPaid,
+            EmployeeFilterViewModel.SelectedUser?.Id,
             ProjectsFilterViewModel.SelectedProject?.Id,
+            DateRangeViewModel.TryGetStartDate(),
+            DateRangeViewModel.TryGetEndDate(),
             PaginatorViewModel.ToQuery()
         );
 

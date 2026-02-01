@@ -19,13 +19,23 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public Task<ActionResult<PagedDTO<PaymentBillDTO>>> GetBillsPageAsync(
         bool isPaid,
+        Guid? employeeId,
         Guid? projectId,
-        [FromQuery] PageQuery pageQuery
+        DateTime? startDate,
+        DateTime? endDate,
+        [FromQuery] PageQueryDTO pageQuery
     )
     {
         return this.OkWithDomainExceptionsHandling(async () =>
             {
-                var page = await paymentBillsService.GetPageAsync(isPaid, projectId, pageQuery);
+                var page = await paymentBillsService.GetPageAsync(
+                    isPaid,
+                    employeeId,
+                    projectId,
+                    startDate?.ToUniversalTime(),
+                    endDate?.ToUniversalTime(),
+                    pageQuery.ToDomain()
+                );
 
                 return page.ToDTO(it => it.ToDTO());
             }
@@ -37,6 +47,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [Obsolete("Use GetPendingPaymentsSummaryAsync")]
     public Task<ActionResult<IReadOnlyList<UserPaymentDTO>>> GetUsersRemainingPaymentsAsync(Guid? projectId)
     {
         return this.OkWithDomainExceptionsHandling(async () =>

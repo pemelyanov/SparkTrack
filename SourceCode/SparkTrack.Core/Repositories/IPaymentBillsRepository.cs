@@ -13,6 +13,8 @@ public interface IPaymentBillsRepository
         bool isPaid,
         Guid? employeeId,
         Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
         PageQuery pageQuery
     );
 

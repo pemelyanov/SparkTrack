@@ -56,9 +56,7 @@ public class PaymentsHistoryViewModel : ViewModelBase
             .CombineLatest(PaginatorViewModel.WhenChanged())
             .CombineLatest(AdminFilterViewModel.WhenAnyValue(it => it.SelectedUser))
             .CombineLatest(EmployeeFilterViewModel.WhenAnyValue(it => it.SelectedUser))
-            .CombineLatest(DateRangeViewModel.WhenAnyValue(it => it.IsSelected))
-            .CombineLatest(DateRangeViewModel.Model.WhenAnyValue(it => it.StartDate))
-            .CombineLatest(DateRangeViewModel.Model.WhenAnyValue(it => it.EndDate))
+            .CombineLatest(DateRangeViewModel.GetChangingObservable())
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
@@ -123,8 +121,8 @@ public class PaymentsHistoryViewModel : ViewModelBase
             AdminFilterViewModel.SelectedUser?.Id,
             EmployeeFilterViewModel.SelectedUser?.Id,
             ProjectsFilterViewModel.SelectedProject?.Id,
-            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.StartDate : null,
-            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.EndDate : null,
+            DateRangeViewModel.TryGetStartDate(),
+            DateRangeViewModel.TryGetEndDate(),
             PaginatorViewModel.ToQuery()
         );
 
