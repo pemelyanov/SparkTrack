@@ -84,8 +84,8 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
                     adminId,
                     employeeId,
                     projectId,
-                    startDate,
-                    endDate,
+                    startDate?.ToUniversalTime(),
+                    endDate?.ToUniversalTime(),
                     pageQuery.ToDomain()
                 );
 
