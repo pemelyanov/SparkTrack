@@ -19,8 +19,7 @@ public class SubTasksController(ISubTasksService subTasksService) : Controller
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public Task<ActionResult<SubTaskDTO>> SetIsCompletedAsync([FromRoute] Guid id, bool value, Guid currentVersion)
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var subTask = await subTasksService.SetIsCompletedAsync(id, value, currentVersion);
 
@@ -40,8 +39,7 @@ public class SubTasksController(ISubTasksService subTasksService) : Controller
         Guid currentVersion
     )
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var subTask = await subTasksService.SetPaymentStatusAsync(id, value, currentVersion);
 
@@ -61,12 +59,33 @@ public class SubTasksController(ISubTasksService subTasksService) : Controller
         Guid currentVersion
     )
     {
-        return this.OkWithDomainExceptionsHandling(
-            async () =>
+        return this.OkWithDomainExceptionsHandling(async () =>
             {
                 var subTask = await subTasksService.SetIsTimelyBonusApprovedAsync(id, value, currentVersion);
 
                 return subTask?.ToDTO()!;
+            }
+        );
+    }
+
+    [HttpPatch("is-timely-bonus-approved/range")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult<IReadOnlyList<SubTaskDTO>>> SetIsTimelyBonusApprovedAsync(
+        [FromBody] IReadOnlyList<EditableEntityIdentityDTO> identities,
+        bool value
+    )
+    {
+        return this.OkWithDomainExceptionsHandling(async () =>
+            {
+                var subTask = await subTasksService.SetIsTimelyBonusApprovedAsync(
+                    identities.Select(it => it.ToDomain()).ToArray(),
+                    value
+                );
+
+                return subTask.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<SubTaskDTO>;
             }
         );
     }

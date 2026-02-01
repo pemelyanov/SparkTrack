@@ -88,23 +88,23 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
         bool value
     )
     {
-        var subTasksTasks = identitiesList.Select(
-            async identity =>
-            {
-                var subTask = await subTasksRepository.GetAsync(identity.Id);
+        var subTasksToUpdate = new List<SubTask>(identitiesList.Count);
 
-                if (subTask is null) return null;
+        foreach (var identity in identitiesList)
+        {
+            var subTask = await subTasksRepository.GetAsync(identity.Id);
 
-                return subTask with
+            if (subTask is null) continue;
+
+            subTasksToUpdate.Add(
+                subTask with
                 {
                     IsTimelyBonusApproved = value,
                     Version = identity.Version
-                };
-            }
-        );
+                }
+            );
+        }
 
-        var subTasks = (await Task.WhenAll(subTasksTasks)).Where(it => it is not null).Select(it => it!).ToArray();
-
-        return await subTasksRepository.EditRangeAsync(subTasks);
+        return await subTasksRepository.EditRangeAsync(subTasksToUpdate);
     }
 }

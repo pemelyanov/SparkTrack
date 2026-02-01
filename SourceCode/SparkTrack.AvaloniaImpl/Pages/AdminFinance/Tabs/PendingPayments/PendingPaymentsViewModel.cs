@@ -8,6 +8,7 @@ using Controls.BonusForm;
 using Controls.PaymentForm;
 using Controls.ProjectsFilter;
 using Controls.UsersFilter;
+using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.PaymentBills;
@@ -58,12 +59,22 @@ public class PendingPaymentsViewModel : ViewModelBase
 
         ApproveBonusForSelectionCommand = ReactiveCommand.CreateFromTask(
             () => SetBonusApprovementForSelectionAsync(true),
-            m_selectedBills.Select(selection => selection.Any(it => !it.IsTimelyBonusApproved))
+            m_selectedBills.Select(selection =>
+                    selection.Select(it => it.WhenAnyValue(t => t.IsTimelyBonusApproved))
+                        .CombineLatest()
+                        .Select(it => it.Any(itTrue => !itTrue))
+                )
+                .Switch()
         );
 
         UnapproveBonusForSelectionCommand = ReactiveCommand.CreateFromTask(
             () => SetBonusApprovementForSelectionAsync(false),
-            m_selectedBills.Select(selection => selection.Any(it => it.IsTimelyBonusApproved))
+            m_selectedBills.Select(selection =>
+                    selection.Select(it => it.WhenAnyValue(t => t.IsTimelyBonusApproved))
+                        .CombineLatest()
+                        .Select(it => it.Any(itTrue => itTrue))
+                )
+                .Switch()
         );
 
         PayBonusCommand = ReactiveCommand.CreateFromTask(PayBonusAsync);
@@ -101,6 +112,12 @@ public class PendingPaymentsViewModel : ViewModelBase
             .DisposeWith(disposables);
 
         m_selectedBills
+            .CombineLatest(
+                m_selectedBills.Select(list => list.Select(it => it.WhenAnyValue(t => t.IsTimelyBonusApproved))
+                    .CombineLatest()
+                ),
+                (list, _) => list
+            )
             .Select(it => it.Count == 0
                 ? 0
                 : it.Sum(b
@@ -132,14 +149,14 @@ public class PendingPaymentsViewModel : ViewModelBase
 
     [Reactive]
     public float TotalBill { get; private set; }
-    
+
     [Reactive]
     public bool ShowPaid { get; set; }
 
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
-    
+
     public UserFilterViewModel EmployeeFilterViewModel { get; }
 
     public SelectableViewModel<DateRangeViewModel> DateRangeViewModel { get; } = new(new DateRangeViewModel())
@@ -224,15 +241,28 @@ public class PendingPaymentsViewModel : ViewModelBase
         await ReloadTableCommand.Execute().ToTask();
     }
 
-    private async Task SetBonusApprovementForSelectionAsync(bool value) { }
+    private async Task SetBonusApprovementForSelectionAsync(bool value)
+    {
+        var selection = m_selectedBills.Value.ToDictionary(it => it.SubTask.Id);
+
+        var updatedTasks = await m_subTasksService.SetIsTimelyBonusApprovedAsync(
+            selection.Values.Select(it => new EditableEntityIdentity(it.SubTask.Id, it.SubTask.Version)).ToArray(),
+            value
+        );
+
+        foreach (var task in updatedTasks)
+            selection[task.Id].Update(task);
+
+        await ReloadRemainingPaymentsAsync();
+    }
 
     private async Task PayBonusAsync()
     {
         var bonusViewModel = m_bonusFormViewModelFactory.Invoke();
 
         await m_dialogService.ShowAsync(bonusViewModel);
-        
-        if(bonusViewModel.UserFilterViewModel.SelectedUser is null || bonusViewModel.Payment <= 0) return;
+
+        if (bonusViewModel.UserFilterViewModel.SelectedUser is null || bonusViewModel.Payment <= 0) return;
 
         await m_paymentBillsService.PayBonusAsync(
             bonusViewModel.UserFilterViewModel.SelectedUser.Id,

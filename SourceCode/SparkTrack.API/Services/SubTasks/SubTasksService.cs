@@ -27,7 +27,11 @@ public class SubTasksService(ClientFactory<SubTasksClient> subTasksClientFactory
         return dto?.ToDomain();
     }
 
-    public async Task<SubTask?> SetPaymentStatusAsync(Guid id, Core.Shared.Enums.EPaymentStatus value, Guid currentVersion)
+    public async Task<SubTask?> SetPaymentStatusAsync(
+        Guid id,
+        Core.Shared.Enums.EPaymentStatus value,
+        Guid currentVersion
+    )
     {
         using var wrapper = subTasksClientFactory();
 
@@ -36,5 +40,18 @@ public class SubTasksService(ClientFactory<SubTasksClient> subTasksClientFactory
         return dto?.ToDomain();
     }
 
-    public Task<IReadOnlyList<SubTask>> SetIsTimelyBonusApprovedAsync(IReadOnlyList<EditableEntityIdentity> identitiesList, bool value) => throw new NotImplementedException();
+    public async Task<IReadOnlyList<SubTask>> SetIsTimelyBonusApprovedAsync(
+        IReadOnlyList<EditableEntityIdentity> identitiesList,
+        bool value
+    )
+    {
+        using var wrapper = subTasksClientFactory();
+
+        var dto = await wrapper.Client.SetIsTimelyBonusApprovedAllAsync(
+            value,
+            identitiesList.Select(it => it.ToDTO()).ToArray()
+        );
+
+        return dto.Select(it => it.ToDomain()).ToArray();
+    }
 }
