@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:update="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Update"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.Update.UpdatePage"
+             x:DataType="update:UpdatePageViewModel">
+    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto Auto">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding LoadingProgress^.StageName}"
+                       IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
+            <TextBlock Grid.Row="0" Grid.Column="1"
+                       IsVisible="{Binding !!LoadingProgress^.ProcessedTasksQuantity^, FallbackValue={x:False}}">
+                <Run Text="{Binding LoadingProgress^.ProcessedTasksQuantity^}" />
+                <Run Text="/" />
+                <Run Text="{Binding LoadingProgress^.TotalTasksQuantity^}" />
+            </TextBlock>
+            <ProgressBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
+                         Margin="0 8 0 0"
+                         IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
+                         Value="{Binding LoadingProgress^.ProcessedTasksQuantity^}"
+                         Maximum="{Binding LoadingProgress^.TotalTasksQuantity^, FallbackValue=100}"
+                         IsIndeterminate="{Binding !LoadingProgress^.ProcessedTasksQuantity^}" />
+        </Grid>
+    </Border>
+</UserControl>

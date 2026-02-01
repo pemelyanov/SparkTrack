@@ -19,6 +19,8 @@ using Core.Client.AutofacModules;
 using Core.Client.Events;
 using Core.Shared.Eventing;
 using Fanatiki.MVVM;
+using Fanatiki.Updating.GitHub.Services;
+using Fanatiki.Updating.Services;
 using Installers;
 using Microsoft.Extensions.Configuration;
 using Pages.AdminFinance;
@@ -28,6 +30,7 @@ using Pages.Authorization;
 using Pages.Feature;
 using Pages.FeaturesList;
 using Pages.ProjectsList;
+using Pages.Update;
 using Pages.Users;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
@@ -78,6 +81,52 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                 )
             )
         );
+        
+        RegisterUpdatingIfNeeded(builder);
+    }
+
+    private void RegisterUpdatingIfNeeded(ContainerBuilder builder)
+    {
+        var updatingSection = s_configuration.GetSection("Updating");
+
+        if (!updatingSection.Exists()) return;
+
+        builder.RegisterType<UpdatePageViewModel>().SingleInstance();
+        builder.RegisterType<UpdateUnpackerService>()
+            .WithParameters(
+                [
+                    new NamedParameter(
+                        "updatedUnpackerPath",
+                        Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.exe")
+                    ),
+                    new NamedParameter(
+                        "currentUnpackerPath",
+                        Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.Current.exe")
+                    )
+                ]
+            )
+            .As<IUpdateUnpackerService>()
+            .SingleInstance();
+
+        builder.RegisterType<UpdateService>()
+            .WithParameters(
+                [
+                    new NamedParameter("applicationRootPath", Environment.CurrentDirectory)
+                ]
+            )
+            .As<IUpdateUnpackerService>()
+            .SingleInstance();
+
+        builder.RegisterType<GitHubUpdateService>()
+            .WithParameters(
+                [
+                    new NamedParameter("repoName", updatingSection.GetRequiredSection("RepoName").Get<string>()),
+                    new NamedParameter("repoOwner", updatingSection.GetRequiredSection("RepoOwner").Get<string>()),
+                    new NamedParameter("accessToken", updatingSection.GetRequiredSection("AccessToken").Get<string>()),
+                ]
+            )
+            .As<IUpdateUnpackerService>()
+            .SingleInstance();
     }
 
     private static IConfiguration InitializeConfiguration()

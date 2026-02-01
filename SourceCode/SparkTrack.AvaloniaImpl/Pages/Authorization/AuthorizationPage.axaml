@@ -12,7 +12,7 @@
         </Style>
     </UserControl.Styles>
     <Panel>
-        <Border Classes="card" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+        <Border Classes="card" HorizontalAlignment="Center" VerticalAlignment="Center" Width="300" IsVisible="{Binding !AuthorizeExistingCredentialsCommand.IsExecuting^}">
             <StackPanel Spacing="8">
                 <TextBlock Text="Авторизация" Classes="title" />
             
@@ -23,6 +23,13 @@
                 <Button Classes="accent" Content="Войти" HorizontalAlignment="Right"
                         HotKey="Enter"
                         Command="{Binding LogInCommand}" />
+            </StackPanel>
+        </Border>
+        
+        <Border Classes="card" Width="500" IsVisible="{Binding AuthorizeExistingCredentialsCommand.IsExecuting^}" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Выполняется вход..."/>
+                <ProgressBar IsIndeterminate="True" />
             </StackPanel>
         </Border>
     </Panel>

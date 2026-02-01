@@ -7,6 +7,7 @@ using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using NLog;
 using Pages.Authorization;
+using Pages.Update;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Routing;
@@ -21,13 +22,16 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     public MainWindowViewModel(
         AuthorizationPageViewModel startPage,
         INavigationListResolver navigationListResolver,
-        AccountViewModel accountViewModel
+        AccountViewModel accountViewModel,
+        UpdatePageViewModel? updatePage = null
     )
     {
         AccountViewModel = accountViewModel;
         NavigationList = navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
 
-        Router.NavigateOnUIThread(startPage);
+        IRoutableViewModel page = updatePage is null ? startPage : updatePage;
+
+        Router.NavigateOnUIThread(page);
     }
 
     protected override void OnFirstActivated(CompositeDisposable disposables)

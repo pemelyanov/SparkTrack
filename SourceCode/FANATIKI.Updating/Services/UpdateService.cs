@@ -4,7 +4,7 @@ using System.Reflection;
 using Loading.Data;
 using NLog;
 
-internal class UpdateService(
+public class UpdateService(
     string applicationRootPath,
     IUpdateLoaderService loaderService,
     IUpdateUnpackerService unpackerService

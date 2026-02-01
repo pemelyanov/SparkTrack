@@ -3,7 +3,7 @@
 using System.Diagnostics;
 using NLog;
 
-internal class UpdateUnpackerService(string updatedUnpackerPath, string currentUnpackerPath)
+public class UpdateUnpackerService(string updatedUnpackerPath, string currentUnpackerPath)
     : IUpdateUnpackerService
 {
     #region Fields
