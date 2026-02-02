@@ -1,0 +1,17 @@
+**/.gitignore
+**/.git
+**/.env
+**/bin
+**/obj
+**/out
+**/.vscode
+**/.vs
+.dotnet
+.Microsoft.DotNet.ImageBuilder
+**/docker-compose
+**/Dockerfile*
+./SourceCode/SpartTrack.API
+./SourceCode/Avalonia**
+./SourceCode/SparkTrack.Core.Client
+./SourceCode/SparkTrack.Desktop
+./SourceCode/SparkTrack.Angular
