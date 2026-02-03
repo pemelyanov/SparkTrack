@@ -12,18 +12,6 @@ services:
       TZ: UTC
     ports:
       - "${POSTGRES_PORT}:5432"
-    volumes:
-      # Основной том для данных
-      - postgres_data:/var/lib/postgresql/data
-      
-      # Опционально: конфигурационные файлы
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf
-      
-      # Опционально: бекапы
-      - ${POSTGRES_BACKUP_DIR}:/backups
-      
-      # Для Linux: сохраняем права на файлы
-      - ./data/postgres:/var/lib/postgresql/data:cached
       
     env_file:
       - .env
