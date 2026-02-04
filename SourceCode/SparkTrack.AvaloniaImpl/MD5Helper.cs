@@ -12,7 +12,7 @@ public static class Md5Helper
         if (!File.Exists(filePath))
             throw new FileNotFoundException("Файл не найден", filePath);
 
-        using var stream = File.OpenRead(filePath);
+        using var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         using var md5 = MD5.Create();
         return md5.ComputeHash(stream);
     }

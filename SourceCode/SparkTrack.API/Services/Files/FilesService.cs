@@ -31,7 +31,7 @@ public class FilesService(ClientFactory<FilesClient> clientFactory) : IFilesServ
 
         if (!string.IsNullOrEmpty(outputFolder)) Directory.CreateDirectory(outputFolder);
 
-        var fileStream = File.OpenWrite(outputPath);
+        var fileStream = File.Open(outputPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
         await using var progressStream = new ProgressWriteStream(fileStream, progress);
 
