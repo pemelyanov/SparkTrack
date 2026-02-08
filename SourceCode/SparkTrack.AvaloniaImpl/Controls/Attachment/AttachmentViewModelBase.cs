@@ -6,12 +6,17 @@ using ImageDialog;
 using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Diagnostics;
+using NLog;
 
 public abstract class AttachmentViewModelBase(
     Action<IAttachmentViewModel> onRemove,
-    IDialogService dialogService
+    IDialogService dialogService,
+    ILogger logger
 ) : ViewModelBase
 {
+    protected readonly ILogger                  m_logger = logger;
+    protected          CancellationTokenSource? m_cancellationTokenSource;
+    
     [Reactive]
     public bool IsImage { get; protected set; }
 
@@ -19,7 +24,7 @@ public abstract class AttachmentViewModelBase(
 
     public string Name { get; protected set; } = string.Empty;
     
-    public async Task RemoveAsync()
+    public virtual async Task RemoveAsync()
     {
         if (!await dialogService.ConfirmAsync(
             "Вы действительно хотите удалить файл?",
@@ -68,5 +73,15 @@ public abstract class AttachmentViewModelBase(
                 UseShellExecute = true
             }
         );
+    }
+
+    protected void Cancel(bool close)
+    {
+        m_logger.Info("Canceling file upload...");
+        m_cancellationTokenSource?.Cancel();
+        m_cancellationTokenSource = null;
+        
+        if(close)
+            onRemove(GetThis());
     }
 }

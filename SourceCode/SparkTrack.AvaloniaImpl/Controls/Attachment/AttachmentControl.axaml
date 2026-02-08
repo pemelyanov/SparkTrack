@@ -83,6 +83,18 @@
                                        HorizontalAlignment="Stretch"
                                        VerticalAlignment="Stretch" />
             </Panel>
+            
+            <Panel Grid.Column="0" Classes="file-actions">
+                <Button  Classes="icon close" Command="{Binding Cancel}" >
+                    <Control.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="#Container.IsPointerOver" />
+                            <Binding Path="LoadProgress" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                        </MultiBinding>
+                    </Control.IsVisible>
+                </Button>
+            </Panel>
+            
 
             <TextBlock Grid.Column="1" Text="{Binding Name}"
                        TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"
@@ -90,7 +102,19 @@
 
             <TextBlock Grid.Column="1" Text="{Binding Size, Converter={StaticResource BytesToStringConverter}}"
                        HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
+                       IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}"
                        FontSize="12" Opacity="0.75" />
+            
+            <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
+                       IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
+                       FontSize="12" Opacity="0.75">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0} / {1}">
+                        <Binding Path="LoadProgress.Progress.CurrentProgress^" Converter="{StaticResource BytesToStringConverter}" />
+                        <Binding Path="Size" Converter="{StaticResource BytesToStringConverter}" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
 
             <StackPanel Grid.Column="2" Margin="4" IsVisible="{Binding #Container.IsPointerOver}" Spacing="4">
                 <Button Classes="icon small close"

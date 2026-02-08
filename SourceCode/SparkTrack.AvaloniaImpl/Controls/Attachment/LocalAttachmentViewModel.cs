@@ -9,17 +9,18 @@ using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using NLog;
 
 public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentViewModel
 {
-    private readonly IFilesService m_filesService;
+    private readonly        IFilesService                m_filesService;
 
     public LocalAttachmentViewModel(
         string path,
         Action<IAttachmentViewModel> onRemove,
         IDialogService dialogService,
         IFilesService filesService
-    ) : base(onRemove, dialogService)
+    ) : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
     {
         m_filesService = filesService;
         using var stream = File.OpenRead(path);
@@ -46,15 +47,42 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
 
     public Task DownloadAsync() => throw new NotImplementedException();
 
+    public override async Task RemoveAsync()
+    {
+        if (LoadProgress == null)
+        {
+            await base.RemoveAsync();
+            Cancel(false);
+        }
+
+        Cancel();
+    }
+
+    public void Cancel()
+    {
+        Cancel(true);
+    }
+
     public async Task UploadAsync()
     {
+        m_cancellationTokenSource = new CancellationTokenSource();
+        
         var progress = new AttachmentLoadProgress(ELoadType.Upload, new LoadingProgress());
 
         LoadProgress = progress;
 
-        UploadedFileId = await m_filesService.UploadAsync(Uri, progress.Progress);
-
-        LoadProgress = null;
+        try
+        {
+            UploadedFileId = await m_filesService.UploadAsync(Uri, progress.Progress, m_cancellationTokenSource.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            m_logger.Warn("File upload canceled");
+        }
+        finally
+        {
+            LoadProgress = null;
+        }
     }
 
     public Attachment ToModel() => new()

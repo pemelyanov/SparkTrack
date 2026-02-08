@@ -25,6 +25,8 @@ public interface IAttachmentViewModel
 
     Task DownloadAsync();
 
+    void Cancel();
+
     void Open();
 
     void OpenInExplorer();
