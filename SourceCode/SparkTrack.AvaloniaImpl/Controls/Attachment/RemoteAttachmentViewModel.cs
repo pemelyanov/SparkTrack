@@ -91,11 +91,11 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     public AttachmentLoadProgress? LoadProgress { get; private set; }
 
     public ICommand SaveAsCommand { get; }
-
+    
     public async Task DownloadAsync()
     {
         if (IsDownloaded || LoadProgress is not null) return;
-
+        
         try
         {
             var progress = new AttachmentLoadProgress(ELoadType.Download, new LoadingProgress());

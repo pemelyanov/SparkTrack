@@ -1,20 +1,27 @@
 namespace SparkTrack.API.Services.Files;
 
+using System.Net.Http.Headers;
 using Core.Client.Data;
 using Core.Client.Services.Files;
 using Core.Client.Streams;
 using Delegates;
 
-public class FilesService(ClientFactory<FilesClient> clientFactory) : IFilesService
+public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpClient> httpClientFactory) : IFilesService
 {
     public async Task<Guid> UploadAsync(string inputPath, LoadingProgress progress)
     {
-        using var wrapper = clientFactory.Invoke();
-
         await using var stream = File.OpenRead(inputPath);
         await using var progressStream = new ProgressReadStream(stream, progress);
+        
+        using var content = new StreamContent(progressStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-        return await wrapper.Client.UploadAsync(new FileParameter(progressStream));
+        using var httpClient = httpClientFactory();
+        
+        var response = await httpClient.PostAsync("/files", content);
+        var id = await response.Content.ReadAsStringAsync();
+
+        return Guid.Parse(id.Trim('"'));
     }
 
     public async Task DownloadAsync(Guid id, string outputPath, LoadingProgress progress)

@@ -2,9 +2,9 @@ namespace SparkTrack.Core.Services.Files;
 
 public interface IFilesService
 {
-    Task<Guid> UploadAsync(Stream stream);
+    Task<Guid> UploadAsync(Stream stream, CancellationToken cancellationToken);
 
-    Task<Stream?> DownloadAsync(Guid id);
+    Task DownloadAsync(Guid id, Stream stream, CancellationToken cancellationToken, Action<long> contentLengthCallback);
 
     Task DeleteAsync(Guid id);
 }

@@ -119,8 +119,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_subTaskViewModelFactory = subTaskViewModelFactory;
         IsDescriptionInPreviewMode = m_feature is not null;
 
-        InitializeProperties(feature);
-
         if (feature is null) IsNameEditing = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);

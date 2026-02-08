@@ -56,6 +56,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fanatiki.GitHub", "Fanatiki
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fanatiki.Updating.GitHub", "Fanatiki.Updating.GitHub\Fanatiki.Updating.GitHub.csproj", "{62B68A69-6A73-4E98-AADB-49399E04AC86}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDriveCredentialsFetcher", "GoogleDriveCredentialsFetcher\GoogleDriveCredentialsFetcher.csproj", "{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,5 +151,9 @@ Global
 		{62B68A69-6A73-4E98-AADB-49399E04AC86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62B68A69-6A73-4E98-AADB-49399E04AC86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62B68A69-6A73-4E98-AADB-49399E04AC86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
