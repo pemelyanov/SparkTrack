@@ -23,6 +23,8 @@ public abstract class AttachmentViewModelBase(
     public string Uri { get; protected set; } = string.Empty;
 
     public string Name { get; protected set; } = string.Empty;
+
+    public bool CanOpenInExplorer { get; protected set; } = true; 
     
     public virtual async Task RemoveAsync()
     {

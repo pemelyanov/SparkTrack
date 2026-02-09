@@ -66,6 +66,8 @@ public class ViewModelBase : ReactiveValidationObject, IActivatableViewModel
 
     #region Methods
 
+    public void DisposeWithViewModel(IDisposable disposable) => m_disposables.Add(disposable);
+    
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {

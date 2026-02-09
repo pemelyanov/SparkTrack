@@ -61,6 +61,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<PendingPaymentsViewModel>();
         builder.RegisterType<PaymentsHistoryViewModel>();
         builder.RegisterType<UserFilterViewModel>();
+        builder.RegisterType<ClipboardAttachmentViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

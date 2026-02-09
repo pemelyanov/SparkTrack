@@ -8,20 +8,20 @@ using Delegates;
 
 public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpClient> httpClientFactory) : IFilesService
 {
+    public async Task<Guid> UploadAsync(
+        byte[] content,
+        LoadingProgress progress,
+        CancellationToken cancellationToken = default
+    )
+    {
+        using var stream = new MemoryStream(content);
+        return await UploadAsync(progress, cancellationToken, stream);
+    }
+
     public async Task<Guid> UploadAsync(string inputPath, LoadingProgress progress, CancellationToken cancellationToken)
     {
         await using var stream = File.OpenRead(inputPath);
-        await using var progressStream = new ProgressReadStream(stream, progress);
-
-        using var content = new StreamContent(progressStream);
-        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-        using var httpClient = httpClientFactory();
-
-        var response = await httpClient.PostAsync("/files", content, cancellationToken);
-        var id = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        return Guid.Parse(id.Trim('"'));
+        return await UploadAsync(progress, cancellationToken, stream);
     }
 
     public async Task DownloadAsync(
@@ -48,5 +48,20 @@ public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpCli
         await using var progressStream = new ProgressWriteStream(fileStream, progress);
 
         await response.Stream.CopyToAsync(progressStream, cancellationToken);
+    }
+    
+    private async Task<Guid> UploadAsync(LoadingProgress progress, CancellationToken cancellationToken, Stream stream)
+    {
+        await using var progressStream = new ProgressReadStream(stream, progress);
+
+        using var content = new StreamContent(progressStream);
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+        using var httpClient = httpClientFactory();
+
+        var response = await httpClient.PostAsync("/files", content, cancellationToken);
+        var id = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        return Guid.Parse(id.Trim('"'));
     }
 }

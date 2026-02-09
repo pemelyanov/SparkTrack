@@ -12,7 +12,7 @@
              x:DataType="attachment:IAttachmentViewModel"
              x:Name="Root">
     <UserControl.Resources>
-        <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
+        <converters:UriToImageSourceConverter x:Key="PathToImageSourceConverter" />
         <converters:BytesToStringConverter x:Key="BytesToStringConverter" />
         <converters:FileExtensionToSymbolConverter x:Key="FileExtensionToSymbolConverter" />
     </UserControl.Resources>
@@ -110,7 +110,7 @@
                        FontSize="12" Opacity="0.75">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="{}{0} / {1}">
-                        <Binding Path="LoadProgress.Progress.CurrentProgress^" Converter="{StaticResource BytesToStringConverter}" />
+                        <Binding Path="LoadProgress.Progress.CurrentProgress" Converter="{StaticResource BytesToStringConverter}" />
                         <Binding Path="Size" Converter="{StaticResource BytesToStringConverter}" />
                     </MultiBinding>
                 </TextBlock.Text>
@@ -125,7 +125,7 @@
                     <Button.Flyout>
                         <MenuFlyout>
                             <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
-                            <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}" />
+                            <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}" IsEnabled="{Binding CanOpenInExplorer}" />
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>
