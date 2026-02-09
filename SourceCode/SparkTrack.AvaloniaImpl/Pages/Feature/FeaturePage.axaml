@@ -14,7 +14,8 @@
              xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
-             x:DataType="feature:FeaturePageViewModel">
+             x:DataType="feature:FeaturePageViewModel"
+             x:Name="Root">
     <UserControl.Resources>
         <converters:ComparisonConverter x:Key="LessOrEqualConverter" Operation="Elt" />
     </UserControl.Resources>
@@ -60,6 +61,7 @@
         </Style>
     </UserControl.Styles>
     <Panel>
+        <Button HotKey="Ctrl+V" Command="{Binding #Root.OnPaste}" IsVisible="False" />
         <ScrollViewer x:Name="MainScrollViewer">
             <StackPanel Spacing="8">
                 <Border Classes="card" Padding="16 8 16 16">

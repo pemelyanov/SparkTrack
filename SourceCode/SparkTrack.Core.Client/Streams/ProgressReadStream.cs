@@ -13,7 +13,7 @@ public sealed class ProgressReadStream : Stream
         m_inner = inner;
         m_progress = progress;
 
-        progress.TotalProgress.OnNext(Length);
+        progress.TotalProgress.OnNext(-1);
     }
 
     public override async ValueTask<int> ReadAsync(
@@ -24,6 +24,9 @@ public sealed class ProgressReadStream : Stream
         
         if (read > 0)
         {
+            if (m_progress.TotalProgress.Value < 1)
+                m_progress.TotalProgress.OnNext(Length);
+            
             m_totalRead += read;
             m_progress.CurrentProgress.OnNext(m_totalRead);
         }

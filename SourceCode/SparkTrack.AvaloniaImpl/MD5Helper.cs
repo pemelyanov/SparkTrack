@@ -16,6 +16,13 @@ public static class Md5Helper
         using var md5 = MD5.Create();
         return md5.ComputeHash(stream);
     }
+    
+    public static byte[] ComputeFileMd5(byte[] data)
+    {
+        using var stream = new MemoryStream(data);
+        using var md5 = MD5.Create();
+        return md5.ComputeHash(stream);
+    }
 
     /// <summary>
     /// Проверяет, совпадает ли MD5 файла с переданным массивом

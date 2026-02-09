@@ -10,6 +10,8 @@ using Services.LocalFilesManager;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using System.Windows.Input;
+using NLog;
+using Services.AttachmentsPathCache;
 
 public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentViewModel
 {
@@ -27,9 +29,10 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         Action<IAttachmentViewModel> onRemove,
         IDialogService dialogService,
         ILocalFilesManager localFilesManager,
-        IFilesService filesService
+        IFilesService filesService,
+        IAttachmentsPathCache attachmentsPathCache
     )
-        : base(onRemove, dialogService)
+        : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
     {
         m_attachment = attachment;
         m_filesService = filesService;
@@ -37,12 +40,11 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         Extension = attachment.Extension;
         Size = attachment.Size;
 
-        Uri = Path.Combine(
+        Uri = attachmentsPathCache.Resolve(attachment.FileId) ?? Path.Combine(
             s_downloadsFolder,
             $"{attachment.FileId.ToString()}.{attachment.Extension.TrimStart('.')}"
         );
-
-        // TODO: Добавить проверку MD5 суммы файла
+        
         IsDownloaded = CheckIsDownloaded();
 
         if (IsDownloaded)
@@ -91,10 +93,12 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     public AttachmentLoadProgress? LoadProgress { get; private set; }
 
     public ICommand SaveAsCommand { get; }
-
+    
     public async Task DownloadAsync()
     {
         if (IsDownloaded || LoadProgress is not null) return;
+        
+        m_cancellationTokenSource = new CancellationTokenSource();
 
         try
         {
@@ -102,18 +106,40 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
             LoadProgress = progress;
 
-            await m_filesService.DownloadAsync(m_attachment.FileId, Uri, progress.Progress);
-            
+            await m_filesService.DownloadAsync(
+                m_attachment.FileId,
+                Uri,
+                progress.Progress,
+                m_cancellationTokenSource.Token
+            );
+
             IsDownloaded = true;
 
             IsImage = CheckIsImage();
-
-            LoadProgress = null;
+        }
+        catch (TaskCanceledException)
+        {
+            m_logger.Warn("Download is cancelled");
         }
         catch
         {
             IsDownloaded = CheckIsDownloaded();
         }
+        finally
+        {
+            LoadProgress = null;
+        }
+    }
+
+    public override async Task RemoveAsync()
+    {
+        await base.RemoveAsync();
+        Cancel();
+    }
+
+    public void Cancel()
+    {
+        Cancel(false);
     }
 
     public Attachment ToModel() => m_attachment;

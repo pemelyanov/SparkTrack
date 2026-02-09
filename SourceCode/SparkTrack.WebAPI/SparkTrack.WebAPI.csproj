@@ -8,8 +8,10 @@
   
     <ItemGroup>
       <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+      <PackageReference Include="Google.Apis.Drive.v3" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+      <PackageReference Include="NLog" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
       <PackageReference Include="NSwag.AspNetCore" />
     </ItemGroup>
@@ -19,6 +21,12 @@
       <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
       <ProjectReference Include="..\SparkTrack.Core\SparkTrack.Core.csproj" />
       <ProjectReference Include="..\SparkTrack.DataAccess.EFCore\SparkTrack.DataAccess.EFCore.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Secrets\client_secret_828655576886-t5kecaa986kvnds6nvn1qa2lq0asc7cm.apps.googleusercontent.com.json" />
+      <_ContentIncludedByDefault Remove="Secrets\fanatikilauncher-2ddfcfc02be2.json" />
+      <_ContentIncludedByDefault Remove="Secrets\fanatikilauncher-f522a23bd377.json" />
     </ItemGroup>
 
 </Project>

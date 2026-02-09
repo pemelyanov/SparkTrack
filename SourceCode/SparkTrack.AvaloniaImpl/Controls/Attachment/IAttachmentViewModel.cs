@@ -18,12 +18,16 @@ public interface IAttachmentViewModel
     long Size { get; }
 
     AttachmentLoadProgress? LoadProgress { get; }
-    
+
+    bool CanOpenInExplorer { get; }
+
     ICommand SaveAsCommand { get; }
 
     Task RemoveAsync();
 
     Task DownloadAsync();
+
+    void Cancel();
 
     void Open();
 

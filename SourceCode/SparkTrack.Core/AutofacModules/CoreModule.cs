@@ -22,7 +22,7 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PasswordHasher>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().InstancePerLifetimeScope();
-        builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        //builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<SubTasksService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PaymentBillsService>().AsImplementedInterfaces().InstancePerLifetimeScope();

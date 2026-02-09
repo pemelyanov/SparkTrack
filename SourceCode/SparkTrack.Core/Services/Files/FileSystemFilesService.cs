@@ -4,24 +4,30 @@ public class FileSystemFilesService : IFilesService
 {
     private const string FilesFolder = "UploadedFiles";
 
-    public async Task<Guid> UploadAsync(Stream stream)
+    public async Task<Guid> UploadAsync(Stream stream, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(FilesFolder);
         
         var fileId = Guid.CreateVersion7();
         await using var fileStream = File.OpenWrite(Path.Combine(FilesFolder, fileId.ToString()));
-        await stream.CopyToAsync(fileStream);
+        await stream.CopyToAsync(fileStream, cancellationToken);
 
         return fileId;
     }
 
-    public Task<Stream?> DownloadAsync(Guid id)
+    public async Task DownloadAsync(Guid id, Stream stream, CancellationToken cancellationToken, Action<long> contentLengthCallback)
     {
         var filePath = Path.Combine(FilesFolder, id.ToString());
 
-        if (!File.Exists(filePath)) return Task.FromResult<Stream?>(null);
+        if (!File.Exists(filePath)) return;
 
-        return Task.FromResult<Stream?>(File.OpenRead(filePath));
+        var fileInfo = new FileInfo(filePath);
+
+        contentLengthCallback(fileInfo.Length);
+
+        await using var fileStream = File.OpenRead(filePath);
+
+        await fileStream.CopyToAsync(stream, cancellationToken);
     }
 
     public Task DeleteAsync(Guid id)

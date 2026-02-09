@@ -21,6 +21,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using Comment = Core.Shared.Data.Entities.Comment;
@@ -119,8 +120,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_subTaskViewModelFactory = subTaskViewModelFactory;
         IsDescriptionInPreviewMode = m_feature is not null;
 
-        InitializeProperties(feature);
-
         if (feature is null) IsNameEditing = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
@@ -181,7 +180,32 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
 
-    public void CreateComment() => CommentEditViewModel = m_commentEditFactory(null);
+    public void OnImagePaste(byte[] image, string extension)
+    {
+        if (CommentEditViewModel is not null)
+        {
+            CommentEditViewModel.AttachmentsPanelViewModel.AddAttachment(image, extension);
+            return;
+        }
+
+        if (CommentsList.FirstOrDefault(it => it.EditViewModel is not null) is { } existingCommentEdit)
+        {
+            existingCommentEdit.EditViewModel?.AttachmentsPanelViewModel.AddAttachment(image, extension);
+            return;
+        }
+        
+        if(m_authorizationService.CurrentUser.Value?.Role is ERole.Employee) return;
+        
+        AttachmentsPanelViewModel.AddAttachment(image, extension);
+    }
+
+    public void CreateComment()
+    {
+        CommentEditViewModel = m_commentEditFactory(null);
+
+        foreach (var commentViewModel in CommentsList)
+            commentViewModel.CancelEdit();
+    }
 
     public void CancelComment() => CommentEditViewModel = null;
 
@@ -275,19 +299,41 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         var page = await m_commentsService.GetPageAsync(m_feature.Id, PageQuery.All);
 
-        var commentsViewModels = page.Items.Select(it => m_commentFactory(it, OnCommentDeleteAsync));
+        var commentsViewModels = page.Items.Select(it =>
+        {
+            var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
 
+            var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
+                .WhereNotNull()
+                .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
+                .Subscribe(source =>
+                    {
+                        foreach (var otherComment in CommentsList)
+                            if(otherComment != source) otherComment.CancelEdit();
+
+                        CancelComment();
+                    }
+                );
+            
+            commentViewModel.DisposeWithViewModel(editSubscription);
+
+            return commentViewModel;
+        });
+
+        var oldComments = CommentsList.ToArray();
+        
         using (CommentsList.SuspendNotifications())
         {
             CommentsList.Clear();
             CommentsList.AddRange(commentsViewModels);
         }
+        
+        foreach (var commentViewModel in oldComments)
+            commentViewModel.Dispose();
     }
 
     private async Task OnCommentDeleteAsync(CommentViewModel comment)
     {
-        // TODO: Добавить модалку подтверждения
-
         await m_commentsService.DeleteAsync(comment.Model.Id);
 
         CommentsList.Remove(comment);

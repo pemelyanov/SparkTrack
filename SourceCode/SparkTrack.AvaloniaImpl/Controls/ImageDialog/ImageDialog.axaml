@@ -11,7 +11,7 @@
              CloseButtonText="Закрыть"
              Title="{Binding Name}">
     <controls:ContentDialog.Resources>
-        <converters:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
+        <converters:UriToImageSourceConverter x:Key="PathToImageSourceConverter" />
     </controls:ContentDialog.Resources>
     <controls:ContentDialog.Styles>
         <Style Selector=":is(imageDialog|ImageDialog) /template/ ScrollViewer:not(:disabled)">

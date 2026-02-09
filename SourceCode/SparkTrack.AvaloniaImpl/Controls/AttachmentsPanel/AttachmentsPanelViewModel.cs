@@ -10,7 +10,8 @@ using Services.LocalFilesManager;
 public class AttachmentsPanelViewModel(
     ILocalFilesManager localFilesManager,
     LocalAttachmentViewModelFactory localLocalAttachmentViewModelFactory,
-    RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory
+    RemoteAttachmentViewModelFactory remoteAttachmentViewModelFactory,
+    ClipboardAttachmentViewModelFactory clipboardAttachmentViewModelFactory
 )
     : ViewModelBase
 {
@@ -19,7 +20,7 @@ public class AttachmentsPanelViewModel(
     public Task UploadLocalAttachments()
     {
         var localAttachments =
-            AttachmentsList.OfType<LocalAttachmentViewModel>().Where(it => it.UploadedFileId is null);
+            AttachmentsList.OfType<IUploadableAttachment>().Where(it => it.UploadedFileId is null);
 
         var uploadingTasks = localAttachments.Select(it => it.UploadAsync());
 
@@ -49,6 +50,13 @@ public class AttachmentsPanelViewModel(
     public void AddAttachment(string path)
     {
         var attachment = localLocalAttachmentViewModelFactory.Invoke(path, OnAttachmentDelete);
+
+        AttachmentsList.Add(attachment);
+    }
+
+    public void AddAttachment(byte[] data, string extension)
+    {
+        var attachment = clipboardAttachmentViewModelFactory.Invoke(extension, data, OnAttachmentDelete);
 
         AttachmentsList.Add(attachment);
     }
