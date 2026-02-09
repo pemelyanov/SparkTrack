@@ -10,19 +10,23 @@ using Services.DialogHost;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using NLog;
+using Services.AttachmentsPathCache;
 
 public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentViewModel, IUploadableAttachment
 {
-    private readonly        IFilesService                m_filesService;
+    private readonly IFilesService         m_filesService;
+    private readonly IAttachmentsPathCache m_attachmentsPathCache;
 
     public LocalAttachmentViewModel(
         string path,
         Action<IAttachmentViewModel> onRemove,
         IDialogService dialogService,
-        IFilesService filesService
+        IFilesService filesService,
+        IAttachmentsPathCache attachmentsPathCache
     ) : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
     {
         m_filesService = filesService;
+        m_attachmentsPathCache = attachmentsPathCache;
         using var stream = File.OpenRead(path);
 
         IsImage = stream.IsImageBySignature();
@@ -74,6 +78,7 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         try
         {
             UploadedFileId = await m_filesService.UploadAsync(Uri, progress.Progress, m_cancellationTokenSource.Token);
+            m_attachmentsPathCache.Save(UploadedFileId.Value, Uri);
         }
         catch (TaskCanceledException)
         {

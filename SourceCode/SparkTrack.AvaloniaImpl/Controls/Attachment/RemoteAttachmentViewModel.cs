@@ -11,6 +11,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using System.Windows.Input;
 using NLog;
+using Services.AttachmentsPathCache;
 
 public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentViewModel
 {
@@ -28,7 +29,8 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         Action<IAttachmentViewModel> onRemove,
         IDialogService dialogService,
         ILocalFilesManager localFilesManager,
-        IFilesService filesService
+        IFilesService filesService,
+        IAttachmentsPathCache attachmentsPathCache
     )
         : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
     {
@@ -38,7 +40,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         Extension = attachment.Extension;
         Size = attachment.Size;
 
-        Uri = Path.Combine(
+        Uri = attachmentsPathCache.Resolve(attachment.FileId) ?? Path.Combine(
             s_downloadsFolder,
             $"{attachment.FileId.ToString()}.{attachment.Extension.TrimStart('.')}"
         );

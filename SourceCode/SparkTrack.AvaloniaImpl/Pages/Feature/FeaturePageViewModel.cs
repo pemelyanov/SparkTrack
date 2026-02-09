@@ -320,20 +320,20 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             return commentViewModel;
         });
 
+        var oldComments = CommentsList.ToArray();
+        
         using (CommentsList.SuspendNotifications())
         {
-            foreach (var commentViewModel in CommentsList)
-                commentViewModel.Dispose();
-            
             CommentsList.Clear();
             CommentsList.AddRange(commentsViewModels);
         }
+        
+        foreach (var commentViewModel in oldComments)
+            commentViewModel.Dispose();
     }
 
     private async Task OnCommentDeleteAsync(CommentViewModel comment)
     {
-        // TODO: Добавить модалку подтверждения
-
         await m_commentsService.DeleteAsync(comment.Model.Id);
 
         CommentsList.Remove(comment);

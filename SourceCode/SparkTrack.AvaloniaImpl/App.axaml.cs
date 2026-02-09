@@ -6,6 +6,8 @@ namespace SparkTrack.AvaloniaImpl;
 
 using System.Globalization;
 using Windows.Main;
+using Core.Shared.Eventing;
+using Events;
 using Splat;
 
 public partial class App : Application
@@ -15,8 +17,11 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
-    public override void OnFrameworkInitializationCompleted()
+    public override async void OnFrameworkInitializationCompleted()
     {
+        var eventEmitter = Locator.Current.GetService<IEventEmitter>()!;
+
+        await eventEmitter.RaiseAsync(new StartupEvent());
         
         var ruCulture = CultureInfo.GetCultureInfo("ru-RU");
         CultureInfo.CurrentCulture = ruCulture;

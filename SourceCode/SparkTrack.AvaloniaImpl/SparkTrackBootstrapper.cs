@@ -32,6 +32,7 @@ using Pages.FeaturesList;
 using Pages.ProjectsList;
 using Pages.Update;
 using Pages.Users;
+using Services.AttachmentsPathCache;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
@@ -82,6 +83,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                 )
             )
         );
+        builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
         
         RegisterUpdatingIfNeeded(builder);
     }
