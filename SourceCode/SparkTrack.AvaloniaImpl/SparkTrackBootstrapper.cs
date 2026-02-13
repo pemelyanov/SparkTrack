@@ -18,12 +18,12 @@ using Controls.UsersFilter;
 using Core.Client.AutofacModules;
 using Core.Client.Events;
 using Core.Shared.Eventing;
-using Extensions;
 using Fanatiki.MVVM;
 using Fanatiki.Updating.GitHub.Services;
 using Fanatiki.Updating.Services;
 using Installers;
 using Microsoft.Extensions.Configuration;
+using Minerals.StringCases;
 using Pages.AdminFinance;
 using Pages.AdminFinance.Tabs.PaymentsHistory;
 using Pages.AdminFinance.Tabs.PendingPayments;
@@ -122,7 +122,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                     new NamedParameter("applicationRootPath", Environment.CurrentDirectory)
                 ]
             )
-            .As<IUpdateUnpackerService>()
+            .AsImplementedInterfaces()
             .SingleInstance();
 
         builder.RegisterType<GitHubUpdateService>()
@@ -135,7 +135,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                         )
                     )
             )
-            .As<IUpdateUnpackerService>()
+            .AsImplementedInterfaces()
             .SingleInstance();
     }
 

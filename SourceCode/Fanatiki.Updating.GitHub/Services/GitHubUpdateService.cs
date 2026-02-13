@@ -55,7 +55,9 @@ public class GitHubUpdateService(
 
         s_logger.Info("Asset found: {asset}...", launcherAsset.BrowserDownloadUrl);
 
-        string updatePath = Path.GetTempFileName();
+        string updatePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(updatePath);
+        updatePath = Path.Combine(updatePath, launcherAsset.Name);
 
         await DownloadUpdateAsync(launcherAsset, updatePath, observer);
 

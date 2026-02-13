@@ -38,7 +38,7 @@ public class GitHubRepositoryManager(string repoOwner, string repoName, string? 
         IProgress<HttpDownloadProgress>? progressTracker = null
     )
     {
-        var downloadUrl = asset.BrowserDownloadUrl;
+        var downloadUrl = asset.Url ?? asset.BrowserDownloadUrl;
         s_logger.Info("Downloading asset: {url} -> {path}", downloadUrl, downloadPath);
 
         using var httpClient = new HttpClient();
