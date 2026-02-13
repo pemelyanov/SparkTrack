@@ -6,10 +6,26 @@
         <Nullable>enable</Nullable>
         <OutputType>WinExe</OutputType>
         <LangVersion>default</LangVersion>
+        <ApplicationIcon>..\SparkTrack.AvaloniaImpl\icon.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <OutputPath>..\..\Redist\Frontend</OutputPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <OutputPath>..\..\Redist\Frontend</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\SparkTrack.AvaloniaImpl\SparkTrack.AvaloniaImpl.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\SparkTrack.AvaloniaImpl\icon.ico">
+        <Link>icon.ico</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

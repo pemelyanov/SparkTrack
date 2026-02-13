@@ -3,7 +3,7 @@
 using System.Diagnostics;
 using NLog;
 
-public class UpdateUnpackerService(string updatedUnpackerPath, string currentUnpackerPath)
+public class UpdateCustomUnpackerService(string updatedUnpackerPath, string currentUnpackerPath)
     : IUpdateUnpackerService
 {
     #region Fields
@@ -14,7 +14,7 @@ public class UpdateUnpackerService(string updatedUnpackerPath, string currentUnp
 
     #region Methods
 
-    public bool BeginUnpack(string launcherUnpackPath, string updatePath)
+    public bool BeginUnpack(string applicationRootPath, string updatePath)
     {
         if (File.Exists(updatedUnpackerPath))
         {
@@ -53,7 +53,7 @@ public class UpdateUnpackerService(string updatedUnpackerPath, string currentUnp
         var processStartInfo = new ProcessStartInfo
         {
             FileName = currentUnpackerPath,
-            Arguments = $"-p \"{processName}\" -l \"{launcherUnpackPath}\" -u \"{updatePath}\"",
+            Arguments = $"-p \"{processName}\" -l \"{applicationRootPath}\" -u \"{updatePath}\"",
         };
 
         s_logger.Info("Starting unpacker with args: {args}", processStartInfo.Arguments);

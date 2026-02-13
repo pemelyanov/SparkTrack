@@ -1,6 +1,7 @@
 ﻿namespace Fanatiki.GitHub;
 
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using BigHelp.Http;
 using NLog;
 using Octokit;
@@ -10,16 +11,20 @@ public class GitHubRepositoryManager(string repoOwner, string repoName, string? 
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
     
-    public async Task<Release?> GetLatestReleaseAsync()
+    public async Task<Release?> GetLatestReleaseAsync(Regex? regex = null)
     {
         try
         {
             var client = new GitHubClient(new ProductHeaderValue(repoName));
             if(accessToken is not null) 
                 client.Credentials = new Credentials(accessToken);
-            Release? release = await client.Repository.Release.GetLatest(repoOwner, repoName);
+            
+            if(regex is null) return await client.Repository.Release.GetLatest(repoOwner, repoName);
+            
+            var allReleases = await client.Repository.Release.GetAll(repoOwner, repoName);
 
-            return release;
+            return allReleases.OrderBy(it => it.CreatedAt)
+                .FirstOrDefault(release => regex.IsMatch(release.Name));
         }
         catch
         {
