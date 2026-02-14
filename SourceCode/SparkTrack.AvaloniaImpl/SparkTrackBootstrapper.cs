@@ -23,6 +23,7 @@ using Fanatiki.Updating.GitHub.Services;
 using Fanatiki.Updating.Services;
 using Installers;
 using Microsoft.Extensions.Configuration;
+using Minerals.StringCases;
 using Pages.AdminFinance;
 using Pages.AdminFinance.Tabs.PaymentsHistory;
 using Pages.AdminFinance.Tabs.PendingPayments;
@@ -84,7 +85,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             )
         );
         builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
-        
+
         RegisterUpdatingIfNeeded(builder);
     }
 
@@ -95,21 +96,25 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         if (!updatingSection.Exists()) return;
 
         builder.RegisterType<UpdatePageViewModel>().SingleInstance();
-        builder.RegisterType<UpdateUnpackerService>()
-            .WithParameters(
-                [
-                    new NamedParameter(
-                        "updatedUnpackerPath",
-                        Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.exe")
-                    ),
-                    new NamedParameter(
-                        "currentUnpackerPath",
-                        Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.Current.exe")
-                    )
-                ]
-            )
-            .As<IUpdateUnpackerService>()
+        builder.RegisterType<InnoSetupInstallerUnpackerService>()
+            .AsImplementedInterfaces()
             .SingleInstance();
+
+        // builder.RegisterType<UpdateCustomUnpackerService>()
+        //     .WithParameters(
+        //         [
+        //             new NamedParameter(
+        //                 "updatedUnpackerPath",
+        //                 Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.exe")
+        //             ),
+        //             new NamedParameter(
+        //                 "currentUnpackerPath",
+        //                 Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.Current.exe")
+        //             )
+        //         ]
+        //     )
+        //     .As<IUpdateUnpackerService>()
+        //     .SingleInstance();
 
         builder.RegisterType<UpdateService>()
             .WithParameters(
@@ -117,18 +122,20 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                     new NamedParameter("applicationRootPath", Environment.CurrentDirectory)
                 ]
             )
-            .As<IUpdateUnpackerService>()
+            .AsImplementedInterfaces()
             .SingleInstance();
 
         builder.RegisterType<GitHubUpdateService>()
             .WithParameters(
-                [
-                    new NamedParameter("repoName", updatingSection.GetRequiredSection("RepoName").Get<string>()),
-                    new NamedParameter("repoOwner", updatingSection.GetRequiredSection("RepoOwner").Get<string>()),
-                    new NamedParameter("accessToken", updatingSection.GetRequiredSection("AccessToken").Get<string>()),
-                ]
+                typeof(GitHubUpdateService).GetConstructors()[0]
+                    .GetParameters()
+                    .Select(parameter => new NamedParameter(
+                            parameter.Name!,
+                            updatingSection.GetRequiredSection(parameter.Name!.ToPascalCase()).Get<string>()
+                        )
+                    )
             )
-            .As<IUpdateUnpackerService>()
+            .AsImplementedInterfaces()
             .SingleInstance();
     }
 

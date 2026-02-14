@@ -1,6 +1,7 @@
 ﻿namespace Fanatiki.Updating.GitHub.Services;
 
 using System.Reactive.Subjects;
+using System.Text.RegularExpressions;
 using BigHelp.Http;
 using Fanatiki.GitHub;
 using Loading.Data;
@@ -8,12 +9,20 @@ using NLog;
 using Octokit;
 using Updating.Services;
 
-public class GitHubUpdateService(string repoName, string repoOwner, string accessToken) : IUpdateLoaderService
+public class GitHubUpdateService(
+    string repoName,
+    string repoOwner,
+    string accessToken,
+    string releaseRegex,
+    string assetRegex
+) : IUpdateLoaderService
 {
     #region Fields
 
     private readonly        GitHubRepositoryManager m_gitHubRepositoryManager = new(repoOwner, repoName, accessToken);
     private static readonly ILogger                 s_logger                  = LogManager.GetCurrentClassLogger();
+    private readonly        Regex                   m_releaseRegex            = new(releaseRegex);
+    private readonly        Regex                   m_assetRegex              = new(assetRegex);
 
     #endregion
 
@@ -21,30 +30,34 @@ public class GitHubUpdateService(string repoName, string repoOwner, string acces
 
     public async Task<Version?> GetLatestVersionAsync()
     {
-        Release? latestRelease = await m_gitHubRepositoryManager.GetLatestReleaseAsync();
+        Release? latestRelease = await m_gitHubRepositoryManager.GetLatestReleaseAsync(m_releaseRegex);
 
         if (latestRelease is null) return null;
 
-        return new Version(latestRelease.TagName.TrimStart('v'));
+        var stringVersion = m_releaseRegex.Match(latestRelease.Name).Groups["version"].Value;
+
+        return new Version(stringVersion);
     }
 
     public async Task<string?> DownloadLatestAsync(IObserver<LoadingProgress>? observer)
     {
         s_logger.Info("Downloading latest release...");
-        Release? latestRelease = await m_gitHubRepositoryManager.GetLatestReleaseAsync();
+        Release? latestRelease = await m_gitHubRepositoryManager.GetLatestReleaseAsync(m_releaseRegex);
 
         if (latestRelease is null) return null;
 
         s_logger.Info("Release found: {asset}...", latestRelease.TagName);
 
         ReleaseAsset? launcherAsset =
-            latestRelease.Assets.FirstOrDefault(it => it.Name.StartsWith(repoName) && it.Name.EndsWith(".zip"));
+            latestRelease.Assets.FirstOrDefault(it => m_assetRegex.IsMatch(it.Name));
 
         if (launcherAsset is null) return null;
 
         s_logger.Info("Asset found: {asset}...", launcherAsset.BrowserDownloadUrl);
 
-        string updatePath = Path.GetTempFileName();
+        string updatePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(updatePath);
+        updatePath = Path.Combine(updatePath, launcherAsset.Name);
 
         await DownloadUpdateAsync(launcherAsset, updatePath, observer);
 

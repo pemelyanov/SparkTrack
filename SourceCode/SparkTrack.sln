@@ -58,6 +58,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fanatiki.Updating.GitHub", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDriveCredentialsFetcher", "GoogleDriveCredentialsFetcher\GoogleDriveCredentialsFetcher.csproj", "{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Unpacker", "SparkTrack.Unpacker\SparkTrack.Unpacker.csproj", "{5D6CA510-25DF-4428-816E-BD659883B7B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fanatiki.ZIP", "Fanatiki.ZIP\Fanatiki.ZIP.csproj", "{0DB7B72F-ACCD-4811-B261-1DFF0CA2084E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +85,7 @@ Global
 		{5C96617A-7BF8-4854-B0BC-7DEF43545F13} = {EB5578DE-2062-4785-9D35-A3A4C83AD564}
 		{6AD1AED1-5B59-4C1D-9B2D-0F7470BAD5FB} = {C4CB4E5B-7643-4BC0-B6D0-78565798EAD9}
 		{62B68A69-6A73-4E98-AADB-49399E04AC86} = {C4CB4E5B-7643-4BC0-B6D0-78565798EAD9}
+		{5D6CA510-25DF-4428-816E-BD659883B7B9} = {F582FA44-CBEA-4892-AB06-7745473ABDCF}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3D679824-3986-472A-B08F-51BADB3B0D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -155,5 +160,13 @@ Global
 		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FC34EF3-7273-4831-89CD-7CB48B1CFD63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D6CA510-25DF-4428-816E-BD659883B7B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D6CA510-25DF-4428-816E-BD659883B7B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D6CA510-25DF-4428-816E-BD659883B7B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D6CA510-25DF-4428-816E-BD659883B7B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB7B72F-ACCD-4811-B261-1DFF0CA2084E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB7B72F-ACCD-4811-B261-1DFF0CA2084E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB7B72F-ACCD-4811-B261-1DFF0CA2084E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB7B72F-ACCD-4811-B261-1DFF0CA2084E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

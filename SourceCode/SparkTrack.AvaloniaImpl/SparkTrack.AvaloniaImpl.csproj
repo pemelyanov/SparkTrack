@@ -6,6 +6,9 @@
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="icon.ico">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </AvaloniaResource>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,6 +30,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Minerals.StringCases" />
         <PackageReference Include="NLog" />
         <PackageReference Include="ReactiveUI.Fody" />
         <PackageReference Include="Xaml.Behaviors" />

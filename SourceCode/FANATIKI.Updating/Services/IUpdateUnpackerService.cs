@@ -4,7 +4,7 @@ public interface IUpdateUnpackerService
 {
     #region Methods
 
-    bool BeginUnpack(string launcherUnpackPath, string updatePath);
+    bool BeginUnpack(string applicationRootPath, string updatePath);
 
     #endregion
 }
