@@ -6,6 +6,8 @@ namespace SparkTrack.AvaloniaImpl;
 
 using System.Globalization;
 using Windows.Main;
+using Avalonia.Controls;
+using Avalonia.Threading;
 using Core.Shared.Eventing;
 using Events;
 using Splat;
@@ -31,6 +33,20 @@ public partial class App : Application
             var mainWindow = Locator.Current.GetService<MainWindow>()!;
             mainWindow.DataContext = Locator.Current.GetService<MainWindowViewModel>();
             desktop.MainWindow = mainWindow;
+            
+            SingleInstanceIpc.StartListening(() =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (mainWindow.WindowState == WindowState.Minimized)
+                        mainWindow.WindowState = WindowState.Normal;
+
+                    mainWindow.Show();
+                    mainWindow.Activate();
+                    mainWindow.Topmost = true;
+                    mainWindow.Topmost = false;
+                });
+            });
         }
 
         base.OnFrameworkInitializationCompleted();
