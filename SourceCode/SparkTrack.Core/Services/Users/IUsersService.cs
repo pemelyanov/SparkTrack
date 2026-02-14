@@ -12,4 +12,6 @@ public interface IUsersService
     Task<User?> GetByEmailAsync(string email);
 
     Task EditAsync(UserEdit userEdit);
+    
+    Task DeleteAsync(Guid userId);
 }

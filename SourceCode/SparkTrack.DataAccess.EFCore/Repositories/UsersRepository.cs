@@ -66,6 +66,16 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
         .AsPaginated(pageQuery)
         .CollectAsync();
 
+    public async Task DeleteAsync(Guid id)
+    {
+        var userData = await dbContext.Users.FindAsync(id);
+
+        if (userData == null) return;
+
+        dbContext.Users.Remove(userData);
+        await dbContext.SaveChangesAsync();
+    }
+
     private static Expression<Func<UserData, User>> GetMapToUserExpression()
     {
         return it => new User

@@ -1,18 +1,16 @@
-﻿using Avalonia.Controls;
+﻿namespace SparkTrack.AvaloniaImpl.Pages.UsersList;
 
-namespace SparkTrack.AvaloniaImpl.Pages.Users;
-
-using Avalonia.Data.Converters;
+using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
-using Core.Shared.Data.Entities;
 using ReactiveUI;
 using ViewModels;
+using Core.Shared.Data.Entities;
 
 [SingleInstanceView]
-public partial class UsersPage : ReactiveUserControl<UsersPageViewModel>
+public partial class UsersListPage : ReactiveUserControl<UsersListPageViewModel>
 {
-    public UsersPage()
+    public UsersListPage()
     {
         InitializeComponent();
     }

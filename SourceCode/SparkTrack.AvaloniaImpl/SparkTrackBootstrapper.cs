@@ -33,7 +33,7 @@ using Pages.Feature;
 using Pages.FeaturesList;
 using Pages.ProjectsList;
 using Pages.Update;
-using Pages.Users;
+using Pages.UsersList;
 using Services.AttachmentsPathCache;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
@@ -45,7 +45,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<MainWindowViewModel>().AsImplementedInterfaces().AsSelf().SingleInstance();
         builder.RegisterType<AuthorizationPageViewModel>().SingleInstance();
         builder.RegisterType<FeaturesListPageViewModel>().SingleInstance();
-        builder.RegisterType<UsersPageViewModel>().As<IEventHandler<LogoutEvent>>().AsSelf().SingleInstance();
+        builder.RegisterType<UsersListPageViewModel>().As<IEventHandler<LogoutEvent>>().AsSelf().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
         builder.RegisterType<UserAddFormViewModel>();
         builder.RegisterType<FeaturePageViewModel>();

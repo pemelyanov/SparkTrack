@@ -49,16 +49,16 @@ public class ProjectsController(IProjectsService projectsService) : Controller
         );
     }
     
-    [HttpDelete]
+    [HttpDelete("/{id}")]
     [Authorize(Roles = nameof(ERole.God))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public Task<ActionResult> DeleteAsync(Guid projectId)
+    public Task<ActionResult> DeleteAsync([FromRoute] Guid id)
     {
         return this.OkWithDomainExceptionsHandling(
-            () => projectsService.DeleteAsync(projectId)
+            () => projectsService.DeleteAsync(id)
         );
     }
 }

@@ -43,4 +43,22 @@ internal class UsersService(IUsersRepository usersRepository, IAuthorizationServ
 
         await usersRepository.UpdateAsync(updatedUser);
     }
+
+    public async Task DeleteAsync(Guid userId)
+    {
+        var existingUser = await usersRepository.GetAsync(userId);
+
+        if (existingUser is null) throw new NotFoundException($"User with id {userId} not found");
+
+        var allowedRole = existingUser.Role switch
+        {
+            ERole.Admin => ERole.God,
+            ERole.Employee => ERole.God | ERole.Admin,
+            _ => throw new NotSupportedException()
+        };
+
+        authorizationService.GetUserOrThrowIfNotInRole(allowedRole);
+
+        await usersRepository.DeleteAsync(userId);
+    }
 }

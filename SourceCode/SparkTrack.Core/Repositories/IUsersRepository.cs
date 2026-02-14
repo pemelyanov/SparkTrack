@@ -17,4 +17,6 @@ public interface IUsersRepository
     Task<bool> UsersWithRoleExistsAsync(ERole role);
 
     Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery);
+
+    Task DeleteAsync(Guid id);
 }

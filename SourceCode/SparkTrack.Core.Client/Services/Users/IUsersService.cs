@@ -12,4 +12,6 @@ public interface IUsersService
     Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery);
     
     Task EditAsync(UserEdit userEdit);
+
+    Task DeleteAsync(Guid id);
 }

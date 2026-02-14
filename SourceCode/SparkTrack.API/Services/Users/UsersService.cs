@@ -47,6 +47,13 @@ public class UsersService(
     {
         using var clientWrapper = usersClientFactory();
 
-        await clientWrapper.Client.EditEmployeeAsync(userEdit.ToDTO());
+        await clientWrapper.Client.EditAsync(userEdit.ToDTO());
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        using var clientWrapper = usersClientFactory();
+
+        await clientWrapper.Client.DeleteAsync(id);
     }
 }
