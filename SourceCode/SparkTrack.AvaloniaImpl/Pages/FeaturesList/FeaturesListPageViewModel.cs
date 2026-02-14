@@ -13,6 +13,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using ConfirmationOptions;
 using Reactive;
 using Services.DialogHost;
 
@@ -124,10 +125,13 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     private async Task DeleteAsync()
     {
         if (m_selectedFeatures.Value.Count == 0) return;
+        
+        var forceOption = new ForceDeleteOption();
 
         if (!await m_dialogService.ConfirmAsync(
             $"Вы уверены что хотите удалить выбранные идеи ({m_selectedFeatures.Value.Count})? Идеи имеющие связь с оплаченными задачами будут добавлены в архив, остальные будут полностью удалены.",
-            "Удаление пользователей"
+            "Удаление пользователей",
+            additionalOptionsList: [forceOption]
         )) return;
 
         var errorsList = new List<(Exception exception, Feature feature)>();

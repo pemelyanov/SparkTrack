@@ -11,6 +11,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using ConfirmationOptions;
 using Extensions;
 using Reactive;
 using ViewModels;
@@ -88,11 +89,14 @@ public class ProjectsListPageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task DeleteAsync()
     {
-        if(m_selectedProjects.Value.Count == 0) return;
-        
+        if (m_selectedProjects.Value.Count == 0) return;
+
+        var forceOption = new ForceDeleteOption();
+
         if (!await m_dialogService.ConfirmAsync(
-            $"Вы уверены что хотите удалить выбранные проекты ({m_selectedProjects.Value.Count})? Проекты имеющие связь с оплаченными задачами будут добавлены в архив, остальные будут полностью удалены.",
-            "Удаление проектов"
+            $"Вы уверены что хотите удалить выбранные проекты ({m_selectedProjects.Value.Count})? Проекты, имеющие связь с оплаченными задачами, будут добавлены в архив, остальные будут полностью удалены.",
+            "Удаление проектов",
+            additionalOptionsList: [forceOption]
         )) return;
 
         var errorsList = new List<(Exception exception, Project project)>();

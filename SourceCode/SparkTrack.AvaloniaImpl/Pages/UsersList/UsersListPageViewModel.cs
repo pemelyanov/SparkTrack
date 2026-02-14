@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using ConfirmationOptions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -107,10 +108,13 @@ public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventH
     private async Task DeleteAsync()
     {
         if (m_selectedUsers.Value.Count == 0) return;
+        
+        var forceOption = new ForceDeleteOption();
 
         if (!await m_dialogService.ConfirmAsync(
             $"Вы уверены что хотите удалить выбранных пользователей ({m_selectedUsers.Value.Count})? Пользователи имеющие связь с задачами будут добавлены в архив, остальные будут полностью удалены.",
-            "Удаление пользователей"
+            "Удаление пользователей",
+            additionalOptionsList: [forceOption]
         )) return;
 
         var errorsList = new List<(Exception exception, User user)>();
