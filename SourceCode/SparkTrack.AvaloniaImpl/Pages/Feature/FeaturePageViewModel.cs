@@ -137,6 +137,14 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         base.OnActivated(disposables);
 
         RefreshCommand.Execute().Subscribe().DisposeWith(disposables);
+
+        this.WhenAnyValue(
+                it => it.IsEditingSubTask,
+                it => it.IsEditingComment,
+                (isEditingSubTask, isEditingComment) => !isEditingSubTask && !isEditingComment
+            )
+            .Subscribe(canSaveByHotKey => CanSaveByHotKey = canSaveByHotKey)
+            .DisposeWith(disposables);
     }
 
     public string UrlPathSegment => "feature";
@@ -151,6 +159,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public bool IsDescriptionInPreviewMode { get; set; }
+    
+    [Reactive]
+    public bool IsEditingComment { get; private set; }
+    
+    [Reactive]
+    public bool IsEditingSubTask { get; private set; }
+    
+    [Reactive]
+    public bool CanSaveByHotKey { get; private set; }
 
     public bool CanAddComments => m_feature is not null;
     
@@ -204,17 +221,32 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTask = CreateSubTaskViewModel();
         subTask.IsInEditMode = true;
 
-        foreach (var taskViewModel in SubTasksList)
-            taskViewModel.IsInEditMode = false;
-
         SubTasksList.Add(subTask);
     }
 
-    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null) => m_subTaskViewModelFactory.Invoke(
-        subTask,
-        m_availableEmployeesList,
-        it => SubTasksList.Remove(it)
-    );
+    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null)
+    {
+        var subTaskViewModel = m_subTaskViewModelFactory.Invoke(
+            subTask,
+            m_availableEmployeesList,
+            it => SubTasksList.Remove(it)
+        );
+
+        var isEditSubscription = subTaskViewModel.WhenAnyValue(it => it.IsInEditMode)
+            .Do(_ => IsEditingSubTask = SubTasksList.Any(it => it.IsInEditMode))
+            .Where(isInEditMode => isInEditMode)
+            .Subscribe(_ =>
+                {
+                    foreach (var task in SubTasksList)
+                        if (subTaskViewModel != task)
+                            task.IsInEditMode = false;
+                }
+            );
+        
+        subTaskViewModel.DisposeWithViewModel(isEditSubscription);
+
+        return subTaskViewModel;
+    }
 
     private async Task RefreshAsync()
     {
@@ -272,11 +304,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         var subTasks = feature?.TasksList.Select(CreateSubTaskViewModel) ?? [];
 
+        var oldTasks = SubTasksList.ToArray();
         using (SubTasksList.SuspendNotifications())
         {
             SubTasksList.Clear();
             SubTasksList.AddRange(subTasks);
         }
+
+        foreach (var oldTask in oldTasks)
+            oldTask.Dispose();
 
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
     }
@@ -292,6 +328,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
 
             var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
+                .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
                 .WhereNotNull()
                 .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
                 .Subscribe(source =>
