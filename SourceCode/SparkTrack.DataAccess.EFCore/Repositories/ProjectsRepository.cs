@@ -64,5 +64,13 @@ internal class ProjectsRepository(SparkTrackDbContext dbContext) : IProjectsRepo
         await dbContext.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(Guid id) => throw new NotImplementedException();
+    public async Task DeleteAsync(Guid id)
+    {
+        var project = await dbContext.Projects.FindAsync(id);
+
+        if(project is null) return;
+        
+        dbContext.Projects.Remove(project);
+        await dbContext.SaveChangesAsync();
+    }
 }

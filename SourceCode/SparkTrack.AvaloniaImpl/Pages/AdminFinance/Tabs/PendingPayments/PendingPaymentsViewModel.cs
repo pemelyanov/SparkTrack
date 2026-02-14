@@ -95,20 +95,7 @@ public class PendingPaymentsViewModel : ViewModelBase
             .Subscribe()
             .DisposeWith(disposables);
 
-        this.WhenAnyValue(it => it.CurrentPageData)
-            .Select(list => list.Count == 0
-                ? Observable.Return<IList<SelectableViewModel<PaymentBillViewModel>>>([])
-                : list.Select(it => it.WhenAnyValue(v => v.IsSelected)
-                        .Select(_ => it
-                        )
-                    )
-                    .CombineLatest()
-            )
-            .Switch()
-            .Select(list => list.Where(it => it.IsSelected).Select(it => it.Model).ToArray())
-            .Throttle(TimeSpan.FromMilliseconds(50))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(m_selectedBills)
+        this.SetupSelectionList(it => it.CurrentPageData, m_selectedBills)
             .DisposeWith(disposables);
 
         m_selectedBills
