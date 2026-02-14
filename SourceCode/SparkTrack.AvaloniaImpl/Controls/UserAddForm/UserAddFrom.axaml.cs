@@ -1,13 +1,13 @@
-﻿namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
+﻿namespace SparkTrack.AvaloniaImpl.Controls.UserAddForm;
 
-using Windows;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using FluentAvalonia.UI.Controls;
+using Windows;
 
-public partial class UserEditFrom : ReactiveContentDialog<UserEditFormViewModel>
+public partial class UserAddFrom : ReactiveContentDialog<UserAddFormViewModel>
 {
-    public UserEditFrom()
+    public UserAddFrom()
     {
         InitializeComponent();
     }

@@ -1,25 +1,25 @@
-﻿namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
+﻿namespace SparkTrack.AvaloniaImpl.Controls.UserAddForm;
 
-using Core.Client.Enums;
 using System.Reactive;
 using System.Reactive.Linq;
-using Core.Client.Services.Authorization;
-using Core.Client.Services.PopupNotification;
-using Core.Client.Services.Users;
-using Core.Shared.Data.Edit;
-using Core.Shared.Enums;
-using Core.Shared.Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using SparkTrack.Core.Client.Enums;
+using SparkTrack.Core.Client.Services.Authorization;
+using SparkTrack.Core.Client.Services.PopupNotification;
+using SparkTrack.Core.Client.Services.Users;
+using Core.Shared.Data.Edit;
+using SparkTrack.Core.Shared.Enums;
+using SparkTrack.Core.Shared.Extensions;
 
-public class UserEditFormViewModel : ViewModelBase
+public class UserAddFormViewModel : ViewModelBase
 {
     private readonly IUsersService             m_usersService;
     private readonly IPopupNotificationService m_popupNotificationService;
     private readonly IAuthorizationService     m_authorizationService;
 
-    public UserEditFormViewModel(
+    public UserAddFormViewModel(
         IAuthorizationService authorizationService,
         IUsersService usersService,
         IPopupNotificationService popupNotificationService

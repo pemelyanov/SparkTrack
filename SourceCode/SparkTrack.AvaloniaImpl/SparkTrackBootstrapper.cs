@@ -13,7 +13,7 @@ using Controls.CommentEdit;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.SubTask;
-using Controls.UserEditForm;
+using Controls.UserAddForm;
 using Controls.UsersFilter;
 using Core.Client.AutofacModules;
 using Core.Client.Events;
@@ -46,7 +46,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<FeaturesListPageViewModel>().SingleInstance();
         builder.RegisterType<UsersPageViewModel>().As<IEventHandler<LogoutEvent>>().AsSelf().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
-        builder.RegisterType<UserEditFormViewModel>();
+        builder.RegisterType<UserAddFormViewModel>();
         builder.RegisterType<FeaturePageViewModel>();
         builder.RegisterType<ProjectsListPageViewModel>().SingleInstance();
         builder.RegisterType<ProjectEditFormViewModel>();

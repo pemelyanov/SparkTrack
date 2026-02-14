@@ -3,7 +3,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
-using Controls.UserEditForm;
+using Controls.UserAddForm;
 using Core.Client.Events;
 using Core.Client.Services.Authorization;
 using Core.Client.Services.Users;
@@ -23,22 +23,22 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
     private readonly IUsersService               m_usersService;
     private readonly IAuthorizationService       m_authorizationService;
     private readonly IDialogService                 m_dialogService;
-    private readonly Func<UserEditFormViewModel> m_userEditFactory;
-    private readonly UserEditFormViewModel       m_userEditFormViewModel;
+    private readonly Func<UserAddFormViewModel> m_userEditFactory;
+    private readonly UserAddFormViewModel       m_userAddFormViewModel;
 
     public UsersPageViewModel(Lazy<IScreen> hostScreen,
-                              UserEditFormViewModel userEditFormViewModel,
+                              UserAddFormViewModel userAddFormViewModel,
                               IUsersService usersService,
                               IAuthorizationService authorizationService,
                               IDialogService dialogService,
-                              Func<UserEditFormViewModel> userEditFactory)
+                              Func<UserAddFormViewModel> userEditFactory)
     {
         m_hostScreen = hostScreen;
         m_usersService = usersService;
         m_authorizationService = authorizationService;
         m_dialogService = dialogService;
         m_userEditFactory = userEditFactory;
-        m_userEditFormViewModel = userEditFormViewModel;
+        m_userAddFormViewModel = userAddFormViewModel;
 
         ReloadTableCommand = CreateReloadTableCommand();
     }
@@ -70,23 +70,16 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
         }
     );
 
-    public async Task OpenUserEditAsync()
-    {
-        var editForm = m_userEditFactory.Invoke();
-        
-        
-    }
-
     public async Task OpenUserAddAsync()
     {
-        await m_dialogService.ShowAsync(m_userEditFormViewModel);
+        await m_dialogService.ShowAsync(m_userAddFormViewModel);
 
         await ReloadTableCommand.Execute().ToTask();
     }
 
     public Task HandleAsync(LogoutEvent eventData)
     {
-        m_userEditFormViewModel.Reset();
+        m_userAddFormViewModel.Reset();
         
         return Task.CompletedTask;
     }
