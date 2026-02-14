@@ -14,7 +14,7 @@
                 <Template>
                     <TextBox AcceptsReturn="True" AcceptsTab="True" UseFloatingWatermark="False"
                              Text="{Binding Text}"
-                             MinHeight="200" />
+                             MinHeight="200" PastingFromClipboard="TextBox_OnPastingFromClipboard" />
                 </Template>
             </Setter>
         </Style>

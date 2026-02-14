@@ -26,6 +26,11 @@ public class CommentEditViewModel : ViewModelBase
     public bool IsInPreviewMode { get; set; }
 
     public AttachmentsPanelViewModel AttachmentsPanelViewModel { get; }
+    
+    public void OnImagePaste(byte[] image, string extension)
+    {
+        AttachmentsPanelViewModel.AddAttachment(image, extension);
+    }
 
     public Core.Shared.Data.Edit.CommentEdit ToModel() => new()
     {
