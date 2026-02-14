@@ -151,6 +151,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public bool IsDescriptionInPreviewMode { get; set; }
+    
+    [Reactive]
+    public bool IsEditingComment { get; private set; }
 
     public bool CanAddComments => m_feature is not null;
     
@@ -304,6 +307,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
 
             var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
+                .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
                 .WhereNotNull()
                 .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
                 .Subscribe(source =>

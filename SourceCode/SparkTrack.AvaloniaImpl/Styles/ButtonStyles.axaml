@@ -83,4 +83,16 @@
             </Template>
         </Setter>
     </Style>
+    
+    <Style Selector="Button.enter-hot-key">
+        <Setter Property="HotKey" Value="Enter" />
+    </Style>
+        
+    <Style Selector="Button.esc-hot-key">
+        <Setter Property="HotKey" Value="Escape" />
+    </Style>
+    
+    <Style Selector="Button.f5-hot-key">
+        <Setter Property="HotKey" Value="F5" />
+    </Style>
 </Styles>

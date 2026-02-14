@@ -86,8 +86,8 @@
                         <Separator />
                 
                         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
-                            <Button Classes="accent" Content="Сохранить" HorizontalAlignment="Right" Command="{Binding SaveCommand}" />
-                            <Button Content="Отмена" Command="{Binding CancelEdit}"></Button>
+                            <Button Classes="accent" Content="Сохранить" HorizontalAlignment="Right" Command="{Binding SaveCommand}" HotKey="Enter" />
+                            <Button Content="Отмена" Command="{Binding CancelEdit}" HotKey="Escape" />
                         </StackPanel>
                     </StackPanel>
                 </Template>

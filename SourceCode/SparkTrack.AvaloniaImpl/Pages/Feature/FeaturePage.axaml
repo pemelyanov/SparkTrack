@@ -154,13 +154,15 @@
                 </ItemsControl>
 
                 <Border x:Name="CommentCreationControl" Classes="card"
-                        IsVisible="{Binding CommentEditViewModel, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        IsVisible="{Binding CommentEditViewModel, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        IsEnabled="{Binding $self.IsVisible}">
                     <StackPanel Spacing="8">
                         <commentEdit:CommentEdit DataContext="{Binding CommentEditViewModel}" />
 
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                            <Button Classes="accent" Content="Создать" Command="{Binding SaveCommentCommand}" />
-                            <Button Content="Отмена" Command="{Binding CancelComment}" />
+                            <Button Classes="accent" Content="Создать" Command="{Binding SaveCommentCommand}" 
+                                    HotKey="Enter" />
+                            <Button Content="Отмена" Command="{Binding CancelComment}" HotKey="Escape"  />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -168,11 +170,13 @@
         </ScrollViewer>
 
         <Button Classes="icon back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Command="{Binding Back}" />
+                Command="{Binding Back}"
+                Classes.esc-hot-key="{Binding !IsEditingComment}"/>
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
-            <Button Classes="icon reload" Command="{Binding RefreshCommand}" />
-            <Button Classes="accent" Content="Сохранить" 
+            <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" />
+            <Button Classes="accent" Content="Сохранить"
+                    Classes.enter-hot-key="{Binding !IsEditingComment}"
                     Command="{Binding SaveCommand}"
                     IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"/>
         </StackPanel>
