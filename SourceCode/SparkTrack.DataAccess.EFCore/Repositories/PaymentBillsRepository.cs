@@ -82,6 +82,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
             .WhereIf(employeeId is not null, it => it.ExecutorEmployeeId == employeeId)
             .WhereIf(startDate is not null, it => it.Feature.CreatedAt >= startDate)
             .WhereIf(endDate is not null, it => it.Feature.CreatedAt <= endDate)
+            // TODO: Add filter
+            .Where(it => it.Feature.ArchivedAt == null)
+            .Where(it => it.ExecutorEmployee.ArchivedAt == null)
             .Where(it => it.PaymentStatus == targetPaymentStatus)
             .Select(data => new PaymentBill
                 {
@@ -158,6 +161,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         return await dbContext.SubTasks
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
+            // TODO: Add filter
+            .Where(it => it.Feature.ArchivedAt == null)
+            .Where(it => it.ExecutorEmployee.ArchivedAt == null)
             .GroupBy(it => it.ExecutorEmployee)
             .Select(grouping => new UserPayment
                 {
@@ -201,6 +207,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
             .AsNoTracking()
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
+            // TODO: Add filter
+            .Where(it => it.Feature.ArchivedAt == null)
+            .Where(it => it.ExecutorEmployee.ArchivedAt == null)
             .SelectMany(it => it.Payments)
             .GroupBy(it => it.Admin)
             .Select(grouping => new UserPayment
