@@ -14,6 +14,7 @@ using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.SubTask;
 using Controls.UserAddForm;
+using Controls.UserEditForm;
 using Controls.UsersFilter;
 using Core.Client.AutofacModules;
 using Core.Client.Events;
@@ -64,6 +65,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<PaymentsHistoryViewModel>();
         builder.RegisterType<UserFilterViewModel>();
         builder.RegisterType<ClipboardAttachmentViewModel>();
+        builder.RegisterType<UserEditFormViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
@@ -99,22 +101,6 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<InnoSetupInstallerUnpackerService>()
             .AsImplementedInterfaces()
             .SingleInstance();
-
-        // builder.RegisterType<UpdateCustomUnpackerService>()
-        //     .WithParameters(
-        //         [
-        //             new NamedParameter(
-        //                 "updatedUnpackerPath",
-        //                 Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.exe")
-        //             ),
-        //             new NamedParameter(
-        //                 "currentUnpackerPath",
-        //                 Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.Current.exe")
-        //             )
-        //         ]
-        //     )
-        //     .As<IUpdateUnpackerService>()
-        //     .SingleInstance();
 
         builder.RegisterType<UpdateService>()
             .WithParameters(

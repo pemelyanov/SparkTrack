@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using Controls.UserAddForm;
+using Controls.UserEditForm;
 using Core.Client.Events;
 using Core.Client.Services.Authorization;
 using Core.Client.Services.Users;
@@ -19,11 +20,11 @@ using ViewModels;
 
 public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandler<LogoutEvent>
 {
-    private readonly Lazy<IScreen>               m_hostScreen;
-    private readonly IUsersService               m_usersService;
-    private readonly IAuthorizationService       m_authorizationService;
-    private readonly IDialogService                 m_dialogService;
-    private readonly Func<UserAddFormViewModel> m_userEditFactory;
+    private readonly Lazy<IScreen>              m_hostScreen;
+    private readonly IUsersService              m_usersService;
+    private readonly IAuthorizationService      m_authorizationService;
+    private readonly IDialogService             m_dialogService;
+    private readonly Func<User, UserEditFormViewModel> m_userEditFactory;
     private readonly UserAddFormViewModel       m_userAddFormViewModel;
 
     public UsersPageViewModel(Lazy<IScreen> hostScreen,
@@ -31,7 +32,7 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
                               IUsersService usersService,
                               IAuthorizationService authorizationService,
                               IDialogService dialogService,
-                              Func<UserAddFormViewModel> userEditFactory)
+                              Func<User, UserEditFormViewModel> userEditFactory)
     {
         m_hostScreen = hostScreen;
         m_usersService = usersService;
@@ -73,6 +74,15 @@ public class UsersPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandl
     public async Task OpenUserAddAsync()
     {
         await m_dialogService.ShowAsync(m_userAddFormViewModel);
+
+        await ReloadTableCommand.Execute().ToTask();
+    }
+    
+    public async Task OpenUserEditAsync(User user)
+    {
+        var userEditViewModel = m_userEditFactory(user);
+        
+        if(await m_dialogService.ShowAsync(userEditViewModel) is not true) return;
 
         await ReloadTableCommand.Execute().ToTask();
     }

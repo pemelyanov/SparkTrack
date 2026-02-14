@@ -35,5 +35,7 @@ public partial class UsersPage : ReactiveUserControl<UsersPageViewModel>
     private void RowOnDoubleTapped(object? sender, TappedEventArgs e)
     {
         if(sender is not Control { DataContext: SelectableViewModel<User> userViewModel }) return;
+
+        ViewModel?.OpenUserEditAsync(userViewModel.Model);
     }
 }
