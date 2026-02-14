@@ -6,6 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PublisherName>Fanatiki</PublisherName>
-        <Version>0.0.0.4</Version>
+        <Version>0.0.0.5</Version>
     </PropertyGroup>
 </Project>
