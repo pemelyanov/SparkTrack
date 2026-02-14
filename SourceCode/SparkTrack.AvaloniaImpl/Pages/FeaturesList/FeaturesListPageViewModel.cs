@@ -157,11 +157,11 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task SendOnPaymentAsync()
     {
-        
+        await m_dialogService.NotifyAsync("W.I.P");
     }
 
     private async Task MarkAsCompletedAsync()
     {
-        
+        await m_dialogService.NotifyAsync("W.I.P");
     }
 }

@@ -1,5 +1,7 @@
 namespace SparkTrack.AvaloniaImpl.MarkupExtensions;
 
+using System.Reactive.Linq;
+using Avalonia;
 using Core.Client.Services.Authorization;
 using Core.Shared.Enums;
 using Splat;
@@ -13,12 +15,17 @@ public class CurrentUserInRoleExtension(ERole role)
 
     public object ProvideValue()
     {
-        if (s_authorizationService.CurrentUser.Value is not { } user) return false;
+        return s_authorizationService.CurrentUser.Select(currentUser =>
+                {
+                    if (currentUser is not { } user) return false;
 
-        var intersection = user.Role & role;
+                    var intersection = user.Role & role;
 
-        if (role is ERole.Employee) { }
+                    if (role is ERole.Employee) { }
 
-        return Inverse ? intersection == 0 : intersection != 0;
+                    return Inverse ? intersection == 0 : intersection != 0;
+                }
+            )
+            .ToBinding();
     }
 }

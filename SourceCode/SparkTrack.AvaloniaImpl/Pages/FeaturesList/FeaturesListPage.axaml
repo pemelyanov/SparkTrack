@@ -46,9 +46,9 @@
         </Grid>
 
         <StackPanel Grid.Row="2" HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal">
-            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}" />
+            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}" IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
             
-            <Button Content="Перевести на оплату" Command="{Binding SendOnPaymentCommand}" />
+            <Button Content="Перевести на оплату" Command="{Binding SendOnPaymentCommand}" IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
             
             <Button Content="Пометить как выполненные" Command="{Binding MarkAsCompletedCommand}" />
             
