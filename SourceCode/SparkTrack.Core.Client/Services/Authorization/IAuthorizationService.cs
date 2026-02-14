@@ -14,4 +14,6 @@ public interface IAuthorizationService
     Task LogOutAsync();
 
     Task<bool> ChangePasswordAsync(string oldPassword, string newPassword);
+
+    Task<string> ResetPasswordAsync(Guid userId);
 }

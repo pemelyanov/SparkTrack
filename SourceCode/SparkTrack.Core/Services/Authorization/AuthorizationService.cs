@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.Core.Services.Authorization;
 
+using Exceptions;
+using Extensions;
 using PasswordGenerator;
 using PasswordHasher;
 using Repositories;
@@ -7,9 +9,14 @@ using Shared.Data.Edit;
 using Shared.Data.Entities;
 using Shared.Enums;
 
-public class AuthorizationService(IUsersRepository usersRepository, IPasswordHasher passwordHasher)
+public class AuthorizationService(
+    IUsersRepository usersRepository,
+    IPasswordHasher passwordHasher
+)
     : IAuthorizationService
 {
+    private const int PasswordLength = 8;
+    
     public User? CurrentUser { get; private set; }
 
     public async Task AuthorizeAsync(Guid? userId)
@@ -18,14 +25,14 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
         {
             CurrentUser = null;
             return;
-        } 
-        
+        }
+
         CurrentUser = await usersRepository.GetAsync(userId.Value);
     }
 
     public async Task<string> RegisterAsync(UserEdit userEdit, ERole role)
     {
-        var password = new Password().LengthRequired(8).Next();
+        var password = new Password().LengthRequired(PasswordLength).Next();
 
         var user = new User
         {
@@ -37,6 +44,33 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
         };
 
         await usersRepository.AddAsync(user);
+
+        return password;
+    }
+
+    public async Task<string> ResetPasswordAsync(Guid userId)
+    {
+        var existingUser = await usersRepository.GetAsync(userId);
+
+        if (existingUser is null) throw new NotFoundException($"User with id {userId} not found");
+
+        var allowedRole = existingUser.Role switch
+        {
+            ERole.Admin => ERole.God,
+            ERole.Employee => ERole.God | ERole.Admin,
+            _ => throw new NotSupportedException()
+        };
+
+        this.GetUserOrThrowIfNotInRole(allowedRole);
+        
+        var password = new Password().LengthRequired(PasswordLength).Next();
+
+        var updatedUser = existingUser with
+        {
+            PasswordHash = await passwordHasher.HashAsync(password)
+        };
+
+        await usersRepository.UpdateAsync(updatedUser);
 
         return password;
     }
@@ -68,7 +102,7 @@ public class AuthorizationService(IUsersRepository usersRepository, IPasswordHas
 
     public async Task InvalidateDefaultGodAsync(UserEdit userData, string password)
     {
-        if(await usersRepository.UsersWithRoleExistsAsync(ERole.God)) return;
+        if (await usersRepository.UsersWithRoleExistsAsync(ERole.God)) return;
 
         var god = new User
         {

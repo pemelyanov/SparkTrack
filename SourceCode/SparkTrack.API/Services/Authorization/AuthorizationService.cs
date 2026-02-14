@@ -128,6 +128,13 @@ internal class AuthorizationService(
         }
     }
 
+    public async Task<string> ResetPasswordAsync(Guid userId)
+    {
+        using var authorizationClientWrapper = authorizationClientFactory();
+
+        return await authorizationClientWrapper.Client.ResetPasswordAsync(userId);
+    }
+
     private async Task<User> GetCurrentProfileAsync()
     {
         using var profileClientWrapper = profileClientFactory();

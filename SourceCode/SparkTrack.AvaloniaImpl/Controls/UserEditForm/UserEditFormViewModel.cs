@@ -3,6 +3,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Core.Client.Enums;
+using Core.Client.Services.Authorization;
 using Core.Client.Services.PopupNotification;
 using Core.Client.Services.Users;
 using Core.Shared.Data.Edit;
@@ -19,18 +20,21 @@ public class UserEditFormViewModel : DialogViewModelBase
     private readonly IPopupNotificationService m_popupNotificationService;
     private readonly User                      m_user;
     private readonly IDialogService            m_dialogService;
+    private readonly IAuthorizationService     m_authorizationService;
 
     public UserEditFormViewModel(
         IUsersService usersService,
         IPopupNotificationService popupNotificationService,
         User user,
-        IDialogService dialogService
+        IDialogService dialogService,
+        IAuthorizationService authorizationService
     )
     {
         m_usersService = usersService;
         m_popupNotificationService = popupNotificationService;
         m_user = user;
         m_dialogService = dialogService;
+        m_authorizationService = authorizationService;
 
         Name = user.Name;
         Email = user.Email;
@@ -90,8 +94,15 @@ public class UserEditFormViewModel : DialogViewModelBase
                 "Сброс пароля"
             )) return;
 
-            GeneratedPassword = "asdasdasd";
-            m_popupNotificationService.Show(ENotificationType.Success, "Пароль пользователя сброшен.");
+            try
+            {
+                GeneratedPassword = await m_authorizationService.ResetPasswordAsync(m_user.Id);
+                m_popupNotificationService.Show(ENotificationType.Success, "Пароль пользователя сброшен.");
+            }
+            catch (Exception e)
+            {
+                m_popupNotificationService.Show(ENotificationType.Error, $"При сбросе пароля возникли ошибки: {e.Message}");
+            }
         },
         GetIsEmailValidObservable()
             .CombineLatest(
