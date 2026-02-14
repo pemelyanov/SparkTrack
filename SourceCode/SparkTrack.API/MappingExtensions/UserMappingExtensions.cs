@@ -17,6 +17,7 @@ public static class UserMappingExtensions
     
     public static UserEditDTO ToDTO(this UserEdit it) => new()
     {
+        Id = it.Id,
         Name = it.Name,
         Email = it.Email,
         TelegramTag = it.TelegramTag
