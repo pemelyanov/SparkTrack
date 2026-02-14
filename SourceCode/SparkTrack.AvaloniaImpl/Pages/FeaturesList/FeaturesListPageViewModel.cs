@@ -12,34 +12,48 @@ using SparkTrack.Core.Shared.Services.Features;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using Reactive;
+using Services.DialogHost;
 
 public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 {
-    private readonly Lazy<IScreen>                       m_screen;
-    private readonly IFeaturesService                    m_featuresService;
-    private readonly Func<Feature, FeaturePageViewModel> m_featureEditPageViewModelFactory;
-    private readonly Func<Guid, FeaturePageViewModel> m_featureAddPageViewModelFactory;
+    private readonly Lazy<IScreen>                                     m_screen;
+    private readonly IFeaturesService                                  m_featuresService;
+    private readonly Func<Feature, FeaturePageViewModel>               m_featureEditPageViewModelFactory;
+    private readonly Func<Guid, FeaturePageViewModel>                  m_featureAddPageViewModelFactory;
+    private readonly IDialogService                                    m_dialogService;
+    private readonly BehaviorObservableSubject<IReadOnlyList<Feature>> m_selectedFeatures = new([]);
 
     public FeaturesListPageViewModel(
         Lazy<IScreen> screen,
         IFeaturesService featuresService,
         Func<Feature, FeaturePageViewModel> featureEditPageViewModelFactory,
         Func<Guid, FeaturePageViewModel> featureAddPageViewModelFactory,
-        ProjectsFilterViewModel projectsFilterViewModel
+        ProjectsFilterViewModel projectsFilterViewModel,
+        IDialogService dialogService
     )
     {
         m_screen = screen;
         m_featuresService = featuresService;
         m_featureEditPageViewModelFactory = featureEditPageViewModelFactory;
         m_featureAddPageViewModelFactory = featureAddPageViewModelFactory;
+        m_dialogService = dialogService;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
         ReloadTableCommand = CreateReloadTableCommand();
+        var isSelectedPipe = m_selectedFeatures.Select(it => it.Count > 0);
+        DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, isSelectedPipe);
+        SendOnPaymentCommand = ReactiveCommand.CreateFromTask(SendOnPaymentAsync, isSelectedPipe);
+        MarkAsCompletedCommand = ReactiveCommand.CreateFromTask(MarkAsCompletedAsync, isSelectedPipe);
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
     {
         base.OnActivated(disposables);
+
+        this.SetupSelectionList(it => it.CurrentPageData, m_selectedFeatures)
+            .DisposeWith(disposables);
 
         ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
             .CombineLatest(PaginatorViewModel.WhenChanged())
@@ -72,6 +86,12 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
+    
+    public ReactiveCommand<Unit, Unit> DeleteCommand { get; }
+    
+    public ReactiveCommand<Unit, Unit> SendOnPaymentCommand { get; }
+    
+    public ReactiveCommand<Unit, Unit> MarkAsCompletedCommand { get; }
 
     public void OpenFeature(Feature feature)
     {
@@ -100,4 +120,48 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             PaginatorViewModel.SetPagesQuantity(page.Total);
         }
     );
+
+    private async Task DeleteAsync()
+    {
+        if (m_selectedFeatures.Value.Count == 0) return;
+
+        if (!await m_dialogService.ConfirmAsync(
+            $"Вы уверены что хотите удалить выбранные идеи ({m_selectedFeatures.Value.Count})? Идеи имеющие связь с оплаченными задачами будут добавлены в архив, остальные будут полностью удалены.",
+            "Удаление пользователей"
+        )) return;
+
+        var errorsList = new List<(Exception exception, Feature feature)>();
+
+        foreach (var feature in m_selectedFeatures.Value)
+        {
+            try
+            {
+                await m_featuresService.DeleteAsync(feature.Id);
+            }
+            catch (Exception e)
+            {
+                errorsList.Add((e, feature));
+            }
+        }
+
+        if (errorsList.Count != 0)
+        {
+            await m_dialogService.NotifyAsync(
+                $"{string.Join(";\n\n\n", errorsList.Select(it => $"{it.feature.Name}: {it.exception.Message}"))}.",
+                "При удалении некоторых идей возникли ошибки"
+            );
+        }
+
+        await ReloadTableCommand.Execute().ToTask();
+    }
+
+    private async Task SendOnPaymentAsync()
+    {
+        
+    }
+
+    private async Task MarkAsCompletedAsync()
+    {
+        
+    }
 }

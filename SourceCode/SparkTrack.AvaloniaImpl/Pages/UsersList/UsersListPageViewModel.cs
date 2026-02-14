@@ -115,15 +115,15 @@ public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventH
 
         var errorsList = new List<(Exception exception, User user)>();
 
-        foreach (var project in m_selectedUsers.Value)
+        foreach (var user in m_selectedUsers.Value)
         {
             try
             {
-                await m_usersService.DeleteAsync(project.Id);
+                await m_usersService.DeleteAsync(user.Id);
             }
             catch (Exception e)
             {
-                errorsList.Add((e, project));
+                errorsList.Add((e, user));
             }
         }
 

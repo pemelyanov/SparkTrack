@@ -49,7 +49,7 @@ public class ProjectsController(IProjectsService projectsService) : Controller
         );
     }
     
-    [HttpDelete("/{id}")]
+    [HttpDelete("{id}")]
     [Authorize(Roles = nameof(ERole.God))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

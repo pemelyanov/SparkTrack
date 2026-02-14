@@ -75,6 +75,17 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     {
         return this.OkWithDomainExceptionsHandling(() => featuresService.EditAsync(featureEdit.ToDomain()));
     }
+    
+    [HttpDelete("{id}")]
+    [Authorize(Roles = nameof(ERole.Admin))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public Task<ActionResult> DeleteAsync(int id)
+    {
+        return this.OkWithDomainExceptionsHandling(() => featuresService.DeleteAsync(id));
+    }
 
     [HttpGet("{featureId}/comments")]
     [Authorize]
