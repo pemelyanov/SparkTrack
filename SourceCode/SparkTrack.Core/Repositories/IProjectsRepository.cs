@@ -1,6 +1,7 @@
 ﻿namespace SparkTrack.Core.Repositories;
 
 using Shared.Data.Entities;
+using Shared.Enums;
 
 public interface IProjectsRepository
 {
@@ -16,4 +17,8 @@ public interface IProjectsRepository
     Task UpdateAsync(Project project);
 
     Task DeleteAsync(Guid id);
+
+    Task SetArchiveStatus(Guid id, bool isArchived, EArchiveSource? archiveSource = null);
+
+    Task<bool> HasRelationsAsync(Guid id);
 }

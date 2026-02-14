@@ -54,8 +54,8 @@ public class UsersController(IUsersService usersService) : Controller
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public Task<ActionResult> DeleteAsync([FromRoute]Guid id)
+    public Task<ActionResult> DeleteAsync([FromRoute]Guid id, [FromQuery] bool force)
     {
-        return this.OkWithDomainExceptionsHandling(() => usersService.DeleteAsync(id));
+        return this.OkWithDomainExceptionsHandling(() => usersService.DeleteAsync(id, force));
     }
 }

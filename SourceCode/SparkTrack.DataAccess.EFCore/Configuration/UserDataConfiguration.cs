@@ -23,5 +23,12 @@ public class UserDataConfiguration : IEntityTypeConfiguration<UserData>
 
         builder.Property(u => u.TelegramTag)
             .IsRequired(false);
+        
+        builder.Property(p => p.ArchivedAt)
+            .IsRequired(false);
+        
+        builder.Property(p => p.ArchiveSource)
+            .IsRequired(false);
+        
     }
 }

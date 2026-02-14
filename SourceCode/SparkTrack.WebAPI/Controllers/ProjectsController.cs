@@ -55,10 +55,10 @@ public class ProjectsController(IProjectsService projectsService) : Controller
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public Task<ActionResult> DeleteAsync([FromRoute] Guid id)
+    public Task<ActionResult> DeleteAsync([FromRoute] Guid id, [FromQuery] bool force)
     {
         return this.OkWithDomainExceptionsHandling(
-            () => projectsService.DeleteAsync(id)
+            () => projectsService.DeleteAsync(id, force)
         );
     }
 }

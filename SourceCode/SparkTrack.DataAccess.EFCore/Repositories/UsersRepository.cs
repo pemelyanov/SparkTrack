@@ -60,6 +60,8 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
         .Where(
             it => it.Role == role
         )
+        // TODO: Add filter
+        .Where(it => it.ArchivedAt == null)
         .Select(
             GetMapToUserExpression()
         )
@@ -75,6 +77,20 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
         dbContext.Users.Remove(userData);
         await dbContext.SaveChangesAsync();
     }
+    
+    public async Task SetArchiveStatus(Guid id, bool isArchived, EArchiveSource? archiveSource = null)
+    {
+        var user = await dbContext.Users.FindAsync(id);
+
+        if (user is null) return;
+
+        user.ArchiveSource =
+            isArchived ? archiveSource ?? throw new InvalidOperationException("Enter archive source") : null;
+        
+        user.ArchivedAt = isArchived ? DateTime.UtcNow : null;
+        
+        await dbContext.SaveChangesAsync();
+    }
 
     private static Expression<Func<UserData, User>> GetMapToUserExpression()
     {
@@ -85,7 +101,9 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
             Name = it.Name,
             Role = it.Role,
             PasswordHash = it.PasswordHash,
-            TelegramTag = it.TelegramTag
+            TelegramTag = it.TelegramTag,
+            ArchivedAt = it.ArchivedAt,
+            ArchiveSource = it.ArchiveSource
         };
     }
 }

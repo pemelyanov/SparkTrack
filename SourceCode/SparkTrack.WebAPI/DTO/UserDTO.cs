@@ -13,4 +13,8 @@ public record UserDTO
     public required string Email { get; init; }
     
     public string? TelegramTag { get; init; }
+    
+    public required DateTime? ArchivedAt { get; init; }
+    
+    public required EArchiveSource? ArchiveSource { get; init; }
 }

@@ -25,5 +25,11 @@ public class ProjectDataConfiguration : IEntityTypeConfiguration<ProjectData>
         
         builder.HasIndex(p => p.Name)
             .IsUnique();
+
+        builder.Property(p => p.ArchivedAt)
+            .IsRequired(false);
+        
+        builder.Property(p => p.ArchiveSource)
+            .IsRequired(false);
     }
 }

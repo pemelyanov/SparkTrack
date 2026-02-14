@@ -21,7 +21,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     Email = it.Admin.Email,
                     Name = it.Admin.Name,
                     Role = it.Admin.Role,
-                    TelegramTag = it.Admin.TelegramTag
+                    TelegramTag = it.Admin.TelegramTag,
+                    ArchivedAt = it.Admin.ArchivedAt,
+                    ArchiveSource = it.Admin.ArchiveSource,
                 },
                 Payment = it.Payment,
                 PaymentType = it.PaymentType,
@@ -42,7 +44,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     Email = it.Admin.Email,
                     Name = it.Admin.Name,
                     Role = it.Admin.Role,
-                    TelegramTag = it.Admin.TelegramTag
+                    TelegramTag = it.Admin.TelegramTag,
+                    ArchivedAt = it.Admin.ArchivedAt,
+                    ArchiveSource = it.Admin.ArchiveSource,
                 },
                 Employee = new User
                 {
@@ -50,7 +54,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     Email = it.Employee.Email,
                     Name = it.Employee.Name,
                     Role = it.Employee.Role,
-                    TelegramTag = it.Employee.TelegramTag
+                    TelegramTag = it.Employee.TelegramTag,
+                    ArchivedAt = it.Employee.ArchivedAt,
+                    ArchiveSource = it.Employee.ArchiveSource,
                 },
                 Payment = it.Payment,
                 CreatedAt = it.CreatedAt,
@@ -87,10 +93,14 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         {
                             Id = data.Feature.Project.Id,
                             Name = data.Feature.Project.Name,
-                            Link = data.Feature.Project.Link
+                            Link = data.Feature.Project.Link,
+                            ArchivedAt = data.Feature.Project.ArchivedAt,
+                            ArchiveSource = data.Feature.Project.ArchiveSource
                         },
                         CreatedAt = data.Feature.CreatedAt,
-                        EditedAt = data.Feature.EditedAt
+                        EditedAt = data.Feature.EditedAt,
+                        ArchivedAt = data.Feature.ArchivedAt,
+                        ArchiveSource = data.Feature.ArchiveSource
                     },
                     SubTask = new SubTask
                     {
@@ -102,7 +112,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                             Email = data.ExecutorEmployee.Email,
                             Name = data.ExecutorEmployee.Name,
                             Role = data.ExecutorEmployee.Role,
-                            TelegramTag = data.ExecutorEmployee.TelegramTag
+                            TelegramTag = data.ExecutorEmployee.TelegramTag,
+                            ArchivedAt = data.ExecutorEmployee.ArchivedAt,
+                            ArchiveSource = data.ExecutorEmployee.ArchiveSource
                         },
                         Deadline = data.Deadline,
                         Cost = data.Cost,
@@ -122,7 +134,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                                     Email = p.Admin.Email,
                                     Name = p.Admin.Name,
                                     Role = p.Admin.Role,
-                                    TelegramTag = p.Admin.TelegramTag
+                                    TelegramTag = p.Admin.TelegramTag,
+                                    ArchivedAt = p.Admin.ArchivedAt,
+                                    ArchiveSource = p.Admin.ArchiveSource
                                 },
                                 Payment = p.Payment,
                                 PaymentType = p.PaymentType,
@@ -153,7 +167,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Email = grouping.Key.Email,
                         Name = grouping.Key.Name,
                         Role = grouping.Key.Role,
-                        TelegramTag = grouping.Key.TelegramTag
+                        TelegramTag = grouping.Key.TelegramTag,
+                        ArchivedAt = grouping.Key.ArchivedAt,
+                        ArchiveSource = grouping.Key.ArchiveSource
                     },
                     Payment = grouping.Sum(it => it.IsTimelyBonusApproved
                         ? Math.Max(
@@ -195,7 +211,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Email = grouping.Key.Email,
                         Name = grouping.Key.Name,
                         Role = grouping.Key.Role,
-                        TelegramTag = grouping.Key.TelegramTag
+                        TelegramTag = grouping.Key.TelegramTag,
+                        ArchivedAt = grouping.Key.ArchivedAt,
+                        ArchiveSource = grouping.Key.ArchiveSource
                     },
                     Payment = grouping.Sum(it => it.Payment
                     )
@@ -233,7 +251,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     Email = data.Admin.Email,
                     Name = data.Admin.Name,
                     Role = data.Admin.Role,
-                    TelegramTag = data.Admin.TelegramTag
+                    TelegramTag = data.Admin.TelegramTag,
+                    ArchivedAt = data.Admin.ArchivedAt,
+                    ArchiveSource = data.Admin.ArchiveSource
                 },
                 Payment = data.Payment,
                 PaymentType = data.PaymentType,
@@ -249,7 +269,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Email = data.Task.ExecutorEmployee.Email,
                         Name = data.Task.ExecutorEmployee.Name,
                         Role = data.Task.ExecutorEmployee.Role,
-                        TelegramTag = data.Task.ExecutorEmployee.TelegramTag
+                        TelegramTag = data.Task.ExecutorEmployee.TelegramTag,
+                        ArchivedAt = data.Task.ExecutorEmployee.ArchivedAt,
+                        ArchiveSource = data.Task.ExecutorEmployee.ArchiveSource
                     },
                     Deadline = data.Task.Deadline,
                     Cost = data.Task.Cost,
@@ -268,10 +290,14 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                     {
                         Id = data.Task.Feature.Project.Id,
                         Name = data.Task.Feature.Project.Name,
-                        Link = data.Task.Feature.Project.Link
+                        Link = data.Task.Feature.Project.Link,
+                        ArchivedAt = data.Task.Feature.Project.ArchivedAt,
+                        ArchiveSource = data.Task.Feature.Project.ArchiveSource
                     },
                     CreatedAt = data.Task.Feature.CreatedAt,
-                    EditedAt = data.Task.Feature.EditedAt
+                    EditedAt = data.Task.Feature.EditedAt,
+                    ArchivedAt = data.Task.Feature.ArchivedAt,
+                    ArchiveSource = data.Task.Feature.ArchiveSource
                 }
             }
         )
@@ -300,7 +326,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Email = data.Admin.Email,
                         Name = data.Admin.Name,
                         Role = data.Admin.Role,
-                        TelegramTag = data.Admin.TelegramTag
+                        TelegramTag = data.Admin.TelegramTag,
+                        ArchivedAt = data.Admin.ArchivedAt,
+                        ArchiveSource = data.Admin.ArchiveSource
                     },
                     Employee = new User
                     {
@@ -308,7 +336,9 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
                         Email = data.Employee.Email,
                         Name = data.Employee.Name,
                         Role = data.Employee.Role,
-                        TelegramTag = data.Employee.TelegramTag
+                        TelegramTag = data.Employee.TelegramTag,
+                        ArchivedAt = data.Employee.ArchivedAt,
+                        ArchiveSource = data.Employee.ArchiveSource
                     },
                     Payment = data.Payment,
                     CreatedAt = data.CreatedAt,

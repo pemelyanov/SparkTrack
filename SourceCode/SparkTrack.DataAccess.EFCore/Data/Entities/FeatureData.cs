@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
+using Core.Shared.Enums;
+
 public record FeatureData : IAttachmentsOwner
 {
     public int Id { get; init; }
@@ -21,4 +23,8 @@ public record FeatureData : IAttachmentsOwner
     public DateTime? EditedAt { get; set; }
     
     public Guid Version { get; set; }
+    
+    public DateTime? ArchivedAt { get; set; }
+    
+    public EArchiveSource? ArchiveSource { get; set; }
 }

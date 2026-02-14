@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.Core.Services.Features;
 
+using Archive;
 using Authorization;
 using Extensions;
 using Repositories;
@@ -9,7 +10,7 @@ using Shared.Data.Entities;
 using Shared.Enums;
 using Shared.Services.Features;
 
-internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthorizationService authorizationService)
+internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthorizationService authorizationService, IFeatureArchiveService featureArchiveService)
     : IFeaturesService
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
@@ -46,8 +47,10 @@ internal class FeaturesService(IFeaturesRepository featuresRepository, IAuthoriz
         return featuresRepository.EditAsync(feature);
     }
 
-    public Task DeleteAsync(int id)
+    public Task DeleteAsync(int id, bool force)
     {
-        return featuresRepository.DeleteAsync(id);
+        if(force) return featuresRepository.DeleteAsync(id);
+
+        return featureArchiveService.ArchiveAsync(id, EArchiveSource.User);
     }
 }

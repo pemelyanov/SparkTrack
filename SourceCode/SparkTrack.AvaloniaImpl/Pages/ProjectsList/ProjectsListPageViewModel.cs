@@ -105,7 +105,7 @@ public class ProjectsListPageViewModel : ViewModelBase, IRoutableViewModel
         {
             try
             {
-                await m_projectsService.DeleteAsync(project.Id);
+                await m_projectsService.DeleteAsync(project.Id, forceOption.IsSelected);
             }
             catch (Exception e)
             {

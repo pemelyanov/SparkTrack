@@ -13,5 +13,5 @@ public interface IProjectsService
     
     Task EditAsync(Project project);
 
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(Guid id, bool force);
 }

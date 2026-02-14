@@ -50,10 +50,10 @@ public class UsersService(
         await clientWrapper.Client.EditAsync(userEdit.ToDTO());
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id, bool force)
     {
         using var clientWrapper = usersClientFactory();
 
-        await clientWrapper.Client.DeleteAsync(id);
+        await clientWrapper.Client.DeleteAsync(id, force);
     }
 }

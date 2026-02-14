@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.WebAPI.DTO;
 
+using Core.Shared.Enums;
+
 public record FeatureDTO
 {
     public int Id { get; init; }
@@ -19,4 +21,8 @@ public record FeatureDTO
     public DateTime? EditedAt { get; init; }
     
     public Guid Version { get; init; }
+    
+    public required DateTime? ArchivedAt { get; init; }
+    
+    public required EArchiveSource? ArchiveSource { get; init; }
 }

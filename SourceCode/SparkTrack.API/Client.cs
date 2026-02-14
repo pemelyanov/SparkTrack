@@ -1317,14 +1317,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task DeleteAsync(int id)
+        public virtual System.Threading.Tasks.Task DeleteAsync(int id, bool? force)
         {
-            return DeleteAsync(id, System.Threading.CancellationToken.None);
+            return DeleteAsync(id, force, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task DeleteAsync(int id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task DeleteAsync(int id, bool? force, System.Threading.CancellationToken cancellationToken)
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -1342,6 +1342,12 @@ namespace SparkTrack.API
                     // Operation Path: "features/{id}"
                     urlBuilder_.Append("features/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append('?');
+                    if (force != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("force")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(force, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -4306,14 +4312,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task DeleteAsync(System.Guid id)
+        public virtual System.Threading.Tasks.Task DeleteAsync(System.Guid id, bool? force)
         {
-            return DeleteAsync(id, System.Threading.CancellationToken.None);
+            return DeleteAsync(id, force, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task DeleteAsync(System.Guid id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task DeleteAsync(System.Guid id, bool? force, System.Threading.CancellationToken cancellationToken)
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -4331,6 +4337,12 @@ namespace SparkTrack.API
                     // Operation Path: "projects/{id}"
                     urlBuilder_.Append("projects/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append('?');
+                    if (force != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("force")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(force, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -5496,14 +5508,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task DeleteAsync(System.Guid id)
+        public virtual System.Threading.Tasks.Task DeleteAsync(System.Guid id, bool? force)
         {
-            return DeleteAsync(id, System.Threading.CancellationToken.None);
+            return DeleteAsync(id, force, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task DeleteAsync(System.Guid id, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task DeleteAsync(System.Guid id, bool? force, System.Threading.CancellationToken cancellationToken)
         {
             if (id == null)
                 throw new System.ArgumentNullException("id");
@@ -5521,6 +5533,12 @@ namespace SparkTrack.API
                     // Operation Path: "users/{id}"
                     urlBuilder_.Append("users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append('?');
+                    if (force != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("force")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(force, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    urlBuilder_.Length--;
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -5873,6 +5891,12 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("version")]
         public System.Guid Version { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("archivedAt")]
+        public System.DateTime? ArchivedAt { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("archiveSource")]
+        public EArchiveSource? ArchiveSource { get; init; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -5887,6 +5911,22 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("link")]
         public string Link { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("archivedAt")]
+        public System.DateTime? ArchivedAt { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("archiveSource")]
+        public EArchiveSource? ArchiveSource { get; init; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum EArchiveSource
+    {
+
+        Parent = 0,
+
+        User = 1,
 
     }
 
@@ -5947,6 +5987,12 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("telegramTag")]
         public string TelegramTag { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("archivedAt")]
+        public System.DateTime? ArchivedAt { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("archiveSource")]
+        public EArchiveSource? ArchiveSource { get; init; }
 
     }
 

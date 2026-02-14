@@ -123,7 +123,7 @@ public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventH
         {
             try
             {
-                await m_usersService.DeleteAsync(user.Id);
+                await m_usersService.DeleteAsync(user.Id, forceOption.IsSelected);
             }
             catch (Exception e)
             {

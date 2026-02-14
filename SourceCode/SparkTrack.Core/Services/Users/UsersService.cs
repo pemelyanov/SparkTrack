@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.Core.Services.Users;
 
+using Archive;
 using Authorization;
 using Exceptions;
 using Extensions;
@@ -9,7 +10,7 @@ using Shared.Data.Edit;
 using Shared.Data.Entities;
 using Shared.Enums;
 
-internal class UsersService(IUsersRepository usersRepository, IAuthorizationService authorizationService)
+internal class UsersService(IUsersRepository usersRepository, IAuthorizationService authorizationService, IUserArchiveService userArchiveService)
     : IUsersService
 {
     public Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery)
@@ -44,7 +45,7 @@ internal class UsersService(IUsersRepository usersRepository, IAuthorizationServ
         await usersRepository.UpdateAsync(updatedUser);
     }
 
-    public async Task DeleteAsync(Guid userId)
+    public async Task DeleteAsync(Guid userId, bool force)
     {
         var existingUser = await usersRepository.GetAsync(userId);
 
@@ -59,6 +60,12 @@ internal class UsersService(IUsersRepository usersRepository, IAuthorizationServ
 
         authorizationService.GetUserOrThrowIfNotInRole(allowedRole);
 
-        await usersRepository.DeleteAsync(userId);
+        if (force)
+        {
+            await usersRepository.DeleteAsync(userId);
+            return;
+        }
+
+        await userArchiveService.ArchiveAsync(userId, EArchiveSource.User);
     }
 }

@@ -13,5 +13,5 @@ public interface IUsersService
 
     Task EditAsync(UserEdit userEdit);
     
-    Task DeleteAsync(Guid userId);
+    Task DeleteAsync(Guid userId, bool force);
 }

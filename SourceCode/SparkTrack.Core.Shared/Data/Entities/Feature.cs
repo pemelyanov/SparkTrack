@@ -1,5 +1,7 @@
 ﻿namespace SparkTrack.Core.Shared.Data.Entities;
 
+using Enums;
+
 public record Feature
 {
     public int Id { get; init; }
@@ -19,4 +21,8 @@ public record Feature
     public DateTime? EditedAt { get; init; }
     
     public Guid Version { get; init; }
+    
+    public DateTime? ArchivedAt { get; init; }
+    
+    public EArchiveSource? ArchiveSource { get; init; }
 }

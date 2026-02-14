@@ -1,6 +1,6 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
-using Core.Shared.Data.Entities;
+using Core.Shared.Enums;
 
 public record ProjectData
 {
@@ -11,4 +11,8 @@ public record ProjectData
     public string? Link { get; set; }
 
     public ICollection<FeatureData> Features { get; } = [];
+    
+    public DateTime? ArchivedAt { get; set; }
+    
+    public EArchiveSource? ArchiveSource { get; set; }
 }

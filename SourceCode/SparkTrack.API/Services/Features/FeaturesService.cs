@@ -55,10 +55,10 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
         await clientWrapper.Client.EditAsync(feature.ToDTO());
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id, bool force)
     {
         using var clientWrapper = featuresClientFactory();
 
-        await clientWrapper.Client.DeleteAsync(id);
+        await clientWrapper.Client.DeleteAsync(id, force);
     }
 }

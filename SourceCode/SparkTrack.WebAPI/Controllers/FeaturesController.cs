@@ -82,9 +82,9 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public Task<ActionResult> DeleteAsync(int id)
+    public Task<ActionResult> DeleteAsync([FromRoute] int id, [FromQuery] bool force)
     {
-        return this.OkWithDomainExceptionsHandling(() => featuresService.DeleteAsync(id));
+        return this.OkWithDomainExceptionsHandling(() => featuresService.DeleteAsync(id, force));
     }
 
     [HttpGet("{featureId}/comments")]

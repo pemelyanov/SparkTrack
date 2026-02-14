@@ -9,13 +9,17 @@ public static class ProjectMappingExtensions
     {
         Id = project.Id,
         Name = project.Name,
-        Link = project.Link
+        Link = project.Link,
+        ArchivedAt = project.ArchivedAt,
+        ArchiveSource = project.ArchiveSource?.Cast<EArchiveSource>()
     };
     
     public static Project ToDomain(this ProjectDTO project) => new()
     {
         Id = project.Id,
         Name = project.Name,
-        Link = project.Link
+        Link = project.Link,
+        ArchivedAt = project.ArchivedAt,
+        ArchiveSource = project.ArchiveSource?.Cast<Core.Shared.Enums.EArchiveSource>()
     };
 }

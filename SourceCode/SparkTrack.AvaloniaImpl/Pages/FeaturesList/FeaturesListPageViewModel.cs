@@ -140,7 +140,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         {
             try
             {
-                await m_featuresService.DeleteAsync(feature.Id);
+                await m_featuresService.DeleteAsync(feature.Id, forceOption.IsSelected);
             }
             catch (Exception e)
             {

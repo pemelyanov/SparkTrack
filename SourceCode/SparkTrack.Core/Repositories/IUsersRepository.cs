@@ -19,4 +19,6 @@ public interface IUsersRepository
     Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery);
 
     Task DeleteAsync(Guid id);
+
+    Task SetArchiveStatus(Guid id, bool isArchived, EArchiveSource? archiveSource = null);
 }

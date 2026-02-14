@@ -29,7 +29,7 @@ public class ProjectsSeeder(
         {
             var project = new Project
             {
-                Name = $"Канал {i + 1}",
+                Name = $"Канал {i + 1}"
             };
 
             await projectsService.AddAsync(project);

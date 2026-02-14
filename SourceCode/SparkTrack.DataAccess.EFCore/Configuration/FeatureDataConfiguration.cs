@@ -41,5 +41,11 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
             .IsRequired()
             .ValueGeneratedOnUpdate()
             .IsConcurrencyToken();
+        
+        builder.Property(p => p.ArchivedAt)
+            .IsRequired(false);
+        
+        builder.Property(p => p.ArchiveSource)
+            .IsRequired(false);
     }
 }
