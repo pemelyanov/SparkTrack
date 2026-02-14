@@ -1,6 +1,5 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Data.Entities;
 
-using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 
 public record SubTaskData

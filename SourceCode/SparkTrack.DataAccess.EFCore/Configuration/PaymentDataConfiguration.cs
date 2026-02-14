@@ -20,7 +20,8 @@ public class PaymentDataConfiguration : IEntityTypeConfiguration<PaymentData>
         builder.HasOne(it => it.Task)
             .WithMany(it => it.Payments)
             .HasForeignKey(it => it.TaskId)
-            .IsRequired();
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.Property(f => f.CreatedAt)
             .IsRequired();

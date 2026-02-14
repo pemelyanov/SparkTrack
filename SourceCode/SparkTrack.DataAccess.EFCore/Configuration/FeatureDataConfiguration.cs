@@ -25,7 +25,7 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
         builder.HasOne(f => f.Project)
             .WithMany()
             .HasForeignKey(f => f.ProjectId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(f => f.TasksList)
             .WithOne(it => it.Feature)
