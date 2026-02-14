@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.DataAccess.EFCore.Repositories;
 
+using Core.Exceptions;
 using Core.Repositories;
 using Core.Shared.Data.Entities;
 using Data.Entities;
@@ -45,6 +46,21 @@ internal class ProjectsRepository(SparkTrackDbContext dbContext) : IProjectsRepo
         };
 
         await dbContext.Projects.AddAsync(projectData);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Project project)
+    {
+        var projectData = await dbContext.Projects.FindAsync(project.Id);
+
+        if (projectData is null)
+        {
+            throw new NotFoundException($"Project with id {project.Id} not found");
+        }
+
+        projectData.Name = project.Name;
+        projectData.Link = projectData.Link;
+        
         await dbContext.SaveChangesAsync();
     }
 

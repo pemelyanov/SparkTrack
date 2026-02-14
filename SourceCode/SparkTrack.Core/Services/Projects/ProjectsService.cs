@@ -6,7 +6,8 @@ using Repositories;
 using Shared.Data.Entities;
 using Shared.Services.Projects;
 
-internal class ProjectsService(IAuthorizationService authorizationService, IProjectsRepository projectsRepository) : IProjectsService
+internal class ProjectsService(IAuthorizationService authorizationService, IProjectsRepository projectsRepository)
+    : IProjectsService
 {
     public Task<IReadOnlyList<Project>> GetListAsync()
     {
@@ -19,7 +20,17 @@ internal class ProjectsService(IAuthorizationService authorizationService, IProj
 
     public Task AddAsync(Project project)
     {
-        return projectsRepository.AddAsync(project with { Id = Guid.Empty });
+        return projectsRepository.AddAsync(
+            project with
+            {
+                Id = Guid.Empty
+            }
+        );
+    }
+
+    public Task EditAsync(Project project)
+    {
+        return projectsRepository.UpdateAsync(project);
     }
 
     public Task DeleteAsync(Guid id)

@@ -22,8 +22,17 @@ internal class ProjectsService(Func<ClientWrapper<ProjectsClient>> projectsClien
         await clientWrapper.Client.AddAsync(project.ToDTO());
     }
 
-    public Task DeleteAsync(Guid id)
+    public async Task EditAsync(Project project)
     {
-        throw new NotImplementedException();
+        using var clientWrapper = projectsClientWrapperFactory();
+
+        await clientWrapper.Client.EditAsync(project.ToDTO());
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        using var clientWrapper = projectsClientWrapperFactory();
+
+        await clientWrapper.Client.DeleteAsync(id);
     }
 }

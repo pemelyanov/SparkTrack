@@ -12,6 +12,8 @@ public interface IProjectsRepository
     Task<IReadOnlyList<Project>> GetListAsync(Guid? userId = null);
 
     Task AddAsync(Project project);
+    
+    Task UpdateAsync(Project project);
 
     Task DeleteAsync(Guid id);
 }

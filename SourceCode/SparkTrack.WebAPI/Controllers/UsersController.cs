@@ -42,6 +42,7 @@ public class UsersController(IUsersService usersService) : Controller
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public Task<ActionResult> EditEmployeeAsync(UserEditDTO userEditDTO)
     {
         return this.OkWithDomainExceptionsHandling(() => usersService.EditAsync(userEditDTO.ToDomain()));
