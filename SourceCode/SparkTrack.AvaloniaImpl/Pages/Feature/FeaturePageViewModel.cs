@@ -182,18 +182,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void OnImagePaste(byte[] image, string extension)
     {
-        if (CommentEditViewModel is not null)
-        {
-            CommentEditViewModel.AttachmentsPanelViewModel.AddAttachment(image, extension);
-            return;
-        }
-
-        if (CommentsList.FirstOrDefault(it => it.EditViewModel is not null) is { } existingCommentEdit)
-        {
-            existingCommentEdit.EditViewModel?.AttachmentsPanelViewModel.AddAttachment(image, extension);
-            return;
-        }
-        
         if(m_authorizationService.CurrentUser.Value?.Role is ERole.Employee) return;
         
         AttachmentsPanelViewModel.AddAttachment(image, extension);

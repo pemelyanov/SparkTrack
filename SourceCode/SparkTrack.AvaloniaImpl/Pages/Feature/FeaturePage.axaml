@@ -42,7 +42,7 @@
                 <Template>
                     <TextBox AcceptsReturn="True" AcceptsTab="True" UseFloatingWatermark="False"
                              Text="{Binding Description}"
-                             MinHeight="300" />
+                             MinHeight="300" PastingFromClipboard="TextBox_OnPastingFromClipboard" />
                 </Template>
             </Setter>
         </Style>
@@ -61,7 +61,6 @@
         </Style>
     </UserControl.Styles>
     <Panel>
-        <Button HotKey="Ctrl+V" Command="{Binding #Root.OnPaste}" IsVisible="False" />
         <ScrollViewer x:Name="MainScrollViewer">
             <StackPanel Spacing="8">
                 <Border Classes="card" Padding="16 8 16 16">
