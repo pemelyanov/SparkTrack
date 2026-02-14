@@ -5,9 +5,9 @@ using Avalonia.Interactivity;
 using FluentAvalonia.UI.Controls;
 using Windows;
 
-public partial class UserAddFrom : ReactiveContentDialog<UserAddFormViewModel>
+public partial class UserAddForm : ReactiveContentDialog<UserAddFormViewModel>
 {
-    public UserAddFrom()
+    public UserAddForm()
     {
         InitializeComponent();
     }

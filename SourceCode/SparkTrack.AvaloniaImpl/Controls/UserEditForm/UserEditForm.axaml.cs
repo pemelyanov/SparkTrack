@@ -1,6 +1,8 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
 
 using Windows;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using FluentAvalonia.UI.Controls;
 
 public partial class UserEditForm : ReactiveContentDialog<UserEditFormViewModel>
@@ -20,4 +22,12 @@ public partial class UserEditForm : ReactiveContentDialog<UserEditFormViewModel>
         args.Cancel = true;
     }
 
+    private void CopyPassword_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if(ViewModel?.GeneratedPassword is not {} generatedPassword) return;
+
+        TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(generatedPassword);
+        
+        ViewModel.NotifyPasswordCopied();
+    }
 }

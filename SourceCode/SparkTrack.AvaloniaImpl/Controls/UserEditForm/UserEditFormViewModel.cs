@@ -7,8 +7,10 @@ using Core.Client.Services.PopupNotification;
 using Core.Client.Services.Users;
 using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
+using Extensions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
 using ViewModels;
 
 public class UserEditFormViewModel : DialogViewModelBase
@@ -16,22 +18,26 @@ public class UserEditFormViewModel : DialogViewModelBase
     private readonly IUsersService             m_usersService;
     private readonly IPopupNotificationService m_popupNotificationService;
     private readonly User                      m_user;
+    private readonly IDialogService            m_dialogService;
 
     public UserEditFormViewModel(
         IUsersService usersService,
         IPopupNotificationService popupNotificationService,
-        User user
+        User user,
+        IDialogService dialogService
     )
     {
         m_usersService = usersService;
         m_popupNotificationService = popupNotificationService;
         m_user = user;
+        m_dialogService = dialogService;
 
         Name = user.Name;
         Email = user.Email;
         TelegramTag = user.TelegramTag;
-        
+
         SaveUserCommand = InitializeSaveUserCommand();
+        ResetPasswordCommand = InitializeResetPasswordCommand();
     }
 
     [Reactive]
@@ -39,9 +45,12 @@ public class UserEditFormViewModel : DialogViewModelBase
 
     [Reactive]
     public string Email { get; set; }
-    
+
     [Reactive]
     public string? TelegramTag { get; set; }
+
+    [Reactive]
+    public string? GeneratedPassword { get; private set; }
 
     public ReactiveCommand<Unit, Unit> SaveUserCommand { get; }
 
@@ -61,7 +70,7 @@ public class UserEditFormViewModel : DialogViewModelBase
             await m_usersService.EditAsync(userEdit);
 
             m_popupNotificationService.Show(ENotificationType.Success, "Данные пользователя успешно обновлены.");
-            
+
             Close(true);
         },
         GetIsEmailValidObservable()
@@ -70,12 +79,30 @@ public class UserEditFormViewModel : DialogViewModelBase
                 (isEmailValid, isNameValid) => isEmailValid && isNameValid
             )
     );
-    
-    public void Reset()
+
+    public ReactiveCommand<Unit, Unit> ResetPasswordCommand { get; }
+
+    private ReactiveCommand<Unit, Unit> InitializeResetPasswordCommand() => ReactiveCommand.CreateFromTask(
+        async () =>
+        {
+            if (!await m_dialogService.ConfirmAsync(
+                "Вы уверены что хотите сбросить пароль пользователя? Будет сгенерирован новый случайный пароль.",
+                "Сброс пароля"
+            )) return;
+
+            GeneratedPassword = "asdasdasd";
+            m_popupNotificationService.Show(ENotificationType.Success, "Пароль пользователя сброшен.");
+        },
+        GetIsEmailValidObservable()
+            .CombineLatest(
+                GetIsNameValidObservable(),
+                (isEmailValid, isNameValid) => isEmailValid && isNameValid
+            )
+    );
+
+    public void NotifyPasswordCopied()
     {
-        Email = m_user.Email;
-        Name = m_user.Name;
-        TelegramTag = m_user.TelegramTag;
+        m_popupNotificationService.Show(ENotificationType.Information, "Пароль скопирован в буфер обмена");
     }
 
     private IObservable<bool> GetIsEmailValidObservable()

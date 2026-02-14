@@ -7,7 +7,7 @@
                         xmlns:behaviors="clr-namespace:SparkTrack.AvaloniaImpl.Behaviors"
                         xmlns:userEditForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserAddForm"
                         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-                        x:Class="SparkTrack.AvaloniaImpl.Controls.UserAddForm.UserAddFrom"
+                        x:Class="SparkTrack.AvaloniaImpl.Controls.UserAddForm.UserAddForm"
                         x:DataType="userEditForm:UserAddFormViewModel"
                         Title="Создание пользователя"
                         DefaultButton="Primary"
