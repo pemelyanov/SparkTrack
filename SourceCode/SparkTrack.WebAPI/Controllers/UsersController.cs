@@ -3,6 +3,8 @@
 using Core.Services.Users;
 using Core.Shared.Enums;
 using DTO;
+using DTO.Edit;
+using Extensions;
 using MappingExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,5 +35,15 @@ public class UsersController(IUsersService usersService) : Controller
         var page = await usersService.GetPageAsync(ERole.Employee, pageQuery.ToDomain());
 
         return Ok(page.ToDTO(it => it.ToDTO()));
+    }
+    
+    [Authorize(Roles = $"{nameof(ERole.God)}, {nameof(ERole.Admin)}")]
+    [HttpPatch("users")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> EditEmployeeAsync(UserEditDTO userEditDTO)
+    {
+        return this.OkWithDomainExceptionsHandling(() => usersService.EditAsync(userEditDTO.ToDomain()));
     }
 }

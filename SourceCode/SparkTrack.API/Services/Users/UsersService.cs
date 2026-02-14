@@ -42,4 +42,11 @@ public class UsersService(
 
         return new ReadOnlyPagedData<User>(list, dto.Total);
     }
+
+    public async Task EditAsync(UserEdit userEdit)
+    {
+        using var clientWrapper = usersClientFactory();
+
+        await clientWrapper.Client.EditEmployeeAsync(userEdit.ToDTO());
+    }
 }

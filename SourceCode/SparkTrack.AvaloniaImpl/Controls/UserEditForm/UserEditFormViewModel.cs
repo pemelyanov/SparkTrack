@@ -1,43 +1,55 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Controls.UserEditForm;
 
-using Core.Client.Enums;
 using System.Reactive;
 using System.Reactive.Linq;
+using Core.Client.Enums;
 using Core.Client.Services.Authorization;
 using Core.Client.Services.PopupNotification;
 using Core.Client.Services.Users;
 using Core.Shared.Data.Edit;
-using Core.Shared.Enums;
-using Core.Shared.Extensions;
-using Fanatiki.MVVM.ViewModels;
+using Core.Shared.Data.Entities;
+using Extensions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.DialogHost;
+using ViewModels;
 
-public class UserEditFormViewModel : ViewModelBase
+public class UserEditFormViewModel : DialogViewModelBase
 {
     private readonly IUsersService             m_usersService;
     private readonly IPopupNotificationService m_popupNotificationService;
+    private readonly User                      m_user;
+    private readonly IDialogService            m_dialogService;
     private readonly IAuthorizationService     m_authorizationService;
 
     public UserEditFormViewModel(
-        IAuthorizationService authorizationService,
         IUsersService usersService,
-        IPopupNotificationService popupNotificationService
+        IPopupNotificationService popupNotificationService,
+        User user,
+        IDialogService dialogService,
+        IAuthorizationService authorizationService
     )
     {
         m_usersService = usersService;
         m_popupNotificationService = popupNotificationService;
+        m_user = user;
+        m_dialogService = dialogService;
         m_authorizationService = authorizationService;
 
+        Name = user.Name;
+        Email = user.Email;
+        TelegramTag = user.TelegramTag;
+
         SaveUserCommand = InitializeSaveUserCommand();
+        ResetPasswordCommand = InitializeResetPasswordCommand();
     }
 
     [Reactive]
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; }
 
     [Reactive]
-    public string Email { get; set; } = string.Empty;
-    
+    public string Email { get; set; }
+
     [Reactive]
     public string? TelegramTag { get; set; }
 
@@ -49,37 +61,55 @@ public class UserEditFormViewModel : ViewModelBase
     private ReactiveCommand<Unit, Unit> InitializeSaveUserCommand() => ReactiveCommand.CreateFromTask(
         async () =>
         {
-            if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Email)
-                || m_authorizationService.CurrentUser.Value?.Role is not { } currentUserRole) return;
-
-            if (currentUserRole is ERole.Employee) return;
-
-            var createdUserRole = currentUserRole.ResolveSubordinateRole();
+            if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Email)) return;
 
             var userEdit = new UserEdit
             {
+                Id = m_user.Id,
                 Name = Name,
                 Email = Email,
                 TelegramTag = TelegramTag?.TrimStart('@')
             };
 
-            GeneratedPassword = await m_usersService.AddAsync(userEdit, createdUserRole);
+            await m_usersService.EditAsync(userEdit);
+
+            m_popupNotificationService.Show(ENotificationType.Success, "Данные пользователя успешно обновлены.");
+
+            Close(true);
         },
         GetIsEmailValidObservable()
             .CombineLatest(
                 GetIsNameValidObservable(),
-                GetIsPasswordGeneratedObservable(),
-                (isEmailValid, isNameValid, isPasswordGenerated) => isEmailValid && isNameValid && !isPasswordGenerated
+                (isEmailValid, isNameValid) => isEmailValid && isNameValid
             )
     );
-    
-    public void Reset()
-    {
-        Email = string.Empty;
-        Name = string.Empty;
-        TelegramTag = null;
-        GeneratedPassword = string.Empty;
-    }
+
+    public ReactiveCommand<Unit, Unit> ResetPasswordCommand { get; }
+
+    private ReactiveCommand<Unit, Unit> InitializeResetPasswordCommand() => ReactiveCommand.CreateFromTask(
+        async () =>
+        {
+            if (!await m_dialogService.ConfirmAsync(
+                "Вы уверены что хотите сбросить пароль пользователя? Будет сгенерирован новый случайный пароль.",
+                "Сброс пароля"
+            )) return;
+
+            try
+            {
+                GeneratedPassword = await m_authorizationService.ResetPasswordAsync(m_user.Id);
+                m_popupNotificationService.Show(ENotificationType.Success, "Пароль пользователя сброшен.");
+            }
+            catch (Exception e)
+            {
+                m_popupNotificationService.Show(ENotificationType.Error, $"При сбросе пароля возникли ошибки: {e.Message}");
+            }
+        },
+        GetIsEmailValidObservable()
+            .CombineLatest(
+                GetIsNameValidObservable(),
+                (isEmailValid, isNameValid) => isEmailValid && isNameValid
+            )
+    );
 
     public void NotifyPasswordCopied()
     {
@@ -95,12 +125,6 @@ public class UserEditFormViewModel : ViewModelBase
     private IObservable<bool> GetIsNameValidObservable()
     {
         return this.WhenAnyValue(it => it.Name)
-            .Select(it => !string.IsNullOrEmpty(it));
-    }
-
-    private IObservable<bool> GetIsPasswordGeneratedObservable()
-    {
-        return this.WhenAnyValue(it => it.GeneratedPassword)
             .Select(it => !string.IsNullOrEmpty(it));
     }
 }

@@ -83,7 +83,7 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult> ChangePassword(ChangePasswordDTO changePasswordDTO)
+    public async Task<ActionResult> ChangePasswordAsync(ChangePasswordDTO changePasswordDTO)
     {
         var result = await authorizationService.ChangePassword(
             changePasswordDTO.OldPassword,
@@ -91,5 +91,15 @@ public class AuthorizationController(IJwtAuthorizationService authorizationServi
         );
 
         return result ? Ok() : BadRequest();
+    }
+    
+    [HttpPatch("reset-password")]
+    [Authorize(Roles = $"{nameof(ERole.God)}, {nameof(ERole.Admin)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public Task<ActionResult<string>> ResetPasswordAsync(Guid userId)
+    {
+        return this.OkWithDomainExceptionsHandling(() => authorizationService.ResetPasswordAsync(userId));
     }
 }

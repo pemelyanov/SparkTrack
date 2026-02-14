@@ -96,6 +96,8 @@ internal class JwtAuthorizationService(
     public Task<bool> ChangePassword(string oldPassword, string newPassword) =>
         authorizeService.ChangePassword(oldPassword, newPassword);
 
+    public Task<string> ResetPasswordAsync(Guid userId) => authorizeService.ResetPasswordAsync(userId);
+
     private List<Claim> GetUserClaimList(Guid userId, string roleName)
     {
         return

@@ -21,4 +21,6 @@ public interface IJwtAuthorizationService
     Task<string> RegisterAsync(UserEditDTO userEdit, ERole role);
     
     Task<bool> ChangePassword(string oldPassword, string newPassword);
+
+    Task<string> ResetPasswordAsync(Guid userId);
 }

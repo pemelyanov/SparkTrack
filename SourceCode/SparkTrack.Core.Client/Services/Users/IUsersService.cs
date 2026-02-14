@@ -10,4 +10,6 @@ public interface IUsersService
     Task<string> AddAsync(UserEdit user, ERole role);
 
     Task<IReadOnlyPagedData<User>> GetPageAsync(ERole role, PageQuery pageQuery);
+    
+    Task EditAsync(UserEdit userEdit);
 }
