@@ -40,9 +40,8 @@
         <Style Selector="ContentControl.description-edit">
             <Setter Property="Content">
                 <Template>
-                    <TextBox AcceptsReturn="True" AcceptsTab="True" UseFloatingWatermark="False"
-                             Text="{Binding Description}"
-                             MinHeight="300" PastingFromClipboard="TextBox_OnPastingFromClipboard" />
+                    <TextBox x:Name="MarkdownEdit" AcceptsReturn="True" AcceptsTab="True" UseFloatingWatermark="False"
+                             MinHeight="200" PastingFromClipboard="TextBox_OnPastingFromClipboard" />
                 </Template>
             </Setter>
         </Style>
@@ -53,11 +52,29 @@
             </Style>
             <Setter Property="Content">
                 <Template>
-                    <Border Classes="card">
-                        <mdxaml:MarkdownScrollViewer x:Name="Markdown" Markdown="{Binding Description}" />
-                    </Border>
+                    <mdxaml:MarkdownScrollViewer x:Name="Markdown" Markdown="{Binding $self.Tag, Mode=TwoWay}" />
                 </Template>
             </Setter>
+        </Style>
+        
+        <Style Selector="ContentControl.reel-description">
+            <Style Selector="^ TextBox#MarkdownEdit">
+                <Setter Property="Text" Value="{Binding ReelDescription, Mode=TwoWay}" />
+            </Style>
+            
+            <Style Selector="^ mdxaml|MarkdownScrollViewer#Markdown">
+                <Setter Property="Tag" Value="{Binding ReelDescription}" />
+            </Style>
+        </Style>
+        
+        <Style Selector="ContentControl.preview-description">
+            <Style Selector="^ TextBox#MarkdownEdit">
+                <Setter Property="Text" Value="{Binding PreviewDescription, Mode=TwoWay}" />
+            </Style>
+            
+            <Style Selector="^ mdxaml|MarkdownScrollViewer#Markdown">
+                <Setter Property="Tag" Value="{Binding PreviewDescription}" />
+            </Style>
         </Style>
     </UserControl.Styles>
     <Panel>
@@ -112,16 +129,54 @@
 
                         <Separator />
 
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Описание:" VerticalAlignment="Center" />
-                            <ToggleSwitch Classes="markdown-view-switch"
-                                          IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                          IsChecked="{Binding IsDescriptionInPreviewMode, Mode=TwoWay}" />
-                        </StackPanel>
+                        <!-- TODO: В будущем подумать как переделать это в механизм. -->
+                        <!-- Заказчику нужно делить описание на 3 поля и большое превью, -->
+                        <!-- но я не хочу жертвовать гибкостью системы, поэтому будем хранить описание Json строкой вот такой структуры, -->
+                        <!-- возможно потом можно будет сделать механизм подключения разных шаблонов для описания -->
+                        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto * *" RowSpacing="8" ColumnSpacing="8">
+                            <TextBox Grid.Column="0" Grid.Row="0" Text="{Binding ReelLink}" />
+                            
+                            <Border Classes="card" Grid.Row="1" Grid.Column="0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Ролик:" VerticalAlignment="Center" />
+                                        <ToggleSwitch Classes="markdown-view-switch"
+                                                      IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
+                                                      IsChecked="{Binding IsReelDescriptionInPreviewMode, Mode=TwoWay}" />
+                                    </StackPanel>
+                                    
+                                    <Separator />
 
-                        <ContentControl Classes.description-edit="{Binding !IsDescriptionInPreviewMode}"
-                                        Classes.description-view="{Binding IsDescriptionInPreviewMode}" />
+                                    <ContentControl Classes="reel-description" 
+                                                    Classes.description-edit="{Binding !IsReelDescriptionInPreviewMode}"
+                                                    Classes.description-view="{Binding IsReelDescriptionInPreviewMode}" 
+                                                    Tag="{Binding ReelDescription, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Classes="card" Grid.Row="2" Grid.Column="0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Превью:" VerticalAlignment="Center" />
+                                        <ToggleSwitch Classes="markdown-view-switch"
+                                                      IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
+                                                      IsChecked="{Binding IsPreviewDescriptionInPreviewMode, Mode=TwoWay}" />
+                                    </StackPanel>
+                                    
+                                    <Separator />
 
+                                    <ContentControl Classes="preview-description"  
+                                                    Classes.description-edit="{Binding !IsPreviewDescriptionInPreviewMode}"
+                                                    Classes.description-view="{Binding IsPreviewDescriptionInPreviewMode}"
+                                                    Tag="{Binding PreviewDescription, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="400" Height="400" VerticalAlignment="Top">
+                                
+                            </Border>
+                        </Grid>
+                        
                         <Separator />
 
                         <attachmentsPanel:AttachmentsPanel

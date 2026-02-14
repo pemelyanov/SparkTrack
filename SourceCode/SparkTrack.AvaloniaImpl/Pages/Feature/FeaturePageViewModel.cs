@@ -24,6 +24,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Text.Json;
+using DescriptionTemplates;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
 
@@ -118,14 +120,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_commentFactory = commentFactory;
         m_authorizationService = authorizationService;
         m_subTaskViewModelFactory = subTaskViewModelFactory;
-        IsDescriptionInPreviewMode = m_feature is not null;
+        IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
 
         if (feature is null) IsNameEditing = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
 
-        RefreshCommand = ReactiveCommand.CreateFromTask(
-            () => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()])
+        RefreshCommand = ReactiveCommand.CreateFromTask(() => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()])
         );
 
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
@@ -158,22 +159,25 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public bool IsNameEditing { get; set; }
 
     [Reactive]
-    public bool IsDescriptionInPreviewMode { get; set; }
-    
+    public bool IsReelDescriptionInPreviewMode { get; set; }
+
+    [Reactive]
+    public bool IsPreviewDescriptionInPreviewMode { get; set; }
+
     [Reactive]
     public bool IsEditingComment { get; private set; }
-    
+
     [Reactive]
     public bool IsEditingSubTask { get; private set; }
-    
+
     [Reactive]
     public bool CanSaveByHotKey { get; private set; }
 
     public bool CanAddComments => m_feature is not null;
-    
+
     [Reactive]
     public DateTime? CreatedAt { get; private set; }
-    
+
     [Reactive]
     public DateTime? EditedAt { get; private set; }
 
@@ -187,7 +191,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public SuspendableObservableCollection<CommentViewModel> CommentsList { get; } = [];
 
     [Reactive]
-    public string Description { get; set; } = string.Empty;
+    public string ReelLink { get; set; } = string.Empty;
+
+    [Reactive]
+    public string ReelDescription { get; set; } = string.Empty;
+
+    [Reactive]
+    public string PreviewDescription { get; set; } = string.Empty;
 
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
@@ -199,8 +209,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void OnImagePaste(byte[] image, string extension)
     {
-        if(m_authorizationService.CurrentUser.Value?.Role is ERole.Employee) return;
-        
+        if (m_authorizationService.CurrentUser.Value?.Role is ERole.Employee) return;
+
         AttachmentsPanelViewModel.AddAttachment(image, extension);
     }
 
@@ -242,7 +252,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
                             task.IsInEditMode = false;
                 }
             );
-        
+
         subTaskViewModel.DisposeWithViewModel(isEditSubscription);
 
         return subTaskViewModel;
@@ -255,7 +265,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         if (m_authorizationService.CurrentUser.Value?.Role is not ERole.Employee)
         {
             var availableEmployees = await m_usersService.GetPageAsync(ERole.Employee, PageQuery.All);
-            m_availableEmployeesList.OnNext(availableEmployees.Items);   
+            m_availableEmployeesList.OnNext(availableEmployees.Items);
         }
 
         if (m_feature?.Id is not { } featureId) return;
@@ -291,14 +301,26 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         ProjectId = m_projectId,
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
         AttachmentsList = AttachmentsPanelViewModel.AttachmentsList.Select(it => it.ToModel()).ToArray(),
-        Description = Description,
+        Description = JsonSerializer.Serialize(
+            new ReelWithPreviewTemplate
+            {
+                ReelLink = ReelLink,
+                PreviewDescription = PreviewDescription,
+                ReelDescription = ReelDescription
+            }
+        ),
         Version = m_feature?.Version ?? Guid.Empty
     };
 
     private void InitializeProperties(Feature? feature)
     {
         Name = feature?.Name ?? "Название идеи";
-        Description = feature?.Description ?? string.Empty;
+
+        var template = TryParseJson<ReelWithPreviewTemplate>(feature?.Description);
+
+        ReelLink = template?.ReelLink ?? string.Empty;
+        ReelDescription = template?.ReelDescription ?? string.Empty;
+        PreviewDescription = template?.PreviewDescription ?? string.Empty;
         CreatedAt = feature?.CreatedAt;
         EditedAt = feature?.EditedAt;
 
@@ -317,6 +339,20 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
     }
 
+    private TData? TryParseJson<TData>(string? data) where TData : class
+    {
+        if (data is null) return null;
+        
+        try
+        {
+            return JsonSerializer.Deserialize<TData>(data);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private async Task RefreshCommentsAsync()
     {
         if (m_feature is null) return;
@@ -324,35 +360,37 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var page = await m_commentsService.GetPageAsync(m_feature.Id, PageQuery.All);
 
         var commentsViewModels = page.Items.Select(it =>
-        {
-            var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
+            {
+                var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
 
-            var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
-                .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
-                .WhereNotNull()
-                .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
-                .Subscribe(source =>
-                    {
-                        foreach (var otherComment in CommentsList)
-                            if(otherComment != source) otherComment.CancelEdit();
+                var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
+                    .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
+                    .WhereNotNull()
+                    .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
+                    .Subscribe(source =>
+                        {
+                            foreach (var otherComment in CommentsList)
+                                if (otherComment != source)
+                                    otherComment.CancelEdit();
 
-                        CancelComment();
-                    }
-                );
-            
-            commentViewModel.DisposeWithViewModel(editSubscription);
+                            CancelComment();
+                        }
+                    );
 
-            return commentViewModel;
-        });
+                commentViewModel.DisposeWithViewModel(editSubscription);
+
+                return commentViewModel;
+            }
+        );
 
         var oldComments = CommentsList.ToArray();
-        
+
         using (CommentsList.SuspendNotifications())
         {
             CommentsList.Clear();
             CommentsList.AddRange(commentsViewModels);
         }
-        
+
         foreach (var commentViewModel in oldComments)
             commentViewModel.Dispose();
     }
