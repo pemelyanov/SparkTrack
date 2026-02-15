@@ -10,6 +10,8 @@ public interface IProjectsService
     Task<IReadOnlyList<Project>> GetListAsync();
 
     Task AddAsync(Project project);
+    
+    Task EditAsync(Project project);
 
-    Task DeleteAsync(Guid id);
+    Task DeleteAsync(Guid id, bool force);
 }

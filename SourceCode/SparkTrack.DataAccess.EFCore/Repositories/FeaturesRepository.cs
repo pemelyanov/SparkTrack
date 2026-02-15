@@ -33,6 +33,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             !showCompleted,
             f => f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
         )
+        // TODO: Add filter
+        .Where(it => it.ArchivedAt == null)
         .OrderBy(it => it.CreatedAt)
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .AsPaginated(pageQuery)
@@ -170,6 +172,20 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         await dbContext.SaveChangesAsync();
     }
+    
+    public async Task SetArchiveStatus(int id, bool isArchived, EArchiveSource? archiveSource = null)
+    {
+        var feature = await dbContext.Features.FindAsync(id);
+
+        if (feature is null) return;
+
+        feature.ArchiveSource =
+            isArchived ? archiveSource ?? throw new InvalidOperationException("Enter archive source") : null;
+        
+        feature.ArchivedAt = isArchived ? DateTime.UtcNow : null;
+        
+        await dbContext.SaveChangesAsync();
+    }
 
     private static Expression<Func<FeatureData, Feature>> GetFeatureMapExpression(
         Guid? subTaskEmployeeId
@@ -181,7 +197,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Project = new Project
         {
             Id = f.Project.Id,
-            Name = f.Project.Name
+            Name = f.Project.Name,
+            ArchivedAt = f.Project.ArchivedAt,
+            ArchiveSource = f.Project.ArchiveSource
         },
         TasksList = f.TasksList
             .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId)
@@ -198,7 +216,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                         Id = t.ExecutorEmployee.Id,
                         Name = t.ExecutorEmployee.Name,
                         Role = t.ExecutorEmployee.Role,
-                        Email = t.ExecutorEmployee.Email
+                        Email = t.ExecutorEmployee.Email,
+                        ArchivedAt = t.ExecutorEmployee.ArchivedAt,
+                        ArchiveSource = t.ExecutorEmployee.ArchiveSource
                     },
                     PaymentStatus = t.PaymentStatus,
                     IsCompleted = t.IsCompleted,
@@ -225,6 +245,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             .ToArray(),
         CreatedAt = f.CreatedAt,
         EditedAt = f.EditedAt,
-        Version = f.Version
+        Version = f.Version,
+        ArchivedAt = f.ArchivedAt,
+        ArchiveSource = f.ArchiveSource
     };
 }

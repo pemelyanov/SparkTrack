@@ -19,16 +19,17 @@ public static class AuthorizationServiceExtensions
 
     public static User GetUserOrThrowIfNotInRole(
         this IAuthorizationService service,
-        ERole role,
-        params ERole[] otherRoles
+        ERole role
     )
     {
         if (service.CurrentUser is null)
             throw new UnauthorizedException(
                 $"Authorize user using {nameof(IAuthorizationService)}.{nameof(IAuthorizationService.AuthorizeAsync)}"
             );
+        
+        var intersection = service.CurrentUser.Role & role;
 
-        if (service.CurrentUser.Role != role)
+        if (intersection == 0)
             throw new ForbiddenException(
                 $"Authorize user with required role ({role}) using {nameof(IAuthorizationService)}.{nameof(IAuthorizationService.AuthorizeAsync)}"
             );

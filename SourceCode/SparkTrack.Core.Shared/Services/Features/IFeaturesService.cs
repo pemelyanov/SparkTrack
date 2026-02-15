@@ -34,5 +34,5 @@ public interface IFeaturesService
 
     Task EditAsync(FeatureEdit feature);
 
-    Task DeleteAsync(int id);
+    Task DeleteAsync(int id, bool force);
 }

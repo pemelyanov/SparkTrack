@@ -3,6 +3,7 @@
 using Autofac;
 using Seeding;
 using Seeding.Development;
+using Services.Archive;
 using Services.Authorization;
 using Services.Comments;
 using Services.Features;
@@ -26,6 +27,9 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<SubTasksService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PaymentBillsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<UserArchiveService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<FeatureArchiveService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<ProjectsArchiveService>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
         RegisterSeeders(builder);
     }

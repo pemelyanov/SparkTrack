@@ -45,8 +45,16 @@
                     VerticalAlignment="Bottom" Command="{Binding CreateFeature}" />
         </Grid>
 
-        <Button Grid.Row="2" Classes="icon reload" Command="{Binding ReloadTableCommand}"
-                HorizontalAlignment="Right" />
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal">
+            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}" IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
+            
+            <Button Content="Перевести на оплату" Command="{Binding SendOnPaymentCommand}" IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
+            
+            <Button Content="Пометить как выполненные" Command="{Binding MarkAsCompletedCommand}" />
+            
+            <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
+        </StackPanel>
+        
 
         <DataGrid Grid.Row="3"
                   Classes="readonly"

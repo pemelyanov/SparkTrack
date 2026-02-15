@@ -20,8 +20,12 @@
                     VerticalAlignment="Bottom" Command="{Binding AddProjectAsync}"/>
         </Grid>
         
-        <Button Grid.Row="2" Classes="icon reload" Command="{Binding ReloadTableCommand}"
-                HorizontalAlignment="Right" />
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal">
+            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}" /> 
+            
+            <Button Classes="icon reload f5-hot-key" Command="{Binding ReloadTableCommand}" />    
+        </StackPanel>
+        
         
         <DataGrid Grid.Row="3"
                   Classes="readonly"

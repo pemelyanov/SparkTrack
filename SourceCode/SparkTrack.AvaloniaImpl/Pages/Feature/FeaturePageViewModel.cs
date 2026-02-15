@@ -24,6 +24,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Text.Json;
+using Controls.Attachment;
+using DescriptionTemplates;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
 
@@ -118,25 +121,35 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_commentFactory = commentFactory;
         m_authorizationService = authorizationService;
         m_subTaskViewModelFactory = subTaskViewModelFactory;
-        IsDescriptionInPreviewMode = m_feature is not null;
+        IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
+        IsEditingLink = m_feature is null;
+        AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
+        AttachmentsPanelViewModel.PreviewAttachmentSetRequested += AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
         if (feature is null) IsNameEditing = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
 
-        RefreshCommand = ReactiveCommand.CreateFromTask(
-            () => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()])
+        RefreshCommand = ReactiveCommand.CreateFromTask(() => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()])
         );
 
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
     }
-
+    
     protected override void OnActivated(CompositeDisposable disposables)
     {
         base.OnActivated(disposables);
 
         RefreshCommand.Execute().Subscribe().DisposeWith(disposables);
+
+        this.WhenAnyValue(
+                it => it.IsEditingSubTask,
+                it => it.IsEditingComment,
+                (isEditingSubTask, isEditingComment) => !isEditingSubTask && !isEditingComment
+            )
+            .Subscribe(canSaveByHotKey => CanSaveByHotKey = canSaveByHotKey)
+            .DisposeWith(disposables);
     }
 
     public string UrlPathSegment => "feature";
@@ -145,18 +158,36 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public string Name { get; set; } = string.Empty;
+    
+    [Reactive]
+    public IAttachmentViewModel? PreviewAttachment { get; private set; }
 
     [Reactive]
     public bool IsNameEditing { get; set; }
 
     [Reactive]
-    public bool IsDescriptionInPreviewMode { get; set; }
+    public bool IsReelDescriptionInPreviewMode { get; set; }
 
-    public bool CanAddComments => m_feature is not null;
+    [Reactive]
+    public bool IsPreviewDescriptionInPreviewMode { get; set; }
+
+    [Reactive]
+    public bool IsEditingLink { get; set; }
     
     [Reactive]
+    public bool IsEditingComment { get; private set; }
+
+    [Reactive]
+    public bool IsEditingSubTask { get; private set; }
+
+    [Reactive]
+    public bool CanSaveByHotKey { get; private set; }
+
+    public bool CanAddComments => m_feature is not null;
+
+    [Reactive]
     public DateTime? CreatedAt { get; private set; }
-    
+
     [Reactive]
     public DateTime? EditedAt { get; private set; }
 
@@ -170,7 +201,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public SuspendableObservableCollection<CommentViewModel> CommentsList { get; } = [];
 
     [Reactive]
-    public string Description { get; set; } = string.Empty;
+    public string ReelLink { get; set; } = string.Empty;
+
+    [Reactive]
+    public string ReelDescription { get; set; } = string.Empty;
+
+    [Reactive]
+    public string PreviewDescription { get; set; } = string.Empty;
 
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
@@ -182,20 +219,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void OnImagePaste(byte[] image, string extension)
     {
-        if (CommentEditViewModel is not null)
-        {
-            CommentEditViewModel.AttachmentsPanelViewModel.AddAttachment(image, extension);
-            return;
-        }
+        if (m_authorizationService.CurrentUser.Value?.Role is ERole.Employee) return;
 
-        if (CommentsList.FirstOrDefault(it => it.EditViewModel is not null) is { } existingCommentEdit)
-        {
-            existingCommentEdit.EditViewModel?.AttachmentsPanelViewModel.AddAttachment(image, extension);
-            return;
-        }
-        
-        if(m_authorizationService.CurrentUser.Value?.Role is ERole.Employee) return;
-        
         AttachmentsPanelViewModel.AddAttachment(image, extension);
     }
 
@@ -216,17 +241,32 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTask = CreateSubTaskViewModel();
         subTask.IsInEditMode = true;
 
-        foreach (var taskViewModel in SubTasksList)
-            taskViewModel.IsInEditMode = false;
-
         SubTasksList.Add(subTask);
     }
 
-    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null) => m_subTaskViewModelFactory.Invoke(
-        subTask,
-        m_availableEmployeesList,
-        it => SubTasksList.Remove(it)
-    );
+    private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null)
+    {
+        var subTaskViewModel = m_subTaskViewModelFactory.Invoke(
+            subTask,
+            m_availableEmployeesList,
+            it => SubTasksList.Remove(it)
+        );
+
+        var isEditSubscription = subTaskViewModel.WhenAnyValue(it => it.IsInEditMode)
+            .Do(_ => IsEditingSubTask = SubTasksList.Any(it => it.IsInEditMode))
+            .Where(isInEditMode => isInEditMode)
+            .Subscribe(_ =>
+                {
+                    foreach (var task in SubTasksList)
+                        if (subTaskViewModel != task)
+                            task.IsInEditMode = false;
+                }
+            );
+
+        subTaskViewModel.DisposeWithViewModel(isEditSubscription);
+
+        return subTaskViewModel;
+    }
 
     private async Task RefreshAsync()
     {
@@ -235,7 +275,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         if (m_authorizationService.CurrentUser.Value?.Role is not ERole.Employee)
         {
             var availableEmployees = await m_usersService.GetPageAsync(ERole.Employee, PageQuery.All);
-            m_availableEmployeesList.OnNext(availableEmployees.Items);   
+            m_availableEmployeesList.OnNext(availableEmployees.Items);
         }
 
         if (m_feature?.Id is not { } featureId) return;
@@ -271,26 +311,60 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         ProjectId = m_projectId,
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
         AttachmentsList = AttachmentsPanelViewModel.AttachmentsList.Select(it => it.ToModel()).ToArray(),
-        Description = Description,
+        Description = JsonSerializer.Serialize(
+            new ReelWithPreviewTemplate
+            {
+                ReelLink = ReelLink,
+                PreviewDescription = PreviewDescription,
+                ReelDescription = ReelDescription,
+                PreviewAttachmentName = PreviewAttachment?.Name
+            }
+        ),
         Version = m_feature?.Version ?? Guid.Empty
     };
 
     private void InitializeProperties(Feature? feature)
     {
         Name = feature?.Name ?? "Название идеи";
-        Description = feature?.Description ?? string.Empty;
+
+        var template = TryParseJson<ReelWithPreviewTemplate>(feature?.Description);
+
+        ReelLink = template?.ReelLink ?? string.Empty;
+        ReelDescription = template?.ReelDescription ?? string.Empty;
+        PreviewDescription = template?.PreviewDescription ?? string.Empty;
         CreatedAt = feature?.CreatedAt;
         EditedAt = feature?.EditedAt;
 
         var subTasks = feature?.TasksList.Select(CreateSubTaskViewModel) ?? [];
 
+        var oldTasks = SubTasksList.ToArray();
         using (SubTasksList.SuspendNotifications())
         {
             SubTasksList.Clear();
             SubTasksList.AddRange(subTasks);
         }
 
+        foreach (var oldTask in oldTasks)
+            oldTask.Dispose();
+        
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
+
+        PreviewAttachment =
+            AttachmentsPanelViewModel.AttachmentsList.FirstOrDefault(it => it.Name == template?.PreviewAttachmentName);
+    }
+
+    private TData? TryParseJson<TData>(string? data) where TData : class
+    {
+        if (data is null) return null;
+        
+        try
+        {
+            return JsonSerializer.Deserialize<TData>(data);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private async Task RefreshCommentsAsync()
@@ -300,34 +374,37 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var page = await m_commentsService.GetPageAsync(m_feature.Id, PageQuery.All);
 
         var commentsViewModels = page.Items.Select(it =>
-        {
-            var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
+            {
+                var commentViewModel = m_commentFactory(it, OnCommentDeleteAsync);
 
-            var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
-                .WhereNotNull()
-                .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
-                .Subscribe(source =>
-                    {
-                        foreach (var otherComment in CommentsList)
-                            if(otherComment != source) otherComment.CancelEdit();
+                var editSubscription = commentViewModel.WhenAnyValue(vm => vm.EditViewModel)
+                    .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
+                    .WhereNotNull()
+                    .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
+                    .Subscribe(source =>
+                        {
+                            foreach (var otherComment in CommentsList)
+                                if (otherComment != source)
+                                    otherComment.CancelEdit();
 
-                        CancelComment();
-                    }
-                );
-            
-            commentViewModel.DisposeWithViewModel(editSubscription);
+                            CancelComment();
+                        }
+                    );
 
-            return commentViewModel;
-        });
+                commentViewModel.DisposeWithViewModel(editSubscription);
+
+                return commentViewModel;
+            }
+        );
 
         var oldComments = CommentsList.ToArray();
-        
+
         using (CommentsList.SuspendNotifications())
         {
             CommentsList.Clear();
             CommentsList.AddRange(commentsViewModels);
         }
-        
+
         foreach (var commentViewModel in oldComments)
             commentViewModel.Dispose();
     }
@@ -353,4 +430,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         await RefreshCommentsCommand.Execute().ToTask();
     }
+    
+    private void AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested(IAttachmentViewModel preview)
+    {
+        PreviewAttachment = preview;
+    }
+
+    private void AttachmentsPanelViewModel_OnAttachmentAdded(IAttachmentViewModel attachment)
+    {
+        if (AttachmentsPanelViewModel.AttachmentsList.Count == 1) PreviewAttachment = attachment;
+    }
+
 }

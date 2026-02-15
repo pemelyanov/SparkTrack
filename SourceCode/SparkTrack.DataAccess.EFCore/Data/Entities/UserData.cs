@@ -17,4 +17,8 @@ public record UserData
     public required string PasswordHash { get; set; }
     
     public ICollection<BonusPaymentData> Bonuses { get; } = [];
+    
+    public DateTime? ArchivedAt { get; set; }
+    
+    public EArchiveSource? ArchiveSource { get; set; }
 }

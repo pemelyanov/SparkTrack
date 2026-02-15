@@ -23,7 +23,7 @@ public class GitHubRepositoryManager(string repoOwner, string repoName, string? 
             
             var allReleases = await client.Repository.Release.GetAll(repoOwner, repoName);
 
-            return allReleases.OrderBy(it => it.CreatedAt)
+            return allReleases.OrderByDescending(it => it.CreatedAt)
                 .FirstOrDefault(release => regex.IsMatch(release.Name));
         }
         catch

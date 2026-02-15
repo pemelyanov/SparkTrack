@@ -3,6 +3,7 @@
 using Shared.Data;
 using Shared.Data.Edit;
 using Shared.Data.Entities;
+using Shared.Enums;
 
 public interface IFeaturesRepository
 {
@@ -32,4 +33,6 @@ public interface IFeaturesRepository
     Task EditAsync(FeatureEdit feature);
 
     Task DeleteAsync(int id);
+
+    Task SetArchiveStatus(int id, bool isArchived, EArchiveSource? archiveSource = null);
 }

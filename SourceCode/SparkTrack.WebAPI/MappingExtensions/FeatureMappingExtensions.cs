@@ -39,6 +39,8 @@ public static class FeatureMappingExtensions
         AttachmentsList = it.AttachmentsList.Select(file => file.ToDTO()).ToArray(),
         CreatedAt = it.CreatedAt,
         EditedAt = it.EditedAt,
-        Version = it.Version
+        Version = it.Version,
+        ArchivedAt = it.ArchivedAt,
+        ArchiveSource = it.ArchiveSource
     };
 }

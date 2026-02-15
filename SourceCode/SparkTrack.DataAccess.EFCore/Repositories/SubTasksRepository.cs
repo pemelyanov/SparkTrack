@@ -105,7 +105,9 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
             Id = data.ExecutorEmployee.Id,
             Email = data.ExecutorEmployee.Email,
             Name = data.ExecutorEmployee.Name,
-            Role = data.ExecutorEmployee.Role
+            Role = data.ExecutorEmployee.Role,
+            ArchivedAt = data.ExecutorEmployee.ArchivedAt,
+            ArchiveSource = data.ExecutorEmployee.ArchiveSource
         },
         Deadline = data.Deadline,
         Cost = data.Cost,
@@ -127,7 +129,9 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
                 Id = data.ExecutorEmployee.Id,
                 Email = data.ExecutorEmployee.Email,
                 Name = data.ExecutorEmployee.Name,
-                Role = data.ExecutorEmployee.Role
+                Role = data.ExecutorEmployee.Role,
+                ArchivedAt = data.ExecutorEmployee.ArchivedAt,
+                ArchiveSource = data.ExecutorEmployee.ArchiveSource
             },
             Deadline = data.Deadline,
             Cost = data.Cost,
@@ -150,7 +154,9 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
                             Email = p.Admin.Email,
                             Name = p.Admin.Name,
                             Role = p.Admin.Role,
-                            TelegramTag = p.Admin.TelegramTag
+                            TelegramTag = p.Admin.TelegramTag,
+                            ArchivedAt = p.Admin.ArchivedAt,
+                            ArchiveSource = p.Admin.ArchiveSource
                         },
                         CreatedAt = p.CreatedAt
                     }

@@ -53,7 +53,15 @@
         </Style>
     </UserControl.Styles>
     <Border Classes="card" x:Name="Container" Padding="0">
-        <Grid ColumnDefinitions="Auto * Auto" Width="256">
+        <Grid ColumnDefinitions="Auto * Auto" Width="256" Background="Transparent">
+            <Grid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
+                    <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"
+                              IsEnabled="{Binding CanOpenInExplorer}" />
+                    <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью" Command="{Binding RaisePreviewSetRequested}" />
+                </ContextMenu>
+            </Grid.ContextMenu>
             <ContentControl Classes.half-transparent="{Binding #Container.IsPointerOver}"
                             Classes.file="{Binding !IsImage}"
                             Classes.image="{Binding IsImage}"
@@ -125,16 +133,6 @@
                 <Button Classes="icon small close"
                         IsVisible="{Binding !#Root.IsReadOnly}"
                         Command="{Binding RemoveAsync}" />
-
-                <Button Classes="icon small more">
-                    <Button.Flyout>
-                        <MenuFlyout>
-                            <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
-                            <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"
-                                      IsEnabled="{Binding CanOpenInExplorer}" />
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
             </StackPanel>
         </Grid>
     </Border>

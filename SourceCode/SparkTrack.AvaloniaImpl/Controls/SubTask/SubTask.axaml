@@ -102,7 +102,7 @@
 
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
                             HorizontalAlignment="Right">
-                    <ToggleButton Classes="icon"
+                    <ToggleButton Classes="icon enter-hot-key"
                                   Classes.edit="{Binding !IsInEditMode}"
                                   Classes.save="{Binding IsInEditMode}"
                                   VerticalAlignment="Top"

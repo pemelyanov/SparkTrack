@@ -18,12 +18,6 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     private readonly Attachment    m_attachment;
     private readonly IFilesService m_filesService;
 
-    private static readonly string s_downloadsFolder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-        "Downloads",
-        "SparkTrackDownloads"
-    );
-
     public RemoteAttachmentViewModel(
         Attachment attachment,
         Action<IAttachmentViewModel> onRemove,
@@ -40,7 +34,9 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         Extension = attachment.Extension;
         Size = attachment.Size;
 
-        Uri = attachmentsPathCache.Resolve(attachment.FileId) ?? Path.Combine(
+        var cachedPath = attachmentsPathCache.Resolve(attachment.FileId);
+
+        Uri = File.Exists(cachedPath) ? cachedPath : null ?? Path.Combine(
             s_downloadsFolder,
             $"{attachment.FileId.ToString()}.{attachment.Extension.TrimStart('.')}"
         );

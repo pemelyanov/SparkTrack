@@ -8,6 +8,7 @@ using Avalonia.ReactiveUI;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Extensions;
 
 public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
 {
@@ -44,36 +45,15 @@ public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
         m_loadedDisposables?.Dispose();
     }
 
-    public async void OnPaste()
-    {
-        var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-
-        if (clipboard?.TryGetDataAsync() is not { } dataTask) return;
-        
-        var data = await dataTask;
-            
-        if(data is null) return;
-
-        foreach (var asyncDataTransferItem in data.Items)
-        {
-            var imageFormat = asyncDataTransferItem.Formats.FirstOrDefault(it =>
-                it.Identifier is "PNG" or "JPG" or "JPEG"
-            );
-                
-            if(imageFormat is null) continue;
-
-            var imageBytes = await asyncDataTransferItem.TryGetRawAsync(imageFormat) as byte[];
-                
-            if(imageBytes is null) continue;
-            
-            ViewModel?.OnImagePaste(imageBytes, imageFormat.Identifier.ToLower());
-        }
-    }
-
     private void InputElement_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         if(sender is not ScrollViewer scrollViewer) return;
 
         scrollViewer.Offset = new Vector(scrollViewer.Offset.X + e.Delta.Y * 10, 0);
+    }
+
+    private async void TextBox_OnPastingFromClipboard(object? sender, RoutedEventArgs e)
+    {
+        await this.HandleImagePastingFromClipboard((data, extension) => ViewModel?.OnImagePaste(data, extension));
     }
 }

@@ -5,13 +5,13 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using FluentAvalonia.UI.Controls;
 
-public partial class UserEditFrom : ReactiveContentDialog<UserEditFormViewModel>
+public partial class UserEditForm : ReactiveContentDialog<UserEditFormViewModel>
 {
-    public UserEditFrom()
+    public UserEditForm()
     {
         InitializeComponent();
     }
-
+    
     protected override void OnPrimaryButtonClick(ContentDialogButtonClickEventArgs args)
     {
         args.Cancel = true;

@@ -3,6 +3,7 @@
 using API;
 using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
+using EArchiveSource = Core.Shared.Enums.EArchiveSource;
 
 public static class FeatureMappingExtensions
 {
@@ -38,6 +39,8 @@ public static class FeatureMappingExtensions
         AttachmentsList = it.AttachmentsList.Select(file => file.ToDomain()).ToArray(),
         CreatedAt = it.CreatedAt.ToLocalTime(),
         EditedAt = it.EditedAt?.ToLocalTime(),
-        Version = it.Version
+        Version = it.Version,
+        ArchivedAt = it.ArchivedAt,
+        ArchiveSource = it.ArchiveSource?.Cast<EArchiveSource>()
     };
 }

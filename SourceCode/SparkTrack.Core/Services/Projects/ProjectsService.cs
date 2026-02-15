@@ -1,12 +1,19 @@
 ﻿namespace SparkTrack.Core.Services.Projects;
 
+using Archive;
 using Authorization;
 using Extensions;
 using Repositories;
 using Shared.Data.Entities;
+using Shared.Enums;
 using Shared.Services.Projects;
 
-internal class ProjectsService(IAuthorizationService authorizationService, IProjectsRepository projectsRepository) : IProjectsService
+internal class ProjectsService(
+    IAuthorizationService authorizationService,
+    IProjectsRepository projectsRepository,
+    IProjectArchiveService projectArchiveService
+)
+    : IProjectsService
 {
     public Task<IReadOnlyList<Project>> GetListAsync()
     {
@@ -19,11 +26,27 @@ internal class ProjectsService(IAuthorizationService authorizationService, IProj
 
     public Task AddAsync(Project project)
     {
-        return projectsRepository.AddAsync(project with { Id = Guid.Empty });
+        return projectsRepository.AddAsync(
+            project with
+            {
+                Id = Guid.Empty
+            }
+        );
     }
 
-    public Task DeleteAsync(Guid id)
+    public Task EditAsync(Project project)
     {
-        return projectsRepository.DeleteAsync(id);
+        return projectsRepository.UpdateAsync(project);
+    }
+
+    public async Task DeleteAsync(Guid id, bool force)
+    {
+        if (force)
+        {
+            await projectsRepository.DeleteAsync(id);
+            return;
+        }
+
+        await projectArchiveService.ArchiveAsync(id, EArchiveSource.User);
     }
 }

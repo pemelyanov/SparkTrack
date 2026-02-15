@@ -7,7 +7,7 @@
   
     <Application.Styles>
         <FluentTheme />
-        <styling:FluentAvaloniaTheme PreferSystemTheme="False" PreferUserAccentColor="True" />
+        <styling:FluentAvaloniaTheme PreferSystemTheme="False" PreferUserAccentColor="True" UseSystemFontOnWindows="True" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
         <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
         <StyleInclude Source="Styles/BorderStyles.axaml" />

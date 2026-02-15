@@ -38,7 +38,7 @@ public class JsonAttachmentsPathCache : IAttachmentsPathCache, IEventHandler<Sta
 
         if (File.Exists(s_cachePath))
         {
-            m_pathCache = JsonSerializer.Deserialize<PathCache>(s_cachePath)!;
+            m_pathCache = JsonSerializer.Deserialize<PathCache>(File.ReadAllText(s_cachePath))!;
         }
 
         return Task.CompletedTask;

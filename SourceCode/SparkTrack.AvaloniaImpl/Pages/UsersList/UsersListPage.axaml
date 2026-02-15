@@ -4,25 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
-             xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Users"
              xmlns:dataGridColumns="clr-namespace:SparkTrack.AvaloniaImpl.DataGridColumns"
              xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
+             xmlns:users="clr-namespace:SparkTrack.AvaloniaImpl.Pages.UsersList"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="SparkTrack.AvaloniaImpl.Pages.Users.UsersPage"
-             x:DataType="users:UsersPageViewModel"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.UsersList.UsersListPage"
+             x:DataType="users:UsersListPageViewModel"
              x:Name="Root">
     <UserControl.Resources>
         <converters:RoleConverter x:Key="RoleConverter" />
     </UserControl.Resources>
     <Grid RowDefinitions="Auto Auto Auto * Auto" RowSpacing="8">
-        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type users:UsersPageViewModel}" x:DataType="system:Type"
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type users:UsersListPageViewModel}" x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
         
         <Button Grid.Row="1" Classes="accent" HorizontalAlignment="Right" Content="Создать" 
                 Command="{Binding OpenUserAddAsync}" />
         
-        <Button Grid.Row="2" Classes="icon reload" Command="{Binding ReloadTableCommand}"
-                HorizontalAlignment="Right" />
+        <StackPanel Grid.Row="2" HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal" >
+            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}" />
+            <Button  Classes="icon reload f5-hot-key" Command="{Binding ReloadTableCommand}"/>
+        </StackPanel>
         
         <DataGrid Grid.Row="3"
                   Classes="readonly"

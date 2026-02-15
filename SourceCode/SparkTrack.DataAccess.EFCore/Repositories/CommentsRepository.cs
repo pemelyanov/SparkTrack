@@ -83,6 +83,8 @@ public class CommentsRepository(SparkTrackDbContext dbContext) : ICommentsReposi
                 Email = it.User.Email,
                 Name = it.User.Name,
                 Role = it.User.Role,
+                ArchivedAt = it.User.ArchivedAt,
+                ArchiveSource = it.User.ArchiveSource
             },
             Text = it.Text,
             CreatedAt = it.CreatedAt,

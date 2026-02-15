@@ -3,6 +3,7 @@ namespace SparkTrack.AvaloniaImpl.Extensions;
 using Services.DialogHost;
 using Windows.Confirmation;
 using Windows.Notification;
+using ViewModels;
 
 public static class DialogHostExtensions
 {
@@ -18,6 +19,9 @@ public static class DialogHostExtensions
         string message,
         string? title = null,
         string? acceptText = null,
-        string? cancelText = null
-    ) => await service.ShowAsync(new ConfirmationViewModel(message, title, acceptText, cancelText)) ?? false;
+        string? cancelText = null,
+        IReadOnlyList<SelectableViewModel<string>>? additionalOptionsList = null
+    ) => await service.ShowAsync(
+        new ConfirmationViewModel(message, title, acceptText, cancelText, additionalOptionsList)
+    ) ?? false;
 }

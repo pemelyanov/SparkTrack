@@ -25,11 +25,7 @@ public class ProjectEditFormViewModel : DialogViewModelBase
 
         if (IsEditMode)
         {
-            SaveCommand = ReactiveCommand.Create(() =>
-            {
-                // TODO: Add edit
-                Close(false);
-            });
+            SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync, canSave);
             return;
         }
         
@@ -51,6 +47,15 @@ public class ProjectEditFormViewModel : DialogViewModelBase
         Name = string.Empty;
         Link = string.Empty;
     }
+    
+    private async Task SaveAsync()
+    {
+        var projectData = MapToProject();
+
+        await m_projectsService.EditAsync(projectData);
+        
+        Close(true);
+    }
 
     private async Task CreateAsync()
     {
@@ -70,6 +75,4 @@ public class ProjectEditFormViewModel : DialogViewModelBase
             Link = Link
         };
     }
-    
-    
 }

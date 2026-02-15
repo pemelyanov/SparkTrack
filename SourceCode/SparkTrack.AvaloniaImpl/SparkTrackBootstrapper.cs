@@ -13,6 +13,7 @@ using Controls.CommentEdit;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.SubTask;
+using Controls.UserAddForm;
 using Controls.UserEditForm;
 using Controls.UsersFilter;
 using Core.Client.AutofacModules;
@@ -32,7 +33,7 @@ using Pages.Feature;
 using Pages.FeaturesList;
 using Pages.ProjectsList;
 using Pages.Update;
-using Pages.Users;
+using Pages.UsersList;
 using Services.AttachmentsPathCache;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
@@ -44,9 +45,9 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<MainWindowViewModel>().AsImplementedInterfaces().AsSelf().SingleInstance();
         builder.RegisterType<AuthorizationPageViewModel>().SingleInstance();
         builder.RegisterType<FeaturesListPageViewModel>().SingleInstance();
-        builder.RegisterType<UsersPageViewModel>().As<IEventHandler<LogoutEvent>>().AsSelf().SingleInstance();
+        builder.RegisterType<UsersListPageViewModel>().As<IEventHandler<LogoutEvent>>().AsSelf().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
-        builder.RegisterType<UserEditFormViewModel>();
+        builder.RegisterType<UserAddFormViewModel>();
         builder.RegisterType<FeaturePageViewModel>();
         builder.RegisterType<ProjectsListPageViewModel>().SingleInstance();
         builder.RegisterType<ProjectEditFormViewModel>();
@@ -64,6 +65,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<PaymentsHistoryViewModel>();
         builder.RegisterType<UserFilterViewModel>();
         builder.RegisterType<ClipboardAttachmentViewModel>();
+        builder.RegisterType<UserEditFormViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
@@ -99,22 +101,6 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<InnoSetupInstallerUnpackerService>()
             .AsImplementedInterfaces()
             .SingleInstance();
-
-        // builder.RegisterType<UpdateCustomUnpackerService>()
-        //     .WithParameters(
-        //         [
-        //             new NamedParameter(
-        //                 "updatedUnpackerPath",
-        //                 Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.exe")
-        //             ),
-        //             new NamedParameter(
-        //                 "currentUnpackerPath",
-        //                 Path.Combine(Environment.CurrentDirectory, "SparkTrack.Unpacker.Current.exe")
-        //             )
-        //         ]
-        //     )
-        //     .As<IUpdateUnpackerService>()
-        //     .SingleInstance();
 
         builder.RegisterType<UpdateService>()
             .WithParameters(

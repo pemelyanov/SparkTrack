@@ -48,7 +48,7 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
         builder.HasOne(t => t.ExecutorEmployee)
             .WithMany()
             .HasForeignKey(t => t.ExecutorEmployeeId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(t => t.Feature)
             .WithMany(it => it.TasksList);

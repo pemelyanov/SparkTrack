@@ -1,16 +1,27 @@
 <controls:ContentDialog xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             xmlns:confirmation="clr-namespace:SparkTrack.AvaloniaImpl.Windows.Confirmation"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="SparkTrack.AvaloniaImpl.Windows.Confirmation.ConfirmationWindow"
-             x:DataType="confirmation:ConfirmationViewModel"
-             Title="{Binding Title}"
-             PrimaryButtonText="{Binding AcceptText}"
-             CloseButtonText="{Binding CancelText}"
-             PrimaryButtonCommand="{Binding Close}" PrimaryButtonCommandParameter="{x:True}"
-             CloseButtonCommand="{Binding Close}" CloseButtonCommandParameter="{x:False}">
-    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:confirmation="clr-namespace:SparkTrack.AvaloniaImpl.Windows.Confirmation"
+                        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                        x:Class="SparkTrack.AvaloniaImpl.Windows.Confirmation.ConfirmationWindow"
+                        x:DataType="confirmation:ConfirmationViewModel"
+                        Title="{Binding Title}"
+                        PrimaryButtonText="{Binding AcceptText}"
+                        CloseButtonText="{Binding CancelText}"
+                        PrimaryButtonCommand="{Binding Close}" PrimaryButtonCommandParameter="{x:True}"
+                        CloseButtonCommand="{Binding Close}" CloseButtonCommandParameter="{x:False}">
+    <StackPanel>
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+
+        <ItemsControl ItemsSource="{Binding AdditionalOptionsList}" Margin="8 16 8 0"
+                      IsVisible="{Binding AdditionalOptionsList.Count}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox Content="{Binding Model}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
 </controls:ContentDialog>

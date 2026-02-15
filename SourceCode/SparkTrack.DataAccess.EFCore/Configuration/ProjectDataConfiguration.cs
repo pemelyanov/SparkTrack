@@ -19,8 +19,17 @@ public class ProjectDataConfiguration : IEntityTypeConfiguration<ProjectData>
         builder.Property(p => p.Link)
             .HasMaxLength(500)
             .IsRequired(false);
+
+        builder.HasMany(p => p.Features)
+            .WithOne(p => p.Project);
         
         builder.HasIndex(p => p.Name)
             .IsUnique();
+
+        builder.Property(p => p.ArchivedAt)
+            .IsRequired(false);
+        
+        builder.Property(p => p.ArchiveSource)
+            .IsRequired(false);
     }
 }

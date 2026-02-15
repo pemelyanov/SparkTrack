@@ -35,4 +35,30 @@ public class ProjectsController(IProjectsService projectsService) : Controller
             () => projectsService.AddAsync(projectDTO.ToDomain())
         );
     }
+    
+    [HttpPatch]
+    [Authorize(Roles = nameof(ERole.God))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<ActionResult> EditAsync(ProjectDTO projectDTO)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            () => projectsService.EditAsync(projectDTO.ToDomain())
+        );
+    }
+    
+    [HttpDelete("{id}")]
+    [Authorize(Roles = nameof(ERole.God))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<ActionResult> DeleteAsync([FromRoute] Guid id, [FromQuery] bool force)
+    {
+        return this.OkWithDomainExceptionsHandling(
+            () => projectsService.DeleteAsync(id, force)
+        );
+    }
 }

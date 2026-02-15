@@ -6,9 +6,16 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.UserName.UserName"
              x:Name="Root">
-<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-        <TextBlock Text="{Binding #Root.User.Name}"/>
+    <UserControl.Styles>
+        <Style Selector=":is(Control).disabled">
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="IsEnabled" Value="False" />
+        </Style>
+    </UserControl.Styles>
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                Classes.disabled="{Binding #Root.User.ArchivedAt, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <TextBlock Text="{Binding #Root.User.Name}" />
         <telegramTag:TelegramTag Text="{Binding #Root.User.TelegramTag, StringFormat='@{0}'}"
-                                 IsVisible="{Binding #Root.User.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                 IsVisible="{Binding #Root.User.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
 </UserControl>
