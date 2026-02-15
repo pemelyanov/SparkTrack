@@ -12,6 +12,7 @@
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia.Tight"
              xmlns:localMarkupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
+             xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel"
@@ -145,11 +146,13 @@
                         <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto * *" RowSpacing="8" ColumnSpacing="8">
                             <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="* Auto" ColumnSpacing="8">
                                 <!-- TODO: Добавить контрол-ссылку -->
-                                <TextBlock Grid.Column="0" Text="{Binding ReelLink}"
-                                           IsVisible="{Binding !IsEditingLink}" />
+                                <link:Link Grid.Column="0" Url="{Binding ReelLink}"
+                                           IsVisible="{Binding !IsEditingLink}" VerticalAlignment="Center" />
                                 <TextBox Grid.Column="0" Text="{Binding ReelLink}" IsVisible="{Binding IsEditingLink}"
                                          PastingFromClipboard="TextBox_OnPastingFromClipboard" />
-                                <ToggleButton Grid.Column="1" Classes="icon edit"
+                                <ToggleButton Grid.Column="1" Classes="icon"
+                                              Classes.edit="{Binding !IsEditingLink}"
+                                              Classes.save="{Binding IsEditingLink}"
                                               IsChecked="{Binding IsEditingLink, Mode=TwoWay}" />
                             </Grid>
 
