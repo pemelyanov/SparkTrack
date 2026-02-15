@@ -15,6 +15,9 @@ public class AttachmentsPanelViewModel(
 )
     : ViewModelBase
 {
+    public event Action<IAttachmentViewModel>? AttachmentAdded;
+    public event Action<IAttachmentViewModel>? PreviewAttachmentSetRequested;
+    
     public SuspendableObservableCollection<IAttachmentViewModel> AttachmentsList { get; } = [];
 
     public Task UploadLocalAttachments()
@@ -30,13 +33,23 @@ public class AttachmentsPanelViewModel(
     public void ReplaceWithRemoteAttachments(IEnumerable<Attachment> attachmentsList)
     {
         var attachmentsViewModels =
-            attachmentsList.Select(it => remoteAttachmentViewModelFactory(it, OnAttachmentDelete));
+            attachmentsList.Select(it =>
+            {
+                var viewModel = remoteAttachmentViewModelFactory(it, OnAttachmentDelete);
+                viewModel.PreviewSetRequested += Attachment_OnPreviewSetRequested;
 
+                return viewModel;
+            });
+
+        var previousAttachments = AttachmentsList.ToArray();
         using (AttachmentsList.SuspendNotifications())
         {
             AttachmentsList.Clear();
             AttachmentsList.AddRange(attachmentsViewModels);
         }
+
+        foreach (var attachmentViewModel in previousAttachments)
+            attachmentViewModel.PreviewSetRequested -= Attachment_OnPreviewSetRequested;
     }
 
     public async Task ChooseAttachmentsAsync()
@@ -50,16 +63,29 @@ public class AttachmentsPanelViewModel(
     public void AddAttachment(string path)
     {
         var attachment = localLocalAttachmentViewModelFactory.Invoke(path, OnAttachmentDelete);
+        attachment.PreviewSetRequested += Attachment_OnPreviewSetRequested;
 
         AttachmentsList.Add(attachment);
+        AttachmentAdded?.Invoke(attachment);
     }
 
     public void AddAttachment(byte[] data, string extension)
     {
         var attachment = clipboardAttachmentViewModelFactory.Invoke(extension, data, OnAttachmentDelete);
+        attachment.PreviewSetRequested += Attachment_OnPreviewSetRequested;
 
         AttachmentsList.Add(attachment);
+        AttachmentAdded?.Invoke(attachment);
     }
 
-    private void OnAttachmentDelete(IAttachmentViewModel a) => AttachmentsList.Remove(a);
+    private void OnAttachmentDelete(IAttachmentViewModel a)
+    {
+        AttachmentsList.Remove(a);
+        a.PreviewSetRequested -= Attachment_OnPreviewSetRequested;
+    }
+
+    private void Attachment_OnPreviewSetRequested(IAttachmentViewModel preview)
+    { 
+        PreviewAttachmentSetRequested?.Invoke(preview);
+    }
 }

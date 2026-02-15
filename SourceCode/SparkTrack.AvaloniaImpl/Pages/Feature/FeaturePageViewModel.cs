@@ -25,6 +25,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text.Json;
+using Controls.Attachment;
 using DescriptionTemplates;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
@@ -121,6 +122,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_authorizationService = authorizationService;
         m_subTaskViewModelFactory = subTaskViewModelFactory;
         IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
+        IsEditingLink = m_feature is null;
+        AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
+        AttachmentsPanelViewModel.PreviewAttachmentSetRequested += AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
         if (feature is null) IsNameEditing = true;
 
@@ -132,7 +136,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
     }
-
+    
     protected override void OnActivated(CompositeDisposable disposables)
     {
         base.OnActivated(disposables);
@@ -154,6 +158,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public string Name { get; set; } = string.Empty;
+    
+    [Reactive]
+    public IAttachmentViewModel? PreviewAttachment { get; private set; }
 
     [Reactive]
     public bool IsNameEditing { get; set; }
@@ -164,6 +171,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     [Reactive]
     public bool IsPreviewDescriptionInPreviewMode { get; set; }
 
+    [Reactive]
+    public bool IsEditingLink { get; set; }
+    
     [Reactive]
     public bool IsEditingComment { get; private set; }
 
@@ -306,7 +316,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             {
                 ReelLink = ReelLink,
                 PreviewDescription = PreviewDescription,
-                ReelDescription = ReelDescription
+                ReelDescription = ReelDescription,
+                PreviewAttachmentName = PreviewAttachment?.Name
             }
         ),
         Version = m_feature?.Version ?? Guid.Empty
@@ -335,8 +346,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         foreach (var oldTask in oldTasks)
             oldTask.Dispose();
-
+        
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
+
+        PreviewAttachment =
+            AttachmentsPanelViewModel.AttachmentsList.FirstOrDefault(it => it.Name == template?.PreviewAttachmentName);
     }
 
     private TData? TryParseJson<TData>(string? data) where TData : class
@@ -416,4 +430,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         await RefreshCommentsCommand.Execute().ToTask();
     }
+    
+    private void AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested(IAttachmentViewModel preview)
+    {
+        PreviewAttachment = preview;
+    }
+
+    private void AttachmentsPanelViewModel_OnAttachmentAdded(IAttachmentViewModel attachment)
+    {
+        if (AttachmentsPanelViewModel.AttachmentsList.Count == 1) PreviewAttachment = attachment;
+    }
+
 }

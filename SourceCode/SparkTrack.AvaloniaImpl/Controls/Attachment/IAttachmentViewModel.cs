@@ -5,6 +5,8 @@ using System.Windows.Input;
 
 public interface IAttachmentViewModel
 {
+    event Action<IAttachmentViewModel> PreviewSetRequested;
+    
     bool IsImage { get; }
     
     bool IsDownloaded { get; }
@@ -34,4 +36,6 @@ public interface IAttachmentViewModel
     void OpenInExplorer();
 
     Attachment ToModel();
+
+    void RaisePreviewSetRequested();
 }

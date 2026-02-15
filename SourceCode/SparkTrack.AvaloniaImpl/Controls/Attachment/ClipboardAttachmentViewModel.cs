@@ -29,8 +29,7 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         Size = data.LongLength;
         Name = Guid.NewGuid().ToString().Substring(0, 6) + "." + extension;
         Uri = Base64Mask + Convert.ToBase64String(data);
-        using var stream = new MemoryStream(data);
-        IsImage = stream.IsImageBySignature();
+        IsImage = data.GetImageExtensionBySignature() is not null;
         CanOpenInExplorer = false;
     }
 
@@ -79,6 +78,13 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         {
             var data = GetBytes();
             UploadedFileId = await m_filesService.UploadAsync(data, progress.Progress, m_cancellationTokenSource.Token);
+            
+            var newPath = Path.Combine(
+                s_downloadsFolder,
+                $"{UploadedFileId.ToString()}.{Extension}"
+            );
+            
+            File.WriteAllBytes(newPath, data);
         }
         catch (TaskCanceledException)
         {

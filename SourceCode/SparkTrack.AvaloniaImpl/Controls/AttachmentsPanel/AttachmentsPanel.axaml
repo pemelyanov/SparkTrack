@@ -17,6 +17,14 @@
         <Style Selector=":is(Window):drag-over Panel#FilesPanel Rectangle#DashRectangle">
             <Setter Property="IsVisible" Value="True" />
         </Style>
+        
+        <Style Selector="attachment|AttachmentControl ContextMenu MenuItem#PreviewRequestMenuItem">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        
+        <Style Selector="attachmentsPanel|AttachmentsPanel.previewable attachment|AttachmentControl ContextMenu MenuItem#PreviewRequestMenuItem">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
     </UserControl.Styles>
     <StackPanel Spacing="8">
         <Panel HorizontalAlignment="Stretch" IsVisible="{Binding !#Root.IsReadOnly}">

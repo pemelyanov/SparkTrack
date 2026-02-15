@@ -18,6 +18,7 @@
              x:Name="Root">
     <UserControl.Resources>
         <converters:ComparisonConverter x:Key="LessOrEqualConverter" Operation="Elt" />
+        <converters:UriToImageSourceConverter x:Key="PathToImageSourceConverter" />
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="TextBox.subtitle">
@@ -56,25 +57,33 @@
                 </Template>
             </Setter>
         </Style>
-        
+
         <Style Selector="ContentControl.reel-description">
             <Style Selector="^ TextBox#MarkdownEdit">
                 <Setter Property="Text" Value="{Binding ReelDescription, Mode=TwoWay}" />
             </Style>
-            
+
             <Style Selector="^ mdxaml|MarkdownScrollViewer#Markdown">
                 <Setter Property="Tag" Value="{Binding ReelDescription}" />
             </Style>
         </Style>
-        
+
         <Style Selector="ContentControl.preview-description">
             <Style Selector="^ TextBox#MarkdownEdit">
                 <Setter Property="Text" Value="{Binding PreviewDescription, Mode=TwoWay}" />
             </Style>
-            
+
             <Style Selector="^ mdxaml|MarkdownScrollViewer#Markdown">
                 <Setter Property="Tag" Value="{Binding PreviewDescription}" />
             </Style>
+        </Style>
+
+        <Style Selector="ContentControl.attachment-preview">
+            <Setter Property="Content">
+                <Template>
+                    <Image Source="{Binding PreviewAttachment.Uri, Converter={StaticResource PathToImageSourceConverter}}" />
+                </Template>
+            </Setter>
         </Style>
     </UserControl.Styles>
     <Panel>
@@ -134,8 +143,16 @@
                         <!-- но я не хочу жертвовать гибкостью системы, поэтому будем хранить описание Json строкой вот такой структуры, -->
                         <!-- возможно потом можно будет сделать механизм подключения разных шаблонов для описания -->
                         <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto * *" RowSpacing="8" ColumnSpacing="8">
-                            <TextBox Grid.Column="0" Grid.Row="0" Text="{Binding ReelLink}" />
-                            
+                            <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="* Auto" ColumnSpacing="8">
+                                <!-- TODO: Добавить контрол-ссылку -->
+                                <TextBlock Grid.Column="0" Text="{Binding ReelLink}"
+                                           IsVisible="{Binding !IsEditingLink}" />
+                                <TextBox Grid.Column="0" Text="{Binding ReelLink}" IsVisible="{Binding IsEditingLink}"
+                                         PastingFromClipboard="TextBox_OnPastingFromClipboard" />
+                                <ToggleButton Grid.Column="1" Classes="icon edit"
+                                              IsChecked="{Binding IsEditingLink, Mode=TwoWay}" />
+                            </Grid>
+
                             <Border Classes="card" Grid.Row="1" Grid.Column="0">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -144,16 +161,16 @@
                                                       IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
                                                       IsChecked="{Binding IsReelDescriptionInPreviewMode, Mode=TwoWay}" />
                                     </StackPanel>
-                                    
+
                                     <Separator />
 
-                                    <ContentControl Classes="reel-description" 
+                                    <ContentControl Classes="reel-description"
                                                     Classes.description-edit="{Binding !IsReelDescriptionInPreviewMode}"
-                                                    Classes.description-view="{Binding IsReelDescriptionInPreviewMode}" 
-                                                    Tag="{Binding ReelDescription, Mode=TwoWay}"/>
+                                                    Classes.description-view="{Binding IsReelDescriptionInPreviewMode}"
+                                                    Tag="{Binding ReelDescription, Mode=TwoWay}" />
                                 </StackPanel>
                             </Border>
-                            
+
                             <Border Classes="card" Grid.Row="2" Grid.Column="0">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -162,27 +179,29 @@
                                                       IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
                                                       IsChecked="{Binding IsPreviewDescriptionInPreviewMode, Mode=TwoWay}" />
                                     </StackPanel>
-                                    
+
                                     <Separator />
 
-                                    <ContentControl Classes="preview-description"  
+                                    <ContentControl Classes="preview-description"
                                                     Classes.description-edit="{Binding !IsPreviewDescriptionInPreviewMode}"
                                                     Classes.description-view="{Binding IsPreviewDescriptionInPreviewMode}"
-                                                    Tag="{Binding PreviewDescription, Mode=TwoWay}"/>
+                                                    Tag="{Binding PreviewDescription, Mode=TwoWay}" />
                                 </StackPanel>
                             </Border>
-                            
-                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="400" Height="400" VerticalAlignment="Top">
-                                
+
+                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="400"
+                                    Height="400" VerticalAlignment="Top">
+                                <ContentControl
+                                    Classes.attachment-preview="{Binding AttachmentsPanelViewModel.AttachmentsList.Count}" />
                             </Border>
                         </Grid>
-                        
+
                         <Separator />
 
                         <attachmentsPanel:AttachmentsPanel
+                            Classes="previewable"
                             IsReadOnly="{localMarkupExtensions:CurrentUserInRole Employee}"
                             DataContext="{Binding AttachmentsPanelViewModel}" />
-
 
                         <editDates:EditDates CreatedAt="{Binding CreatedAt}" EditedAt="{Binding EditedAt}" />
                     </StackPanel>

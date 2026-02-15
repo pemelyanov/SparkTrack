@@ -18,7 +18,7 @@ public static class StreamExtensions
 
         // PNG
         if (stream.Length >= 8 &&
-            stream.SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
+            stream[..8].SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
             return "png";
 
         // JPEG / JPG (SOI)
@@ -41,13 +41,13 @@ public static class StreamExtensions
 
         // GIF
         if (stream.Length >= 6 &&
-            (stream.SequenceEqual("GIF89a"u8) ||
-                stream.SequenceEqual("GIF87a"u8)))
+            (stream[..6].SequenceEqual("GIF89a"u8) ||
+                stream[..6].SequenceEqual("GIF87a"u8)))
             return "gif";
 
         // BMP
         if (stream.Length >= 2 &&
-            stream.SequenceEqual("BM"u8))
+            stream[..2].SequenceEqual("BM"u8))
             return "bmp";
 
         return null;

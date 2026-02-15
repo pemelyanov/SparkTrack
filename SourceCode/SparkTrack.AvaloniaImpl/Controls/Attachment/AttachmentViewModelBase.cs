@@ -16,6 +16,13 @@ public abstract class AttachmentViewModelBase(
 {
     protected readonly ILogger                  m_logger = logger;
     protected          CancellationTokenSource? m_cancellationTokenSource;
+    protected static readonly string s_downloadsFolder = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        "Downloads",
+        "SparkTrackDownloads"
+    );
+
+    public event Action<IAttachmentViewModel>? PreviewSetRequested;
     
     [Reactive]
     public bool IsImage { get; protected set; }
@@ -86,4 +93,6 @@ public abstract class AttachmentViewModelBase(
         if(close)
             onRemove(GetThis());
     }
+
+    public void RaisePreviewSetRequested() => PreviewSetRequested?.Invoke(GetThis());
 }

@@ -13,4 +13,6 @@ public record ReelWithPreviewTemplate
     public required string ReelDescription { get; init; }
     
     public required string PreviewDescription { get; init; }
+    
+    public string? PreviewAttachmentName { get; init; }
 }
