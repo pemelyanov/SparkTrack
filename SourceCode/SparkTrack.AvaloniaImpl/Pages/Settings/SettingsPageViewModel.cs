@@ -8,6 +8,8 @@ using SparkTrack.Core.Client.Services.Configuration;
 
 namespace SparkTrack.AvaloniaImpl.Pages.Settings;
 
+using Core.Client.Extensions;
+
 public class SettingsPageViewModel(
     Lazy<IScreen> hostScreen,
     IExplorerService explorerService,
@@ -19,7 +21,7 @@ public class SettingsPageViewModel(
         base.OnFirstActivated(disposables);
 
         this.WhenAnyValue(it => it.Scale)
-            .Subscribe(value => interfaceConfigurationService.UpdateConfig(interfaceConfigurationService.Config with
+            .Subscribe(value => interfaceConfigurationService.Update(it => it with
             {
                 Scale = value
             }))
