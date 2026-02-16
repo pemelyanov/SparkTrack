@@ -10,6 +10,8 @@ public class JsonConfigurationService<TData> : IConfigurationService<TData> wher
     private readonly string                m_configFilePath;
     private readonly JsonSerializerOptions m_jsonOptions;
     private          TData                 m_config;
+    
+    public event Action<TData>? ConfigChanged;
 
     public JsonConfigurationService(string configPath)
     {
@@ -36,6 +38,7 @@ public class JsonConfigurationService<TData> : IConfigurationService<TData> wher
             SaveConfig(config);
             m_config = config;
             m_logger.Info("Configuration updated successfully: {ConfigPath}", m_configFilePath);
+            ConfigChanged?.Invoke(config);
         }
         catch (Exception ex)
         {
