@@ -9,9 +9,26 @@
              x:Class="SparkTrack.AvaloniaImpl.Pages.Settings.SettingsPage"
              x:DataType="projectsList:SettingsPageViewModel">
     <Grid RowDefinitions="Auto * Auto" RowSpacing="8">
-        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type projectsList:SettingsPageViewModel}" x:DataType="system:Type"
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type projectsList:SettingsPageViewModel}"
+                   x:DataType="system:Type"
                    Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
-        
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Интерфейс">
+                <StackPanel>
+                    <Panel>
+                        <TextBlock Text="Масштаб: " VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="8">
+                            <Slider IsSnapToTickEnabled="True" TickFrequency="5" TickPlacement="BottomRight"
+                                    Width="300" Minimum="100" Maximum="250"
+                                    Value="{Binding Scale, Mode=TwoWay}"/>
+                            <TextBlock Text="{Binding Scale, StringFormat='{}{0}%'}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Panel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Открыть папку с логами" Command="{Binding OpenLogsFolder}" />
         </StackPanel>

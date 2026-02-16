@@ -1,3 +1,8 @@
+using Avalonia;
+using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.Core.Client.Services.Configuration;
+using Splat;
+
 namespace SparkTrack.AvaloniaImpl.Windows.Main;
 
 using API.MappingExtensions;
@@ -17,11 +22,18 @@ using Services.DialogHost;
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService
 {
     private readonly WindowNotificationManager m_notificationManager;
-    
+
+    private readonly IConfigurationService<InterfaceConfiguration> m_interfaceConfiguration =
+        Locator.Current.GetService<IConfigurationService<InterfaceConfiguration>>()!;
+
+    private readonly double m_scale;
+
     public MainWindow()
     {
         InitializeComponent();
 
+        m_scale = m_interfaceConfiguration.Config.Scale / 100d;
+        
         m_notificationManager = new WindowNotificationManager
         {
             Position = NotificationPosition.BottomCenter,
@@ -36,12 +48,41 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         InitializeWindowNotificationManagerViaOverlay();
     }
 
+    #region ContentWidth
+
+    public static readonly StyledProperty<double> ContentWidthProperty =
+        AvaloniaProperty.Register<MainWindow, double>(
+            nameof(ContentWidth), defaultValue: Double.NaN);
+
+    public double ContentWidth
+    {
+        get => GetValue(ContentWidthProperty);
+        set => SetValue(ContentWidthProperty, value);
+    }
+
+    #region ContentHeight
+
+    public static readonly StyledProperty<double> ContentHeightProperty =
+        AvaloniaProperty.Register<MainWindow, double>(
+            nameof(ContentHeight), defaultValue: Double.NaN);
+
+    public double ContentHeight
+    {
+        get => GetValue(ContentHeightProperty);
+        set => SetValue(ContentHeightProperty, value);
+    }
+
+    #endregion
+
+    #endregion
+
     private void InitializeWindowNotificationManagerViaOverlay()
     {
         var visualLayerManager = this.FindDescendantOfType<VisualLayerManager>();
-        
-        if(visualLayerManager?.OverlayLayer is null || visualLayerManager.OverlayLayer.Children.Contains(m_notificationManager)) return;
-        
+
+        if (visualLayerManager?.OverlayLayer is null ||
+            visualLayerManager.OverlayLayer.Children.Contains(m_notificationManager)) return;
+
         visualLayerManager.OverlayLayer.Children.Add(m_notificationManager);
     }
 
@@ -84,4 +125,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         Message = message,
         Type = type
     };
+
+    private void OnSizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        ContentWidth = SizeBox.Bounds.Width / m_scale;
+        ContentHeight = SizeBox.Bounds.Height / m_scale;
+    }
 }

@@ -1,5 +1,7 @@
-﻿using SparkTrack.AvaloniaImpl.Pages.Settings;
+﻿using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Pages.Settings;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
+using SparkTrack.Core.Client.Extensions;
 
 namespace SparkTrack.AvaloniaImpl;
 
@@ -92,6 +94,12 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         );
         builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<WindowsExplorerService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterJsonConfiguration<InterfaceConfiguration>(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "SparkTrack",
+            "Settings",
+            "interface-configuration.json"
+        ));
 
         RegisterUpdatingIfNeeded(builder);
     }
