@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.AvaloniaImpl.Windows.Main;
+﻿using System.Reflection;
+
+namespace SparkTrack.AvaloniaImpl.Windows.Main;
 
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -28,6 +30,13 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     {
         AccountViewModel = accountViewModel;
         NavigationList = navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
+
+        var assembly = GetType().Assembly;
+        
+        Copyright = assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)
+            .OfType<AssemblyCopyrightAttribute>()
+            .FirstOrDefault()
+            ?.Copyright!;
 
         IRoutableViewModel page = updatePage is null ? startPage : updatePage;
 
@@ -63,6 +72,8 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     public IObservable<IReadOnlyList<Type>> NavigationList { get; }
 
     public AccountViewModel AccountViewModel { get; }
+    
+    public string Copyright { get; }
 
     [Reactive]
     public Type? SelectedPageType { get; set; }

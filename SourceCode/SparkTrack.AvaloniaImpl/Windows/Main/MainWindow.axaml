@@ -25,12 +25,12 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
-    
+
     <Window.Styles>
         <Style Selector="WindowNotificationManager">
             <Setter Property="Width" Value="{Binding $parent[OverlayLayer].Bounds.Width}" />
             <Setter Property="Height" Value="{Binding $parent[OverlayLayer].Bounds.Height}" />
-            
+
             <!-- NOTE: Почему-то из коробки оно не работает -->
             <Style Selector="^:bottomcenter /template/ ReversibleStackPanel#PART_Items">
                 <Setter Property="ReverseOrder" Value="True" />
@@ -38,17 +38,21 @@
                 <Setter Property="HorizontalAlignment" Value="Center" />
             </Style>
         </Style>
+        
+        <Style Selector="controls|NavigationView /template/ Grid#PaneContentGrid:not(:something)">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
     </Window.Styles>
 
     <controls:NavigationView x:Name="NavigationView" IsPaneOpen="False" IsSettingsVisible="False"
-                             Background="Transparent" 
+                             Background="Transparent"
                              MenuItemsSource="{Binding NavigationList^}"
                              SelectedItem="{Binding SelectedPageType, Mode=TwoWay}">
         <controls:NavigationView.MenuItemTemplate>
             <DataTemplate x:DataType="system:Type">
                 <controls:NavigationViewItem SelectsOnInvoked="True"
-                    Content="{Binding ., Converter={x:Static converters:PagesConverters.Name}}"
-                    Tapped="NavigationItem_OnTapped" Tag="{Binding}">
+                                             Content="{Binding ., Converter={x:Static converters:PagesConverters.Name}}"
+                                             Tapped="NavigationItem_OnTapped" Tag="{Binding}">
                     <controls:NavigationViewItem.IconSource>
                         <fluent:SymbolIconSource
                             Symbol="{Binding ., Converter={x:Static converters:PagesConverters.Symbol}}" />
@@ -58,29 +62,34 @@
         </controls:NavigationView.MenuItemTemplate>
 
         <controls:NavigationView.PaneFooter>
-            <Panel>
-                <ToggleButton Width="32" Height="32" Margin="10 0 0 0" Padding="4"
-                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                              Content="{markupExtensions:SymbolIcon Symbol=Person}"
-                              IsChecked="{Binding #NavigationView.IsPaneOpen, Mode=TwoWay}">
-                    <ToggleButton.IsVisible>
-                        <MultiBinding Converter="{x:Static BoolConverters.And}">
-                            <Binding Path="AccountViewModel.CurrentUser.Value"
-                                     Converter="{x:Static ObjectConverters.IsNotNull}" />
-                            <Binding Path="!#NavigationView.IsPaneOpen" />
-                        </MultiBinding>
-                    </ToggleButton.IsVisible>
-                </ToggleButton>
-                <account:Account DataContext="{Binding AccountViewModel}"
-                                 Margin="8 0">
-                    <account:Account.IsVisible>
-                        <MultiBinding Converter="{x:Static BoolConverters.And}">
-                            <Binding Path="CurrentUser.Value" Converter="{x:Static ObjectConverters.IsNotNull}" />
-                            <Binding Path="#NavigationView.IsPaneOpen" />
-                        </MultiBinding>
-                    </account:Account.IsVisible>
-                </account:Account>
-            </Panel>
+            <StackPanel Spacing="4">
+                <Panel>
+                    <ToggleButton Width="32" Height="32" Margin="10 0 0 0" Padding="4"
+                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                  Content="{markupExtensions:SymbolIcon Symbol=Person}"
+                                  IsChecked="{Binding #NavigationView.IsPaneOpen, Mode=TwoWay}">
+                        <ToggleButton.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="AccountViewModel.CurrentUser.Value"
+                                         Converter="{x:Static ObjectConverters.IsNotNull}" />
+                                <Binding Path="!#NavigationView.IsPaneOpen" />
+                            </MultiBinding>
+                        </ToggleButton.IsVisible>
+                    </ToggleButton>
+                    <account:Account DataContext="{Binding AccountViewModel}"
+                                     Margin="8 0">
+                        <account:Account.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="CurrentUser.Value" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                                <Binding Path="#NavigationView.IsPaneOpen" />
+                            </MultiBinding>
+                        </account:Account.IsVisible>
+                    </account:Account>
+                </Panel>
+
+                <TextBlock Text="{Binding Copyright}" HorizontalAlignment="Center"
+                           IsVisible="{Binding #NavigationView.IsPaneOpen}" Opacity="0.7" />
+            </StackPanel>
         </controls:NavigationView.PaneFooter>
 
         <Grid RowDefinitions="Auto *" Margin="8" RowSpacing="8">

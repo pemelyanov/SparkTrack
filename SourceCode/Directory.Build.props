@@ -5,7 +5,11 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <Version>0.1.1.0</Version>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>$(Version)</FileVersion>
         <PublisherName>Fanatiki</PublisherName>
-        <Version>0.1.0.0</Version>
+        <Copyright>v$(Version) © $(PublisherName)</Copyright>
     </PropertyGroup>
 </Project>
