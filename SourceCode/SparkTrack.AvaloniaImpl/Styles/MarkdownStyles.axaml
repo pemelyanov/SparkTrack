@@ -7,8 +7,8 @@
     </Design.PreviewWith>
 
     <Style Selector="ToggleSwitch.markdown-view-switch">
-        <Setter Property="OnContent" Value="Превью" />
-        <Setter Property="OffContent" Value="Верстка" />
+        <Setter Property="OnContent" Value="View" />
+        <Setter Property="OffContent" Value="Edit" />
         <Setter Property="ToolTip.Tip" Value="Переключить верстка\превью" />
     </Style>
 </Styles>

@@ -1,3 +1,5 @@
+using SparkTrack.AvaloniaImpl.Services.Explorer;
+
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
 using Core.Client.Data;
@@ -24,9 +26,10 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         IDialogService dialogService,
         ILocalFilesManager localFilesManager,
         IFilesService filesService,
-        IAttachmentsPathCache attachmentsPathCache
+        IAttachmentsPathCache attachmentsPathCache,
+        IExplorerService explorerService
     )
-        : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
+        : base(onRemove, dialogService, explorerService, LogManager.GetCurrentClassLogger())
     {
         m_attachment = attachment;
         m_filesService = filesService;
@@ -112,6 +115,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
             IsDownloaded = true;
 
             IsImage = CheckIsImage();
+            Uri = new string(Uri); // Чтобы стригеррить обновление View
         }
         catch (TaskCanceledException)
         {

@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:projectsList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Settings"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Pages.Settings.SettingsPage"
+             x:DataType="projectsList:SettingsPageViewModel">
+    <Grid RowDefinitions="Auto * Auto" RowSpacing="8">
+        <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type projectsList:SettingsPageViewModel}"
+                   x:DataType="system:Type"
+                   Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Интерфейс">
+                <StackPanel>
+                    <Panel>
+                        <TextBlock Text="Масштаб: " VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="8">
+                            <Slider IsSnapToTickEnabled="True" TickFrequency="5" TickPlacement="BottomRight"
+                                    Width="300" Minimum="100" Maximum="250"
+                                    Value="{Binding Scale, Mode=TwoWay}"/>
+                            <TextBlock Text="{Binding Scale, StringFormat='{}{0}%'}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Panel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Открыть папку с логами" Command="{Binding OpenLogsFolder}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.AvaloniaImpl.Services.NavigationListResolver;
+﻿using SparkTrack.AvaloniaImpl.Pages.Settings;
+
+namespace SparkTrack.AvaloniaImpl.Services.NavigationListResolver;
 
 using System.Reactive.Linq;
 using Core.Client.Services.Authorization;
@@ -15,9 +17,9 @@ public class NavigationListResolver : INavigationListResolver, IDisposable
 
     private readonly Dictionary<ERole, IReadOnlyList<Type>> m_navigationListByRoleMap = new()
     {
-        [ERole.Admin] = [typeof(FeaturesListPageViewModel), typeof(UsersListPageViewModel), typeof(AdminFinancePageViewModel)],
-        [ERole.Employee] = [typeof(FeaturesListPageViewModel)],
-        [ERole.God] = [typeof(UsersListPageViewModel), typeof(ProjectsListPageViewModel)]
+        [ERole.Admin] = [typeof(FeaturesListPageViewModel), typeof(UsersListPageViewModel), typeof(AdminFinancePageViewModel), typeof(SettingsPageViewModel)],
+        [ERole.Employee] = [typeof(FeaturesListPageViewModel), typeof(SettingsPageViewModel)],
+        [ERole.God] = [typeof(UsersListPageViewModel), typeof(ProjectsListPageViewModel), typeof(SettingsPageViewModel)]
     };
 
     private readonly IDisposable m_authorizationSubscription;

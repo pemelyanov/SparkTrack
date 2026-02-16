@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
+﻿using SparkTrack.AvaloniaImpl.Services.Explorer;
+
+namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
 using System.Reactive.Linq;
 using System.Windows.Input;
@@ -21,8 +23,9 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         byte[] data,
         Action<IAttachmentViewModel> onRemove,
         IDialogService dialogService,
-        IFilesService filesService
-    ) : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
+        IFilesService filesService,
+        IExplorerService explorerService
+    ) : base(onRemove, dialogService, explorerService, LogManager.GetCurrentClassLogger())
     {
         m_filesService = filesService;
         Extension = extension;

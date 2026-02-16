@@ -1,4 +1,9 @@
-﻿namespace SparkTrack.AvaloniaImpl;
+﻿using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Pages.Settings;
+using SparkTrack.AvaloniaImpl.Services.Explorer;
+using SparkTrack.Core.Client.Extensions;
+
+namespace SparkTrack.AvaloniaImpl;
 
 using Windows.Main;
 using API.AutofacModules;
@@ -66,6 +71,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<UserFilterViewModel>();
         builder.RegisterType<ClipboardAttachmentViewModel>();
         builder.RegisterType<UserEditFormViewModel>();
+        builder.RegisterType<SettingsPageViewModel>().SingleInstance();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
@@ -87,6 +93,13 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             )
         );
         builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterType<WindowsExplorerService>().AsImplementedInterfaces().SingleInstance();
+        builder.RegisterJsonConfiguration<InterfaceConfiguration>(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "SparkTrack",
+            "Settings",
+            "interface-configuration.json"
+        ));
 
         RegisterUpdatingIfNeeded(builder);
     }

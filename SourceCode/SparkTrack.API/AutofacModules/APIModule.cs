@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.API.AutofacModules;
+﻿using SparkTrack.Core.Client.Extensions;
+
+namespace SparkTrack.API.AutofacModules;
 
 using Autofac;
 using API;
@@ -26,10 +28,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         RegisterAllClientsFromAssembly<ClientBase>(builder, typeof(APIModule).Assembly);
 
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
-        builder.RegisterType<JsonConfigurationService<TokensConfiguration>>()
-            .AsImplementedInterfaces()
-            .WithParameter(new TypedParameter(typeof(string), tokensConfigPath))
-            .SingleInstance();
+        builder.RegisterJsonConfiguration<TokensConfiguration>(tokensConfigPath);
         
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().SingleInstance();

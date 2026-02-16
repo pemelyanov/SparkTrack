@@ -13,6 +13,7 @@
              xmlns:localMarkupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
              xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel"
@@ -20,6 +21,7 @@
     <UserControl.Resources>
         <converters:ComparisonConverter x:Key="LessOrEqualConverter" Operation="Elt" />
         <converters:UriToImageSourceConverter x:Key="PathToImageSourceConverter" />
+        <system:Double x:Key="PreviewSize">512</system:Double>
     </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="TextBox.subtitle">
@@ -192,8 +194,8 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="400"
-                                    Height="400" VerticalAlignment="Top">
+                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="{StaticResource PreviewSize}"
+                                    Height="{StaticResource PreviewSize}" VerticalAlignment="Top">
                                 <ContentControl
                                     Classes.attachment-preview="{Binding AttachmentsPanelViewModel.AttachmentsList.Count}" />
                             </Border>

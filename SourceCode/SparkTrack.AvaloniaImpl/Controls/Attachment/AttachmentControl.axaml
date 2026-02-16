@@ -89,7 +89,7 @@
 
                 <controls:ProgressRing Maximum="{Binding LoadProgress.Progress.TotalProgress^}"
                                        Value="{Binding LoadProgress.Progress.CurrentProgress^}"
-                                       IsIndeterminate="{Binding LoadProgress.Progress.TotalProgress, Converter={StaticResource LessOrEqualConverter}, ConverterParameter={StaticResource Zero}}"
+                                       IsIndeterminate="{Binding LoadProgress.Progress.TotalProgress^, Converter={StaticResource LessOrEqualConverter}, ConverterParameter={StaticResource Zero}}"
                                        Width="NaN"
                                        Height="NaN"
                                        HorizontalAlignment="Stretch"

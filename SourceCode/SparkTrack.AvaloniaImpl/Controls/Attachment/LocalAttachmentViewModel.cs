@@ -1,3 +1,5 @@
+using SparkTrack.AvaloniaImpl.Services.Explorer;
+
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
 using Core.Client.Data;
@@ -22,8 +24,9 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         Action<IAttachmentViewModel> onRemove,
         IDialogService dialogService,
         IFilesService filesService,
-        IAttachmentsPathCache attachmentsPathCache
-    ) : base(onRemove, dialogService, LogManager.GetCurrentClassLogger())
+        IAttachmentsPathCache attachmentsPathCache,
+        IExplorerService explorerService
+    ) : base(onRemove, dialogService, explorerService, LogManager.GetCurrentClassLogger())
     {
         m_filesService = filesService;
         m_attachmentsPathCache = attachmentsPathCache;
