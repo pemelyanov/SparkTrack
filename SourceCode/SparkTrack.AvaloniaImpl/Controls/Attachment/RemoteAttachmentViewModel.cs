@@ -112,6 +112,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
             IsDownloaded = true;
 
             IsImage = CheckIsImage();
+            Uri = new string(Uri); // Чтобы стригеррить обновление View
         }
         catch (TaskCanceledException)
         {
