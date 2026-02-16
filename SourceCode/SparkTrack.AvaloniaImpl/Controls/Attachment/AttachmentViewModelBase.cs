@@ -1,3 +1,5 @@
+using SparkTrack.AvaloniaImpl.Services.Explorer;
+
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
 
 using Extensions;
@@ -11,6 +13,7 @@ using NLog;
 public abstract class AttachmentViewModelBase(
     Action<IAttachmentViewModel> onRemove,
     IDialogService dialogService,
+    IExplorerService explorerService,
     ILogger logger
 ) : ViewModelBase
 {
@@ -74,14 +77,7 @@ public abstract class AttachmentViewModelBase(
 
     public void OpenInExplorer()
     {
-        Process.Start(
-            new ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                Arguments = $"/select,\"{Uri}\"",
-                UseShellExecute = true
-            }
-        );
+        explorerService.OpenContainingFolder(Uri);
     }
 
     protected void Cancel(bool close)
