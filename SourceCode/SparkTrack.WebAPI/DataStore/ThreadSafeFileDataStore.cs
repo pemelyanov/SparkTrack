@@ -3,6 +3,7 @@
 using System.Collections.Concurrent;
 using Google.Apis.Json;
 using Google.Apis.Util.Store;
+using NLog;
 
 /// <summary>
 /// Thread-safe file data store that implements <see cref="IDataStore"/>. 
@@ -11,6 +12,8 @@ using Google.Apis.Util.Store;
 /// </summary>
 public class ThreadSafeFileDataStore : IDataStore
 {
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+    
     private const string XdgDataHomeSubdirectory = "google-filedatastore";
 
     // Словарь для хранения блокировок для каждого файла
@@ -28,9 +31,9 @@ public class ThreadSafeFileDataStore : IDataStore
     /// <param name="fullPath">
     /// Defines whether the folder parameter is absolute or relative.
     /// </param>
-    public ThreadSafeFileDataStore(string? folder, bool fullPath = false)
+    public ThreadSafeFileDataStore(string? folder)
     {
-        m_folderPath = fullPath
+        m_folderPath = Path.IsPathRooted(folder)
             ? folder ?? throw new ArgumentNullException(nameof(folder))
             : GetFullPath(folder ?? throw new ArgumentNullException(nameof(folder)));
             
@@ -50,8 +53,9 @@ public class ThreadSafeFileDataStore : IDataStore
         var serialized = NewtonsoftJsonSerializer.Instance.Serialize(value);
         var filePath = GetFilePath<T>(key);
         var fileLock = GetFileLock(filePath);
-
+        
         await fileLock.WaitAsync();
+        s_logger.Info("Storing key '{key}' with value type '{type}'. File path: {path}", key, typeof(T), filePath);
         try
         {
             // Используем временный файл для атомарной записи
@@ -83,6 +87,7 @@ public class ThreadSafeFileDataStore : IDataStore
         await fileLock.WaitAsync();
         try
         {
+            s_logger.Info("Deleting key '{key}' with value type '{type}'. File path: {path}", key, typeof(T), filePath);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -123,6 +128,7 @@ public class ThreadSafeFileDataStore : IDataStore
                 return default;
             }
 
+            s_logger.Info("Reading key '{key}' with value type '{type}'. File path: {path}", key, typeof(T), filePath);
             var content = await File.ReadAllTextAsync(filePath);
             return NewtonsoftJsonSerializer.Instance.Deserialize<T>(content);
         }
@@ -154,7 +160,8 @@ public class ThreadSafeFileDataStore : IDataStore
                 {
                     CleanupFileLock(file);
                 }
-                
+
+                s_logger.Info("Clearing store with path: {path}", m_folderPath);
                 // Удаляем и пересоздаем папку
                 Directory.Delete(m_folderPath, true);
                 Directory.CreateDirectory(m_folderPath);
@@ -192,11 +199,12 @@ public class ThreadSafeFileDataStore : IDataStore
 
     private async Task EnsureDirectoryExists(string path)
     {
+       
         if (!Directory.Exists(path))
         {
-            await s_directoryLock.WaitAsync();
             try
             {
+                 await s_directoryLock.WaitAsync();
                 // Double-check pattern
                 if (!Directory.Exists(path))
                 {
