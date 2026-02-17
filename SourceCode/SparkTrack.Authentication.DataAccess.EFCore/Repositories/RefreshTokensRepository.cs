@@ -95,22 +95,22 @@ internal class RefreshTokensRepository<TUserId>(RefreshTokenDbContext<TUserId> d
         return refreshToken;
     }
 
-    public async Task UpdateAsync(RefreshToken<TUserId> refreshToken)
+    public async Task UpdateAsync(RefreshToken<TUserId> token)
     {
         var existingToken = await dbContext.RefreshTokens
-            .FirstOrDefaultAsync(t => t.Id == refreshToken.Id);
+            .FirstOrDefaultAsync(t => t.Id == token.Id);
 
         if (existingToken != null)
         {
-            existingToken.Token = refreshToken.Token;
-            existingToken.TokenHash = refreshToken.TokenHash;
-            existingToken.GenerationDate = refreshToken.GenerationDate;
+            existingToken.Token = token.Token;
+            existingToken.TokenHash = token.TokenHash;
+            existingToken.GenerationDate = token.GenerationDate;
 
             await dbContext.SaveChangesAsync();
         }
         else
         {
-            throw new InvalidOperationException($"Refresh token with id {refreshToken.Id} not found");
+            throw new InvalidOperationException($"Refresh token with id {token.Id} not found");
         }
     }
 

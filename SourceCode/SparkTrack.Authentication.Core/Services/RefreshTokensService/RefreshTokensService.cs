@@ -73,7 +73,10 @@ public class RefreshTokensService<TUserId>(
             return null;
 
         refreshToken.Token = newToken;
+        refreshToken.TokenHash = GetTokenHash(newToken);
         refreshToken.GenerationDate = DateTime.UtcNow;
+
+        await refreshTokensRepository.UpdateAsync(refreshToken);
 
         return refreshToken;
     }
