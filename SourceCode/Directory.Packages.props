@@ -31,7 +31,9 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.1" />
     <PackageVersion Include="Minerals.StringCases" Version="0.2.2" />
-    <PackageVersion Include="NLog" Version="6.0.6" />
+    <PackageVersion Include="NLog" Version="6.1.0" />
+    <PackageVersion Include="NLog.Schema" Version="6.1.0" />
+    <PackageVersion Include="NLog.Web.AspNetCore" Version="6.1.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="NSwag.AspNetCore" Version="14.6.3" />
     <PackageVersion Include="Octokit" Version="14.0.0" />

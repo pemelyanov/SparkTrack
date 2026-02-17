@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.Desktop;
+﻿using SparkTrack.AvaloniaImpl.Extensions;
+
+namespace SparkTrack.Desktop;
 
 using Avalonia;
 using Avalonia.ReactiveUI;
@@ -66,7 +68,7 @@ sealed class Program
     private static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
         .UsePlatformDetect()
         .WithInterFont()
-        .LogToTrace()
+        .LogToNLog()
         .UseReactiveUI()
         .With(() => new Win32PlatformOptions { OverlayPopups = true })
         .With(() => new SkiaOptions { UseOpacitySaveLayer = true, MaxGpuResourceSizeBytes = 512 * 1024 * 1024})

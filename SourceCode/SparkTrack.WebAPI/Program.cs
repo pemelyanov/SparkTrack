@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using NLog.Web;
 using SparkTrack.Authentication.Core.Models;
 using SparkTrack.Authentication.DataAccess.EFCore.AutofacModules;
 using SparkTrack.Authentication.WebAPI.Extensions;
@@ -17,6 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(RegisterServices));
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

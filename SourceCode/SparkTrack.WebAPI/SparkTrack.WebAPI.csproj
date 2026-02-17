@@ -12,6 +12,8 @@
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="NLog" />
+      <PackageReference Include="NLog.Schema" />
+      <PackageReference Include="NLog.Web.AspNetCore" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
       <PackageReference Include="NSwag.AspNetCore" />
     </ItemGroup>
