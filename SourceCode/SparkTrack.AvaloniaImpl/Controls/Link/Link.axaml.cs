@@ -5,9 +5,13 @@ namespace SparkTrack.AvaloniaImpl.Controls.Link;
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Input;
+using Services.Clipboard;
+using Splat;
 
 public partial class Link : UserControl
 {
+    private readonly IClipboardService m_clipboardService = Locator.Current.GetService<IClipboardService>()!;
+    
     public Link()
     {
         InitializeComponent();
@@ -70,5 +74,16 @@ public partial class Link : UserControl
                 UseShellExecute = true
             }
         );
+    }
+
+    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if(sender is not Control control) return;
+        
+        var properties = e.GetCurrentPoint(control).Properties;
+        
+        if(!properties.IsRightButtonPressed || string.IsNullOrEmpty(Url)) return;
+
+        m_clipboardService.SaveToClipboardAsync(Url, "Ссылка скопирована");
     }
 }

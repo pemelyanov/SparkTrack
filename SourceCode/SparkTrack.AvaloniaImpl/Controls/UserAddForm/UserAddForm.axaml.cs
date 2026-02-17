@@ -21,13 +21,4 @@ public partial class UserAddForm : ReactiveContentDialog<UserAddFormViewModel>
     {
         args.Cancel = true;
     }
-
-    private void CopyPassword_OnClick(object? sender, RoutedEventArgs e)
-    {
-        if(ViewModel?.GeneratedPassword is not {} generatedPassword) return;
-
-        TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(generatedPassword);
-        
-        ViewModel.NotifyPasswordCopied();
-    }
 }

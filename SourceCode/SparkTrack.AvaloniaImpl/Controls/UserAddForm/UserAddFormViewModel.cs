@@ -5,11 +5,11 @@ using System.Reactive.Linq;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using SparkTrack.Core.Client.Enums;
 using SparkTrack.Core.Client.Services.Authorization;
 using SparkTrack.Core.Client.Services.PopupNotification;
 using SparkTrack.Core.Client.Services.Users;
 using Core.Shared.Data.Edit;
+using Services.Clipboard;
 using SparkTrack.Core.Shared.Enums;
 using SparkTrack.Core.Shared.Extensions;
 
@@ -17,16 +17,19 @@ public class UserAddFormViewModel : ViewModelBase
 {
     private readonly IUsersService             m_usersService;
     private readonly IPopupNotificationService m_popupNotificationService;
+    private readonly IClipboardService         m_clipboardService;
     private readonly IAuthorizationService     m_authorizationService;
 
     public UserAddFormViewModel(
         IAuthorizationService authorizationService,
         IUsersService usersService,
-        IPopupNotificationService popupNotificationService
+        IPopupNotificationService popupNotificationService,
+        IClipboardService clipboardService
     )
     {
         m_usersService = usersService;
         m_popupNotificationService = popupNotificationService;
+        m_clipboardService = clipboardService;
         m_authorizationService = authorizationService;
 
         SaveUserCommand = InitializeSaveUserCommand();
@@ -81,9 +84,11 @@ public class UserAddFormViewModel : ViewModelBase
         GeneratedPassword = string.Empty;
     }
 
-    public void NotifyPasswordCopied()
+    public async Task CopyGeneratedPasswordAsync()
     {
-        m_popupNotificationService.Show(ENotificationType.Information, "Пароль скопирован в буфер обмена");
+        if(GeneratedPassword is null) return;
+
+        await m_clipboardService.SaveToClipboardAsync(GeneratedPassword, "Пароль скопирован в буфер обмена");
     }
 
     private IObservable<bool> GetIsEmailValidObservable()

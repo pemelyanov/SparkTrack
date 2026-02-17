@@ -31,7 +31,7 @@
                        TextAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                 <SelectableTextBlock Text="{Binding GeneratedPassword}" VerticalAlignment="Center" />
-                <Button Content="{markupExtensions:SymbolIcon Symbol=Copy}" VerticalAlignment="Center" Click="CopyPassword_OnClick" />
+                <Button Content="{markupExtensions:SymbolIcon Symbol=Copy}" VerticalAlignment="Center" Command="{Binding CopyGeneratedPasswordAsync}" />
             </StackPanel>
             <TextBlock Text="Для создания нового пользователя сбросьте форму"
                        TextAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap" />
