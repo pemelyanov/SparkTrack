@@ -8,7 +8,7 @@ public class UriToImageSourceConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is not string uri) return null;
+        if (value is not string uri || string.IsNullOrEmpty(uri)) return null;
 
         var base64Mark = "base64:";
         if (uri.StartsWith(base64Mark))
@@ -18,6 +18,8 @@ public class UriToImageSourceConverter : IValueConverter
             using var memoryStream = new MemoryStream(data);
             return new Bitmap(memoryStream);
         }
+
+        if (!File.Exists(uri)) return null;
 
         return new Bitmap(uri);
     }

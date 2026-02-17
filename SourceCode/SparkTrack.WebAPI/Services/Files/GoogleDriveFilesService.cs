@@ -10,11 +10,14 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Upload;
 using Streams;
 
-public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactory)
+public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactory, IConfiguration configuration)
     : IFilesService
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
-    private const           string  FolderId = "1I3TWNzOXA6xXEhM9-TBB1dqITYwa53_3"; //TODO: вынести в appsettings.json
+
+    private readonly string m_folderId =
+        configuration.GetRequiredSection("Google").GetSection("FolderId").Get<string>()
+        ?? throw new InvalidOperationException("Set FolderId in configuration");
 
     public async Task<Guid> UploadAsync(Stream stream, long contentLength,  CancellationToken cancellationToken)
     {
@@ -28,7 +31,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
             Name = fileId.ToString(),
             Parents =
             [
-                FolderId,
+                m_folderId,
             ]
         };
 
@@ -89,7 +92,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         var listRequest = drive.Files.List();
         var fileName = id.ToString();
 
-        listRequest.Q = $"name = '{fileName}' and '{FolderId}' in parents and trashed = false";
+        listRequest.Q = $"name = '{fileName}' and '{m_folderId}' in parents and trashed = false";
         listRequest.Fields = "files(id, name, size)";
         listRequest.PageSize = 10;
 
@@ -98,7 +101,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
 
         if (searchResult.Files == null || searchResult.Files.Count == 0)
         {
-            throw new NotFoundException($"Файл с именем '{fileName}' не найден в папке {FolderId}");
+            throw new NotFoundException($"Файл с именем '{fileName}' не найден в папке {m_folderId}");
         }
 
         var file = searchResult.Files[0];

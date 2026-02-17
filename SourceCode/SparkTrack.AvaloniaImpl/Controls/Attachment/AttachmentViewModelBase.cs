@@ -76,6 +76,7 @@ public abstract class AttachmentViewModelBase(
     [Reactive]
     public bool IsImage { get; protected set; }
 
+    [Reactive]
     public string Uri { get; protected set; } = string.Empty;
 
     public string Name { get; protected set; } = string.Empty;
@@ -96,9 +97,9 @@ public abstract class AttachmentViewModelBase(
 
     protected abstract IAttachmentViewModel GetThis();
     
-    protected bool CheckIsImage()
+    protected bool CheckIsImage(string uri)
     {
-        using var fileStream = File.OpenRead(Uri);
+        using var fileStream = File.OpenRead(uri);
         var isImage = fileStream.IsImageBySignature();
         return isImage;
     }

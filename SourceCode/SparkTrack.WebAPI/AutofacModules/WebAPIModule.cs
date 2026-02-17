@@ -58,7 +58,7 @@ public class WebAPIModule : Module
 
             var credential = new UserCredential(
                 flow,
-                "SparkTrack.KonSnoCorp",
+                user,
                 await flow.LoadTokenAsync(user, CancellationToken.None)
             );
 

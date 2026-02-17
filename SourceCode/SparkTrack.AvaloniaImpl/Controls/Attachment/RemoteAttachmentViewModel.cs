@@ -48,7 +48,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
         if (IsDownloaded)
         {
-            IsImage = CheckIsImage();
+            IsImage = CheckIsImage(Uri);
         }
 
         SaveAsCommand = ReactiveCommand.CreateFromTask(
@@ -91,14 +91,14 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
             await m_filesService.DownloadAsync(
                 m_attachment.FileId,
-                Uri,
+                uri,
                 progress.Progress,
                 m_cancellationTokenSource.Token
             );
 
             IsDownloaded = true;
 
-            IsImage = CheckIsImage();
+            IsImage = CheckIsImage(uri);
         }
         catch (TaskCanceledException)
         {
