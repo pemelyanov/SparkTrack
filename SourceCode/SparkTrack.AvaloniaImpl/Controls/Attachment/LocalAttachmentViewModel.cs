@@ -87,6 +87,10 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         {
             m_logger.Warn("File upload canceled");
         }
+        catch (Exception e)
+        {
+            m_logger.Error(e, "File upload error");
+        }
         finally
         {
             LoadProgress = null;

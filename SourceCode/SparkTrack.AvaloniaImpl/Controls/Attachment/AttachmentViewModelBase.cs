@@ -38,6 +38,8 @@ public abstract class AttachmentViewModelBase(
     
     public virtual async Task RemoveAsync()
     {
+        m_logger.Info("Attempt to remove attachment (base call)");
+        
         if (!await dialogService.ConfirmAsync(
             "Вы действительно хотите удалить файл?",
             "Удаление файла"
@@ -57,8 +59,12 @@ public abstract class AttachmentViewModelBase(
     
     public void Open()
     {
+        m_logger.Info("Attempt to open attachment");
+        
         if (!IsImage)
         {
+            m_logger.Info("Attachment is not image, starting process for {uri}", Uri);
+            
             Process.Start(
                 new ProcessStartInfo
                 {
@@ -70,6 +76,7 @@ public abstract class AttachmentViewModelBase(
             return;
         }
 
+        m_logger.Info("Attachment is image, openning preview dialog");
         var imageViewModel = new ImageDialogViewModel(Name, Uri);
 
         dialogService.ShowAsync(imageViewModel);
@@ -77,12 +84,13 @@ public abstract class AttachmentViewModelBase(
 
     public void OpenInExplorer()
     {
+        m_logger.Info("Attempt to open attachment in explorer");
         explorerService.OpenContainingFolder(Uri);
     }
 
     protected void Cancel(bool close)
     {
-        m_logger.Info("Canceling file upload...");
+        m_logger.Info("Canceling file upload (base call)");
         m_cancellationTokenSource?.Cancel();
         m_cancellationTokenSource = null;
         
