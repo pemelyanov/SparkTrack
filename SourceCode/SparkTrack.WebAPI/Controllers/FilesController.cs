@@ -17,9 +17,9 @@ public class FilesController(IFilesService filesService) : Controller
     [DisableRequestTimeout]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public Task<ActionResult<Guid>> UploadAsync(CancellationToken cancellationToken)
+    public Task<ActionResult<Guid>> UploadAsync(CancellationToken cancellationToken, [FromHeader(Name = "Content-Length")] long contentLength)
     {
-        return this.OkWithDomainExceptionsHandling(() => filesService.UploadAsync(Request.Body, cancellationToken));
+        return this.OkWithDomainExceptionsHandling(() => filesService.UploadAsync(Request.Body, contentLength, cancellationToken));
     }
 
     [Authorize]

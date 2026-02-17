@@ -72,9 +72,6 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
     public long Size { get; }
 
-    [Reactive]
-    public AttachmentLoadProgress? LoadProgress { get; private set; }
-
     public ICommand SaveAsCommand { get; }
     
     public async Task DownloadAsync()

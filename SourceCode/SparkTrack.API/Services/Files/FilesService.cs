@@ -56,6 +56,7 @@ public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpCli
 
         using var content = new StreamContent(progressStream);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Headers.ContentLength = stream.Length;
 
         using var httpClient = httpClientFactory();
 

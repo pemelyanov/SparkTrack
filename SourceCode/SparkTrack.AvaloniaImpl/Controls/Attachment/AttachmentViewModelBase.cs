@@ -8,7 +8,10 @@ using ImageDialog;
 using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Diagnostics;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using NLog;
+using ReactiveUI;
 
 public abstract class AttachmentViewModelBase(
     Action<IAttachmentViewModel> onRemove,
@@ -25,8 +28,51 @@ public abstract class AttachmentViewModelBase(
         "SparkTrackDownloads"
     );
 
+    private IDisposable? m_progressSubscription;
+
     public event Action<IAttachmentViewModel>? PreviewSetRequested;
+
+    protected override void OnActivated(CompositeDisposable disposables)
+    {
+        base.OnActivated(disposables);
+
+        this.WhenAnyValue(it => it.LoadProgress)
+            .Skip(1)
+            .DistinctUntilChanged()
+            .Subscribe(progress =>
+                {
+                    if (progress is null)
+                    {
+                        m_logger.Info("Progress removed");
+                        m_progressSubscription?.Dispose();
+                        m_progressSubscription = null;
+                        return;
+                    }
+
+                    m_progressSubscription = progress.Progress.CurrentProgress.CombineLatest(
+                            progress.Progress.TotalProgress,
+                            (current, total) => new
+                            {
+                                current,
+                                total
+                            }
+                        )
+                        .Subscribe(args => m_logger.Trace(
+                                "Progress for attachment '{name}' changed: {bytes}/{total} ({percent:P})",
+                                Name,
+                                args.current,
+                                args.total,
+                                (float)args.current / args.total
+                            )
+                        );
+                }
+            )
+            .DisposeWith(disposables);
+    }
     
+    [Reactive]
+    public AttachmentLoadProgress? LoadProgress { get; protected set; }
+
     [Reactive]
     public bool IsImage { get; protected set; }
 
