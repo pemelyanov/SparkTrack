@@ -1,0 +1,6 @@
+version: '3.8'
+
+services:
+  spark-track-api:
+    volumes:
+      - /usr/share/SparkTrack/logs:/usr/share/SparkTrack/logs
