@@ -122,7 +122,7 @@
                        FontSize="12" Opacity="0.75">
                 <TextBlock.Text>
                     <MultiBinding StringFormat="{}{0} / {1}">
-                        <Binding Path="LoadProgress.Progress.CurrentProgress"
+                        <Binding Path="LoadProgress.Progress.CurrentProgress^"
                                  Converter="{StaticResource BytesToStringConverter}" />
                         <Binding Path="Size" Converter="{StaticResource BytesToStringConverter}" />
                     </MultiBinding>

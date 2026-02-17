@@ -44,9 +44,11 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
 
         s_logger.Info("Starting file upload: {name}", metadata.Name);
         var progress = await request.UploadAsync(cancellationToken);
-
+        
         if (progress.Status != UploadStatus.Completed)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            
             throw new InvalidOperationException(
                 $"Upload failed: {progress.Exception?.Message}"
             );
