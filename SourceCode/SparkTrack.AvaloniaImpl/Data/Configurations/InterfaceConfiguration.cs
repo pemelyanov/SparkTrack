@@ -1,4 +1,4 @@
-namespace SparkTrack.AvaloniaImpl.Data;
+namespace SparkTrack.AvaloniaImpl.Data.Configurations;
 
 public record InterfaceConfiguration
 {

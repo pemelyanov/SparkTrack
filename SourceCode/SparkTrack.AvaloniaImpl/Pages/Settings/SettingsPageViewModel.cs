@@ -3,6 +3,7 @@ using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
 using SparkTrack.Core.Client.Services.Configuration;
 

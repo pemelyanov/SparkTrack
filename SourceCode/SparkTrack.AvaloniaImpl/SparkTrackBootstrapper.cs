@@ -1,4 +1,5 @@
 ﻿using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.AvaloniaImpl.Pages.Settings;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
 using SparkTrack.Core.Client.Extensions;

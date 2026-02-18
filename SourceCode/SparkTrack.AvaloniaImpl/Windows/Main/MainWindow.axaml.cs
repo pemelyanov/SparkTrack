@@ -1,5 +1,6 @@
 using Avalonia;
 using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.Core.Client.Services.Configuration;
 using Splat;
 
