@@ -98,7 +98,7 @@
                                     Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}"
                                     Spacing="8" Orientation="Horizontal" HorizontalAlignment="Left">
                             <Panel>
-                                <TextBlock Margin="0 2 0 0" IsVisible="{Binding !IsNameEditing}" Classes="subtitle"
+                                <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsNameEditing}" Classes="subtitle"
                                            Text="{Binding Name}"
                                            TextTrimming="CharacterEllipsis" MaxWidth="500" />
                                 <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500"
