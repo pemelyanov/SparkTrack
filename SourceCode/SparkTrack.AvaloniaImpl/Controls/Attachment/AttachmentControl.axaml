@@ -59,7 +59,8 @@
                     <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
                     <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"
                               IsEnabled="{Binding CanOpenInExplorer}" />
-                    <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью" Command="{Binding RaisePreviewSetRequested}" />
+                    <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью"
+                              Command="{Binding RaisePreviewSetRequested}" />
                 </ContextMenu>
             </Grid.ContextMenu>
             <ContentControl Classes.half-transparent="{Binding #Container.IsPointerOver}"
@@ -84,12 +85,14 @@
 
             <Panel Grid.Column="0" IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <avalonia:SymbolIcon
-                    Symbol="{Binding LoadProgress.LoadType, Mode=OneWay, Converter={x:Static attachment:AttachmentControl.LoadingIconConverter}}"
+                    Symbol="{Binding LoadProgress.LoadType, FallbackValue={x:Static attachment:ELoadType.Download}, 
+                    Mode=OneWay, Converter={x:Static attachment:AttachmentControl.LoadingIconConverter}}"
                     HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                <controls:ProgressRing Maximum="{Binding LoadProgress.Progress.TotalProgress^}"
-                                       Value="{Binding LoadProgress.Progress.CurrentProgress^}"
-                                       IsIndeterminate="{Binding LoadProgress.Progress.TotalProgress^, Converter={StaticResource LessOrEqualConverter}, ConverterParameter={StaticResource Zero}}"
+                <controls:ProgressRing Maximum="{Binding LoadProgress.Progress.TotalProgress^, FallbackValue=1}"
+                                       Value="{Binding LoadProgress.Progress.CurrentProgress^, FallbackValue=0}"
+                                       IsIndeterminate="{Binding LoadProgress.Progress.TotalProgress^, 
+                                       FallbackValue={x:True}, Converter={StaticResource LessOrEqualConverter}, ConverterParameter={StaticResource Zero}}"
                                        Width="NaN"
                                        Height="NaN"
                                        HorizontalAlignment="Stretch"

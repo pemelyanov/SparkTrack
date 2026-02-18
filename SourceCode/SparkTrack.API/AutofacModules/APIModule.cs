@@ -25,7 +25,7 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<SparkHttpClient>().As<HttpClient>().WithParameter(new TypedParameter(typeof(string), apiBaseUrl));
         builder.RegisterType<RetryAuthHandler>();
         
-        RegisterAllClientsFromAssembly<ClientBase>(builder, typeof(APIModule).Assembly);
+        RegisterAllClientsFromAssembly(builder);
 
         builder.RegisterType<FeaturesService>().AsImplementedInterfaces();
         builder.RegisterJsonConfiguration<TokensConfiguration>(tokensConfigPath);
@@ -39,11 +39,8 @@ public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module
         builder.RegisterType<PaymentBillsService>().AsImplementedInterfaces().SingleInstance();
     }
 
-    private void RegisterAllClientsFromAssembly<TClientBase>(ContainerBuilder builder, Assembly assembly)
+    private void RegisterAllClientsFromAssembly(ContainerBuilder builder)
     {
-        builder.RegisterAssemblyTypes(assembly)
-            .Where(it => it.IsAssignableTo(typeof(TClientBase)));
-
         builder
             .RegisterGeneric(typeof(ClientWrapper<>))
             .AsSelf();

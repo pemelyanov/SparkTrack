@@ -6,7 +6,7 @@ using Core.Client.Services.Files;
 using Core.Client.Streams;
 using Delegates;
 
-public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpClient> httpClientFactory) : IFilesService
+public class FilesService(CustomClientFactory<FilesClient> clientFactory, Func<HttpClient> httpClientFactory) : IFilesService
 {
     public async Task<Guid> UploadAsync(
         byte[] content,
@@ -31,7 +31,7 @@ public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpCli
         CancellationToken cancellationToken
     )
     {
-        using var wrapper = clientFactory.Invoke();
+        using var wrapper = clientFactory.Invoke(GetConfiguredHttpClient());
 
         var response = await wrapper.Client.DownloadAsync(id, cancellationToken);
 
@@ -58,11 +58,27 @@ public class FilesService(ClientFactory<FilesClient> clientFactory, Func<HttpCli
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = stream.Length;
 
-        using var httpClient = httpClientFactory();
+        using HttpClient httpClient = GetConfiguredHttpClient();
 
         var response = await httpClient.PostAsync("/files", content, cancellationToken);
         var id = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return Guid.Parse(id.Trim('"'));
+    }
+
+    private HttpClient GetConfiguredHttpClient()
+    {
+        HttpClient? httpClient = null;
+        try
+        {
+            httpClient = httpClientFactory();
+            httpClient.Timeout = Timeout.InfiniteTimeSpan;
+            return httpClient;
+        }
+        catch
+        {
+            httpClient?.Dispose();
+            throw;
+        }
     }
 }
