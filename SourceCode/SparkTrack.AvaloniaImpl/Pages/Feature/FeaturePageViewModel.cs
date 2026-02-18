@@ -26,7 +26,10 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text.Json;
 using Controls.Attachment;
+using Core.Client.Enums;
+using Core.Client.Services.PopupNotification;
 using DescriptionTemplates;
+using Exceptions;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
 
@@ -44,6 +47,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly CommentViewModelFactory              m_commentFactory;
     private readonly IAuthorizationService                m_authorizationService;
     private readonly SubTaskViewModelFactory              m_subTaskViewModelFactory;
+    private readonly IPopupNotificationService            m_popupNotificationService;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -56,7 +60,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         ICommentsService commentsService,
         CommentViewModelFactory commentFactory,
         IAuthorizationService authorizationService,
-        SubTaskViewModelFactory subTaskViewModelFactory
+        SubTaskViewModelFactory subTaskViewModelFactory,
+        IPopupNotificationService popupNotificationService
     ) : this(
         null,
         projectId,
@@ -68,7 +73,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         commentsService,
         commentFactory,
         authorizationService,
-        subTaskViewModelFactory
+        subTaskViewModelFactory,
+        popupNotificationService
     ) { }
 
     public FeaturePageViewModel(
@@ -81,7 +87,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         ICommentsService commentsService,
         CommentViewModelFactory commentFactory,
         IAuthorizationService authorizationService,
-        SubTaskViewModelFactory subTaskViewModelFactory
+        SubTaskViewModelFactory subTaskViewModelFactory,
+        IPopupNotificationService popupNotificationService
     ) : this(
         feature,
         feature.Project.Id,
@@ -93,7 +100,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         commentsService,
         commentFactory,
         authorizationService,
-        subTaskViewModelFactory
+        subTaskViewModelFactory,
+        popupNotificationService
     ) { }
 
     private FeaturePageViewModel(
@@ -107,7 +115,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         ICommentsService commentsService,
         CommentViewModelFactory commentFactory,
         IAuthorizationService authorizationService,
-        SubTaskViewModelFactory subTaskViewModelFactory
+        SubTaskViewModelFactory subTaskViewModelFactory,
+        IPopupNotificationService popupNotificationService
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -121,6 +130,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_commentFactory = commentFactory;
         m_authorizationService = authorizationService;
         m_subTaskViewModelFactory = subTaskViewModelFactory;
+        m_popupNotificationService = popupNotificationService;
         IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
         IsEditingLink = m_feature is null;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
@@ -287,21 +297,33 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task SaveAsync()
     {
-        await AttachmentsPanelViewModel.UploadLocalAttachments();
-
-        var editData = CreateEditData();
-
-        if (m_feature is null)
+        try
         {
-            await m_featuresService.AddAsync(editData);
+            await AttachmentsPanelViewModel.UploadLocalAttachments();
 
-            Back();
-            return;
+            var editData = CreateEditData();
+
+            if (m_feature is null)
+            {
+                await m_featuresService.AddAsync(editData);
+
+                Back();
+                return;
+            }
+
+            await m_featuresService.EditAsync(editData);
+
+            await RefreshCommand.Execute().ToTask();
         }
-
-        await m_featuresService.EditAsync(editData);
-
-        await RefreshCommand.Execute().ToTask();
+        catch (Exception e)
+        {
+            if(e is NotifyUIException)
+                s_logger.Warn(e.Message);
+            else
+                s_logger.Error(e);
+            
+            m_popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка сохранения");
+        }
     }
 
     private FeatureEdit CreateEditData() => new()

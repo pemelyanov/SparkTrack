@@ -13,6 +13,7 @@ using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
 using Core.Shared.Extensions;
+using Exceptions;
 
 public class SubTaskViewModel : ViewModelBase
 {
@@ -105,7 +106,7 @@ public class SubTaskViewModel : ViewModelBase
     {
         Id = m_subTask?.Id ?? Guid.Empty,
         Name = Name,
-        ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NullReferenceException("Select employee"),
+        ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NotifyUIException($"Выберите сотрудника для задачи {Name}"),
         Deadline = Deadline,
         Cost = Cost,
         Version = m_subTask?.Version ?? Guid.Empty,
