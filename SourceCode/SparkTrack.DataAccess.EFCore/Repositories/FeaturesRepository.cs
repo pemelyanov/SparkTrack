@@ -31,7 +31,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         )
         .WhereIf(
             !showCompleted,
-            f => f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
+            f => f.TasksList.Count == 0
+                || f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
         )
         // TODO: Add filter
         .Where(it => it.ArchivedAt == null)
@@ -105,7 +106,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         featureData.EditedAt = DateTime.UtcNow;
 
         HandleSubTasks(feature, featureData);
-        
+
         AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
 
         try
@@ -172,7 +173,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         await dbContext.SaveChangesAsync();
     }
-    
+
     public async Task SetArchiveStatus(int id, bool isArchived, EArchiveSource? archiveSource = null)
     {
         var feature = await dbContext.Features.FindAsync(id);
@@ -181,9 +182,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         feature.ArchiveSource =
             isArchived ? archiveSource ?? throw new InvalidOperationException("Enter archive source") : null;
-        
+
         feature.ArchivedAt = isArchived ? DateTime.UtcNow : null;
-        
+
         await dbContext.SaveChangesAsync();
     }
 
@@ -204,8 +205,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         TasksList = f.TasksList
             .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId)
             .OrderBy(t => t.Deadline)
-            .Select(
-                t => new SubTask
+            .Select(t => new SubTask
                 {
                     Id = t.Id,
                     Name = t.Name,
@@ -230,8 +230,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             )
             .ToArray(),
         AttachmentsList = f.AttachmentsList
-            .Select(
-                a => new Attachment
+            .Select(a => new Attachment
                 {
                     Id = a.Id,
                     Name = a.Name,
