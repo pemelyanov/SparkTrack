@@ -1,7 +1,9 @@
 ﻿using SparkTrack.AvaloniaImpl.Data;
 using SparkTrack.AvaloniaImpl.Data.Configurations;
+using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Pages.Settings;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
+using SparkTrack.AvaloniaImpl.Services.Templates;
 using SparkTrack.Core.Client.Extensions;
 
 namespace SparkTrack.AvaloniaImpl;
@@ -93,6 +95,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                 )
             )
         );
+
         builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<WindowsExplorerService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterJsonConfiguration<InterfaceConfiguration>(Path.Combine(
@@ -103,6 +106,8 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         ));
 
         RegisterUpdatingIfNeeded(builder);
+        
+        RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");
     }
 
     private void RegisterUpdatingIfNeeded(ContainerBuilder builder)
@@ -144,5 +149,14 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         return new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true)
             .Build();
+    }
+
+    private void RegisterTemplateService<TTemplate>(ContainerBuilder builder, string categoryName)
+        where TTemplate : ITemplate
+    {
+        builder.RegisterType<JsonTemplatesService<TTemplate>>()
+            .WithParameter(new TypedParameter(typeof(string), categoryName))
+            .As<ITemplatesService<TTemplate>>()
+            .SingleInstance();
     }
 }
