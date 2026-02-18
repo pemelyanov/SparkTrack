@@ -12,6 +12,7 @@ using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
+using Core.Shared.Extensions;
 
 public class SubTaskViewModel : ViewModelBase
 {
@@ -143,7 +144,7 @@ public class SubTaskViewModel : ViewModelBase
     private void UpdateProperties(SubTaskData? subTask)
     {
         Name = subTask?.Name ?? string.Empty;
-        Deadline = subTask?.Deadline ?? DateTime.Now;
+        Deadline = (subTask?.Deadline ?? DateTime.Now).EndOfTheDay();
         Cost = subTask?.Cost ?? 0;
         IsCompleted = subTask?.IsCompleted ?? false;
         PaymentStatus = subTask?.PaymentStatus ?? EPaymentStatus.None;
