@@ -114,7 +114,14 @@
                                           Classes.save="{Binding IsNameEditing}"
                                           IsChecked="{Binding IsNameEditing, Mode=TwoWay}" />
                         </StackPanel>
+                        
+                        <Separator />
 
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Канал:" />
+                            <link:Link Text="{Binding Project.Name}" Url="{Binding Project.Link}" />
+                        </StackPanel>
+                        
                         <Separator />
 
                         <TextBlock Text="Задачи: " />

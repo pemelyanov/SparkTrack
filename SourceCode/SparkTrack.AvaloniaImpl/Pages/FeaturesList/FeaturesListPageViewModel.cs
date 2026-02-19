@@ -24,7 +24,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Lazy<IScreen>                                         m_screen;
     private readonly IFeaturesService                                      m_featuresService;
     private readonly Func<Feature, FeaturePageViewModel>                   m_featureEditPageViewModelFactory;
-    private readonly Func<Guid, FeaturePageViewModel>                      m_featureAddPageViewModelFactory;
+    private readonly Func<Project, FeaturePageViewModel>                   m_featureAddPageViewModelFactory;
     private readonly IDialogService                                        m_dialogService;
     private readonly Func<TemplateSelectionFormViewModel<FeatureTemplate>> m_templateSelectionViewModelFactory;
     private readonly BehaviorObservableSubject<IReadOnlyList<Feature>>     m_selectedFeatures = new([]);
@@ -33,7 +33,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         Lazy<IScreen> screen,
         IFeaturesService featuresService,
         Func<Feature, FeaturePageViewModel> featureEditPageViewModelFactory,
-        Func<Guid, FeaturePageViewModel> featureAddPageViewModelFactory,
+        Func<Project, FeaturePageViewModel> featureAddPageViewModelFactory,
         ProjectsFilterViewModel projectsFilterViewModel,
         IDialogService dialogService,
         Func<TemplateSelectionFormViewModel<FeatureTemplate>> templateSelectionViewModelFactory
@@ -77,12 +77,12 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     public IScreen HostScreen => m_screen.Value;
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
-    
+
     public SelectableViewModel<DateRangeViewModel> DateRangeViewModel { get; } = new(new DateRangeViewModel())
     {
         IsSelected = true
     };
-    
+
     [Reactive]
     public bool ShowCompleted { get; set; }
 
@@ -92,11 +92,11 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ReactiveCommand<Unit, Unit> ReloadTableCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> DeleteCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> SendOnPaymentCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> MarkAsCompletedCommand { get; }
 
     public void OpenFeature(Feature feature)
@@ -107,15 +107,15 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     public async Task CreateFeatureFromTemplateAsync()
     {
         if (ProjectsFilterViewModel.SelectedProject is not { } project) return;
-        
+
         var selectionViewModel = m_templateSelectionViewModelFactory();
 
         if (await m_dialogService.ShowAsync(selectionViewModel) is not true ||
             selectionViewModel.SelectedTemplate is not FeatureTemplate template) return;
 
-        var featureViewModel = m_featureAddPageViewModelFactory(project.Id);
+        var featureViewModel = m_featureAddPageViewModelFactory(project);
         featureViewModel.InitializeFromTemplate(template);
-        
+
         HostScreen.Router.NavigateOnUIThread(featureViewModel);
     }
 
@@ -123,11 +123,10 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     {
         if (ProjectsFilterViewModel.SelectedProject is not { } project) return;
 
-        HostScreen.Router.NavigateOnUIThread(m_featureAddPageViewModelFactory(project.Id));
+        HostScreen.Router.NavigateOnUIThread(m_featureAddPageViewModelFactory(project));
     }
 
-    private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(
-        async () =>
+    private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(async () =>
         {
             var page = await m_featuresService.GetPageAsync(
                 ProjectsFilterViewModel.SelectedProject?.Id,
@@ -136,7 +135,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
                 DateRangeViewModel.TryGetEndDate(),
                 PaginatorViewModel.ToQuery()
             );
-            
+
             CurrentPageData = page.Items.Select(it => new SelectableViewModel<Feature>(it)).ToArray();
             PaginatorViewModel.SetPagesQuantity(page.Total);
         }
@@ -145,7 +144,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     private async Task DeleteAsync()
     {
         if (m_selectedFeatures.Value.Count == 0) return;
-        
+
         var forceOption = new ForceDeleteOption();
 
         if (!await m_dialogService.ConfirmAsync(
