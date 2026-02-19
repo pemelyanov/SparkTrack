@@ -238,12 +238,14 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         };
     }
 
-    public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync( Guid? adminId,
-                                                                                    Guid? employeeId,
-                                                                                    Guid? projectId,
-                                                                                    DateTime? startDate,
-                                                                                    DateTime? endDate,
-                                                                                    PageQuery pageQuery) => await dbContext
+    public async Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
+        Guid? adminId,
+        Guid? employeeId,
+        Guid? projectId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    ) => await dbContext
         .Payments
         .AsNoTracking()
         .WhereIf(adminId is not null, it => it.AdminId == adminId)
@@ -314,49 +316,50 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         .AsPaginated(pageQuery)
         .CollectAsync();
 
-    public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(Guid? adminId,
-                                                                                          Guid? employeeId,
-                                                                                          DateTime? startDate,
-                                                                                          DateTime? endDate,
-                                                                                          PageQuery pageQuery) =>
-        await dbContext
-            .Bonuses
-            .AsNoTracking()
-            .WhereIf(adminId is not null, it => it.AdminId == adminId)
-            .WhereIf(employeeId is not null, it => it.EmployeeId == employeeId)
-            .WhereIf(startDate is not null, it => it.CreatedAt >= startDate)
-            .WhereIf(endDate is not null, it => it.CreatedAt <= endDate)
-            .Select(data => new BonusPaymentInfo
+    public async Task<IReadOnlyPagedData<BonusPaymentInfo>> GetPaidBonusPaymentsListAsync(
+        Guid? adminId,
+        Guid? employeeId,
+        DateTime? startDate,
+        DateTime? endDate,
+        PageQuery pageQuery
+    ) => await dbContext
+        .Bonuses
+        .AsNoTracking()
+        .WhereIf(adminId is not null, it => it.AdminId == adminId)
+        .WhereIf(employeeId is not null, it => it.EmployeeId == employeeId)
+        .WhereIf(startDate is not null, it => it.CreatedAt >= startDate)
+        .WhereIf(endDate is not null, it => it.CreatedAt <= endDate)
+        .Select(data => new BonusPaymentInfo
+            {
+                Id = data.Id,
+                Admin = new User
                 {
-                    Id = data.Id,
-                    Admin = new User
-                    {
-                        Id = data.Admin.Id,
-                        Email = data.Admin.Email,
-                        Name = data.Admin.Name,
-                        Role = data.Admin.Role,
-                        TelegramTag = data.Admin.TelegramTag,
-                        ArchivedAt = data.Admin.ArchivedAt,
-                        ArchiveSource = data.Admin.ArchiveSource
-                    },
-                    Employee = new User
-                    {
-                        Id = data.Employee.Id,
-                        Email = data.Employee.Email,
-                        Name = data.Employee.Name,
-                        Role = data.Employee.Role,
-                        TelegramTag = data.Employee.TelegramTag,
-                        ArchivedAt = data.Employee.ArchivedAt,
-                        ArchiveSource = data.Employee.ArchiveSource
-                    },
-                    Payment = data.Payment,
-                    CreatedAt = data.CreatedAt,
-                    Comment = data.Comment,
-                }
-            )
-            .OrderByDescending(it => it.CreatedAt)
-            .AsPaginated(pageQuery)
-            .CollectAsync();
+                    Id = data.Admin.Id,
+                    Email = data.Admin.Email,
+                    Name = data.Admin.Name,
+                    Role = data.Admin.Role,
+                    TelegramTag = data.Admin.TelegramTag,
+                    ArchivedAt = data.Admin.ArchivedAt,
+                    ArchiveSource = data.Admin.ArchiveSource
+                },
+                Employee = new User
+                {
+                    Id = data.Employee.Id,
+                    Email = data.Employee.Email,
+                    Name = data.Employee.Name,
+                    Role = data.Employee.Role,
+                    TelegramTag = data.Employee.TelegramTag,
+                    ArchivedAt = data.Employee.ArchivedAt,
+                    ArchiveSource = data.Employee.ArchiveSource
+                },
+                Payment = data.Payment,
+                CreatedAt = data.CreatedAt,
+                Comment = data.Comment,
+            }
+        )
+        .OrderByDescending(it => it.CreatedAt)
+        .AsPaginated(pageQuery)
+        .CollectAsync();
 
     public async Task AddPaymentsRangeAsync(IReadOnlyList<PaymentInfo> paymentsList)
     {
@@ -397,8 +400,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
     public async Task DeletePaymentAsync(Guid id)
     {
         var entity = await dbContext.Payments.FindAsync(id);
-        
-        if(entity is null) return;
+
+        if (entity is null) return;
 
         dbContext.Payments.Remove(entity);
         await dbContext.SaveChangesAsync();
@@ -407,8 +410,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
     public async Task DeleteBonusPaymentAsync(Guid id)
     {
         var entity = await dbContext.Bonuses.FindAsync(id);
-        
-        if(entity is null) return;
+
+        if (entity is null) return;
 
         dbContext.Bonuses.Remove(entity);
         await dbContext.SaveChangesAsync();
@@ -416,7 +419,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
 
     public async Task<bool> IsPaymentPaidByThisUser(Guid paymentId, Guid userId)
     {
-        var payerId = await dbContext.Payments.AsNoTracking().Where(it => it.Id == paymentId)
+        var payerId = await dbContext.Payments.AsNoTracking()
+            .Where(it => it.Id == paymentId)
             .Select(it => it.AdminId)
             .FirstOrDefaultAsync();
 
@@ -425,7 +429,8 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
 
     public async Task<bool> IsBonusPaymentPaidByThisUser(Guid paymentId, Guid userId)
     {
-        var payerId = await dbContext.Bonuses.AsNoTracking().Where(it => it.Id == paymentId)
+        var payerId = await dbContext.Bonuses.AsNoTracking()
+            .Where(it => it.Id == paymentId)
             .Select(it => it.AdminId)
             .FirstOrDefaultAsync();
 

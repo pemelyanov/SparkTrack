@@ -79,6 +79,8 @@ public partial class Link : UserControl
                     UseShellExecute = true
                 }
             );
+
+            args.Handled = true;
         }
         catch (Exception e)
         {
@@ -96,5 +98,7 @@ public partial class Link : UserControl
         if(!properties.IsRightButtonPressed || string.IsNullOrEmpty(Url)) return;
 
         m_clipboardService.SaveToClipboardAsync(Url, "Ссылка скопирована");
+
+        e.Handled = true;
     }
 }

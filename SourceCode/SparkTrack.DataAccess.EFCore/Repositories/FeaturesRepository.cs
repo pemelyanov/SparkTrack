@@ -199,6 +199,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         {
             Id = f.Project.Id,
             Name = f.Project.Name,
+            Link = f.Project.Link,
             ArchivedAt = f.Project.ArchivedAt,
             ArchiveSource = f.Project.ArchiveSource
         },

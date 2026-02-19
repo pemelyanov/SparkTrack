@@ -64,7 +64,7 @@ internal class ProjectsRepository(SparkTrackDbContext dbContext) : IProjectsRepo
         }
 
         projectData.Name = project.Name;
-        projectData.Link = projectData.Link;
+        projectData.Link = project.Link;
 
         await dbContext.SaveChangesAsync();
     }
