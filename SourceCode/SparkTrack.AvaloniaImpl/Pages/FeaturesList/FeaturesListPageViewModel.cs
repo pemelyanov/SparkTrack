@@ -14,17 +14,20 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using ConfirmationOptions;
+using Controls.TemplateSelectionForm;
+using Data.Templates;
 using Reactive;
 using Services.DialogHost;
 
 public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 {
-    private readonly Lazy<IScreen>                                     m_screen;
-    private readonly IFeaturesService                                  m_featuresService;
-    private readonly Func<Feature, FeaturePageViewModel>               m_featureEditPageViewModelFactory;
-    private readonly Func<Guid, FeaturePageViewModel>                  m_featureAddPageViewModelFactory;
-    private readonly IDialogService                                    m_dialogService;
-    private readonly BehaviorObservableSubject<IReadOnlyList<Feature>> m_selectedFeatures = new([]);
+    private readonly Lazy<IScreen>                                         m_screen;
+    private readonly IFeaturesService                                      m_featuresService;
+    private readonly Func<Feature, FeaturePageViewModel>                   m_featureEditPageViewModelFactory;
+    private readonly Func<Guid, FeaturePageViewModel>                      m_featureAddPageViewModelFactory;
+    private readonly IDialogService                                        m_dialogService;
+    private readonly Func<TemplateSelectionFormViewModel<FeatureTemplate>> m_templateSelectionViewModelFactory;
+    private readonly BehaviorObservableSubject<IReadOnlyList<Feature>>     m_selectedFeatures = new([]);
 
     public FeaturesListPageViewModel(
         Lazy<IScreen> screen,
@@ -32,7 +35,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         Func<Feature, FeaturePageViewModel> featureEditPageViewModelFactory,
         Func<Guid, FeaturePageViewModel> featureAddPageViewModelFactory,
         ProjectsFilterViewModel projectsFilterViewModel,
-        IDialogService dialogService
+        IDialogService dialogService,
+        Func<TemplateSelectionFormViewModel<FeatureTemplate>> templateSelectionViewModelFactory
     )
     {
         m_screen = screen;
@@ -40,6 +44,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         m_featureEditPageViewModelFactory = featureEditPageViewModelFactory;
         m_featureAddPageViewModelFactory = featureAddPageViewModelFactory;
         m_dialogService = dialogService;
+        m_templateSelectionViewModelFactory = templateSelectionViewModelFactory;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
         ReloadTableCommand = CreateReloadTableCommand();
@@ -97,6 +102,21 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     public void OpenFeature(Feature feature)
     {
         HostScreen.Router.NavigateOnUIThread(m_featureEditPageViewModelFactory(feature));
+    }
+
+    public async Task CreateFeatureFromTemplateAsync()
+    {
+        if (ProjectsFilterViewModel.SelectedProject is not { } project) return;
+        
+        var selectionViewModel = m_templateSelectionViewModelFactory();
+
+        if (await m_dialogService.ShowAsync(selectionViewModel) is not true ||
+            selectionViewModel.SelectedTemplate is not FeatureTemplate template) return;
+
+        var featureViewModel = m_featureAddPageViewModelFactory(project.Id);
+        featureViewModel.InitializeFromTemplate(template);
+        
+        HostScreen.Router.NavigateOnUIThread(featureViewModel);
     }
 
     public void CreateFeature()

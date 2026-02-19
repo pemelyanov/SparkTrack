@@ -104,7 +104,7 @@
                             HorizontalAlignment="Right" VerticalAlignment="Top">
                     
                     <Button Classes="icon template-add" IsVisible="{Binding IsInEditMode}"
-                            Command="{Binding SaveAsTemplateAsync}" />
+                            Command="{Binding CreateTemplateAsync}" />
                     
                     <ToggleButton Classes="icon enter-hot-key"
                                   Classes.edit="{Binding !IsInEditMode}"

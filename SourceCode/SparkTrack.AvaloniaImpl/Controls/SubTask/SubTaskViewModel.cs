@@ -57,6 +57,8 @@ public class SubTaskViewModel : ViewModelBase
                 it =>
                 {
                     AvailableEmployees = it;
+                    
+                    if(it.Count == 0) return;
 
                     if (m_isUserInitiallySet) return;
                     m_isUserInitiallySet = true;
@@ -69,7 +71,7 @@ public class SubTaskViewModel : ViewModelBase
                         return;
                     }
                     
-                    SelectedEmployee = it.FirstOrDefault(u => u.Id == m_subTask.ExecutorEmployee.Id);
+                    SelectedEmployee = it.FirstOrDefault(u => u.Id == m_subTask?.ExecutorEmployee.Id);
                 }
             )
             .DisposeWith(disposables);
@@ -87,7 +89,7 @@ public class SubTaskViewModel : ViewModelBase
     [Reactive]
     public User? SelectedEmployee { get; set; }
     
-    public User? EmployeeToSelectOnNextLoad { get; set; }
+    public UserSelectionTemplate? EmployeeToSelectOnNextLoad { get; set; }
 
     [Reactive]
     public DateTime Deadline { get; set; }
@@ -117,23 +119,25 @@ public class SubTaskViewModel : ViewModelBase
         
         m_onRemove(this);
     }
-
-    public async Task SaveAsTemplateAsync()
+    
+    public SubTaskTemplate GetTemplate() => new()
     {
-        var template = new SubTaskTemplate
-        {
-            Name = Name,
-            Deadline = Deadline.Date - DateTime.Now.Date,
-            ExecutorEmployee = SelectedEmployee is null
-                ? null
-                : new UserSelectionTemplate
-                {
-                    Id = SelectedEmployee.Id,
-                    Name = SelectedEmployee.Name
-                },
-            Cost = Cost,
-            TimelyBonus = TimelyBonus
-        };
+        Name = Name,
+        Deadline = Deadline.Date - DateTime.Now.Date,
+        ExecutorEmployee = SelectedEmployee is null
+            ? null
+            : new UserSelectionTemplate
+            {
+                Id = SelectedEmployee.Id,
+                Name = SelectedEmployee.Name
+            },
+        Cost = Cost,
+        TimelyBonus = TimelyBonus
+    };
+
+    public async Task CreateTemplateAsync()
+    {
+        var template = GetTemplate();
         
         var viewModel = m_templateViewModelFactory(template);
 

@@ -55,6 +55,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
     protected override void RegisterViews(IMutableDependencyResolver builder)
     {
         RegisterTemplateViewModel<SubTaskTemplate>(builder);
+        RegisterTemplateViewModel<FeatureTemplate>(builder);
     }
 
     protected override void RegisterViewModels(ContainerBuilder builder)
@@ -119,6 +120,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         RegisterUpdatingIfNeeded(builder);
         
         RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");
+        RegisterTemplateService<FeatureTemplate>(builder, "Features");
     }
 
     private void RegisterUpdatingIfNeeded(ContainerBuilder builder)

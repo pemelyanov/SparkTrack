@@ -84,7 +84,8 @@
         <Style Selector="ContentControl.attachment-preview">
             <Setter Property="Content">
                 <Template>
-                    <Image Source="{Binding PreviewAttachment.Uri, Converter={StaticResource PathToImageSourceConverter}}" />
+                    <Image
+                        Source="{Binding PreviewAttachment.Uri, Converter={StaticResource PathToImageSourceConverter}}" />
                 </Template>
             </Setter>
         </Style>
@@ -98,9 +99,10 @@
                                     Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}"
                                     Spacing="8" Orientation="Horizontal" HorizontalAlignment="Left">
                             <Panel>
-                                <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsNameEditing}" Classes="subtitle"
-                                           Text="{Binding Name}"
-                                           TextTrimming="CharacterEllipsis" MaxWidth="500" />
+                                <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsNameEditing}"
+                                                     Classes="subtitle"
+                                                     Text="{Binding Name}"
+                                                     TextTrimming="CharacterEllipsis" MaxWidth="500" />
                                 <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500"
                                          IsVisible="{Binding IsNameEditing}"
                                          Classes="subtitle" Text="{Binding Name}" />
@@ -132,15 +134,17 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                
-                                <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal">
-                                    <Button Classes="icon medium-content" Content="{markupExtensions:SymbolIcon Symbol=Add}"
+
+                                <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
+                                            Orientation="Horizontal">
+                                    <Button Classes="icon medium-content"
+                                            Content="{markupExtensions:SymbolIcon Symbol=Add}"
                                             Command="{Binding AddSubTask}"
                                             CornerRadius="4 0 0 4"
                                             ToolTip.Tip="Добавить задачу" />
-                                    
-                                    <Button Classes="icon medium-content template" Width="20" CornerRadius="0 4 4 0"
-                                            Command="{Binding AddSubTaskFromTemplateAsync}"/>
+
+                                    <Button Classes="icon template" CornerRadius="0 4 4 0"
+                                            Command="{Binding AddSubTaskFromTemplateAsync}" />
                                 </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
@@ -161,7 +165,7 @@
                                               Classes.edit="{Binding !IsEditingLink}"
                                               Classes.save="{Binding IsEditingLink}"
                                               IsChecked="{Binding IsEditingLink, Mode=TwoWay}"
-                                              IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"/>
+                                              IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />
                             </Grid>
 
                             <Border Classes="card" Grid.Row="1" Grid.Column="0">
@@ -200,7 +204,8 @@
                                 </StackPanel>
                             </Border>
 
-                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Width="{StaticResource PreviewSize}"
+                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"
+                                    Width="{StaticResource PreviewSize}"
                                     Height="{StaticResource PreviewSize}" VerticalAlignment="Top">
                                 <ContentControl
                                     Classes.attachment-preview="{Binding AttachmentsPanelViewModel.AttachmentsList.Count}" />
@@ -261,6 +266,10 @@
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
             <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" />
+
+            <Button Classes="icon template-add" Command="{Binding CreateTemplateAsync}"
+                    IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />
+
             <Button Classes="accent" Content="Сохранить"
                     Classes.enter-hot-key="{Binding CanSaveByHotKey}"
                     Command="{Binding SaveCommand}"
