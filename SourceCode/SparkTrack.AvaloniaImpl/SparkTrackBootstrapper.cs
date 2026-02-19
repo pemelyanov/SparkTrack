@@ -1,4 +1,5 @@
-﻿using SparkTrack.AvaloniaImpl.Data;
+﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
+using SparkTrack.AvaloniaImpl.Data;
 using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Pages.Settings;
@@ -84,6 +85,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<UserEditFormViewModel>();
         builder.RegisterType<SettingsPageViewModel>().SingleInstance();
         builder.RegisterGeneric(typeof(TemplateSaveFormViewModel<>));
+        builder.RegisterGeneric(typeof(TemplateSelectionFormViewModel<>));
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
@@ -174,5 +176,6 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         where TTemplate : ITemplate
     {
         builder.Register(() => new TemplateSaveForm(), typeof(IViewFor<TemplateSaveFormViewModel<TTemplate>>));
+        builder.Register(() => new TemplateSelectionForm(), typeof(IViewFor<TemplateSelectionFormViewModel<TTemplate>>));
     }
 }

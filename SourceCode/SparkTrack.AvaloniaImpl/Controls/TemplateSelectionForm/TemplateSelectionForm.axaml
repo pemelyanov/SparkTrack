@@ -1,0 +1,36 @@
+<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:templateSelectionForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm"
+                        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                        x:Class="SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm.TemplateSelectionForm"
+                        Title="Выбор шаблона"
+                        PrimaryButtonText="Выбрать"
+                        CloseButtonText="Отмена"
+                        DefaultButton="Primary"
+                        PrimaryButtonCommand="{Binding Close}"
+                        IsPrimaryButtonEnabled="{Binding SelectedTemplate, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        PrimaryButtonCommandParameter="{x:True}"
+                        x:DataType="templateSelectionForm:TemplateSelectionFormViewModel">
+    <ScrollViewer MaxHeight="500">
+        <StackPanel Spacing="8">
+            <TextBlock Text="Группы: " IsVisible="{Binding TemplateGroups.Count}" />
+            <TreeView ItemsSource="{Binding TemplateGroups}" SelectedItem="{Binding SelectedGroup}">
+                <TreeView.ItemTemplate>
+                    <TreeDataTemplate ItemsSource="{Binding Children}">
+                        <TextBlock Text="{Binding Name}" />
+                    </TreeDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+
+            <Separator />
+
+            <TextBlock Text="Несгруппированные шаблоны:" IsVisible="{Binding UngrouppedTemplates.Count}"/>
+            <ListBox ItemsSource="{Binding UngrouppedTemplates}"
+                     DisplayMemberBinding="{Binding TemplateName}"
+                     SelectedItem="{Binding SelectedTemplate}" />
+        </StackPanel>
+    </ScrollViewer>
+</controls:ContentDialog>

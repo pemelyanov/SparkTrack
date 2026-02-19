@@ -1,4 +1,8 @@
-﻿namespace SparkTrack.AvaloniaImpl.Pages.Feature;
+﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
+using SparkTrack.AvaloniaImpl.Data.Templates;
+using SparkTrack.AvaloniaImpl.Services.DialogHost;
+
+namespace SparkTrack.AvaloniaImpl.Pages.Feature;
 
 using Controls.AttachmentsPanel;
 using Controls.Comment;
@@ -37,18 +41,20 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
-    private          Feature?                             m_feature;
-    private readonly Guid                                 m_projectId;
-    private readonly Lazy<IScreen>                        m_hostScreen;
-    private readonly IFeaturesService                     m_featuresService;
-    private readonly IUsersService                        m_usersService;
-    private readonly Func<Comment?, CommentEditViewModel> m_commentEditFactory;
-    private readonly ICommentsService                     m_commentsService;
-    private readonly CommentViewModelFactory              m_commentFactory;
-    private readonly IAuthorizationService                m_authorizationService;
-    private readonly SubTaskViewModelFactory              m_subTaskViewModelFactory;
-    private readonly IPopupNotificationService            m_popupNotificationService;
-    private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
+    private          Feature?                                              m_feature;
+    private readonly Guid                                                  m_projectId;
+    private readonly Lazy<IScreen>                                         m_hostScreen;
+    private readonly IFeaturesService                                      m_featuresService;
+    private readonly IUsersService                                         m_usersService;
+    private readonly Func<Comment?, CommentEditViewModel>                  m_commentEditFactory;
+    private readonly ICommentsService                                      m_commentsService;
+    private readonly CommentViewModelFactory                               m_commentFactory;
+    private readonly IAuthorizationService                                 m_authorizationService;
+    private readonly SubTaskViewModelFactory                               m_subTaskViewModelFactory;
+    private readonly IPopupNotificationService                             m_popupNotificationService;
+    private readonly Func<TemplateSelectionFormViewModel<SubTaskTemplate>> m_subTaskTemplateSelectionViewModelFactory;
+    private readonly IDialogService                                        m_dialogService;
+    private readonly BehaviorSubject<IReadOnlyList<User>>                  m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
         Guid projectId,
@@ -61,7 +67,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         CommentViewModelFactory commentFactory,
         IAuthorizationService authorizationService,
         SubTaskViewModelFactory subTaskViewModelFactory,
-        IPopupNotificationService popupNotificationService
+        IPopupNotificationService popupNotificationService,
+        Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
+        IDialogService dialogService
     ) : this(
         null,
         projectId,
@@ -74,8 +82,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         commentFactory,
         authorizationService,
         subTaskViewModelFactory,
-        popupNotificationService
-    ) { }
+        popupNotificationService,
+        subTaskTemplateSelectionViewModelFactory,
+        dialogService
+    )
+    {
+    }
 
     public FeaturePageViewModel(
         Feature feature,
@@ -88,7 +100,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         CommentViewModelFactory commentFactory,
         IAuthorizationService authorizationService,
         SubTaskViewModelFactory subTaskViewModelFactory,
-        IPopupNotificationService popupNotificationService
+        IPopupNotificationService popupNotificationService,
+        Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
+        IDialogService dialogService
     ) : this(
         feature,
         feature.Project.Id,
@@ -101,8 +115,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         commentFactory,
         authorizationService,
         subTaskViewModelFactory,
-        popupNotificationService
-    ) { }
+        popupNotificationService,
+        subTaskTemplateSelectionViewModelFactory,
+        dialogService
+    )
+    {
+    }
 
     private FeaturePageViewModel(
         Feature? feature,
@@ -116,8 +134,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         CommentViewModelFactory commentFactory,
         IAuthorizationService authorizationService,
         SubTaskViewModelFactory subTaskViewModelFactory,
-        IPopupNotificationService popupNotificationService
-    )
+        IPopupNotificationService popupNotificationService,
+        Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
+        IDialogService dialogService)
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
         m_feature = feature;
@@ -131,10 +150,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_authorizationService = authorizationService;
         m_subTaskViewModelFactory = subTaskViewModelFactory;
         m_popupNotificationService = popupNotificationService;
+        m_subTaskTemplateSelectionViewModelFactory = subTaskTemplateSelectionViewModelFactory;
+        m_dialogService = dialogService;
         IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
         IsEditingLink = m_feature is null;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
-        AttachmentsPanelViewModel.PreviewAttachmentSetRequested += AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
+        AttachmentsPanelViewModel.PreviewAttachmentSetRequested +=
+            AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
         if (feature is null) IsNameEditing = true;
 
@@ -146,7 +168,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
     }
-    
+
     protected override void OnActivated(CompositeDisposable disposables)
     {
         base.OnActivated(disposables);
@@ -168,7 +190,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public string Name { get; set; } = string.Empty;
-    
+
     [Reactive]
     public IAttachmentViewModel? PreviewAttachment { get; private set; }
 
@@ -183,7 +205,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public bool IsEditingLink { get; set; }
-    
+
     [Reactive]
     public bool IsEditingComment { get; private set; }
 
@@ -254,6 +276,26 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         SubTasksList.Add(subTask);
     }
 
+    public async Task AddSubTaskFromTemplateAsync()
+    {
+        var selectionViewModel = m_subTaskTemplateSelectionViewModelFactory();
+
+        if (await m_dialogService.ShowAsync(selectionViewModel) is not true ||
+            selectionViewModel.SelectedTemplate is not SubTaskTemplate template) return;
+
+        var subTask = CreateSubTaskViewModel();
+        subTask.IsInEditMode = true;
+        subTask.Name = template.Name;
+        subTask.SelectedEmployee =
+            m_availableEmployeesList.Value.FirstOrDefault(it => it.Id == template.ExecutorEmployee?.Id);
+
+        subTask.Cost = template.Cost;
+        subTask.TimelyBonus = template.TimelyBonus;
+        subTask.Deadline = DateTime.Now + template.Deadline;
+
+        SubTasksList.Add(subTask);
+    }
+
     private SubTaskViewModel CreateSubTaskViewModel(SubTask? subTask = null)
     {
         var subTaskViewModel = m_subTaskViewModelFactory.Invoke(
@@ -308,6 +350,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
                 await m_featuresService.AddAsync(editData);
 
                 Back();
+
                 return;
             }
 
@@ -317,11 +360,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         }
         catch (Exception e)
         {
-            if(e is NotifyUIException)
+            if (e is NotifyUIException)
                 s_logger.Warn(e.Message);
             else
                 s_logger.Error(e);
-            
+
             m_popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка сохранения");
         }
     }
@@ -368,7 +411,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         foreach (var oldTask in oldTasks)
             oldTask.Dispose();
-        
+
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
 
         PreviewAttachment =
@@ -378,7 +421,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private TData? TryParseJson<TData>(string? data) where TData : class
     {
         if (data is null) return null;
-        
+
         try
         {
             return JsonSerializer.Deserialize<TData>(data);
@@ -452,7 +495,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         await RefreshCommentsCommand.Execute().ToTask();
     }
-    
+
     private void AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested(IAttachmentViewModel preview)
     {
         PreviewAttachment = preview;
@@ -462,5 +505,4 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         if (AttachmentsPanelViewModel.AttachmentsList.Count == 1) PreviewAttachment = attachment;
     }
-
 }

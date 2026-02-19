@@ -37,7 +37,6 @@ public class JsonConfigurationService<TData> : IConfigurationService<TData> wher
         {
             SaveConfig(config);
             m_config = config;
-            m_logger.Info("Configuration updated successfully: {ConfigPath}", m_configFilePath);
             ConfigChanged?.Invoke(config);
         }
         catch (Exception ex)

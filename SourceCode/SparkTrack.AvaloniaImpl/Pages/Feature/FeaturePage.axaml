@@ -132,10 +132,16 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <Button Classes="icon" Content="{markupExtensions:SymbolIcon Symbol=Add}"
-                                        IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                        Command="{Binding AddSubTask}"
-                                        ToolTip.Tip="Добавить задачу" />
+                                
+                                <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal">
+                                    <Button Classes="icon medium-content" Content="{markupExtensions:SymbolIcon Symbol=Add}"
+                                            Command="{Binding AddSubTask}"
+                                            CornerRadius="4 0 0 4"
+                                            ToolTip.Tip="Добавить задачу" />
+                                    
+                                    <Button Classes="icon medium-content template" Width="20" CornerRadius="0 4 4 0"
+                                            Command="{Binding AddSubTaskFromTemplateAsync}"/>
+                                </StackPanel>
                             </StackPanel>
                         </ScrollViewer>
 

@@ -26,6 +26,14 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
         m_dialogService = dialogService;
 
         ReloadCommand = ReactiveCommand.CreateFromTask(ReloadAsync);
+        
+        RegisterPropertyChangedHandler<TemplateSaveFormViewModel>(it => it.SelectedGroup,
+                OnSelectedGroupChanged)
+            .DisposeWith(m_disposables);
+        
+        RegisterPropertyChangedHandler<TemplateSaveFormViewModel>(it => it.SelectedTemplate,
+                OnSelectedTemplateChanged)
+            .DisposeWith(m_disposables);
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -35,6 +43,7 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
         ReloadCommand.Execute().Subscribe().DisposeWith(disposables);
     }
 
+    [Reactive]
     public string TemplateName { get; set; } = string.Empty;
 
     [Reactive]
@@ -81,6 +90,23 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
             .ToArray();
 
         UngrouppedTemplates = groups.FirstOrDefault(it => string.IsNullOrEmpty(it.Name))?.Templates ?? [];
+    }
+    
+    private void OnSelectedGroupChanged()
+    {
+        if (SelectedGroup?.Template is { } template)
+        {
+            SelectedTemplate = template;
+        }
+        else
+        {
+            SelectedTemplate = null;
+        }
+    }
+    
+    private void OnSelectedTemplateChanged()
+    {
+        SelectedGroup = null;
     }
 }
 
