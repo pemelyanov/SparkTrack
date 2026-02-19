@@ -2,7 +2,6 @@ using System.Reactive.Disposables;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using SparkTrack.AvaloniaImpl.Data;
 using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
 using SparkTrack.Core.Client.Services.Configuration;
@@ -10,6 +9,7 @@ using SparkTrack.Core.Client.Services.Configuration;
 namespace SparkTrack.AvaloniaImpl.Pages.Settings;
 
 using Core.Client.Extensions;
+using NLog;
 
 public class SettingsPageViewModel : ViewModelBase, IRoutableViewModel
 {
@@ -53,6 +53,17 @@ public class SettingsPageViewModel : ViewModelBase, IRoutableViewModel
     public int Scale { get; set; }
 
     public void OpenLogsFolder() => m_explorerService.OpenFolder(NLogConfigManager.LogsFolder);
+
+    public void ResetLoggerConfig()
+    {
+        if(File.Exists(NLogConfigManager.NLogConfigPath)) File.Delete(NLogConfigManager.NLogConfigPath);
+    
+        // TODO: Вынести это в сервис, т.к. копипаста из Program
+        NLogConfigManager.EnsureNLogConfig(typeof(App).Assembly, "SparkTrack.AvaloniaImpl.NLog.config");
+
+        LogManager.Setup(cfg => cfg.LoadConfigurationFromFile(NLogConfigManager.NLogConfigPath));
+        LogManager.ReconfigExistingLoggers();
+    }
     
     private void InterfaceConfigurationService_OnConfigChanged(InterfaceConfiguration config)
     {

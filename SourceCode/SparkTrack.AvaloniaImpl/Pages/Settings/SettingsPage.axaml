@@ -21,6 +21,7 @@
                           IsVisible="{Binding RestartNeeded}" />
 
         <TabControl Grid.Row="2">
+            <!-- TODO: Вынести это все в разные контролы -->
             <TabItem Header="Интерфейс">
                 <StackPanel>
                     <Panel>
@@ -34,10 +35,19 @@
                     </Panel>
                 </StackPanel>
             </TabItem>
+            
+            <TabItem Header="Шаблоны">
+                W.I.P
+            </TabItem>
+            
+            <TabItem Header="Логирование">
+                <StackPanel Spacing="8">
+                    <Button Content="Открыть папку с логами" Command="{Binding OpenLogsFolder}" />
+                    <Button Content="Сбросить конфигурацию логгера" Command="{Binding ResetLoggerConfig}" />
+                </StackPanel>
+            </TabItem>
         </TabControl>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Открыть папку с логами" Command="{Binding OpenLogsFolder}" />
-        </StackPanel>
+       
     </Grid>
 </UserControl>

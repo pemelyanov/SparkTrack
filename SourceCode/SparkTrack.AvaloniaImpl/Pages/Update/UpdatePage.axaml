@@ -6,10 +6,11 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Update.UpdatePage"
              x:DataType="update:UpdatePageViewModel">
-    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
-        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto Auto">
+    <Border Classes="card" HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
+        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto Auto" ColumnSpacing="8">
             <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding LoadingProgress^.StageName, FallbackValue=''}"
-                       IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
+                       IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" 
+                       TextTrimming="CharacterEllipsis"/>
             <TextBlock Grid.Row="0" Grid.Column="1"
                        IsVisible="{Binding !!LoadingProgress^.ProcessedTasksQuantity^, FallbackValue={x:False}}">
                 <Run Text="{Binding LoadingProgress^.ProcessedTasksQuantity^, FallbackValue=''}" />

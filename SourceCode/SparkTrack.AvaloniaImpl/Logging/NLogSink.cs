@@ -7,11 +7,13 @@ using LogLevel = NLog.LogLevel;
 
 namespace SparkTrack.AvaloniaImpl.Logging;
 
+using NLog.Config;
+
 public class NLogSink : ILogSink
 {
     #region Fields
 
-    private readonly        LogEventLevel                             m_logEventLevel;
+    private LogEventLevel                             m_logEventLevel;
     private readonly        HashSet<string>?                          m_areas;
     private static readonly ConcurrentDictionary<string, NLog.Logger> s_loggerCache = new();
 
@@ -22,10 +24,9 @@ public class NLogSink : ILogSink
     public NLogSink(
         IList<string>? areas = null)
     {
-        if(LogManager.Configuration!.Variables.TryGetValue("avaloniaMinLogLevel", out var minLogLevel))
-            m_logEventLevel = GetLogLevel(minLogLevel.ToString()!);
-        else
-            m_logEventLevel = LogEventLevel.Warning;
+        LogManager.ConfigurationChanged += LogManager_OnConfigurationChanged;
+        
+        InitializeMinLogLevel();
         
         m_areas = areas?.Count > 0 ? new HashSet<string>(areas) : null;
     }
@@ -92,6 +93,19 @@ public class NLogSink : ILogSink
         "Fatal" => LogEventLevel.Fatal,
         _ => LogEventLevel.Verbose 
     };
+    
+    private void InitializeMinLogLevel()
+    {
+        if(LogManager.Configuration!.Variables.TryGetValue("avaloniaMinLogLevel", out var minLogLevel))
+            m_logEventLevel = GetLogLevel(minLogLevel.ToString()!);
+        else
+            m_logEventLevel = LogEventLevel.Warning;
+    }
+
+    private void LogManager_OnConfigurationChanged(object? sender, LoggingConfigurationChangedEventArgs e)
+    {
+        InitializeMinLogLevel();
+    }
 
     #endregion
 }
