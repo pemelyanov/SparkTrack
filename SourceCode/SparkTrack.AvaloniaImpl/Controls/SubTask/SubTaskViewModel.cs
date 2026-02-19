@@ -13,28 +13,33 @@ using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
 using Core.Shared.Extensions;
+using Data.Templates;
 using Exceptions;
+using TemplateSaveForm;
 
 public class SubTaskViewModel : ViewModelBase
 {
-    private          bool                             m_isUserInitiallySet;
-    private          SubTaskData?                     m_subTask;
-    private readonly IObservable<IReadOnlyList<User>> m_availableEmployees;
-    private readonly Action<SubTaskViewModel>         m_onRemove;
-    private readonly ISubTasksService                 m_subTasksService;
-    private readonly IDialogService                      m_dialogService;
+    private          bool                                             m_isUserInitiallySet;
+    private          SubTaskData?                                     m_subTask;
+    private readonly IObservable<IReadOnlyList<User>>                 m_availableEmployees;
+    private readonly Action<SubTaskViewModel>                         m_onRemove;
+    private readonly ISubTasksService                                 m_subTasksService;
+    private readonly IDialogService                                   m_dialogService;
+    private readonly Func<TemplateSaveFormViewModel<SubTaskTemplate>> m_templateViewModelFactory;
 
     public SubTaskViewModel(SubTaskData? subTask,
                             IObservable<IReadOnlyList<User>> availableEmployees,
                             Action<SubTaskViewModel> onRemove,
                             ISubTasksService subTasksService,
-                            IDialogService dialogService)
+                            IDialogService dialogService,
+                            Func<TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory)
     {
         m_subTask = subTask;
         m_availableEmployees = availableEmployees;
         m_onRemove = onRemove;
         m_subTasksService = subTasksService;
         m_dialogService = dialogService;
+        m_templateViewModelFactory = templateViewModelFactory;
         UpdateProperties(subTask);
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
@@ -100,6 +105,13 @@ public class SubTaskViewModel : ViewModelBase
         )) return;
         
         m_onRemove(this);
+    }
+
+    public async Task SaveAsTemplateAsync()
+    {
+        var viewModel = m_templateViewModelFactory();
+
+        await m_dialogService.ShowAsync(viewModel);
     }
 
     public SubTaskEdit MapToEdit() => new()

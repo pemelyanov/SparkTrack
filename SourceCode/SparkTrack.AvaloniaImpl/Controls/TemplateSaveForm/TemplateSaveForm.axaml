@@ -1,0 +1,34 @@
+﻿<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             xmlns:templateSaveForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm.TemplateSaveForm"
+             Title="Сохранение шаблона"
+             PrimaryButtonText="Сохранить"
+             CloseButtonText="Отмена"
+             SecondaryButtonText="Новая группа"
+             DefaultButton="Primary"
+             x:DataType="templateSaveForm:TemplateSaveFormViewModel">
+    <Grid RowDefinitions="Auto *" RowSpacing="8" MaxHeight="500">
+        <TextBox UseFloatingWatermark="True" Watermark="Название шаблона" Text="{Binding TemplateName}" />
+        
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="8">
+                <TreeView ItemsSource="{Binding TemplateGroups}">
+                    <TreeView.ItemTemplate>
+                        <DataTemplate>
+                            <TreeViewItem Header="{Binding Name}" ItemsSource="{Binding Templates}" DisplayMemberBinding="{Binding TemplateName}" />
+                        </DataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+                
+                <Separator />
+                
+                <ListBox ItemsSource="{Binding UngrouppedTemplates}" DisplayMemberBinding="{Binding TemplateName}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</controls:ContentDialog >

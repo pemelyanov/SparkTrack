@@ -6,6 +6,8 @@ namespace SparkTrack.AvaloniaImpl.Services.Templates;
 public class JsonTemplatesService<TTemplate>(string templateCategoryName)
     : ITemplatesService<TTemplate> where TTemplate : ITemplate
 {
+    private const string UngroupedFolderName = "Ungrouped";
+    
     private readonly JsonSerializerOptions m_serializerOptions = new()
     {
         WriteIndented = true
@@ -18,29 +20,41 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
     {
         var groupPaths = Directory.GetDirectories(m_rootPath);
 
-        IReadOnlyList<TemplateGroup<TTemplate>> groups = groupPaths.Where(groupPath => Directory
-                .GetDirectories(groupPath).Select(it => new DirectoryInfo(it))
-                .Any(it => it.Name == templateCategoryName))
+        IReadOnlyList<TemplateGroup<TTemplate>> groups = groupPaths
+            .Select(it => new DirectoryInfo(it))
             .Select(group =>
             {
-                var templates = Directory.GetFiles(Path.Combine(group, templateCategoryName))
+                var templatesPath = Path.Combine(group.FullName, templateCategoryName);
+                var groupName = group.Name == UngroupedFolderName ? string.Empty : group.Name;
+
+                if (!Path.Exists(templatesPath)) return new TemplateGroup<TTemplate>
+                {
+                    Name = groupName
+                };
+                
+                var templates = Directory.GetFiles(templatesPath)
                     .Select(templatePath => JsonSerializer.Deserialize<TTemplate>(templatePath, m_serializerOptions))
                     .Where(it => it is not null)
                     .Select(it => it!);
 
                 return new TemplateGroup<TTemplate>
                 {
-                    Name = new DirectoryInfo(group).Name,
+                    Name = groupName,
                     Templates = templates.ToArray()
                 };
-            }).ToArray();
+            })
+            .ToArray();
 
         return Task.FromResult(groups);
     }
 
+    public async Task<IReadOnlyList<ITemplateGroup>> GetAbstractTemplatesListAsync() => await GetTemplatesListAsync();
+
     public Task AddAsync(TTemplate template, string group)
     {
         var data = JsonSerializer.Serialize(template, m_serializerOptions);
+
+        group = string.IsNullOrWhiteSpace(group) ? UngroupedFolderName : group;
 
         var templatePath = EnsureTemplatePath(group, template);
 
@@ -60,6 +74,8 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
 
     public Task AddGroupAsync(string name)
     {
+        if (string.IsNullOrEmpty(name)) return Task.CompletedTask;
+        
         EnsureGroupFolderPath(name);
 
         return Task.CompletedTask;
@@ -67,6 +83,8 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
 
     public Task RemoveGroupAsync(string name)
     {
+        if (string.IsNullOrEmpty(name) || name == UngroupedFolderName) return Task.CompletedTask;
+        
         var groupFolder = EnsureGroupFolderPath(name);
 
         Directory.Delete(groupFolder, true);

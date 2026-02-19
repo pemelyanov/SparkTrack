@@ -21,6 +21,7 @@ using Controls.CommentEdit;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.SubTask;
+using Controls.TemplateSaveForm;
 using Controls.UserAddForm;
 using Controls.UserEditForm;
 using Controls.UsersFilter;
@@ -42,11 +43,18 @@ using Pages.FeaturesList;
 using Pages.ProjectsList;
 using Pages.Update;
 using Pages.UsersList;
+using ReactiveUI;
 using Services.AttachmentsPathCache;
+using Splat;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
     private static readonly IConfiguration s_configuration = InitializeConfiguration();
+
+    protected override void RegisterViews(IMutableDependencyResolver builder)
+    {
+        builder.Register(() => new TemplateSaveForm(), typeof(IViewFor<TemplateSaveFormViewModel<SubTaskTemplate>>));
+    }
 
     protected override void RegisterViewModels(ContainerBuilder builder)
     {
@@ -75,6 +83,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<ClipboardAttachmentViewModel>();
         builder.RegisterType<UserEditFormViewModel>();
         builder.RegisterType<SettingsPageViewModel>().SingleInstance();
+        builder.RegisterGeneric(typeof(TemplateSaveFormViewModel<>));
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
@@ -157,6 +166,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<JsonTemplatesService<TTemplate>>()
             .WithParameter(new TypedParameter(typeof(string), categoryName))
             .As<ITemplatesService<TTemplate>>()
+            .As<IAbstractTemplatesService>()
             .SingleInstance();
     }
 }
