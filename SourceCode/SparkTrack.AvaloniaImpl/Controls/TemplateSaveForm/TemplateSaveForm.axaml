@@ -1,35 +1,40 @@
 ﻿<controls:ContentDialog xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
-             xmlns:templateSaveForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm.TemplateSaveForm"
-             Title="Сохранение шаблона"
-             PrimaryButtonText="Сохранить"
-             CloseButtonText="Отмена"
-             SecondaryButtonText="Новая группа"
-             DefaultButton="Primary"
-             PrimaryButtonCommand="{Binding SaveTemplateAsync}"
-             x:DataType="templateSaveForm:TemplateSaveFormViewModel">
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:templateSaveForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm"
+                        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                        x:Class="SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm.TemplateSaveForm"
+                        Title="Сохранение шаблона"
+                        PrimaryButtonText="Сохранить"
+                        CloseButtonText="Отмена"
+                        SecondaryButtonText="Новая группа"
+                        DefaultButton="Primary"
+                        PrimaryButtonCommand="{Binding SaveTemplateAsync}"
+                        SecondaryButtonCommand="{Binding CreateGroupAsync}"
+                        x:DataType="templateSaveForm:TemplateSaveFormViewModel">
     <Grid RowDefinitions="Auto *" RowSpacing="8" MaxHeight="500">
         <TextBox UseFloatingWatermark="True" Watermark="Название шаблона" Text="{Binding TemplateName}" />
-        
+
         <ScrollViewer Grid.Row="1">
             <StackPanel Spacing="8">
-                <TreeView ItemsSource="{Binding TemplateGroups}">
+                <TextBlock Text="Группы: " IsVisible="{Binding TemplateGroups.Count}" />
+                <TreeView ItemsSource="{Binding TemplateGroups}" SelectedItem="{Binding SelectedGroup}">
                     <TreeView.ItemTemplate>
-                        <DataTemplate>
-                            <TreeViewItem Header="{Binding Name}" ItemsSource="{Binding Templates}" DisplayMemberBinding="{Binding TemplateName}" />
-                        </DataTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Name}" />
+                        </TreeDataTemplate>
                     </TreeView.ItemTemplate>
                 </TreeView>
-                
+
                 <Separator />
-                
-                <ListBox ItemsSource="{Binding UngrouppedTemplates}" DisplayMemberBinding="{Binding TemplateName}" />
+
+                <TextBlock Text="Несгруппированные шаблоны:" IsVisible="{Binding UngrouppedTemplates.Count}"/>
+                <ListBox ItemsSource="{Binding UngrouppedTemplates}"
+                         DisplayMemberBinding="{Binding TemplateName}"
+                         SelectedItem="{Binding SelectedTemplate}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</controls:ContentDialog >
+</controls:ContentDialog>

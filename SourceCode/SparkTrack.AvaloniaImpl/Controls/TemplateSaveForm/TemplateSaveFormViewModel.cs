@@ -1,4 +1,7 @@
 ﻿using System.Reactive.Disposables;
+using System.Reactive.Threading.Tasks;
+using SparkTrack.AvaloniaImpl.Services.DialogHost;
+using SparkTrack.AvaloniaImpl.Windows.TextInput;
 
 namespace SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm;
 
@@ -13,11 +16,14 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
 {
     private readonly IAbstractTemplatesService m_templatesService;
     private readonly ITemplate                 m_template;
+    private readonly IDialogService            m_dialogService;
 
-    public TemplateSaveFormViewModel(IAbstractTemplatesService templatesService, ITemplate template)
+    public TemplateSaveFormViewModel(IAbstractTemplatesService templatesService, ITemplate template,
+        IDialogService dialogService)
     {
         m_templatesService = templatesService;
         m_template = template;
+        m_dialogService = dialogService;
 
         ReloadCommand = ReactiveCommand.CreateFromTask(ReloadAsync);
     }
@@ -32,19 +38,38 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
     public string TemplateName { get; set; } = string.Empty;
 
     [Reactive]
-    public IReadOnlyList<ITemplateGroup> TemplateGroups { get; private set; } = [];
+    public IReadOnlyList<TemplateTreeItemProxy> TemplateGroups { get; private set; } = [];
 
     [Reactive]
     public IReadOnlyList<ITemplate> UngrouppedTemplates { get; private set; } = [];
+    
+    [Reactive]
+    public TemplateTreeItemProxy? SelectedGroup { get; set; }
+    
+    [Reactive]
+    public ITemplate? SelectedTemplate { get; set; }
 
     public ReactiveCommand<Unit, Unit> ReloadCommand { get; }
 
+    public async Task CreateGroupAsync()
+    {
+        var groupNameInputViewModel = new TextInputDialogViewModel("Введите название группы:", "Создание группы",
+            acceptText: "Ок", cancelText: "Отмена");
+
+        if (await m_dialogService.ShowAsync(groupNameInputViewModel) is not true ||
+            string.IsNullOrEmpty(groupNameInputViewModel.Text)) return;
+
+        await m_templatesService.AddGroupAsync(groupNameInputViewModel.Text);
+
+        await ReloadCommand.Execute().ToTask();
+    }
+
     public async Task SaveTemplateAsync()
     {
-        if(string.IsNullOrWhiteSpace(TemplateName)) return;
+        if (string.IsNullOrWhiteSpace(TemplateName)) return;
 
         m_template.TemplateName = TemplateName;
-        await m_templatesService.AddAsync(m_template, string.Empty);
+        await m_templatesService.AddAsync(m_template, SelectedGroup?.Group?.Name ?? string.Empty);
         Close(true);
     }
 
@@ -52,11 +77,12 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
     {
         var groups = await m_templatesService.GetAbstractTemplatesListAsync();
 
-        TemplateGroups = groups.Where(it => !string.IsNullOrEmpty(it.Name)).ToArray();
+        TemplateGroups = groups.Where(it => !string.IsNullOrEmpty(it.Name)).Select(it => new TemplateTreeItemProxy(it))
+            .ToArray();
 
         UngrouppedTemplates = groups.FirstOrDefault(it => string.IsNullOrEmpty(it.Name))?.Templates ?? [];
     }
 }
 
-public class TemplateSaveFormViewModel<TTemplate>(ITemplatesService<TTemplate> templatesService, TTemplate template)
-    : TemplateSaveFormViewModel(templatesService, template) where TTemplate : ITemplate;
+public class TemplateSaveFormViewModel<TTemplate>(ITemplatesService<TTemplate> templatesService, TTemplate template, IDialogService dialogService)
+    : TemplateSaveFormViewModel(templatesService, template, dialogService) where TTemplate : ITemplate;
