@@ -4,6 +4,7 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                         xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
                         xmlns:templateSaveForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm"
+                        xmlns:templatesList="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplatesList"
                         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
                         x:Class="SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm.TemplateSaveForm"
                         Title="Сохранение шаблона"
@@ -13,28 +14,14 @@
                         DefaultButton="Primary"
                         PrimaryButtonCommand="{Binding SaveTemplateAsync}"
                         SecondaryButtonCommand="{Binding CreateGroupAsync}"
+                        IsPrimaryButtonEnabled="{Binding TemplateName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                         x:DataType="templateSaveForm:TemplateSaveFormViewModel">
     <Grid RowDefinitions="Auto *" RowSpacing="8" MaxHeight="500">
         <TextBox UseFloatingWatermark="True" Watermark="Название шаблона" Text="{Binding TemplateName}" />
 
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="8">
-                <TextBlock Text="Группы: " IsVisible="{Binding TemplateGroups.Count}" />
-                <TreeView ItemsSource="{Binding TemplateGroups}" SelectedItem="{Binding SelectedGroup}">
-                    <TreeView.ItemTemplate>
-                        <TreeDataTemplate ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Name}" />
-                        </TreeDataTemplate>
-                    </TreeView.ItemTemplate>
-                </TreeView>
-
-                <Separator />
-
-                <TextBlock Text="Несгруппированные шаблоны:" IsVisible="{Binding UngrouppedTemplates.Count}"/>
-                <ListBox ItemsSource="{Binding UngrouppedTemplates}"
-                         DisplayMemberBinding="{Binding TemplateName}"
-                         SelectedItem="{Binding SelectedTemplate}" />
-            </StackPanel>
-        </ScrollViewer>
+        <templatesList:TemplatesList Grid.Row="1" GroupsList="{Binding TemplateGroups}"
+                                     UngroupedTemplatesList="{Binding UngroupedTemplates}"
+                                     SelectedTemplate="{Binding SelectedTemplate}"
+                                     SelectedGroup="{Binding SelectedGroup}"/>
     </Grid>
 </controls:ContentDialog>

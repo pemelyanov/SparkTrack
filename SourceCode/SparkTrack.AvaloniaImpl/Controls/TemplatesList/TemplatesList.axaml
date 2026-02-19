@@ -1,0 +1,54 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:templatesList="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplatesList"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="SparkTrack.AvaloniaImpl.Controls.TemplatesList.TemplatesList"
+             x:Name="Root">
+    <UserControl.Styles>
+        <Style Selector="TreeViewItem">
+            <Setter Property="Interaction.Behaviors">
+                <BehaviorCollectionTemplate>
+                    <BehaviorCollection>
+                        <ExecuteCommandOnDoubleTappedBehavior x:DataType="templatesList:TemplateTreeItemProxy" 
+                                                              IsEnabled="{Binding Template, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                                              Command="{Binding #Root.TemplateDoubleTappedCommand}" 
+                                                              CommandParameter="{Binding Template}" />
+                    </BehaviorCollection>
+                </BehaviorCollectionTemplate>
+            </Setter>
+        </Style>
+        
+        <Style Selector="ListBoxItem">
+            <Setter Property="Interaction.Behaviors">
+                <BehaviorCollectionTemplate>
+                    <BehaviorCollection>
+                        <ExecuteCommandOnDoubleTappedBehavior Command="{Binding #Root.TemplateDoubleTappedCommand}" 
+                                                              CommandParameter="{ReflectionBinding .}" />
+                    </BehaviorCollection>
+                </BehaviorCollectionTemplate>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+    <ScrollViewer>
+        <StackPanel Spacing="8">
+            <TextBlock Text="Группы: " IsVisible="{Binding  #Root.GroupsList.Count}" />
+            <TreeView x:Name="GroupsTreeView" ItemsSource="{Binding #Root.GroupsList}"
+                      SelectionChanged="GroupsTreeView_OnSelectionChanged">
+                <TreeView.ItemTemplate>
+                    <TreeDataTemplate ItemsSource="{ReflectionBinding Children}">
+                        <TextBlock Text="{ReflectionBinding Name}" />
+                    </TreeDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+
+            <Separator />
+
+            <TextBlock Text="Несгруппированные шаблоны:" IsVisible="{Binding #Root.UngroupedTemplatesList.Count}"/>
+            <ListBox x:Name="UngroupedListBox" ItemsSource="{Binding #Root.UngroupedTemplatesList}"
+                     DisplayMemberBinding="{ReflectionBinding TemplateName}"
+                     SelectionChanged="UngroupedListBox_OnSelectionChanged"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

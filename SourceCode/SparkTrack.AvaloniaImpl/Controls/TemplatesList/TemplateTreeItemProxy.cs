@@ -1,6 +1,6 @@
-using SparkTrack.AvaloniaImpl.Data.Templates;
+namespace SparkTrack.AvaloniaImpl.Controls.TemplatesList;
 
-namespace SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm;
+using Data.Templates;
 
 public class TemplateTreeItemProxy
 {

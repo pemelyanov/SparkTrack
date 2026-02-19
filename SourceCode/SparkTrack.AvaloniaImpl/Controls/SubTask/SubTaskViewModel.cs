@@ -12,6 +12,7 @@ using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Core.Shared.Extensions;
 using Data.Templates;
 using Exceptions;
@@ -50,18 +51,20 @@ public class SubTaskViewModel : ViewModelBase
     {
         base.OnActivated(disposables);
 
-        m_availableEmployees.Subscribe(
+        m_availableEmployees
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(
                 it =>
                 {
-                    var employeeBeforeUpdate = SelectedEmployee;
                     AvailableEmployees = it;
 
                     if (m_isUserInitiallySet) return;
                     m_isUserInitiallySet = true;
 
-                    if (SelectedEmployee is not null || m_subTask?.ExecutorEmployee is null)
+                    if (EmployeeToSelectOnNextLoad is not null || m_subTask?.ExecutorEmployee is null)
                     {
-                        SelectedEmployee = AvailableEmployees.FirstOrDefault(u => u.Id == employeeBeforeUpdate?.Id);
+                        SelectedEmployee = AvailableEmployees.FirstOrDefault(u => u.Id == EmployeeToSelectOnNextLoad?.Id);
+                        EmployeeToSelectOnNextLoad = null;
                         
                         return;
                     }
@@ -83,6 +86,8 @@ public class SubTaskViewModel : ViewModelBase
 
     [Reactive]
     public User? SelectedEmployee { get; set; }
+    
+    public User? EmployeeToSelectOnNextLoad { get; set; }
 
     [Reactive]
     public DateTime Deadline { get; set; }

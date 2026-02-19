@@ -286,7 +286,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTask = CreateSubTaskViewModel();
         subTask.IsInEditMode = true;
         subTask.Name = template.Name;
-        subTask.SelectedEmployee =
+        subTask.EmployeeToSelectOnNextLoad =
             m_availableEmployeesList.Value.FirstOrDefault(it => it.Id == template.ExecutorEmployee?.Id);
 
         subTask.Cost = template.Cost;
