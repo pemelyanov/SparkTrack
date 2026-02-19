@@ -1,6 +1,6 @@
 namespace SparkTrack.AvaloniaImpl.Data.Templates;
 
-public record UserSelectionTemplate(string TemplateName) : ITemplate
+public record UserSelectionTemplate
 {
     public Guid Id { get; init; }
     

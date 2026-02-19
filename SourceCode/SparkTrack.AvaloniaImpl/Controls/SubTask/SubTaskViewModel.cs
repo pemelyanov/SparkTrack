@@ -25,14 +25,14 @@ public class SubTaskViewModel : ViewModelBase
     private readonly Action<SubTaskViewModel>                         m_onRemove;
     private readonly ISubTasksService                                 m_subTasksService;
     private readonly IDialogService                                   m_dialogService;
-    private readonly Func<TemplateSaveFormViewModel<SubTaskTemplate>> m_templateViewModelFactory;
+    private readonly Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> m_templateViewModelFactory;
 
     public SubTaskViewModel(SubTaskData? subTask,
                             IObservable<IReadOnlyList<User>> availableEmployees,
                             Action<SubTaskViewModel> onRemove,
                             ISubTasksService subTasksService,
                             IDialogService dialogService,
-                            Func<TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory)
+                            Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory)
     {
         m_subTask = subTask;
         m_availableEmployees = availableEmployees;
@@ -109,7 +109,22 @@ public class SubTaskViewModel : ViewModelBase
 
     public async Task SaveAsTemplateAsync()
     {
-        var viewModel = m_templateViewModelFactory();
+        var template = new SubTaskTemplate
+        {
+            Name = Name,
+            Deadline = Deadline.Date - DateTime.Now.Date,
+            ExecutorEmployee = SelectedEmployee is null
+                ? null
+                : new UserSelectionTemplate
+                {
+                    Id = SelectedEmployee.Id,
+                    Name = SelectedEmployee.Name
+                },
+            Cost = Cost,
+            TimelyBonus = TimelyBonus
+        };
+        
+        var viewModel = m_templateViewModelFactory(template);
 
         await m_dialogService.ShowAsync(viewModel);
     }

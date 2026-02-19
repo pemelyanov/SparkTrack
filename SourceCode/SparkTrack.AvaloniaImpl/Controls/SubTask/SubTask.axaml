@@ -102,13 +102,14 @@
 
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
                             HorizontalAlignment="Right" VerticalAlignment="Top">
+                    
+                    <Button Classes="icon template-add" IsVisible="{Binding IsInEditMode}"
+                            Command="{Binding SaveAsTemplateAsync}" />
+                    
                     <ToggleButton Classes="icon enter-hot-key"
                                   Classes.edit="{Binding !IsInEditMode}"
                                   Classes.save="{Binding IsInEditMode}"
                                   IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
-
-                    <Button Classes="icon template-add"
-                            Command="{Binding SaveAsTemplateAsync}" />
                     
                     <Button Classes="icon delete" Command="{Binding RemoveAsync}"/>
                 </StackPanel>

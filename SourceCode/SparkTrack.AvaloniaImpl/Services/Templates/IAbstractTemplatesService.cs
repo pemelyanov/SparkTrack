@@ -14,4 +14,8 @@ public interface ITemplatesService<TTemplate> : IAbstractTemplatesService where 
 public interface IAbstractTemplatesService : ITemplateGroupsService
 {
     Task<IReadOnlyList<ITemplateGroup>> GetAbstractTemplatesListAsync();
+    
+    Task AddAsync(ITemplate template, string group);
+
+    Task RemoveAsync(ITemplate template, string group);
 }

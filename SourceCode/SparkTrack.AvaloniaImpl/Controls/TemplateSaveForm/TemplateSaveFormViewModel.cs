@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm;
+﻿using System.Reactive.Disposables;
+
+namespace SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm;
 
 using System.Reactive;
 using Data.Templates;
@@ -10,12 +12,21 @@ using ViewModels;
 public class TemplateSaveFormViewModel : DialogViewModelBase
 {
     private readonly IAbstractTemplatesService m_templatesService;
+    private readonly ITemplate                 m_template;
 
-    public TemplateSaveFormViewModel(IAbstractTemplatesService templatesService)
+    public TemplateSaveFormViewModel(IAbstractTemplatesService templatesService, ITemplate template)
     {
         m_templatesService = templatesService;
+        m_template = template;
 
         ReloadCommand = ReactiveCommand.CreateFromTask(ReloadAsync);
+    }
+
+    protected override void OnActivated(CompositeDisposable disposables)
+    {
+        base.OnActivated(disposables);
+
+        ReloadCommand.Execute().Subscribe().DisposeWith(disposables);
     }
 
     public string TemplateName { get; set; } = string.Empty;
@@ -28,6 +39,15 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
 
     public ReactiveCommand<Unit, Unit> ReloadCommand { get; }
 
+    public async Task SaveTemplateAsync()
+    {
+        if(string.IsNullOrWhiteSpace(TemplateName)) return;
+
+        m_template.TemplateName = TemplateName;
+        await m_templatesService.AddAsync(m_template, string.Empty);
+        Close(true);
+    }
+
     private async Task ReloadAsync()
     {
         var groups = await m_templatesService.GetAbstractTemplatesListAsync();
@@ -38,5 +58,5 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
     }
 }
 
-public class TemplateSaveFormViewModel<TTemplate>(ITemplatesService<TTemplate> templatesService)
-    : TemplateSaveFormViewModel(templatesService) where TTemplate : ITemplate;
+public class TemplateSaveFormViewModel<TTemplate>(ITemplatesService<TTemplate> templatesService, TTemplate template)
+    : TemplateSaveFormViewModel(templatesService, template) where TTemplate : ITemplate;

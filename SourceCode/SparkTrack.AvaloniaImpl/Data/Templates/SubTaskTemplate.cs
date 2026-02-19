@@ -1,10 +1,12 @@
 namespace SparkTrack.AvaloniaImpl.Data.Templates;
 
-public record SubTaskTemplate(string TemplateName) : ITemplate
+public record SubTaskTemplate : ITemplate
 {
+    public string TemplateName { get; set; } = string.Empty;
+    
     public required string Name { get; init; }
     
-    public required UserSelectionTemplate ExecutorEmployee { get; init; }
+    public UserSelectionTemplate? ExecutorEmployee { get; init; }
     
     public required TimeSpan Deadline { get; init; }
     

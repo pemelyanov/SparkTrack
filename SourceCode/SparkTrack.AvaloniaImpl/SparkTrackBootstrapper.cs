@@ -53,7 +53,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
     protected override void RegisterViews(IMutableDependencyResolver builder)
     {
-        builder.Register(() => new TemplateSaveForm(), typeof(IViewFor<TemplateSaveFormViewModel<SubTaskTemplate>>));
+        RegisterTemplateViewModel<SubTaskTemplate>(builder);
     }
 
     protected override void RegisterViewModels(ContainerBuilder builder)
@@ -168,5 +168,11 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             .As<ITemplatesService<TTemplate>>()
             .As<IAbstractTemplatesService>()
             .SingleInstance();
+    }
+    
+    private void RegisterTemplateViewModel<TTemplate>(IMutableDependencyResolver builder)
+        where TTemplate : ITemplate
+    {
+        builder.Register(() => new TemplateSaveForm(), typeof(IViewFor<TemplateSaveFormViewModel<TTemplate>>));
     }
 }

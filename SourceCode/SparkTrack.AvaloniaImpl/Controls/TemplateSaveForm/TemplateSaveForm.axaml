@@ -11,6 +11,7 @@
              CloseButtonText="Отмена"
              SecondaryButtonText="Новая группа"
              DefaultButton="Primary"
+             PrimaryButtonCommand="{Binding SaveTemplateAsync}"
              x:DataType="templateSaveForm:TemplateSaveFormViewModel">
     <Grid RowDefinitions="Auto *" RowSpacing="8" MaxHeight="500">
         <TextBox UseFloatingWatermark="True" Watermark="Название шаблона" Text="{Binding TemplateName}" />

@@ -14,10 +14,12 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
     };
 
     private readonly string m_rootPath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SpartTrack", "Templates");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SparkTrack", "Templates");
 
     public Task<IReadOnlyList<TemplateGroup<TTemplate>>> GetTemplatesListAsync()
     {
+        if (!Path.Exists(m_rootPath)) return Task.FromResult<IReadOnlyList<TemplateGroup<TTemplate>>>([]);
+        
         var groupPaths = Directory.GetDirectories(m_rootPath);
 
         IReadOnlyList<TemplateGroup<TTemplate>> groups = groupPaths
@@ -33,7 +35,7 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
                 };
                 
                 var templates = Directory.GetFiles(templatesPath)
-                    .Select(templatePath => JsonSerializer.Deserialize<TTemplate>(templatePath, m_serializerOptions))
+                    .Select(templatePath => JsonSerializer.Deserialize<TTemplate>(File.ReadAllText(templatePath), m_serializerOptions))
                     .Where(it => it is not null)
                     .Select(it => it!);
 
@@ -49,6 +51,22 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
     }
 
     public async Task<IReadOnlyList<ITemplateGroup>> GetAbstractTemplatesListAsync() => await GetTemplatesListAsync();
+
+    public Task AddAsync(ITemplate template, string group)
+    {
+        if (template is not TTemplate typedTemplate)
+            throw new ArgumentException($"Unsupported type. Template must be {typeof(TTemplate)}");
+
+        return AddAsync(typedTemplate, group);
+    }
+
+    public Task RemoveAsync(ITemplate template, string group)
+    {
+        if (template is not TTemplate typedTemplate)
+            throw new ArgumentException($"Unsupported type. Template must be {typeof(TTemplate)}");
+
+        return RemoveAsync(typedTemplate, group);
+    }
 
     public Task AddAsync(TTemplate template, string group)
     {
