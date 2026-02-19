@@ -53,13 +53,19 @@ public class SubTaskViewModel : ViewModelBase
         m_availableEmployees.Subscribe(
                 it =>
                 {
+                    var employeeBeforeUpdate = SelectedEmployee;
                     AvailableEmployees = it;
 
                     if (m_isUserInitiallySet) return;
                     m_isUserInitiallySet = true;
 
-                    if (SelectedEmployee is not null || m_subTask?.ExecutorEmployee is null) return;
-
+                    if (SelectedEmployee is not null || m_subTask?.ExecutorEmployee is null)
+                    {
+                        SelectedEmployee = AvailableEmployees.FirstOrDefault(u => u.Id == employeeBeforeUpdate?.Id);
+                        
+                        return;
+                    }
+                    
                     SelectedEmployee = it.FirstOrDefault(u => u.Id == m_subTask.ExecutorEmployee.Id);
                 }
             )
