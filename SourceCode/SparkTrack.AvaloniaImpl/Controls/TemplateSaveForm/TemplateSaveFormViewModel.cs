@@ -96,6 +96,47 @@ public class TemplateSaveFormViewModel : DialogViewModelBase
         Close(true);
     }
 
+    public async Task RemoveAsync(object parameter)
+    {
+        if (parameter is TemplateTreeItemProxy templateTreeItemProxy)
+        {
+            if (templateTreeItemProxy.Group is { } group)
+            {
+                await RemoveGroupAsync(group);
+                return;
+            }
+
+            await RemoveTemplateAsync(templateTreeItemProxy.Template!, templateTreeItemProxy.Parent?.Group);
+            return;
+        }
+
+        if (parameter is ITemplate template) await RemoveTemplateAsync(template, null);
+    }
+
+    private async Task RemoveGroupAsync(ITemplateGroup templateGroup)
+    {
+        if (!await m_dialogService.ConfirmAsync(
+            "Вы уверены что хотите удалить группу? Будут удалены шаблоны всех типов, содержащиеся в группе.",
+            "Удаление группы"
+        )) return;
+
+        await m_templatesService.RemoveGroupAsync(templateGroup.Name);
+
+        await ReloadCommand.Execute().ToTask();
+    }
+    
+    private async Task RemoveTemplateAsync(ITemplate template, ITemplateGroup? group)
+    {
+        if (!await m_dialogService.ConfirmAsync(
+            "Вы уверены что хотите удалить шаблон?",
+            "Удаление шаблона"
+        )) return;
+
+        await m_templatesService.RemoveAsync(template, group?.Name);
+        
+        await ReloadCommand.Execute().ToTask();
+    }
+
     private async Task ReloadAsync()
     {
         var groups = await m_templatesService.GetAbstractTemplatesListAsync();

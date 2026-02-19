@@ -52,7 +52,7 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
 
     public async Task<IReadOnlyList<ITemplateGroup>> GetAbstractTemplatesListAsync() => await GetTemplatesListAsync();
 
-    public Task AddAsync(ITemplate template, string group)
+    public Task AddAsync(ITemplate template, string? group = null)
     {
         if (template is not TTemplate typedTemplate)
             throw new ArgumentException($"Unsupported type. Template must be {typeof(TTemplate)}");
@@ -60,7 +60,7 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
         return AddAsync(typedTemplate, group);
     }
 
-    public Task RemoveAsync(ITemplate template, string group)
+    public Task RemoveAsync(ITemplate template, string? group = null)
     {
         if (template is not TTemplate typedTemplate)
             throw new ArgumentException($"Unsupported type. Template must be {typeof(TTemplate)}");
@@ -68,7 +68,7 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
         return RemoveAsync(typedTemplate, group);
     }
 
-    public Task AddAsync(TTemplate template, string group)
+    public Task AddAsync(TTemplate template, string? group = null)
     {
         var data = JsonSerializer.Serialize(template, m_serializerOptions);
 
@@ -81,8 +81,10 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
         return Task.CompletedTask;
     }
 
-    public Task RemoveAsync(TTemplate template, string group)
+    public Task RemoveAsync(TTemplate template, string? group = null)
     {
+        group = string.IsNullOrWhiteSpace(group) ? UngroupedFolderName : group;
+        
         var templatePath = EnsureTemplatePath(group, template);
 
         if (File.Exists(templatePath)) File.Delete(templatePath);

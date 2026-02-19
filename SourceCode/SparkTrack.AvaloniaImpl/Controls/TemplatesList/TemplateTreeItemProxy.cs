@@ -4,8 +4,9 @@ using Data.Templates;
 
 public class TemplateTreeItemProxy
 {
-    public TemplateTreeItemProxy(ITemplate template)
+    public TemplateTreeItemProxy(ITemplate template, TemplateTreeItemProxy parent)
     {
+        Parent = parent;
         Template = template;
         Name = Template.TemplateName;
     }
@@ -14,7 +15,7 @@ public class TemplateTreeItemProxy
     {
         Group = group;
         Name = Group.Name;
-        Children = group.Templates.Select(it => new TemplateTreeItemProxy(it)).ToArray();
+        Children = group.Templates.Select(it => new TemplateTreeItemProxy(it, this)).ToArray();
     }
     
     public ITemplate? Template { get; }
@@ -22,6 +23,8 @@ public class TemplateTreeItemProxy
     public ITemplateGroup? Group { get; }
 
     public string Name { get; }
+    
+    public TemplateTreeItemProxy? Parent { get; }
 
     public IReadOnlyList<TemplateTreeItemProxy> Children { get; } = [];
 }

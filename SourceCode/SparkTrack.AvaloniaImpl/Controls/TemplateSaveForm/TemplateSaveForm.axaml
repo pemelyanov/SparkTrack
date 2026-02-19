@@ -22,6 +22,7 @@
         <templatesList:TemplatesList Grid.Row="1" GroupsList="{Binding TemplateGroups}"
                                      UngroupedTemplatesList="{Binding UngroupedTemplates}"
                                      SelectedTemplate="{Binding SelectedTemplate}"
-                                     SelectedGroup="{Binding SelectedGroup}"/>
+                                     SelectedGroup="{Binding SelectedGroup}"
+                                     RemoveCommand="{Binding RemoveAsync}" />
     </Grid>
 </controls:ContentDialog>

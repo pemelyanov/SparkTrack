@@ -82,6 +82,19 @@ public partial class TemplatesList : UserControl
 
     #endregion
 
+    #region RemoveCommand Property
+
+    public static readonly StyledProperty<ICommand> RemoveCommandProperty =
+        AvaloniaProperty.Register<TemplatesList, ICommand>(nameof(RemoveCommand));
+
+    public ICommand RemoveCommand
+    {
+        get => GetValue(RemoveCommandProperty);
+        set => SetValue(RemoveCommandProperty, value);
+    }
+
+    #endregion
+
     private void GroupsTreeView_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if(m_changingByTemplate) return;

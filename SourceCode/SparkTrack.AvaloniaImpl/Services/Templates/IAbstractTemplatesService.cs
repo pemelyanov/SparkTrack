@@ -6,16 +6,16 @@ public interface ITemplatesService<TTemplate> : IAbstractTemplatesService where 
 {
     Task<IReadOnlyList<TemplateGroup<TTemplate>>> GetTemplatesListAsync();
 
-    Task AddAsync(TTemplate template, string group);
+    Task AddAsync(TTemplate template, string? group = null);
 
-    Task RemoveAsync(TTemplate template, string group);
+    Task RemoveAsync(TTemplate template, string? group = null);
 }
 
 public interface IAbstractTemplatesService : ITemplateGroupsService
 {
     Task<IReadOnlyList<ITemplateGroup>> GetAbstractTemplatesListAsync();
     
-    Task AddAsync(ITemplate template, string group);
+    Task AddAsync(ITemplate template, string? group = null);
 
-    Task RemoveAsync(ITemplate template, string group);
+    Task RemoveAsync(ITemplate template, string? group = null);
 }

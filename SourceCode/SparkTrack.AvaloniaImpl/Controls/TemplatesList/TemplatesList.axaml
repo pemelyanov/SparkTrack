@@ -30,6 +30,18 @@
                 </BehaviorCollectionTemplate>
             </Setter>
         </Style>
+        
+        <Style Selector="ListBoxItem, TreeViewItem">
+            <Setter Property="ContextMenu">
+                <Template>
+                    <ContextMenu>
+                        <MenuItem Header="Удалить" IsVisible="{Binding #Root.RemoveCommand, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                  Command="{Binding #Root.RemoveCommand}"
+                                  CommandParameter="{ReflectionBinding .}" />
+                    </ContextMenu>
+                </Template>
+            </Setter>
+        </Style>
     </UserControl.Styles>
     <ScrollViewer>
         <StackPanel Spacing="8">
