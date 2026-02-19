@@ -13,6 +13,7 @@
              xmlns:usersFilter="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UsersFilter"
              xmlns:disablingWrapper="clr-namespace:SparkTrack.AvaloniaImpl.Controls.DisablingWrapper"
              xmlns:rangeDatePicker="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RangeDatePicker"
+             xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.AdminFinance.Tabs.PendingPayments.PendingPayments"
              x:DataType="pendingPayments:PendingPaymentsViewModel"
@@ -26,8 +27,9 @@
                 <rangeDatePicker:RangeDatePicker StartDate="{Binding DateRangeViewModel.Model.StartDate}"
                                                  EndDate="{Binding DateRangeViewModel.Model.EndDate}" />
             </disablingWrapper:DisablingWrapper>
-            
-            <ToggleSwitch OffContent="Показывать неоплаченные" OnContent="Показывать все" IsChecked="{Binding ShowPaid, Mode=TwoWay}" />
+
+            <ToggleSwitch OffContent="Показывать неоплаченные" OnContent="Показывать все"
+                          IsChecked="{Binding ShowPaid, Mode=TwoWay}" />
         </WrapPanel>
 
         <StackPanel Grid.Row="2">
@@ -99,9 +101,16 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True"
-                                    IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
-                                    Header="Канал" Binding="{Binding Model.Feature.Project.Name}" />
+                <DataGridTemplateColumn IsReadOnly="True"
+                                        Header="Канал"
+                                        IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <link:Link Url="{Binding Model.Feature.Project.Link}"
+                                       Text="{Binding Model.Feature.Project.Name}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Дедлайн" IsReadOnly="True"
                                     Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
                 <DataGridTextColumn Header="Дата выполнения" IsReadOnly="True"

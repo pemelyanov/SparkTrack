@@ -13,6 +13,7 @@
              xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              xmlns:disablingWrapper="clr-namespace:SparkTrack.AvaloniaImpl.Controls.DisablingWrapper"
              xmlns:rangeDatePicker="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RangeDatePicker"
+             xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
@@ -74,18 +75,24 @@
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
+                <DataGridTemplateColumn IsReadOnly="True" Width="220"
+                                        Header="Канал"
+                                        IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <link:Link Url="{Binding Model.Project.Link}" Text="{Binding Model.Project.Name}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True"
-                                    IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
-                                    Header="Канал" Binding="{Binding Model.Project.Name}" />
-                <DataGridTextColumn IsReadOnly="True"
-                                    Header="Дедлайн"
+                                    Header="Дедлайн" Width="180"
                                     Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
                                     StringFormat={x:Static constants:DateFormats.ShortRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTemplateColumn IsReadOnly="True" Width="150"
+                <DataGridTemplateColumn IsReadOnly="True" Width="180"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" />
+                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" VerticalAlignment="Center" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
