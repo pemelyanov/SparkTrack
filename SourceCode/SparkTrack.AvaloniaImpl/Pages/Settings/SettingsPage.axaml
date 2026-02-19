@@ -5,15 +5,23 @@
              xmlns:projectsList="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Settings"
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Settings.SettingsPage"
              x:DataType="projectsList:SettingsPageViewModel">
-    <Grid RowDefinitions="Auto * Auto" RowSpacing="8">
+    <Grid RowDefinitions="Auto Auto * Auto" RowSpacing="8">
         <TextBlock Classes="title" Grid.Row="0" DataContext="{x:Type projectsList:SettingsPageViewModel}"
                    x:DataType="system:Type"
-                   Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}" />
+                   Text="{Binding ., Converter={x:Static converters:PagesConverters.Name}}"
+                   Margin="0 0 0 -8"/>
+        
+        <controls:InfoBar Grid.Row="1" Margin="0 8 0 0" IsClosable="False" 
+                          Severity="Warning" Message="Для применения некоторых настроек необходимо перезапустить ПО"
+                          IsOpen="True"
+                          IsVisible="{Binding RestartNeeded}" />
 
-        <TabControl Grid.Row="1">
+        <TabControl Grid.Row="2">
+            <!-- TODO: Вынести это все в разные контролы -->
             <TabItem Header="Интерфейс">
                 <StackPanel>
                     <Panel>
@@ -27,10 +35,19 @@
                     </Panel>
                 </StackPanel>
             </TabItem>
+            
+            <TabItem Header="Шаблоны">
+                W.I.P
+            </TabItem>
+            
+            <TabItem Header="Логирование">
+                <StackPanel Spacing="8">
+                    <Button Content="Открыть папку с логами" Command="{Binding OpenLogsFolder}" />
+                    <Button Content="Сбросить конфигурацию логгера" Command="{Binding ResetLoggerConfig}" />
+                </StackPanel>
+            </TabItem>
         </TabControl>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Открыть папку с логами" Command="{Binding OpenLogsFolder}" />
-        </StackPanel>
+       
     </Grid>
 </UserControl>

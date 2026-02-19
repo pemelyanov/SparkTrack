@@ -1,5 +1,6 @@
 using Avalonia;
 using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.Core.Client.Services.Configuration;
 using Splat;
 
@@ -17,9 +18,10 @@ using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
+using Services.Clipboard;
 using Services.DialogHost;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService, IClipboardService
 {
     private readonly WindowNotificationManager m_notificationManager;
 
@@ -130,5 +132,14 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
     {
         ContentWidth = SizeBox.Bounds.Width / m_scale;
         ContentHeight = SizeBox.Bounds.Height / m_scale;
+    }
+
+    public async Task SaveToClipboardAsync(string text, string? notificationText = null)
+    {
+        if (Clipboard is null) return;
+            
+        await Clipboard.SetTextAsync(text);
+        
+        if(!string.IsNullOrEmpty(notificationText)) Show(ENotificationType.Information, notificationText);
     }
 }

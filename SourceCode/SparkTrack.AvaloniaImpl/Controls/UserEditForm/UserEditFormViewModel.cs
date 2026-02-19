@@ -11,6 +11,7 @@ using Core.Shared.Data.Entities;
 using Extensions;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Services.Clipboard;
 using Services.DialogHost;
 using ViewModels;
 
@@ -21,13 +22,15 @@ public class UserEditFormViewModel : DialogViewModelBase
     private readonly User                      m_user;
     private readonly IDialogService            m_dialogService;
     private readonly IAuthorizationService     m_authorizationService;
+    private readonly IClipboardService         m_clipboardService;
 
     public UserEditFormViewModel(
         IUsersService usersService,
         IPopupNotificationService popupNotificationService,
         User user,
         IDialogService dialogService,
-        IAuthorizationService authorizationService
+        IAuthorizationService authorizationService,
+        IClipboardService clipboardService
     )
     {
         m_usersService = usersService;
@@ -35,6 +38,7 @@ public class UserEditFormViewModel : DialogViewModelBase
         m_user = user;
         m_dialogService = dialogService;
         m_authorizationService = authorizationService;
+        m_clipboardService = clipboardService;
 
         Name = user.Name;
         Email = user.Email;
@@ -111,11 +115,12 @@ public class UserEditFormViewModel : DialogViewModelBase
             )
     );
 
-    public void NotifyPasswordCopied()
+    public async Task CopyGeneratedPasswordAsync()
     {
-        m_popupNotificationService.Show(ENotificationType.Information, "Пароль скопирован в буфер обмена");
-    }
+        if(GeneratedPassword is null) return;
 
+        await m_clipboardService.SaveToClipboardAsync(GeneratedPassword, "Пароль скопирован в буфер обмена");
+    }
     private IObservable<bool> GetIsEmailValidObservable()
     {
         return this.WhenAnyValue(it => it.Email)

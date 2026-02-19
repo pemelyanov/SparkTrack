@@ -22,7 +22,7 @@
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Исполнитель: " VerticalAlignment="Center" />
                             <ComboBox ItemsSource="{Binding AvailableEmployees}"
-                                      SelectedItem="{Binding SelectedEmployee}"
+                                      SelectedItem="{Binding SelectedEmployee, Mode=TwoWay}"
                                       DisplayMemberBinding="{Binding Name}"
                                       Grid.Column="1" HorizontalAlignment="Stretch" />
                         </Grid>
@@ -101,15 +101,17 @@
                                 Classes.view-control="{Binding !IsInEditMode}" />
 
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
-                            HorizontalAlignment="Right">
+                            HorizontalAlignment="Right" VerticalAlignment="Top">
+                    
+                    <Button Classes="icon template-add" IsVisible="{Binding IsInEditMode}"
+                            Command="{Binding CreateTemplateAsync}" />
+                    
                     <ToggleButton Classes="icon enter-hot-key"
                                   Classes.edit="{Binding !IsInEditMode}"
                                   Classes.save="{Binding IsInEditMode}"
-                                  VerticalAlignment="Top"
                                   IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
-
-                    <Button Classes="icon delete" VerticalAlignment="Top"
-                            Command="{Binding RemoveAsync}" />
+                    
+                    <Button Classes="icon delete" Command="{Binding RemoveAsync}"/>
                 </StackPanel>
             </StackPanel>
 

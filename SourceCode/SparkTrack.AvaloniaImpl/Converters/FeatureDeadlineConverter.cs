@@ -12,7 +12,7 @@ public class FeatureDeadlineConverter : IValueConverter
 
         if (feature.TasksList.Count == 0) return null;
 
-        return feature.TasksList.Max(it => it.Deadline);
+        return feature.TasksList.Min(it => it.Deadline);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();

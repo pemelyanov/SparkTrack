@@ -48,31 +48,15 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
         if (IsDownloaded)
         {
-            IsImage = CheckIsImage();
+            IsImage = CheckIsImage(Uri);
         }
 
         SaveAsCommand = ReactiveCommand.CreateFromTask(
-            async () =>
-            {
-                if (!IsDownloaded)
-                    await DownloadAsync();
-
-                var targetPath = await localFilesManager.ChooseFileForSaveAsync(null, null, Extension);
-
-                if (string.IsNullOrEmpty(targetPath)) return;
-
-                try
-                {
-                    File.Copy(Uri, targetPath, true);
-                }
-                catch
-                {
-                    // TODO: возможно стоит добавить модалку
-                    // ignore
-                }
-            }
+            async () => { await SaveAsAsync(localFilesManager); }
         );
     }
+
+   
 
     protected override void OnActivated(CompositeDisposable disposables)
     {
@@ -88,9 +72,6 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
     public long Size { get; }
 
-    [Reactive]
-    public AttachmentLoadProgress? LoadProgress { get; private set; }
-
     public ICommand SaveAsCommand { get; }
     
     public async Task DownloadAsync()
@@ -98,35 +79,39 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         if (IsDownloaded || LoadProgress is not null) return;
         
         m_cancellationTokenSource = new CancellationTokenSource();
-
+        
+        var uri = Uri;
+        
         try
         {
+            Uri = string.Empty;
             var progress = new AttachmentLoadProgress(ELoadType.Download, new LoadingProgress());
 
             LoadProgress = progress;
 
             await m_filesService.DownloadAsync(
                 m_attachment.FileId,
-                Uri,
+                uri,
                 progress.Progress,
                 m_cancellationTokenSource.Token
             );
 
             IsDownloaded = true;
 
-            IsImage = CheckIsImage();
-            Uri = new string(Uri); // Чтобы стригеррить обновление View
+            IsImage = CheckIsImage(uri);
         }
         catch (TaskCanceledException)
         {
             m_logger.Warn("Download is cancelled");
         }
-        catch
+        catch (Exception e)
         {
+            m_logger.Error(e, "Download failed");
             IsDownloaded = CheckIsDownloaded();
         }
         finally
         {
+            Uri = uri;  // Чтобы стригеррить обновление View
             LoadProgress = null;
         }
     }
@@ -151,5 +136,25 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         if (!File.Exists(Uri)) return false;
 
         return Md5Helper.VerifyFileMd5(Uri, m_attachment.Checksum);
+    }
+    
+    private async Task SaveAsAsync(ILocalFilesManager localFilesManager)
+    {
+        if (!IsDownloaded)
+            await DownloadAsync();
+
+        var targetPath = await localFilesManager.ChooseFileForSaveAsync(null, null, Extension);
+
+        if (string.IsNullOrEmpty(targetPath)) return;
+
+        try
+        {
+            File.Copy(Uri, targetPath, true);
+        }
+        catch (Exception e)
+        {
+            // TODO: возможно стоит добавить модалку
+            m_logger.Warn(e, "Move to {targetPath} failed.", targetPath);
+        }
     }
 }

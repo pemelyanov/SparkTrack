@@ -1,0 +1,28 @@
+﻿<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:templateSaveForm="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm"
+                        xmlns:templatesList="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TemplatesList"
+                        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                        x:Class="SparkTrack.AvaloniaImpl.Controls.TemplateSaveForm.TemplateSaveForm"
+                        Title="Сохранение шаблона"
+                        PrimaryButtonText="Сохранить"
+                        CloseButtonText="Отмена"
+                        SecondaryButtonText="Новая группа"
+                        DefaultButton="Primary"
+                        PrimaryButtonCommand="{Binding SaveTemplateAsync}"
+                        SecondaryButtonCommand="{Binding CreateGroupAsync}"
+                        IsPrimaryButtonEnabled="{Binding TemplateName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                        x:DataType="templateSaveForm:TemplateSaveFormViewModel">
+    <Grid RowDefinitions="Auto *" RowSpacing="8" MaxHeight="500">
+        <TextBox UseFloatingWatermark="True" Watermark="Название шаблона" Text="{Binding TemplateName}" />
+
+        <templatesList:TemplatesList Grid.Row="1" GroupsList="{Binding TemplateGroups}"
+                                     UngroupedTemplatesList="{Binding UngroupedTemplates}"
+                                     SelectedTemplate="{Binding SelectedTemplate}"
+                                     SelectedGroup="{Binding SelectedGroup}"
+                                     RemoveCommand="{Binding RemoveAsync}" />
+    </Grid>
+</controls:ContentDialog>

@@ -73,8 +73,8 @@ public class GitHubUpdateService(
         s_logger.Info("Downloading asset: {url} -> {path}", releaseAsset.BrowserDownloadUrl, downloadPath);
         var stage = new LoadingProgress
         {
-            StageName = "Загружаем обновление...",
-            TotalTasksQuantity = new BehaviorSubject<int>(100),
+            StageName = $"Загружаем обновление {releaseAsset.Name}...",
+            TotalTasksQuantity = new BehaviorSubject<int>(100) // TODO: Перевести это на другой LoadingProgress, где можно показывать прогресс загрузки в байтах
         };
         observer?.OnNext(stage);
 
@@ -83,7 +83,7 @@ public class GitHubUpdateService(
             downloadPath,
             new Progress<HttpDownloadProgress>(progress =>
                 {
-                    s_logger.Trace("Download progress: {percent}%", progress.PercentDownloaded * 100);
+                    s_logger.Trace("Download progress: {bytes}/{total} ({precent:P})", progress.TotalDownloaded, progress.TotalSize, progress.PercentDownloaded);
                     stage.ProcessedTasksQuantity.OnNext((int)(progress.PercentDownloaded * 100));
                 }
             )

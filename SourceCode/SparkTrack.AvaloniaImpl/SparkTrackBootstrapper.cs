@@ -1,6 +1,10 @@
-﻿using SparkTrack.AvaloniaImpl.Data;
+﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
+using SparkTrack.AvaloniaImpl.Data;
+using SparkTrack.AvaloniaImpl.Data.Configurations;
+using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Pages.Settings;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
+using SparkTrack.AvaloniaImpl.Services.Templates;
 using SparkTrack.Core.Client.Extensions;
 
 namespace SparkTrack.AvaloniaImpl;
@@ -18,6 +22,7 @@ using Controls.CommentEdit;
 using Controls.ProjectEditForm;
 using Controls.ProjectsFilter;
 using Controls.SubTask;
+using Controls.TemplateSaveForm;
 using Controls.UserAddForm;
 using Controls.UserEditForm;
 using Controls.UsersFilter;
@@ -39,11 +44,19 @@ using Pages.FeaturesList;
 using Pages.ProjectsList;
 using Pages.Update;
 using Pages.UsersList;
+using ReactiveUI;
 using Services.AttachmentsPathCache;
+using Splat;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
     private static readonly IConfiguration s_configuration = InitializeConfiguration();
+
+    protected override void RegisterViews(IMutableDependencyResolver builder)
+    {
+        RegisterTemplateViewModel<SubTaskTemplate>(builder);
+        RegisterTemplateViewModel<FeatureTemplate>(builder);
+    }
 
     protected override void RegisterViewModels(ContainerBuilder builder)
     {
@@ -72,6 +85,8 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<ClipboardAttachmentViewModel>();
         builder.RegisterType<UserEditFormViewModel>();
         builder.RegisterType<SettingsPageViewModel>().SingleInstance();
+        builder.RegisterGeneric(typeof(TemplateSaveFormViewModel<>));
+        builder.RegisterGeneric(typeof(TemplateSelectionFormViewModel<>));
     }
 
     protected override void RegisterServices(ContainerBuilder builder)
@@ -92,6 +107,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                 )
             )
         );
+
         builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<WindowsExplorerService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterJsonConfiguration<InterfaceConfiguration>(Path.Combine(
@@ -102,6 +118,9 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         ));
 
         RegisterUpdatingIfNeeded(builder);
+        
+        RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");
+        RegisterTemplateService<FeatureTemplate>(builder, "Features");
     }
 
     private void RegisterUpdatingIfNeeded(ContainerBuilder builder)
@@ -143,5 +162,22 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         return new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true)
             .Build();
+    }
+
+    private void RegisterTemplateService<TTemplate>(ContainerBuilder builder, string categoryName)
+        where TTemplate : ITemplate
+    {
+        builder.RegisterType<JsonTemplatesService<TTemplate>>()
+            .WithParameter(new TypedParameter(typeof(string), categoryName))
+            .As<ITemplatesService<TTemplate>>()
+            .As<IAbstractTemplatesService>()
+            .SingleInstance();
+    }
+    
+    private void RegisterTemplateViewModel<TTemplate>(IMutableDependencyResolver builder)
+        where TTemplate : ITemplate
+    {
+        builder.Register(() => new TemplateSaveForm(), typeof(IViewFor<TemplateSaveFormViewModel<TTemplate>>));
+        builder.Register(() => new TemplateSelectionForm(), typeof(IViewFor<TemplateSelectionFormViewModel<TTemplate>>));
     }
 }

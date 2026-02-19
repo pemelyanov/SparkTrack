@@ -2,13 +2,14 @@ namespace SparkTrack.WebAPI.Controllers;
 
 using ActionResults;
 using Core.Services.Files;
+using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("files")]
-public class FilesController(IFilesService filesService) : ControllerBase
+public class FilesController(IFilesService filesService) : Controller
 {
     [Authorize]
     [HttpPost]
@@ -16,11 +17,9 @@ public class FilesController(IFilesService filesService) : ControllerBase
     [DisableRequestTimeout]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<Guid>> UploadAsync(CancellationToken cancellationToken)
+    public Task<ActionResult<Guid>> UploadAsync(CancellationToken cancellationToken, [FromHeader(Name = "Content-Length")] long contentLength)
     {
-        var fileId = await filesService.UploadAsync(Request.Body, cancellationToken);
-
-        return Ok(fileId);
+        return this.OkWithDomainExceptionsHandling(() => filesService.UploadAsync(Request.Body, contentLength, cancellationToken));
     }
 
     [Authorize]

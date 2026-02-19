@@ -36,6 +36,7 @@ public class CommentEditViewModel : ViewModelBase
     {
         Id = m_comment?.Id ?? Guid.Empty,
         Text = Text,
-        AttachmentsList = AttachmentsPanelViewModel.AttachmentsList.Select(it => it.ToModel()).ToArray()
+        AttachmentsList = AttachmentsPanelViewModel.AttachmentsList
+            .Select(it => it.ToModel()).ToArray()
     };
 }

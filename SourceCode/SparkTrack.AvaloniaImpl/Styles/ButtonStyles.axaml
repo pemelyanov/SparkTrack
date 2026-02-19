@@ -26,6 +26,12 @@
                 <Setter Property="FontSize" Value="10" />
             </Style>
         </Style>
+        
+        <Style Selector="^.medium-content">
+            <Style Selector="^ avalonia|SymbolIcon">
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+        </Style>
     </Style>
     
     <Style Selector=":is(Button).more">
@@ -72,6 +78,22 @@
         <Setter Property="Content">
             <Template>
                 <avalonia:SymbolIcon Symbol="Delete" />
+            </Template>
+        </Setter>
+    </Style>
+    
+    <Style Selector=":is(Button).template-add">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="ReceiptAdd" />
+            </Template>
+        </Setter>
+    </Style>
+    
+    <Style Selector=":is(Button).template">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="Receipt" />
             </Template>
         </Setter>
     </Style>

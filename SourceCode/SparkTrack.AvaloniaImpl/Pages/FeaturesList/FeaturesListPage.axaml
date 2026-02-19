@@ -13,6 +13,7 @@
              xmlns:markupExtensions="clr-namespace:SparkTrack.AvaloniaImpl.MarkupExtensions"
              xmlns:disablingWrapper="clr-namespace:SparkTrack.AvaloniaImpl.Controls.DisablingWrapper"
              xmlns:rangeDatePicker="clr-namespace:SparkTrack.AvaloniaImpl.Controls.RangeDatePicker"
+             xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.FeaturesList.FeaturesListPage"
              x:DataType="featuresList:FeaturesListPageViewModel"
@@ -39,22 +40,30 @@
                               IsChecked="{Binding ShowCompleted, Mode=TwoWay}" />
             </WrapPanel>
 
-            <Button Grid.Column="1" Classes="accent" Content="Создать"
-                    IsVisible="{markupExtensions:CurrentUserInRole Admin}"
-                    IsEnabled="{Binding ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}"
-                    VerticalAlignment="Bottom" Command="{Binding CreateFeature}" />
+            <StackPanel Grid.Column="1" IsVisible="{markupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
+                <Button Classes="accent" Content="Создать"
+                        IsEnabled="{Binding ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        Command="{Binding CreateFeature}"
+                        CornerRadius="4 0 0 4" />
+
+                <Button Classes="icon template accent" Command="{Binding CreateFeatureFromTemplateAsync}"
+                        CornerRadius="0 4 4 0"
+                        IsEnabled="{Binding ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="2" HorizontalAlignment="Right" Spacing="8" Orientation="Horizontal">
-            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}" IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
-            
-            <Button Content="Перевести на оплату" Command="{Binding SendOnPaymentCommand}" IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
-            
+            <Button Content="Удалить" HotKey="Delete" Command="{Binding DeleteCommand}"
+                    IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
+
+            <Button Content="Перевести на оплату" Command="{Binding SendOnPaymentCommand}"
+                    IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
+
             <Button Content="Пометить как выполненные" Command="{Binding MarkAsCompletedCommand}" />
-            
+
             <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
         </StackPanel>
-        
+
 
         <DataGrid Grid.Row="3"
                   Classes="readonly"
@@ -66,18 +75,24 @@
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
+                <DataGridTemplateColumn IsReadOnly="True" Width="220"
+                                        Header="Канал"
+                                        IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <link:Link Url="{Binding Model.Project.Link}" Text="{Binding Model.Project.Name}" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True"
-                                    IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}"
-                                    Header="Канал" Binding="{Binding Model.Project.Name}" />
-                <DataGridTextColumn IsReadOnly="True"
-                                    Header="Дедлайн"
+                                    Header="Дедлайн" Width="180"
                                     Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
                                     StringFormat={x:Static constants:DateFormats.ShortRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTemplateColumn IsReadOnly="True" Width="150"
+                <DataGridTemplateColumn IsReadOnly="True" Width="180"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" />
+                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" VerticalAlignment="Center" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

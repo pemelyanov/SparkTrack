@@ -85,6 +85,10 @@ public static class ControllerExtensions
             {
                 return (controller.NotFound() as TResult)!;
             }
+            catch (TaskCanceledException)
+            {
+                return (controller.NoContent() as TResult)!;
+            }
         }
     }
 }

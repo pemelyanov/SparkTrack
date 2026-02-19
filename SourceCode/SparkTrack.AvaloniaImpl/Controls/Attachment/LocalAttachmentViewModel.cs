@@ -47,9 +47,6 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
 
     public Guid? UploadedFileId { get; private set; }
 
-    [Reactive]
-    public AttachmentLoadProgress? LoadProgress { get; private set; }
-
     public ICommand SaveAsCommand { get; } = ReactiveCommand.Create(() => { }, Observable.Return(false));
 
     public Task DownloadAsync() => throw new NotImplementedException();
@@ -86,6 +83,10 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         catch (TaskCanceledException)
         {
             m_logger.Warn("File upload canceled");
+        }
+        catch (Exception e)
+        {
+            m_logger.Error(e, "File upload error");
         }
         finally
         {

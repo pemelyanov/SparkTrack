@@ -6,21 +6,22 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Update.UpdatePage"
              x:DataType="update:UpdatePageViewModel">
-    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
-        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto Auto">
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding LoadingProgress^.StageName}"
-                       IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" />
+    <Border Classes="card" HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
+        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto Auto" ColumnSpacing="8">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding LoadingProgress^.StageName, FallbackValue=''}"
+                       IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}, FallbackValue={x:False}}" 
+                       TextTrimming="CharacterEllipsis"/>
             <TextBlock Grid.Row="0" Grid.Column="1"
                        IsVisible="{Binding !!LoadingProgress^.ProcessedTasksQuantity^, FallbackValue={x:False}}">
-                <Run Text="{Binding LoadingProgress^.ProcessedTasksQuantity^}" />
+                <Run Text="{Binding LoadingProgress^.ProcessedTasksQuantity^, FallbackValue=''}" />
                 <Run Text="/" />
-                <Run Text="{Binding LoadingProgress^.TotalTasksQuantity^}" />
+                <Run Text="{Binding LoadingProgress^.TotalTasksQuantity^, FallbackValue=''}" />
             </TextBlock>
             <ProgressBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch"
                          Margin="0 8 0 0"
                          IsVisible="{Binding LoadingProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
-                         Value="{Binding LoadingProgress^.ProcessedTasksQuantity^}"
-                         Maximum="{Binding LoadingProgress^.TotalTasksQuantity^, FallbackValue=100}"
+                         Value="{Binding LoadingProgress^.ProcessedTasksQuantity^, FallbackValue=0}"
+                         Maximum="{Binding LoadingProgress^.TotalTasksQuantity^, FallbackValue=1}"
                          IsIndeterminate="{Binding !LoadingProgress^.ProcessedTasksQuantity^}" />
         </Grid>
     </Border>

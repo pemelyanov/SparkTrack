@@ -24,14 +24,4 @@ public partial class SubTask : ReactiveUserControl<SubTaskViewModel>
     }
 
     #endregion
-
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
-    {
-        e.Handled = true;
-    }
-
-    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        e.Handled = true;
-    }
 }

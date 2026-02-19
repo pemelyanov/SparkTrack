@@ -15,5 +15,5 @@
             </Style>
         </Style>
     </UserControl.Styles>
-    <TextBlock Text="{Binding #Root.DisplayText}" Tapped="InputElement_OnTapped" />
+    <TextBlock Text="{Binding #Root.DisplayText}" Tapped="InputElement_OnTapped" PointerPressed="InputElement_OnPointerPressed" />
 </UserControl>
