@@ -1,3 +1,6 @@
+using SparkTrack.Core.Events;
+using SparkTrack.Core.Shared.Eventing;
+
 namespace SparkTrack.Core.Services.SubTasks;
 
 using Authorization;
@@ -9,7 +12,7 @@ using Shared.Data.Entities;
 using Shared.Enums;
 using Shared.Services.SubTasks;
 
-public class SubTasksService(IAuthorizationService authorizationService, ISubTasksRepository subTasksRepository)
+public class SubTasksService(IAuthorizationService authorizationService, ISubTasksRepository subTasksRepository, IEventEmitter eventEmitter)
     : ISubTasksService
 {
     public async Task<SubTask?> SetIsTimelyBonusApprovedAsync(Guid id, bool value, Guid currentVersion)
@@ -65,7 +68,14 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
             IsTimelyBonusApproved = isBonusApproved
         };
 
-        return await subTasksRepository.EditAsync(subTask);
+        var updatedSubTask = await subTasksRepository.EditAsync(subTask);
+
+        if (updatedSubTask is null) return null;
+
+        if (updatedSubTask.IsCompleted)
+            await eventEmitter.RaiseAsync(new SubTaskCompletedEvent(updatedSubTask));
+        
+        return updatedSubTask;
     }
 
     public async Task<SubTask?> SetPaymentStatusAsync(Guid id, EPaymentStatus value, Guid currentVersion)

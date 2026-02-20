@@ -1,4 +1,7 @@
-﻿namespace SparkTrack.WebAPI.AutofacModules;
+﻿using SparkTrack.Core.Shared.Eventing;
+using SparkTrack.WebAPI.Events;
+
+namespace SparkTrack.WebAPI.AutofacModules;
 
 using Autofac;
 using DataStore;
@@ -28,11 +31,12 @@ public class WebAPIModule : Module
         builder.Register(c =>
         {
             var configuration = c.Resolve<IConfiguration>();
-            return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(configuration));
+            var eventEmitter = c.Resolve<IEventEmitter>();
+            return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter, configuration));
         }).SingleInstance();
     }
 
-    private async Task<DriveService> AuthenticateDriveAsync(IConfiguration configuration)
+    private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter, IConfiguration configuration)
     {
         try
         {
@@ -73,6 +77,7 @@ public class WebAPIModule : Module
         catch (Exception e)
         {
             s_logger.Error(e, "Google Drive authenticating error:");
+            await eventEmitter.RaiseAsync(new GoogleAuthenticationExceptionEvent(e));
             throw;
         }
     }
