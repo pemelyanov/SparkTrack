@@ -1,16 +1,19 @@
 using NLog;
+using SparkTrack.WebAPI.Services.TelegramMessageSender;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using ILogger = NLog.ILogger;
 
 namespace SparkTrack.WebAPI.BackgroundServices;
 
-public class TelegramBotService(IConfiguration configuration) : BackgroundService
+public class TelegramBotService(IConfiguration configuration) : BackgroundService, ITelegramMessageSender
 {
-    private static readonly ILogger           s_logger    = LogManager.GetCurrentClassLogger();
-    private                 TelegramBotClient m_botClient = null!;
+    private static readonly ILogger                    s_logger          = LogManager.GetCurrentClassLogger();
+    private                 TelegramBotClient          m_botClient       = null!;
+    private                 Dictionary<string, ChatId> m_userTagToChatId = [];
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -35,6 +38,10 @@ public class TelegramBotService(IConfiguration configuration) : BackgroundServic
         s_logger.Info("[{type}] Message received (user: {user}; chat: {chat}): {message}", type, message.From?.Username,
             message.Chat.Id, message.Text);
 
+        // TODO: Добавить хранилище чатов
+        if (message.From?.Username is { } tag)
+            m_userTagToChatId[tag] = message.Chat.Id;
+
         return Task.CompletedTask;
     }
 
@@ -50,5 +57,18 @@ public class TelegramBotService(IConfiguration configuration) : BackgroundServic
         s_logger.Warn("Error occured ({source}): {exception}", source, exception.Message);
 
         return Task.CompletedTask;
+    }
+
+    public async Task SendAsync(string userTag, string message)
+    {
+        if (!m_userTagToChatId.TryGetValue(userTag, out var chatId))
+        {
+            s_logger.Warn("Chat with user {tag} not found", userTag);
+            return;
+        }
+
+        s_logger.Info("Sendnig message to {user} (chat: {chat})", userTag, chatId);
+        await m_botClient.SendMessage(chatId, message,
+            replyMarkup: new InlineKeyboardButton("Открыть SparkTrack", "sparktrack://"));
     }
 }

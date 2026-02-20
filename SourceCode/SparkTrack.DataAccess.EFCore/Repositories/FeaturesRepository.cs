@@ -72,7 +72,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         var addedFeature = await dbContext.Features.AddAsync(featureData);
         await dbContext.SaveChangesAsync();
 
-        return GetFeatureMapExpression(null).Compile().Invoke(addedFeature.Entity);
+        featureData = await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
+            .Include(it => it.TasksList)
+            .ThenInclude(it => it.ExecutorEmployee)
+            .Include(it => it.Project)
+            .FirstAsync();
+
+        return GetFeatureMapExpression(null).Compile().Invoke(featureData);
     }
 
     private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
@@ -190,7 +196,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         await dbContext.SaveChangesAsync();
     }
 
-    private static Expression<Func<FeatureData, Feature>> GetFeatureMapExpression(
+    private static Expression<Func<FeatureData, Feature>> 
+        GetFeatureMapExpression(
         Guid? subTaskEmployeeId
     ) => f => new Feature
     {
@@ -219,6 +226,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                         Id = t.ExecutorEmployee.Id,
                         Name = t.ExecutorEmployee.Name,
                         Role = t.ExecutorEmployee.Role,
+                        TelegramTag = t.ExecutorEmployee.TelegramTag,
                         Email = t.ExecutorEmployee.Email,
                         ArchivedAt = t.ExecutorEmployee.ArchivedAt,
                         ArchiveSource = t.ExecutorEmployee.ArchiveSource
