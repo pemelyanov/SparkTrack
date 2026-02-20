@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Autofac.Extensions.DependencyInjection" />
       <PackageReference Include="Google.Apis.Drive.v3" />
+      <PackageReference Include="JetBrains.Annotations" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="NLog" />

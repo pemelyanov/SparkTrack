@@ -59,16 +59,25 @@ public class TelegramBotService(IConfiguration configuration) : BackgroundServic
         return Task.CompletedTask;
     }
 
-    public async Task SendAsync(string userTag, string message)
+    public async Task SendAsync(string userTag, string message, ReplyMarkup? replyMarkup)
     {
         if (!m_userTagToChatId.TryGetValue(userTag, out var chatId))
         {
             s_logger.Warn("Chat with user {tag} not found", userTag);
+
             return;
         }
 
         s_logger.Info("Sendnig message to {user} (chat: {chat})", userTag, chatId);
-        await m_botClient.SendMessage(chatId, message,
-            replyMarkup: new InlineKeyboardButton("Открыть SparkTrack", "sparktrack://"));
+
+        try
+        {
+            await m_botClient.SendMessage(chatId, message,
+                replyMarkup: replyMarkup);
+        }
+        catch (Exception e)
+        {
+            s_logger.Warn(e, "Message send failed");
+        }
     }
 }
