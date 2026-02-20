@@ -1,4 +1,5 @@
 ﻿using SparkTrack.Core.Shared.Eventing;
+using SparkTrack.WebAPI.BackgroundServices;
 using SparkTrack.WebAPI.Events;
 
 namespace SparkTrack.WebAPI.AutofacModules;
@@ -14,7 +15,7 @@ using NLog;
 using Services.Files;
 using Services.JwtAuthorization;
 
-public class WebAPIModule : Module
+public class WebAPIModule(IConfiguration configuration) : Module
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
@@ -24,19 +25,29 @@ public class WebAPIModule : Module
         builder.RegisterType<JwtAuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         RegisterGoogleDrive(builder);
         builder.RegisterType<GoogleDriveFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<AutofacEventEmitter>().AsImplementedInterfaces().SingleInstance();
+        RegisterTelegramBotIfNeeded(builder);
+    }
+
+    private void RegisterTelegramBotIfNeeded(ContainerBuilder builder)
+    {
+        if(!configuration.GetSection("TelegramBot").Exists()) return;
+
+        builder.RegisterType<TelegramBotService>()
+            .As<IHostedService>()
+            .SingleInstance();
     }
 
     private void RegisterGoogleDrive(ContainerBuilder builder)
     {
         builder.Register(c =>
         {
-            var configuration = c.Resolve<IConfiguration>();
             var eventEmitter = c.Resolve<IEventEmitter>();
-            return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter, configuration));
+            return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter));
         }).SingleInstance();
     }
 
-    private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter, IConfiguration configuration)
+    private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter)
     {
         try
         {

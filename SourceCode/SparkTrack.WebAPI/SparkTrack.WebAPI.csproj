@@ -16,6 +16,7 @@
       <PackageReference Include="NLog.Web.AspNetCore" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
       <PackageReference Include="NSwag.AspNetCore" />
+      <PackageReference Include="Telegram.Bot" />
     </ItemGroup>
 
     <ItemGroup>

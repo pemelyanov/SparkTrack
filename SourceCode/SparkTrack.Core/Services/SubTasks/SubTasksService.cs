@@ -12,7 +12,10 @@ using Shared.Data.Entities;
 using Shared.Enums;
 using Shared.Services.SubTasks;
 
-public class SubTasksService(IAuthorizationService authorizationService, ISubTasksRepository subTasksRepository, IEventEmitter eventEmitter)
+public class SubTasksService(
+    IAuthorizationService authorizationService,
+    ISubTasksRepository subTasksRepository,
+    IEventEmitter eventEmitter)
     : ISubTasksService
 {
     public async Task<SubTask?> SetIsTimelyBonusApprovedAsync(Guid id, bool value, Guid currentVersion)
@@ -74,7 +77,7 @@ public class SubTasksService(IAuthorizationService authorizationService, ISubTas
 
         if (updatedSubTask.IsCompleted)
             await eventEmitter.RaiseAsync(new SubTaskCompletedEvent(updatedSubTask));
-        
+
         return updatedSubTask;
     }
 
