@@ -123,6 +123,12 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         {
             throw new ConflictException("Feature was modified early", e);
         }
+        
+        featureData = await dbContext.Features.Where(it => it.Id == feature.Id)
+            .Include(it => it.TasksList)
+            .ThenInclude(it => it.ExecutorEmployee)
+            .Include(it => it.Project)
+            .FirstAsync();
 
         return GetFeatureMapExpression(null).Compile().Invoke(featureData);
     }
@@ -153,6 +159,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             existingTask.Cost = taskEdit.Cost;
             existingTask.TimelyBonus = taskEdit.TimelyBonus;
             existingTask.Version = taskEdit.Version;
+            existingTask.Deadline = taskEdit.Deadline;
 
             existingTasks.Remove(taskEdit.Id);
         }
