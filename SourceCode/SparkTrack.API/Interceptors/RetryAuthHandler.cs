@@ -13,46 +13,65 @@ public class RetryAuthHandler(
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
+    private static readonly SemaphoreSlim s_refreshLock = new(1, 1);
+
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken
     )
     {
-        var token = tokensConfiguration.Config.AccessToken;
-        request.Headers.Authorization = GetAuthenticationHeader(token);
+        request.Headers.Authorization =
+            GetAuthenticationHeader(tokensConfiguration.Config.AccessToken);
 
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
-        
-        s_logger.Info("Refreshing token...");
+        if (response.StatusCode != HttpStatusCode.Unauthorized)
+            return response;
 
-        var refreshToken = tokensConfiguration.Config.RefreshToken;
+        s_logger.Info("Unauthorized. Trying to refresh token...");
 
-        var authorizationClientWrapper = authorizationClientFactory.Invoke();
+        await s_refreshLock.WaitAsync(cancellationToken);
+        try
+        {
+            // повторно проверяем токен, возможно, другой поток уже обновил его
+            request.Headers.Authorization =
+                GetAuthenticationHeader(tokensConfiguration.Config.AccessToken);
 
-        var tokensDTO = await authorizationClientWrapper.Client.RefreshTokensAsync(
-            new TokenRefreshDTO
-            {
-                RefreshToken = refreshToken
-            },
-            cancellationToken
-        );
-            
-        tokensConfiguration.UpdateConfig(
-            new TokensConfiguration
-            {
-                AccessToken = tokensDTO.AccessToken,
-                RefreshToken = tokensDTO.RefreshToken
-            }
-        );
-            
-        request.Headers.Authorization = GetAuthenticationHeader(tokensDTO.AccessToken);
-            
-        response = await base.SendAsync(request, cancellationToken);
+            response = await base.SendAsync(request, cancellationToken);
+            if (response.StatusCode != HttpStatusCode.Unauthorized)
+                return response;
 
-        return response;
+            s_logger.Info("Refreshing token...");
+
+            var authorizationClientWrapper = authorizationClientFactory.Invoke();
+
+            var tokensDTO = await authorizationClientWrapper.Client.RefreshTokensAsync(
+                new TokenRefreshDTO
+                {
+                    RefreshToken = tokensConfiguration.Config.RefreshToken
+                },
+                cancellationToken
+            );
+
+            tokensConfiguration.UpdateConfig(
+                new TokensConfiguration
+                {
+                    AccessToken = tokensDTO.AccessToken,
+                    RefreshToken = tokensDTO.RefreshToken
+                }
+            );
+        }
+        finally
+        {
+            s_refreshLock.Release();
+        }
+
+        request.Headers.Authorization =
+            GetAuthenticationHeader(tokensConfiguration.Config.AccessToken);
+
+        return await base.SendAsync(request, cancellationToken);
     }
 
-    private static AuthenticationHeaderValue GetAuthenticationHeader(string token) => new("Bearer", token);
+    private static AuthenticationHeaderValue GetAuthenticationHeader(string token) =>
+        new("Bearer", token);
 }
