@@ -53,10 +53,10 @@ public class FeatureCreatedEventHandler(
             var action = new InlineKeyboardButton("Перейти к идее", "link");
 
             var tasksList = tasks.Select(task =>
-                $"*{task.Name}* — Дедлайн: {task.Deadline.ApplyTimeZone(telegramUser.TimeZone):dd.MM.yy HH:mm (ddd) UTCzzz}"
+                $"*{task.Name}* — Дедлайн: {task.Deadline.ApplyTimeZone(telegramUser.TimeZone):dd.MM.yy HH:mm (ddd)} {telegramUser.TimeZone?.AsUtcOffset()}"
             );
             
-            var message = $"*== Создана идея ==*\n"
+            var message = $"  *==== Создана идея ====*\n"
                 + $"{eventData.Feature.Name}\n\n"
                 + $"*Канал:* {eventData.Feature.Project.Name} ({eventData.Feature.Project.Link})\n\n" +
                 $"📝 *Задачи:*\n" +

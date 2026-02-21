@@ -16,4 +16,10 @@ public static class DateTimeExtensions
             )
         );
     }
+    
+    public static string AsUtcOffset(this TimeSpan offset)
+    {
+        var sign = offset >= TimeSpan.Zero ? "+" : "-";
+        return $"UTC{sign}{offset:hh\\:mm}";
+    }
 }

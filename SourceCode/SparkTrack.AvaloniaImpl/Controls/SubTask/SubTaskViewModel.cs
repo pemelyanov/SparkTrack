@@ -149,7 +149,7 @@ public class SubTaskViewModel : ViewModelBase
         Id = m_subTask?.Id ?? Guid.Empty,
         Name = Name,
         ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NotifyUIException($"Выберите сотрудника для задачи {Name}"),
-        Deadline = Deadline,
+        Deadline = Deadline.EndOfTheDay(),
         Cost = Cost,
         Version = m_subTask?.Version ?? Guid.Empty,
         TimelyBonus = TimelyBonus
@@ -187,7 +187,7 @@ public class SubTaskViewModel : ViewModelBase
     private void UpdateProperties(SubTaskData? subTask)
     {
         Name = subTask?.Name ?? string.Empty;
-        Deadline = (subTask?.Deadline ?? DateTime.Now).EndOfTheDay();
+        Deadline = subTask?.Deadline ?? DateTime.Now;
         Cost = subTask?.Cost ?? 0;
         IsCompleted = subTask?.IsCompleted ?? false;
         PaymentStatus = subTask?.PaymentStatus ?? EPaymentStatus.None;

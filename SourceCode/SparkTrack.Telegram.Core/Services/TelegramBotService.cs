@@ -18,6 +18,7 @@ using TelegramBotClientExtensions = Telegram.Bot.TelegramBotClientExtensions;
 namespace SparkTrack.Telegram.Core.Services;
 
 using Data;
+using Extensions;
 using Repositories;
 using SparkTrack.Core.Services.Users;
 
@@ -40,6 +41,10 @@ public class TelegramBotService(
     private const string ShowTimeZonesCommand        = "show_timezones";
     private const string SetTimeZonesCommand         = "set_timezones";
 
+    private static readonly InlineKeyboardButton s_requestTimeZoneSetButton = InlineKeyboardButton.WithCallbackData(
+        "🌍 Указать часовой пояс",
+        ShowTimeZonesCommand
+    );
     private static readonly InlineKeyboardMarkup s_timezoneButtons;
 
     private TelegramBotClient? m_botClient;
@@ -75,7 +80,7 @@ public class TelegramBotService(
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData(
-                        $"UTC{FormatOffset(offset.Offset)} {offset.DisplayName}",
+                        $"{offset.Offset.AsUtcOffset()} {offset.DisplayName}",
                         $"{SetTimeZonesCommand}:{offset.Offset}"
                     )
                 }
@@ -318,10 +323,7 @@ public class TelegramBotService(
                         "🔕 Отключить уведомления",
                         DisableNotificationsCommand
                     ),
-                    InlineKeyboardButton.WithCallbackData(
-                        "🌍 Указать часовой пояс",
-                        ShowTimeZonesCommand
-                    ),
+                    s_requestTimeZoneSetButton
                 ],
             ]
         );
@@ -383,12 +385,13 @@ public class TelegramBotService(
                 IsNotificationsEnabled = true
             }
         );
-
+        
         s_logger.Info("Enabling notifications for user {user}", message.Chat.Username);
         await TelegramBotClientExtensions.SendMessage(
             bot,
             message.Chat.Id,
             "Уведомления подключены",
+            replyMarkup: telegramUser.TimeZone is null ? s_requestTimeZoneSetButton : default!,
             cancellationToken: cancellationToken
         );
     }
@@ -447,11 +450,5 @@ public class TelegramBotService(
             "Часовой пояс обновлен",
             cancellationToken: cancellationToken
         );
-    }
-
-    private static string FormatOffset(TimeSpan offset)
-    {
-        var sign = offset >= TimeSpan.Zero ? "+" : "-";
-        return $"{sign}{offset:hh\\:mm}";
     }
 }

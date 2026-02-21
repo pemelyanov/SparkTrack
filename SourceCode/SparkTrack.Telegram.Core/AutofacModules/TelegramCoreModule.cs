@@ -4,15 +4,12 @@ using Autofac;
 using EventHandlers;
 using Extensions;
 using Microsoft.Extensions.Configuration;
-using Repositories;
 using Services;
 
 public class TelegramCoreModule(IConfiguration configuration, HashSet<Type> handlingEvents) : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        builder.RegisterDecorator<CachingUsersRepository, ITelegramUsersRepository>();
-
         var tokenFile = configuration["TelegramBot:TokenPath"];
 
         if (string.IsNullOrEmpty(tokenFile))
