@@ -11,6 +11,7 @@ using HandleErrorSource = Telegram.Bot.Polling.HandleErrorSource;
 using InlineKeyboardButton = Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton;
 using InlineKeyboardMarkup = Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup;
 using ITelegramBotClient = Telegram.Bot.ITelegramBotClient;
+using ParseMode = Telegram.Bot.Types.Enums.ParseMode;
 using ReceiverOptions = Telegram.Bot.Polling.ReceiverOptions;
 using TelegramBotClientExtensions = Telegram.Bot.TelegramBotClientExtensions;
 
@@ -22,8 +23,8 @@ using SparkTrack.Core.Services.Users;
 
 public class TelegramBotService(
     string botToken,
-    IUsersService usersService,
-    ITelegramUsersRepository telegramUsersRepository
+    Func<IUsersService> usersServiceFactory,
+    Func<ITelegramUsersRepository> telegramUsersRepositoryFactory
 ) : ITelegramBotService, ITelegramMessageSender
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
@@ -43,33 +44,30 @@ public class TelegramBotService(
 
     private TelegramBotClient? m_botClient;
 
-    private readonly Dictionary<string, Func<TelegramBotClient, string, Message, CancellationToken, Task>>
+    private readonly Dictionary<string, Func<TelegramBotClient, string, string?, Message, CancellationToken, Task>>
         m_commandHandlers = [];
 
     static TelegramBotService()
     {
         (TimeSpan Offset, string DisplayName)[] timeZones =
         {
-            // Часовые пояса СНГ
-            (TimeSpan.FromHours(2), "Калининград, Вильнюс, Таллин"),
-            (TimeSpan.FromHours(3), "Москва, Санкт-Петербург, Минск"),
-            (TimeSpan.FromHours(4), "Самара, Ижевск, Астрахань"),
+            (TimeSpan.FromHours(2), "Калининград"),
+            (TimeSpan.FromHours(3), "Москва, Санкт-Петербург, Минск, Астрахань"),
+            (TimeSpan.FromHours(4), "Самара, Ижевск"),
             (TimeSpan.FromHours(5), "Екатеринбург, Челябинск, Тюмень"),
-            (TimeSpan.FromHours(6), "Омск, Новосибирск, Барнаул"),
-            (TimeSpan.FromHours(7), "Красноярск, Кемерово, Абакан"),
+            (TimeSpan.FromHours(6), "Омск"),
+            (TimeSpan.FromHours(7), "Новосибирск, Барнаул, Красноярск, Кемерово, Абакан"),
             (TimeSpan.FromHours(8), "Иркутск, Улан-Удэ, Чита"),
             (TimeSpan.FromHours(9), "Якутск, Благовещенск, Нерюнгри"),
             (TimeSpan.FromHours(10), "Владивосток, Хабаровск, Южно-Сахалинск"),
-            (TimeSpan.FromHours(11), "Магадан, Анадырь, Петропавловск-Камчатский"),
-            (TimeSpan.FromHours(12), "Анадырь, Камчатка, Чукотка"),
+            (TimeSpan.FromHours(11), "Магадан"),
+            (TimeSpan.FromHours(12), "Анадырь, Петропавловск-Камчатский"),
 
-            // Другие пояса
-            (TimeSpan.FromHours(1), "Лондон, Дублин, Лиссабон (зимой)"),
-            (TimeSpan.FromHours(0), "Рейкьявик, Дакар, Аккра"),
+            (TimeSpan.FromHours(0), "Лондон, Дублин, Лиссабон (зимой)"),
             (TimeSpan.FromHours(-3), "Бразилиа, Буэнос-Айрес, Монтевидео"),
-            (TimeSpan.FromHours(-12), "остров Бейкер, остров Хауленд"),
+            (TimeSpan.FromHours(-6), "Чикаго, Мехико, Гватемала"),
             (TimeSpan.FromHours(-9), "Анкоридж, Джуно, Фэрбанкс"),
-            (TimeSpan.FromHours(-6), "Чикаго, Мехико, Гватемала")
+            (TimeSpan.FromHours(-12), "остров Бейкер, остров Хауленд")
         };
 
         s_timezoneButtons = timeZones
@@ -149,12 +147,14 @@ public class TelegramBotService(
     public Task SendAsync(
         long chatId,
         string message,
+        ParseMode parseMode = ParseMode.None,
         ReplyMarkup? replyMarkup = null,
         CancellationToken cancellationToken = default
     ) => TelegramBotClientExtensions.SendMessage(
         EnsureBot(),
         chatId,
         message,
+        parseMode,
         replyMarkup: replyMarkup,
         cancellationToken: cancellationToken
     );
@@ -182,6 +182,8 @@ public class TelegramBotService(
             return;
         }
 
+        var telegramUsersRepository = telegramUsersRepositoryFactory();
+
         var telegramUser = await telegramUsersRepository.GetByChatIdAsync(message.Chat.Id);
 
         if (telegramUser is null)
@@ -190,6 +192,8 @@ public class TelegramBotService(
                 "User not found in telegram database, searching users with specified tag ({tag}) in main database...",
                 username
             );
+
+            var usersService = usersServiceFactory();
 
             var existingUser = await usersService.GetByTelegramTagAsync(username);
 
@@ -251,6 +255,7 @@ public class TelegramBotService(
                 HelloText,
                 cancellationToken: cancellationToken
             );
+            
             await telegramUsersRepository.EditAsync(
                 telegramUser with
                 {
@@ -270,6 +275,7 @@ public class TelegramBotService(
         var firstSeparatorIndex = query.IndexOf(':');
 
         var command = firstSeparatorIndex == -1 ? query : query[..firstSeparatorIndex];
+        var args = firstSeparatorIndex == -1 ? null : query[(firstSeparatorIndex + 1)..];
 
         if (!m_commandHandlers.TryGetValue(command, out var handler)) return;
 
@@ -280,7 +286,7 @@ public class TelegramBotService(
             message.Chat.Id
         );
 
-        await handler(EnsureBot(), query, message, cancellationToken);
+        await handler(EnsureBot(), command, args, message, cancellationToken);
 
         await TelegramBotClientExtensions.DeleteMessage(EnsureBot(), message.Chat.Id, message.Id, cancellationToken);
     }
@@ -323,11 +329,13 @@ public class TelegramBotService(
 
     private async Task DisableNotificationsAsync(
         TelegramBotClient bot,
-        string query,
+        string command,
+        string? args,
         Message message,
         CancellationToken cancellationToken
     )
     {
+        var telegramUsersRepository = telegramUsersRepositoryFactory();
         var telegramUser = await telegramUsersRepository.GetByChatIdAsync(message.Chat.Id);
 
         if (telegramUser is null)
@@ -354,11 +362,13 @@ public class TelegramBotService(
 
     private async Task EnableNotificationsAsync(
         TelegramBotClient bot,
-        string query,
+        string command,
+        string? args,
         Message message,
         CancellationToken cancellationToken
     )
     {
+        var telegramUsersRepository = telegramUsersRepositoryFactory();
         var telegramUser = await telegramUsersRepository.GetByChatIdAsync(message.Chat.Id);
 
         if (telegramUser is null)
@@ -385,7 +395,8 @@ public class TelegramBotService(
 
     private async Task ShowTimeZonesAsync(
         TelegramBotClient bot,
-        string query,
+        string command,
+        string? args,
         Message message,
         CancellationToken cancellationToken
     )
@@ -401,11 +412,13 @@ public class TelegramBotService(
 
     private async Task SetTimeZoneAsync(
         TelegramBotClient bot,
-        string query,
+        string command,
+        string? args,
         Message message,
         CancellationToken cancellationToken
     )
     {
+        var telegramUsersRepository = telegramUsersRepositoryFactory();
         var telegramUser = await telegramUsersRepository.GetByChatIdAsync(message.Chat.Id);
 
         if (telegramUser is null)
@@ -413,18 +426,10 @@ public class TelegramBotService(
             s_logger.Warn("Cannot set timezone. User with chat id {id} not found", message.Chat.Id);
             return;
         }
-
-        var parts = query.Split(':');
-
-        if (parts.Length < 2)
+        
+        if (!TimeSpan.TryParse(args, out var timeZone))
         {
-            s_logger.Warn("Invalid set timezone query format - {query}", query);
-            return;
-        }
-
-        if (!TimeSpan.TryParse(parts[1], out var timeZone))
-        {
-            s_logger.Warn("Unable to parse timezone: {timezone}", parts[1]);
+            s_logger.Warn("Unable to parse timezone: {timezone}", args);
             return;
         }
 

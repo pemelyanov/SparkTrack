@@ -1,7 +1,9 @@
 using InlineKeyboardButton = Telegram.Bot.Types.ReplyMarkups.InlineKeyboardButton;
+using ParseMode = Telegram.Bot.Types.Enums.ParseMode;
 
 namespace SparkTrack.Telegram.Core.EventHandlers;
 
+using Extensions;
 using NLog;
 using Repositories;
 using SparkTrack.Core.Events;
@@ -34,24 +36,34 @@ public class FeatureCreatedEventHandler(
                 return;
             }
 
+            if (!telegramUser.IsNotificationsEnabled)
+            {
+                s_logger.Debug("Notifications disabled for user {username} ({role})", user.Name, user.Role);
+                
+                return;
+            }
+
             s_logger.Info(
                 "Sending feature created info to {user}@{tag} ({role})",
                 user.Name,
                 user.TelegramTag,
                 user.Role
             );
-
-            var tasksList = tasks.Select(task =>
-                $"{task.Name}; Дедлайн: {task.Deadline:dd.MM.yy HH:mm (ddd)}; Оплата: {task.Cost:C0} (+{task.TimelyBonus:C0})."
-            );
-
-            var message = $"Создана новая идея: {eventData.Feature.Name}\n" +
-                $"Задачи:\n" +
-                string.Join("\n", tasksList);
-
+            
             var action = new InlineKeyboardButton("Перейти к идее", "link");
 
-            await messageSender.SendAsync(telegramUser.ChatId, message, action, cancellationToken);
+            var tasksList = tasks.Select(task =>
+                $"*{task.Name}* — Дедлайн: {task.Deadline.ApplyTimeZone(telegramUser.TimeZone):dd.MM.yy HH:mm (ddd) UTCzzz}"
+            );
+            
+            var message = $"*== Создана идея ==*\n"
+                + $"{eventData.Feature.Name}\n\n"
+                + $"*Канал:* {eventData.Feature.Project.Name} ({eventData.Feature.Project.Link})\n\n" +
+                $"📝 *Задачи:*\n" +
+                string.Join("\n", tasksList);
+            
+            await messageSender.SendAsync(telegramUser.ChatId, message, parseMode: ParseMode.Markdown, action, cancellationToken);
+            
         }
     }
 }

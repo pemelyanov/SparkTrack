@@ -6,6 +6,7 @@ using SparkTrack.WebAPI.Events;
 namespace SparkTrack.WebAPI.AutofacModules;
 
 using Autofac;
+using Core.Events;
 using DataStore;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
@@ -16,6 +17,7 @@ using NLog;
 using Services.Files;
 using Services.JwtAuthorization;
 using Telegram.Core.AutofacModules;
+using Telegram.Core.Extensions;
 using Telegram.DataAccess.LiteDb.AutofacModules;
 
 public class WebAPIModule(IConfiguration configuration) : Module
@@ -34,26 +36,34 @@ public class WebAPIModule(IConfiguration configuration) : Module
 
     private void RegisterTelegramBotIfNeeded(ContainerBuilder builder)
     {
-        if(!configuration.GetSection("TelegramBot").Exists()) return;
+        if (!configuration.GetSection("TelegramBot").Exists()) return;
 
-        builder.RegisterModule(new TelegramCoreModule(configuration));
+        HashSet<Type> handlingEvents = [typeof(FeatureCreatedEvent)];
+
+        builder.RegisterModule(new TelegramCoreModule(configuration, handlingEvents));
         builder.RegisterModule(new TelegramDataAccessLiteDbModule(configuration));
 
         builder.RegisterType<TelegramBotBackgroundService>()
             .As<IHostedService>()
             .SingleInstance();
 
-        builder.RegisterGeneric(typeof(TelegramBackgroundEventHandler<>))
-            .As(typeof(IEventHandler<>));
+        builder.RegisterGenericTypes(
+            typeof(TelegramBackgroundEventHandler<>),
+            typeof(IEventHandler<>),
+            handlingEvents,
+            registration => registration.As<IHostedService>().SingleInstance()
+        );
     }
 
     private void RegisterGoogleDrive(ContainerBuilder builder)
     {
         builder.Register(c =>
-        {
-            var eventEmitter = c.Resolve<IEventEmitter>();
-            return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter));
-        }).SingleInstance();
+                {
+                    var eventEmitter = c.Resolve<IEventEmitter>();
+                    return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter));
+                }
+            )
+            .SingleInstance();
     }
 
     private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter)
@@ -101,33 +111,4 @@ public class WebAPIModule(IConfiguration configuration) : Module
             throw;
         }
     }
-
-    // private static void RegisterTelegramEventHandlers(ContainerBuilder builder, Assembly assembly)
-    // {
-    //     // Находим все типы, реализующие ITelegramEventHandler<>
-    //     var handlerTypes = assembly.GetTypes()
-    //         .Where(t => t.IsClass && !t.IsAbstract)
-    //         .SelectMany(t => t.GetInterfaces()
-    //             .Where(i => i.IsGenericType && 
-    //                         i.GetGenericTypeDefinition() == typeof(ITelegramEventHandler<>))
-    //             .Select(i => new
-    //             {
-    //                 Type = t,
-    //                 EventInterface = i
-    //             }))
-    //         .ToList();
-    //
-    //     foreach (var handler in handlerTypes)
-    //     {
-    //         // Регистрируем как IEventHandler<TEvent> для конкретного типа события
-    //         var eventHandlerInterface = typeof(IEventHandler<>)
-    //             .MakeGenericType(handler.EventInterface.GetGenericArguments()[0]);
-    //         
-    //         // Регистрируем как IHostedService
-    //         builder.RegisterType(handler.Type)
-    //             .As<IHostedService>()
-    //             .As(eventHandlerInterface)
-    //             .SingleInstance();
-    //     }
-    // }
 }

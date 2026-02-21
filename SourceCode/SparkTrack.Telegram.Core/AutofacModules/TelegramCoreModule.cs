@@ -1,11 +1,13 @@
 ﻿namespace SparkTrack.Telegram.Core.AutofacModules;
 
 using Autofac;
+using EventHandlers;
+using Extensions;
 using Microsoft.Extensions.Configuration;
 using Repositories;
 using Services;
 
-public class TelegramCoreModule(IConfiguration configuration) : Module
+public class TelegramCoreModule(IConfiguration configuration, HashSet<Type> handlingEvents) : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
@@ -25,5 +27,12 @@ public class TelegramCoreModule(IConfiguration configuration) : Module
             .WithParameters([new NamedParameter("botToken", token)])
             .AsImplementedInterfaces()
             .SingleInstance();
+
+        builder.RegisterAssemblyAssignableGenericWithArguments(
+                GetType().Assembly,
+                typeof(ITelegramEventHandler<>),
+                handlingEvents
+            )
+            .InstancePerLifetimeScope();
     }
 }

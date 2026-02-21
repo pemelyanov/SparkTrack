@@ -5,7 +5,7 @@ namespace SparkTrack.WebAPI.BackgroundHandlers;
 
 public abstract class BackgroundEventHandlerBase<TEvent> : BackgroundService, IEventHandler<TEvent>
 {
-    private readonly Channel<TEvent> m_eventsChannel = Channel.CreateUnbounded<TEvent>();
+    private Channel<TEvent> m_eventsChannel = null!;
     
     public async Task HandleAsync(TEvent eventData, CancellationToken cancellationToken)
     {
@@ -14,6 +14,8 @@ public abstract class BackgroundEventHandlerBase<TEvent> : BackgroundService, IE
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        m_eventsChannel = Channel.CreateUnbounded<TEvent>();
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             var pendingEvent = await m_eventsChannel.Reader.ReadAsync(stoppingToken);
