@@ -1,9 +1,7 @@
-﻿using System.Reflection;
-using SparkTrack.Core.Shared.Eventing;
+﻿using SparkTrack.Core.Shared.Eventing;
 using SparkTrack.WebAPI.BackgroundHandlers.Telegram;
 using SparkTrack.WebAPI.BackgroundServices;
 using SparkTrack.WebAPI.Events;
-using SparkTrack.WebAPI.Services.TelegramMessageSender;
 
 namespace SparkTrack.WebAPI.AutofacModules;
 
@@ -17,6 +15,8 @@ using Middlewares;
 using NLog;
 using Services.Files;
 using Services.JwtAuthorization;
+using Telegram.Core.AutofacModules;
+using Telegram.DataAccess.LiteDb.AutofacModules;
 
 public class WebAPIModule(IConfiguration configuration) : Module
 {
@@ -36,12 +36,15 @@ public class WebAPIModule(IConfiguration configuration) : Module
     {
         if(!configuration.GetSection("TelegramBot").Exists()) return;
 
-        builder.RegisterType<TelegramBotService>()
+        builder.RegisterModule(new TelegramCoreModule(configuration));
+        builder.RegisterModule(new TelegramDataAccessLiteDbModule(configuration));
+
+        builder.RegisterType<TelegramBotBackgroundService>()
             .As<IHostedService>()
-            .As<ITelegramMessageSender>()
             .SingleInstance();
-        
-        RegisterTelegramEventHandlers(builder, GetType().Assembly);
+
+        builder.RegisterGeneric(typeof(TelegramBackgroundEventHandler<>))
+            .As(typeof(IEventHandler<>));
     }
 
     private void RegisterGoogleDrive(ContainerBuilder builder)
@@ -99,32 +102,32 @@ public class WebAPIModule(IConfiguration configuration) : Module
         }
     }
 
-    private static void RegisterTelegramEventHandlers(ContainerBuilder builder, Assembly assembly)
-    {
-        // Находим все типы, реализующие ITelegramEventHandler<>
-        var handlerTypes = assembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract)
-            .SelectMany(t => t.GetInterfaces()
-                .Where(i => i.IsGenericType && 
-                            i.GetGenericTypeDefinition() == typeof(ITelegramEventHandler<>))
-                .Select(i => new
-                {
-                    Type = t,
-                    EventInterface = i
-                }))
-            .ToList();
-
-        foreach (var handler in handlerTypes)
-        {
-            // Регистрируем как IEventHandler<TEvent> для конкретного типа события
-            var eventHandlerInterface = typeof(IEventHandler<>)
-                .MakeGenericType(handler.EventInterface.GetGenericArguments()[0]);
-            
-            // Регистрируем как IHostedService
-            builder.RegisterType(handler.Type)
-                .As<IHostedService>()
-                .As(eventHandlerInterface)
-                .SingleInstance();
-        }
-    }
+    // private static void RegisterTelegramEventHandlers(ContainerBuilder builder, Assembly assembly)
+    // {
+    //     // Находим все типы, реализующие ITelegramEventHandler<>
+    //     var handlerTypes = assembly.GetTypes()
+    //         .Where(t => t.IsClass && !t.IsAbstract)
+    //         .SelectMany(t => t.GetInterfaces()
+    //             .Where(i => i.IsGenericType && 
+    //                         i.GetGenericTypeDefinition() == typeof(ITelegramEventHandler<>))
+    //             .Select(i => new
+    //             {
+    //                 Type = t,
+    //                 EventInterface = i
+    //             }))
+    //         .ToList();
+    //
+    //     foreach (var handler in handlerTypes)
+    //     {
+    //         // Регистрируем как IEventHandler<TEvent> для конкретного типа события
+    //         var eventHandlerInterface = typeof(IEventHandler<>)
+    //             .MakeGenericType(handler.EventInterface.GetGenericArguments()[0]);
+    //         
+    //         // Регистрируем как IHostedService
+    //         builder.RegisterType(handler.Type)
+    //             .As<IHostedService>()
+    //             .As(eventHandlerInterface)
+    //             .SingleInstance();
+    //     }
+    // }
 }

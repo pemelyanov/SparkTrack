@@ -7,9 +7,9 @@ public abstract class BackgroundEventHandlerBase<TEvent> : BackgroundService, IE
 {
     private readonly Channel<TEvent> m_eventsChannel = Channel.CreateUnbounded<TEvent>();
     
-    public async Task HandleAsync(TEvent eventData)
+    public async Task HandleAsync(TEvent eventData, CancellationToken cancellationToken)
     {
-        await m_eventsChannel.Writer.WriteAsync(eventData);
+        await m_eventsChannel.Writer.WriteAsync(eventData, cancellationToken);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

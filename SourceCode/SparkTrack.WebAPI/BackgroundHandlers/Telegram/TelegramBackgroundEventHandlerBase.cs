@@ -1,4 +1,10 @@
 namespace SparkTrack.WebAPI.BackgroundHandlers.Telegram;
 
-public abstract class TelegramBackgroundEventHandlerBase<TEvent> : BackgroundEventHandlerBase<TEvent>,
-    ITelegramEventHandler<TEvent>;
+using SparkTrack.Telegram.Core.EventHandlers;
+
+public class TelegramBackgroundEventHandler<TEvent>(ITelegramEventHandler<TEvent> eventHandler)
+    : BackgroundEventHandlerBase<TEvent>
+{
+    protected override Task HandleEventAsync(TEvent pendingEvent, CancellationToken cancellationToken) =>
+        eventHandler.HandleAsync(pendingEvent, cancellationToken);
+}

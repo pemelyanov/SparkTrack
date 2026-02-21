@@ -20,6 +20,8 @@ internal class UsersService(IUsersRepository usersRepository, IAuthorizationServ
 
     public Task<User?> GetByEmailAsync(string email) => usersRepository.GetByEmailAsync(email);
 
+    public Task<User?> GetByTelegramTagAsync(string tag) => usersRepository.GetByTelegramTagAsync(tag);
+
     public async Task EditAsync(UserEdit userEdit)
     {
         var existingUser = await usersRepository.GetAsync(userEdit.Id);

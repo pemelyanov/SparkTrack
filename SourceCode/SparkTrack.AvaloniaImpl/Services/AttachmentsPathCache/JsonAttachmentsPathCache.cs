@@ -30,7 +30,7 @@ public class JsonAttachmentsPathCache : IAttachmentsPathCache, IEventHandler<Sta
         }
     }
 
-    public Task HandleAsync(StartupEvent eventData)
+    public Task HandleAsync(StartupEvent eventData, CancellationToken cancellationToken = default)
     {
         var cacheDirectory = Path.GetDirectoryName(s_cachePath)!;
 
