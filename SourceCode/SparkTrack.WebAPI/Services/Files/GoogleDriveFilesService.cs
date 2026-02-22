@@ -48,8 +48,9 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
             "application/octet-stream"
         );
 
+        const int mb = 1024 * 1024;
         request.Fields = "id";
-        request.ChunkSize = ResumableUpload.DefaultChunkSize;
+        request.ChunkSize = 12 * mb;
 
         request.ProgressChanged += OnProgressChanged;
 

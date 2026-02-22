@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Core.Client.Data;
 using Core.Client.Services.Files;
 using Core.Shared.Data.Entities;
+using Exceptions;
 using Extensions;
 using NLog;
 using ReactiveUI;
@@ -93,6 +94,10 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         catch (TaskCanceledException)
         {
             m_logger.Warn("File upload canceled");
+        }
+        catch (Exception e)
+        {
+            throw new NotifyUIException($"При отправке файла {Name}.{Extension} произошла ошибка", e);
         }
         finally
         {

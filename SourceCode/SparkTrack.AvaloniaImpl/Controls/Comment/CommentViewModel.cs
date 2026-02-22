@@ -8,23 +8,31 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Reactive;
+using Core.Client.Enums;
+using Core.Client.Services.PopupNotification;
+using Exceptions;
+using NLog;
 using CommentModel = Core.Shared.Data.Entities.Comment;
 
 public class CommentViewModel : ViewModelBase
 {
-    private readonly Func<CommentModel?, CommentEditViewModel> m_editViewModelFactory;
-    private readonly ICommentsService                          m_commentsService;
+    private static readonly ILogger                                   s_logger = LogManager.GetCurrentClassLogger();
+    private readonly        Func<CommentModel?, CommentEditViewModel> m_editViewModelFactory;
+    private readonly        ICommentsService                          m_commentsService;
+    private readonly        IPopupNotificationService                 m_popupNotificationService;
 
     public CommentViewModel(
         CommentModel model,
         Func<CommentViewModel, Task> onDelete,
         Func<CommentModel?, CommentEditViewModel> editViewModelFactory,
         ICommentsService commentsService,
-        IDialogService dialogService
+        IDialogService dialogService,
+        IPopupNotificationService popupNotificationService
     )
     {
         m_editViewModelFactory = editViewModelFactory;
         m_commentsService = commentsService;
+        m_popupNotificationService = popupNotificationService;
         Model = model;
 
         DeleteCommand = ReactiveCommand.CreateFromTask(
@@ -59,15 +67,30 @@ public class CommentViewModel : ViewModelBase
     {
         if (EditViewModel is null) return;
 
-        await EditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
+        try
+        {
+            s_logger.Info("Saving comment {id}...", Model.Id);
+            await EditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
 
-        var commentEdit = EditViewModel.ToModel();
+            var commentEdit = EditViewModel.ToModel();
 
-        var newModel = await m_commentsService.EditAsync(commentEdit);
+            var newModel = await m_commentsService.EditAsync(commentEdit);
 
-        if (newModel != null)
-            Model = newModel;
+            if (newModel != null)
+                Model = newModel;
+            s_logger.Info("Comment {id} saved", Model.Id);
 
-        EditViewModel = null;
+            EditViewModel = null;
+        }
+        catch (Exception e)
+        {
+            if (e is NotifyUIException)
+                s_logger.Warn(e.Message);
+            else
+                s_logger.Error(e);
+
+            m_popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка сохранения комментария");
+        }
+       
     }
 }
