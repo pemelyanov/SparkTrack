@@ -3,6 +3,8 @@ using ParseMode = Telegram.Bot.Types.Enums.ParseMode;
 
 namespace SparkTrack.Telegram.Core.EventHandlers;
 
+using System.Net;
+using System.Text;
 using Extensions;
 using NLog;
 using Repositories;
@@ -21,25 +23,31 @@ public class FeatureUpdatedEventHandler(
     {
         var oldFeature = eventData.OldInfo;
         var newFeature = eventData.NewInfo;
-        
+
         // Получаем всех сотрудников, у которых были изменения в задачах
         var affectedEmployees = GetAffectedEmployees(oldFeature, newFeature);
-        
-        foreach (var employee in affectedEmployees)
+
+        foreach (var employee in affectedEmployees.Where(it => it.TelegramTag is not null))
         {
-            var telegramUser = await telegramUsersRepository.GetByIdAsync(employee.Id);
-            
+            var telegramUser = await telegramUsersRepository.GetByTagAsync(employee.TelegramTag!);
+
             if (telegramUser is null)
             {
-                s_logger.Warn("Cannot find telegram chat with {username} ({role}). Skipping", 
-                    employee.Name, employee.Role);
+                s_logger.Warn(
+                    "Cannot find telegram chat with {username} ({role}). Skipping",
+                    employee.Name,
+                    employee.Role
+                );
                 continue;
             }
 
             if (!telegramUser.IsNotificationsEnabled)
             {
-                s_logger.Debug("Notifications disabled for user {username} ({role})", 
-                    employee.Name, employee.Role);
+                s_logger.Debug(
+                    "Notifications disabled for user {username} ({role})",
+                    employee.Name,
+                    employee.Role
+                );
                 continue;
             }
 
@@ -52,14 +60,14 @@ public class FeatureUpdatedEventHandler(
 
             var changes = GetChangesForEmployee(oldFeature, newFeature, employee.Id, telegramUser.TimeZone);
             var message = BuildMessage(newFeature, changes, telegramUser.TimeZone);
-            
+
             var action = new InlineKeyboardButton("Перейти к идее", "link");
-            
+
             await messageSender.SendAsync(
-                telegramUser.ChatId, 
-                message, 
-                parseMode: ParseMode.Markdown, 
-                action, 
+                telegramUser.ChatId,
+                message,
+                parseMode: ParseMode.Html,
+                action,
                 cancellationToken
             );
         }
@@ -72,9 +80,10 @@ public class FeatureUpdatedEventHandler(
             .Concat(oldFeature.TasksList.Select(t => t.ExecutorEmployee))
             .Where(e => !string.IsNullOrEmpty(e.TelegramTag))
             .DistinctBy(e => e.Id);
-        
-        return allEmployees.Where(employee => 
-            HasChangesForEmployee(oldFeature, newFeature, employee.Id));
+
+        return allEmployees.Where(employee =>
+            HasChangesForEmployee(oldFeature, newFeature, employee.Id)
+        );
     }
 
     private bool HasChangesForEmployee(Feature oldFeature, Feature newFeature, Guid employeeId)
@@ -82,14 +91,14 @@ public class FeatureUpdatedEventHandler(
         var oldEmployeeTasks = oldFeature.TasksList
             .Where(t => t.ExecutorEmployee.Id == employeeId)
             .ToList();
-        
+
         var newEmployeeTasks = newFeature.TasksList
             .Where(t => t.ExecutorEmployee.Id == employeeId)
             .ToList();
-        
+
         if (oldEmployeeTasks.Count != newEmployeeTasks.Count)
             return true;
-        
+
         var oldTasksDict = oldEmployeeTasks.ToDictionary(t => t.Id);
         var newTasksDict = newEmployeeTasks.ToDictionary(t => t.Id);
 
@@ -101,7 +110,7 @@ public class FeatureUpdatedEventHandler(
             if (HasTaskChanges(oldTask, newTask))
                 return true;
         }
-        
+
         foreach (var oldTask in oldEmployeeTasks)
         {
             if (!newTasksDict.ContainsKey(oldTask.Id))
@@ -117,14 +126,19 @@ public class FeatureUpdatedEventHandler(
             || oldTask.ExecutorEmployee.Id != newTask.ExecutorEmployee.Id;
     }
 
-    private List<TaskChange> GetChangesForEmployee(Feature oldFeature, Feature newFeature, Guid employeeId, TimeSpan? timeZone)
+    private List<TaskChange> GetChangesForEmployee(
+        Feature oldFeature,
+        Feature newFeature,
+        Guid employeeId,
+        TimeSpan? timeZone
+    )
     {
         var changes = new List<TaskChange>();
-        
+
         var oldTasks = oldFeature.TasksList
             .Where(t => t.ExecutorEmployee.Id == employeeId)
             .ToDictionary(t => t.Id);
-        
+
         var newTasks = newFeature.TasksList
             .Where(t => t.ExecutorEmployee.Id == employeeId)
             .ToDictionary(t => t.Id);
@@ -136,7 +150,7 @@ public class FeatureUpdatedEventHandler(
                 changes.Add(TaskChange.Added(newTask));
             }
         }
-        
+
         foreach (var oldTask in oldTasks.Values)
         {
             if (!newTasks.ContainsKey(oldTask.Id))
@@ -144,7 +158,7 @@ public class FeatureUpdatedEventHandler(
                 changes.Add(TaskChange.Removed(oldTask));
             }
         }
-        
+
         foreach (var newTask in newTasks.Values)
         {
             if (oldTasks.TryGetValue(newTask.Id, out var oldTask))
@@ -168,59 +182,106 @@ public class FeatureUpdatedEventHandler(
             modifications.Add(new TaskModification("Название", oldTask.Name, newTask.Name));
 
         if (oldTask.Deadline != newTask.Deadline)
-            modifications.Add(new TaskModification("Дедлайн", 
-                oldTask.Deadline.ApplyTimeZone(timeZone).ToString("dd.MM.yy HH:mm"), 
-                newTask.Deadline.ApplyTimeZone(timeZone).ToString("dd.MM.yy HH:mm")));
+            modifications.Add(
+                new TaskModification(
+                    "Дедлайн",
+                    oldTask.Deadline.ApplyTimeZone(timeZone).ToString("dd.MM.yy HH:mm"),
+                    newTask.Deadline.ApplyTimeZone(timeZone).ToString("dd.MM.yy HH:mm")
+                )
+            );
 
         return modifications;
     }
 
-    private string BuildMessage(Feature feature, List<TaskChange> changes, TimeSpan? timeZone)
+    private string BuildMessage(
+        Feature feature,
+        List<TaskChange> changes,
+        TimeSpan? timeZone
+    )
     {
-        var message = $"  *==== Идея обновлена ====*\n" +
-                      $"{feature.Name}\n\n" +
-                      $"*Канал:* {feature.Project.Name} ({feature.Project.Link})\n\n";
+        var sb = new StringBuilder();
+
+        sb.AppendLine("<b>==== Идея обновлена ====</b>");
+        sb.AppendLine(WebUtility.HtmlEncode(feature.Name));
+        sb.AppendLine();
+
+        sb.AppendLine(
+            $"<b>Канал:</b> {WebUtility.HtmlEncode(feature.Project.Name)} " +
+            $"({feature.Project.Link})"
+        );
+        sb.AppendLine();
 
         if (!changes.Any())
-            return message + "❓ *Изменений в задачах не обнаружено*";
+        {
+            sb.AppendLine("❓ <b>Изменений в задачах не обнаружено</b>");
+            return sb.ToString();
+        }
 
-        message += "📝 *Изменения в задачах:*\n";
+        sb.AppendLine("📝 <b>Изменения в задачах:</b>");
 
         foreach (var change in changes.OrderBy(c => c.Type))
         {
-            message += change.Type switch
+            switch (change.Type)
             {
-                ChangeType.Added => $"✅ *Новая задача:* {FormatTask(change.Task, timeZone)}\n",
-                ChangeType.Removed => $"❌ *Удалена задача:* {FormatTask(change.Task, timeZone)}\n",
-                ChangeType.Modified => FormatModifiedTask(change, timeZone),
-                _ => ""
-            };
+                case ChangeType.Added:
+                    sb.AppendLine(
+                        $"✅ <b>Новая задача:</b> {FormatTask(change.Task, timeZone)}"
+                    );
+                    break;
+
+                case ChangeType.Removed:
+                    sb.AppendLine(
+                        $"❌ <b>Удалена задача:</b> {FormatTask(change.Task, timeZone)}"
+                    );
+                    break;
+
+                case ChangeType.Modified:
+                    sb.AppendLine(FormatModifiedTask(change, timeZone));
+                    break;
+            }
         }
 
-        return message;
+        return sb.ToString();
     }
 
     private string FormatTask(SubTask task, TimeSpan? timeZone)
     {
         var deadline =
-            $" — Дедлайн: {task.Deadline.ApplyTimeZone(timeZone):dd.MM.yy HH:mm (ddd)} {timeZone?.AsUtcOffset()}";
-        
-        return $"*{task.Name}*{deadline}";
+            $" — Дедлайн: {task.Deadline.ApplyTimeZone(timeZone):dd.MM.yy HH:mm (ddd)} " +
+            $"{timeZone?.AsUtcOffset()}";
+
+        return
+            $"<b>{WebUtility.HtmlEncode(task.Name)}</b>" +
+            WebUtility.HtmlEncode(deadline);
     }
 
     private string FormatModifiedTask(TaskChange change, TimeSpan? timeZone)
     {
-        var modifications = string.Join("\n", change.Modifications.Select(m => 
-            $"  • {m.Field}: *{m.OldValue}* → *{m.NewValue}*"));
-        
-        return $"✏️ *Изменена задача:* {FormatTask(change.Task, timeZone)}\n{modifications}\n";
+        var sb = new StringBuilder();
+
+        sb.AppendLine(
+            $"✏️ <b>Изменена задача:</b> {FormatTask(change.Task, timeZone)}"
+        );
+
+        foreach (var modification in change.Modifications)
+        {
+            sb.AppendLine(
+                $"  • {WebUtility.HtmlEncode(modification.Field)}: " +
+                $"<b>{WebUtility.HtmlEncode(modification.OldValue)}</b> → " +
+                $"<b>{WebUtility.HtmlEncode(modification.NewValue)}</b>"
+            );
+        }
+
+        return sb.ToString();
     }
 
     private record TaskChange(SubTask Task, ChangeType Type, List<TaskModification> Modifications)
     {
         public static TaskChange Added(SubTask task) => new(task, ChangeType.Added, []);
+
         public static TaskChange Removed(SubTask task) => new(task, ChangeType.Removed, []);
-        public static TaskChange Modified(SubTask task, List<TaskModification> modifications) => 
+
+        public static TaskChange Modified(SubTask task, List<TaskModification> modifications) =>
             new(task, ChangeType.Modified, modifications);
     }
 

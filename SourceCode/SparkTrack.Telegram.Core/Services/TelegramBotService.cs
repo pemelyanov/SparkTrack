@@ -134,7 +134,7 @@ public class TelegramBotService(
 
     private async Task UpdateHandler(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
     {
-        if (update.Type == UpdateType.Message && update.Message is { } message)
+        if (update is { Type: UpdateType.Message, Message: { } message })
         {
             await OnMessageAsync(message, update.Type, cancellationToken);
             return;
@@ -219,6 +219,7 @@ public class TelegramBotService(
             {
                 ChatId = message.Chat.Id,
                 UserId = existingUser.Id,
+                Tag = username
             };
 
             await telegramUsersRepository.AddAsync(telegramUser);

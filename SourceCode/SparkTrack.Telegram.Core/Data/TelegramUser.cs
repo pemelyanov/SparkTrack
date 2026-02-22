@@ -6,6 +6,8 @@ public record TelegramUser
     
     public long ChatId { get; init; }
     
+    public required string Tag { get; init; }
+    
     public bool IsNotificationsEnabled { get; init; }
     
     public bool IsHelloSent { get; init; }

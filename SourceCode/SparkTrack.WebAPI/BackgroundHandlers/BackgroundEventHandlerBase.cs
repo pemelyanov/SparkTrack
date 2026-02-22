@@ -5,10 +5,12 @@ namespace SparkTrack.WebAPI.BackgroundHandlers;
 
 public abstract class BackgroundEventHandlerBase<TEvent> : BackgroundService, IEventHandler<TEvent>
 {
-    private Channel<TEvent> m_eventsChannel = null!;
+    private Channel<TEvent>? m_eventsChannel;
     
     public async Task HandleAsync(TEvent eventData, CancellationToken cancellationToken)
     {
+        if(m_eventsChannel is null) return;
+        
         await m_eventsChannel.Writer.WriteAsync(eventData, cancellationToken);
     }
 

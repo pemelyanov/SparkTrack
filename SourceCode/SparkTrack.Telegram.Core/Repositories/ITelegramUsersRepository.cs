@@ -8,6 +8,8 @@ public interface ITelegramUsersRepository
     
     Task<TelegramUser?> GetByChatIdAsync(long chatId);
     
+    Task<TelegramUser?> GetByTagAsync(string tag);
+    
     Task AddAsync(TelegramUser user);
 
     Task EditAsync(TelegramUser user);

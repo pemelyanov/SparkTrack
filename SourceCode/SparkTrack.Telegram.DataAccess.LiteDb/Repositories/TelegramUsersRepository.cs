@@ -6,33 +6,55 @@ using Core.Repositories;
 using Data;
 using DatabaseProvider;
 
-public class TelegramUsersRepository(ILiteDatabaseProvider databaseProvider) : ITelegramUsersRepository
+public class TelegramUsersRepository : ITelegramUsersRepository
 {
-    public async Task<TelegramUser?> GetByIdAsync(Guid id) => await databaseProvider.GetDatabase()
+    private readonly ILiteDatabaseProvider m_databaseProvider;
+
+    public TelegramUsersRepository(ILiteDatabaseProvider databaseProvider)
+    {
+        m_databaseProvider = databaseProvider;
+        
+        var collection = 
+            m_databaseProvider.GetDatabase()
+                .UnderlyingDatabase
+                .GetCollection<TelegramUserData>();
+        
+        collection.EnsureIndex(it => it.ChatId, unique: true);
+        collection.EnsureIndex(it => it.Tag, unique: true);
+    }
+
+    public async Task<TelegramUser?> GetByIdAsync(Guid id) => await m_databaseProvider.GetDatabase()
         .GetCollection<TelegramUserData>()
         .Query()
         .Where(it => it.UserId == id)
         .Select(GetMapToDomainExpression())
         .FirstOrDefaultAsync();
 
-    public async Task<TelegramUser?> GetByChatIdAsync(long chatId) => await databaseProvider.GetDatabase()
+    public async Task<TelegramUser?> GetByChatIdAsync(long chatId) => await m_databaseProvider.GetDatabase()
         .GetCollection<TelegramUserData>()
         .Query()
         .Where(it => it.ChatId == chatId)
         .Select(GetMapToDomainExpression())
         .FirstOrDefaultAsync();
 
-    public Task AddAsync(TelegramUser user) => databaseProvider
+    public async Task<TelegramUser?> GetByTagAsync(string tag) => await m_databaseProvider.GetDatabase()
+        .GetCollection<TelegramUserData>()
+        .Query()
+        .Where(it => it.Tag == tag)
+        .Select(GetMapToDomainExpression())
+        .FirstOrDefaultAsync();
+
+    public Task AddAsync(TelegramUser user) => m_databaseProvider
         .GetDatabase()
         .GetCollection<TelegramUserData>()
         .InsertAsync(MapToData(user));
 
-    public Task EditAsync(TelegramUser user) => databaseProvider
+    public Task EditAsync(TelegramUser user) => m_databaseProvider
         .GetDatabase()
         .GetCollection<TelegramUserData>()
         .UpdateAsync(MapToData(user));
 
-    public Task RemoveAsync(long chatId) => databaseProvider
+    public Task RemoveAsync(long chatId) => m_databaseProvider
         .GetDatabase()
         .GetCollection<TelegramUserData>()
         .DeleteManyAsync(it => it.ChatId == chatId);
@@ -41,6 +63,7 @@ public class TelegramUsersRepository(ILiteDatabaseProvider databaseProvider) : I
     {
         UserId = it.UserId,
         ChatId = it.ChatId,
+        Tag = it.Tag,
         TimeZone = it.TimeZone,
         IsNotificationsEnabled = it.IsNotificationsEnabled,
         IsHelloSent = it.IsHelloSent
@@ -52,6 +75,7 @@ public class TelegramUsersRepository(ILiteDatabaseProvider databaseProvider) : I
         {
             UserId = it.UserId,
             ChatId = it.ChatId,
+            Tag = it.Tag,
             IsNotificationsEnabled = it.IsNotificationsEnabled,
             TimeZone = it.TimeZone,
             IsHelloSent = it.IsHelloSent

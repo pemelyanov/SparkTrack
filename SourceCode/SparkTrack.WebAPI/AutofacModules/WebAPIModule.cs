@@ -38,7 +38,8 @@ public class WebAPIModule(IConfiguration configuration) : Module
     {
         if (!configuration.GetSection("TelegramBot").Exists()) return;
 
-        HashSet<Type> handlingEvents = [typeof(FeatureCreatedEvent), typeof(FeatureUpdatedEvent)];
+        HashSet<Type> handlingEvents =
+            [typeof(FeatureCreatedEvent), typeof(FeatureUpdatedEvent), typeof(FeatureDeletedEvent)];
 
         builder.RegisterModule(new TelegramCoreModule(configuration, handlingEvents));
         builder.RegisterModule(new TelegramDataAccessLiteDbModule(configuration));
