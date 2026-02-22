@@ -431,6 +431,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         Name = feature?.Name ?? "Название идеи";
 
+        AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
         InitializeDescriptionProperties(feature?.Description);
         CreatedAt = feature?.CreatedAt;
         EditedAt = feature?.EditedAt;
@@ -446,8 +447,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         foreach (var oldTask in oldTasks)
             oldTask.Dispose();
-
-        AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
     }
 
     private void InitializeDescriptionProperties(string? description)
