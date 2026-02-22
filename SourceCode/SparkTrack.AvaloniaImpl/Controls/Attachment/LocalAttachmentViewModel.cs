@@ -7,7 +7,6 @@ using Core.Client.Services.Files;
 using Core.Shared.Data.Entities;
 using Extensions;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Reactive.Linq;
 using System.Windows.Input;

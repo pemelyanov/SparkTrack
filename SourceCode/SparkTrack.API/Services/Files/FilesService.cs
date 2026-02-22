@@ -10,18 +10,20 @@ public class FilesService(CustomClientFactory<FilesClient> clientFactory, Func<H
 {
     public async Task<Guid> UploadAsync(
         byte[] content,
+        string? extension,
         LoadingProgress progress,
         CancellationToken cancellationToken = default
     )
     {
         using var stream = new MemoryStream(content);
-        return await UploadAsync(progress, cancellationToken, stream);
+        return await UploadAsync(progress, cancellationToken, stream, extension);
     }
 
     public async Task<Guid> UploadAsync(string inputPath, LoadingProgress progress, CancellationToken cancellationToken)
     {
+        var extension = Path.GetExtension(inputPath).TrimStart('.');
         await using var stream = File.OpenRead(inputPath);
-        return await UploadAsync(progress, cancellationToken, stream);
+        return await UploadAsync(progress, cancellationToken, stream, extension);
     }
 
     public async Task DownloadAsync(
@@ -50,13 +52,14 @@ public class FilesService(CustomClientFactory<FilesClient> clientFactory, Func<H
         await response.Stream.CopyToAsync(progressStream, cancellationToken);
     }
     
-    private async Task<Guid> UploadAsync(LoadingProgress progress, CancellationToken cancellationToken, Stream stream)
+    private async Task<Guid> UploadAsync(LoadingProgress progress, CancellationToken cancellationToken, Stream stream, string? extension)
     {
         await using var progressStream = new ProgressReadStream(stream, progress);
 
         using var content = new StreamContent(progressStream);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         content.Headers.ContentLength = stream.Length;
+        content.Headers.Add("X-Extension", extension);
 
         using HttpClient httpClient = GetConfiguredHttpClient();
 

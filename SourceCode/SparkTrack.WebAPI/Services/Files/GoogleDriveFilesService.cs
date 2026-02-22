@@ -19,16 +19,21 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         configuration.GetRequiredSection("Google").GetSection("FolderId").Get<string>()
         ?? throw new InvalidOperationException("Set FolderId in configuration");
 
-    public async Task<Guid> UploadAsync(Stream stream, long contentLength,  CancellationToken cancellationToken)
+    public async Task<Guid> UploadAsync(Stream stream, long contentLength, string? extension, CancellationToken cancellationToken)
     {
         s_logger.Info("Initializing drive");
         var drive = await driveFactory();
 
         var fileId = Guid.NewGuid();
 
+        var fileName = fileId.ToString();
+
+        if (!string.IsNullOrEmpty(extension))
+            fileName += $".{extension}";
+
         var metadata = new File
         {
-            Name = fileId.ToString(),
+            Name = fileName,
             Parents =
             [
                 m_folderId,
@@ -92,7 +97,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         var listRequest = drive.Files.List();
         var fileName = id.ToString();
 
-        listRequest.Q = $"name = '{fileName}' and '{m_folderId}' in parents and trashed = false";
+        listRequest.Q = $"name contains '{fileName}' and '{m_folderId}' in parents and trashed = false";
         listRequest.Fields = "files(id, name, size)";
         listRequest.PageSize = 10;
 

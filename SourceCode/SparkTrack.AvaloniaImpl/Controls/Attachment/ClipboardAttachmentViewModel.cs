@@ -10,7 +10,6 @@ using Core.Shared.Data.Entities;
 using Extensions;
 using NLog;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 
 public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachmentViewModel, IUploadableAttachment
@@ -46,9 +45,6 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
 
     public Guid? UploadedFileId { get; private set; }
 
-    [Reactive]
-    public AttachmentLoadProgress? LoadProgress { get; private set; }
-
     public ICommand SaveAsCommand { get; } = ReactiveCommand.Create(() => { }, Observable.Return(false));
 
     public Task DownloadAsync() => throw new NotImplementedException();
@@ -80,13 +76,18 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         try
         {
             var data = GetBytes();
-            UploadedFileId = await m_filesService.UploadAsync(data, progress.Progress, m_cancellationTokenSource.Token);
-            
+            UploadedFileId = await m_filesService.UploadAsync(
+                data,
+                Extension,
+                progress.Progress,
+                m_cancellationTokenSource.Token
+            );
+
             var newPath = Path.Combine(
                 s_downloadsFolder,
                 $"{UploadedFileId.ToString()}.{Extension}"
             );
-            
+
             File.WriteAllBytes(newPath, data);
         }
         catch (TaskCanceledException)
