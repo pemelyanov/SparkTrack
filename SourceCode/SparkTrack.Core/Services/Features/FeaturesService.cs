@@ -66,10 +66,18 @@ internal class FeaturesService(
         await eventEmitter.RaiseAsync(new FeatureUpdatedEvent(oldInfo, newInfo));
     }
 
-    public Task DeleteAsync(int id, bool force)
+    public async Task DeleteAsync(int id, bool force)
     {
-        if (force) return featuresRepository.DeleteAsync(id);
+        if (force)
+        {
+            var feature = await featuresRepository.GetAsync(id, null);
 
-        return featureArchiveService.ArchiveAsync(id, EArchiveSource.User);
+            if (feature is null) throw new NotFoundException();
+            
+            await featuresRepository.DeleteAsync(id);
+            await eventEmitter.RaiseAsync(new FeatureDeletedEvent(feature));
+        }
+        
+        await featureArchiveService.ArchiveAsync(id, EArchiveSource.User);
     }
 }
