@@ -27,50 +27,67 @@ public class FeatureUpdatedEventHandler(
         // Получаем всех сотрудников, у которых были изменения в задачах
         var affectedEmployees = GetAffectedEmployees(oldFeature, newFeature);
 
-        foreach (var employee in affectedEmployees.Where(it => it.TelegramTag is not null))
+        foreach (var user in affectedEmployees.Where(it => it.TelegramTag is not null))
         {
-            var telegramUser = await telegramUsersRepository.GetByTagAsync(employee.TelegramTag!);
-
-            if (telegramUser is null)
+            try
             {
-                s_logger.Warn(
-                    "Cannot find telegram chat with {username} ({role}). Skipping",
-                    employee.Name,
-                    employee.Role
-                );
-                continue;
+                await TrySendAsync(cancellationToken, user, oldFeature, newFeature);
             }
-
-            if (!telegramUser.IsNotificationsEnabled)
+            catch (Exception e)
             {
-                s_logger.Debug(
-                    "Notifications disabled for user {username} ({role})",
-                    employee.Name,
-                    employee.Role
-                );
-                continue;
+                s_logger.Warn(e, "Message sending to {user}@{tag} failed", user.Name, user.TelegramTag);
             }
+        }
+    }
 
-            s_logger.Info(
-                "Sending feature updated info to {user}@{tag} ({role})",
+    private async Task TrySendAsync(
+        CancellationToken cancellationToken,
+        User employee,
+        Feature oldFeature,
+        Feature newFeature
+    )
+    {
+        var telegramUser = await telegramUsersRepository.GetByTagAsync(employee.TelegramTag!);
+
+        if (telegramUser is null)
+        {
+            s_logger.Warn(
+                "Cannot find telegram chat with {username} ({role}). Skipping",
                 employee.Name,
-                employee.TelegramTag,
                 employee.Role
             );
-
-            var changes = GetChangesForEmployee(oldFeature, newFeature, employee.Id, telegramUser.TimeZone);
-            var message = BuildMessage(newFeature, changes, telegramUser.TimeZone);
-
-            var action = new InlineKeyboardButton("Перейти к идее", "link");
-
-            await messageSender.SendAsync(
-                telegramUser.ChatId,
-                message,
-                parseMode: ParseMode.Html,
-                action,
-                cancellationToken
-            );
+            return;
         }
+
+        if (!telegramUser.IsNotificationsEnabled)
+        {
+            s_logger.Debug(
+                "Notifications disabled for user {username} ({role})",
+                employee.Name,
+                employee.Role
+            );
+            return;
+        }
+
+        s_logger.Info(
+            "Sending feature updated info to {user}@{tag} ({role})",
+            employee.Name,
+            employee.TelegramTag,
+            employee.Role
+        );
+
+        var changes = GetChangesForEmployee(oldFeature, newFeature, employee.Id, telegramUser.TimeZone);
+        var message = BuildMessage(newFeature, changes, telegramUser.TimeZone);
+
+        var action = new InlineKeyboardButton("Перейти к идее", "link");
+
+        await messageSender.SendAsync(
+            telegramUser.ChatId,
+            message,
+            parseMode: ParseMode.Html,
+            action,
+            cancellationToken
+        );
     }
 
     private IEnumerable<User> GetAffectedEmployees(Feature oldFeature, Feature newFeature)

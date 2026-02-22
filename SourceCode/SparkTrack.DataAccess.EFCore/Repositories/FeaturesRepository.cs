@@ -203,7 +203,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         await dbContext.SaveChangesAsync();
     }
 
-    private static Expression<Func<FeatureData, Feature>> 
+    public static Expression<Func<FeatureData, Feature>> 
         GetFeatureMapExpression(
         Guid? subTaskEmployeeId
     ) => f => new Feature

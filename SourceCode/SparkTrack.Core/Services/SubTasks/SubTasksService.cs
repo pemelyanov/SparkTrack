@@ -76,8 +76,11 @@ public class SubTasksService(
         if (updatedSubTask is null) return null;
 
         if (updatedSubTask.IsCompleted)
-            await eventEmitter.RaiseAsync(new SubTaskCompletedEvent(updatedSubTask));
-
+        {
+            var parentFeature = await subTasksRepository.GetParentFeatureAsync(updatedSubTask.Id);
+            await eventEmitter.RaiseAsync(new SubTaskCompletedEvent(updatedSubTask, parentFeature!));
+        }
+        
         return updatedSubTask;
     }
 

@@ -21,61 +21,62 @@ public class FeatureDeletedEventHandler(
     public async Task HandleAsync(FeatureDeletedEvent eventData, CancellationToken cancellationToken = default)
     {
         var feature = eventData.Feature;
-        
-        var users = feature.TasksList
-            .Select(t => t.ExecutorEmployee)
+
+        var users = feature.TasksList.Select(t => t.ExecutorEmployee)
             .Where(e => !string.IsNullOrEmpty(e.TelegramTag))
             .DistinctBy(e => e.Id);
 
         foreach (var user in users.Where(it => it.TelegramTag is not null))
         {
-            var telegramUser = await telegramUsersRepository.GetByTagAsync(user.TelegramTag!);
-
-            if (telegramUser is null)
+            try
             {
-                s_logger.Warn(
-                    "Cannot find telegram chat with {username} ({role}). Skipping",
-                    user.Name,
-                    user.Role
-                );
-                continue;
+                await TrySendAsync(eventData, cancellationToken, user, feature);
             }
-
-            if (!telegramUser.IsNotificationsEnabled)
+            catch (Exception e)
             {
-                s_logger.Debug(
-                    "Notifications disabled for user {username} ({role})",
-                    user.Name,
-                    user.Role
-                );
-                continue;
+                s_logger.Warn(e, "Message sending to {user}@{tag} failed", user.Name, user.TelegramTag);
             }
-
-            s_logger.Info(
-                "Sending feature deleted info to {user}@{tag} ({role})",
-                user.Name,
-                user.TelegramTag,
-                user.Role
-            );
-
-            var message = BuildMessage(feature, user, eventData.Reason);
-
-            await messageSender.SendAsync(
-                telegramUser.ChatId,
-                message,
-                parseMode: ParseMode.Html,
-                cancellationToken: cancellationToken
-            );
         }
+    }
+
+    private async Task TrySendAsync(
+        FeatureDeletedEvent eventData,
+        CancellationToken cancellationToken,
+        User user,
+        Feature feature
+    )
+    {
+        var telegramUser = await telegramUsersRepository.GetByTagAsync(user.TelegramTag!);
+
+        if (telegramUser is null)
+        {
+            s_logger.Warn("Cannot find telegram chat with {username} ({role}). Skipping", user.Name, user.Role);
+            return;
+        }
+
+        if (!telegramUser.IsNotificationsEnabled)
+        {
+            s_logger.Debug("Notifications disabled for user {username} ({role})", user.Name, user.Role);
+            return;
+        }
+
+        s_logger.Info("Sending feature deleted info to {user}@{tag} ({role})", user.Name, user.TelegramTag, user.Role);
+
+        var message = BuildMessage(feature, user, eventData.Reason);
+
+        await messageSender.SendAsync(
+            telegramUser.ChatId,
+            message,
+            parseMode: ParseMode.Html,
+            cancellationToken: cancellationToken
+        );
     }
 
     private string BuildMessage(Feature feature, User employee, EArchiveSource? reason)
     {
         var isArchived = reason.HasValue;
 
-        var header = isArchived
-            ? "<b>==== Идея отправлена в архив ====</b>"
-            : "<b>==== Идея удалена ====</b>";
+        var header = isArchived ? "<b>==== Идея отправлена в архив ====</b>" : "<b>==== Идея удалена ====</b>";
 
         var message = new StringBuilder();
 
@@ -84,22 +85,17 @@ public class FeatureDeletedEventHandler(
         message.AppendLine();
 
         message.AppendLine(
-            $"<b>Канал:</b> {WebUtility.HtmlEncode(feature.Project.Name)} "
-            + $"({feature.Project.Link})"
+            $"<b>Канал:</b> {WebUtility.HtmlEncode(feature.Project.Name)} " + $"({feature.Project.Link})"
         );
         message.AppendLine();
 
         if (isArchived)
         {
-            message.AppendLine(
-                $"<b>Причина:</b> {WebUtility.HtmlEncode(GetArchiveReasonText(reason!.Value))}"
-            );
+            message.AppendLine($"<b>Причина:</b> {WebUtility.HtmlEncode(GetArchiveReasonText(reason!.Value))}");
             message.AppendLine();
         }
 
-        var userTasks = feature.TasksList
-            .Where(t => t.ExecutorEmployee.Id == employee.Id)
-            .ToList();
+        var userTasks = feature.TasksList.Where(t => t.ExecutorEmployee.Id == employee.Id).ToList();
 
         if (userTasks.Any())
         {

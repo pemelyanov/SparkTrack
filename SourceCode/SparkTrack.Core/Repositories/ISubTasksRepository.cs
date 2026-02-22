@@ -6,6 +6,8 @@ using Shared.Data.Entities;
 public interface ISubTasksRepository
 {
     Task<SubTask?> GetAsync(Guid id);
+    
+    Task<Feature?> GetParentFeatureAsync(Guid id);
 
     Task<IReadOnlyList<SubTaskWithPayments>> GetListAsync(IReadOnlyList<Guid> idList);
     

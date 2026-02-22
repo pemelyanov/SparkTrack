@@ -7,7 +7,6 @@ using NLog;
 using Repositories;
 using SparkTrack.Core.Events;
 using Services;
-
 using System.Net;
 using System.Text;
 using Data;
@@ -33,50 +32,66 @@ public class FeatureCreatedEventHandler(
 
         foreach (var group in usersToSubTasksMap)
         {
-            var user = group.Key;
-            var tasks = group.Where(it => it.ExecutorEmployee.Id == user.Id);
-
-            var telegramUser = await telegramUsersRepository.GetByTagAsync(user.TelegramTag!);
-
-            if (telegramUser is null)
+            try
             {
-                s_logger.Warn(
-                    "Cannot find telegram chat with {username} ({role}). Skipping",
-                    user.Name,
-                    user.Role
-                );
-                continue;
+                await TrySendAsync(eventData, cancellationToken, group);
             }
-
-            if (!telegramUser.IsNotificationsEnabled)
+            catch (Exception e)
             {
-                s_logger.Debug(
-                    "Notifications disabled for user {username} ({role})",
-                    user.Name,
-                    user.Role
-                );
-                continue;
+                s_logger.Warn(e, "Message sending to {user}@{tag} failed", group.Key.Name, group.Key.TelegramTag);
             }
+        }
+    }
 
-            s_logger.Info(
-                "Sending feature created info to {user}@{tag} ({role})",
+    private async Task TrySendAsync(
+        FeatureCreatedEvent eventData,
+        CancellationToken cancellationToken,
+        IGrouping<User, SubTask> group
+    )
+    {
+        var user = group.Key;
+        var tasks = group.Where(it => it.ExecutorEmployee.Id == user.Id);
+
+        var telegramUser = await telegramUsersRepository.GetByTagAsync(user.TelegramTag!);
+
+        if (telegramUser is null)
+        {
+            s_logger.Warn(
+                "Cannot find telegram chat with {username} ({role}). Skipping",
                 user.Name,
-                user.TelegramTag,
                 user.Role
             );
-
-            var action = new InlineKeyboardButton("Перейти к идее", "link");
-
-            var message = BuildMessage(eventData.Feature, tasks, telegramUser);
-
-            await messageSender.SendAsync(
-                telegramUser.ChatId,
-                message,
-                parseMode: ParseMode.Html,
-                action,
-                cancellationToken
-            );
+            return;
         }
+
+        if (!telegramUser.IsNotificationsEnabled)
+        {
+            s_logger.Debug(
+                "Notifications disabled for user {username} ({role})",
+                user.Name,
+                user.Role
+            );
+            return;
+        }
+
+        s_logger.Info(
+            "Sending feature created info to {user}@{tag} ({role})",
+            user.Name,
+            user.TelegramTag,
+            user.Role
+        );
+
+        var action = new InlineKeyboardButton("Перейти к идее", "link");
+
+        var message = BuildMessage(eventData.Feature, tasks, telegramUser);
+
+        await messageSender.SendAsync(
+            telegramUser.ChatId,
+            message,
+            parseMode: ParseMode.Html,
+            action,
+            cancellationToken
+        );
     }
 
     private string BuildMessage(
