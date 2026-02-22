@@ -60,6 +60,7 @@
                     <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
                     <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"
                               IsEnabled="{Binding CanOpenInExplorer}" />
+                    <MenuItem Header="Получить ссылку" Command="{Binding GetLinkCommand}" />
                     <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью" IsEnabled="{Binding IsImage}"
                               Command="{Binding RaisePreviewSetRequested}" />
                 </ContextMenu>

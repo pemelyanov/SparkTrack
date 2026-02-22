@@ -34,6 +34,7 @@ public class FilesController(IFilesService filesService) : Controller
 
     [Authorize]
     [HttpGet("{id}")]
+    [DisableRequestTimeout]
     [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -52,5 +53,15 @@ public class FilesController(IFilesService filesService) : Controller
         );
 
         return result;
+    }
+    
+    [Authorize]
+    [HttpGet("{id}/link")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<ActionResult<string>> GetLinkAsync([FromRoute] Guid id)
+    {
+        return this.OkWithDomainExceptionsHandling(() => filesService.GetLinkAsync(id));
     }
 }

@@ -10,6 +10,7 @@ using Services.DialogHost;
 using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Windows.Input;
 using NLog;
 using ReactiveUI;
 
@@ -115,6 +116,8 @@ public abstract class AttachmentViewModelBase(
     public string Name { get; protected set; } = string.Empty;
 
     public bool CanOpenInExplorer { get; protected set; } = true;
+
+    public ICommand GetLinkCommand { get; init; } = ReactiveCommand.Create(() => { }, Observable.Return(false));
 
     public virtual async Task RemoveAsync()
     {

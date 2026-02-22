@@ -1,0 +1,24 @@
+﻿<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:linkShare="clr-namespace:SparkTrack.AvaloniaImpl.Windows.LinkShare"
+                        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                        x:Class="SparkTrack.AvaloniaImpl.Windows.LinkShare.LinkShareDialog"
+                        x:DataType="linkShare:LinkShareViewModel"
+                        Title="Ссылка"
+                        CloseButtonText="Закрыть">
+    <Panel Width="500">
+        <StackPanel Spacing="8" IsVisible="{Binding GetLinkCommand.IsExecuting^}">
+            <TextBlock Text="Получаем ссылку..."/>
+            <ProgressBar IsIndeterminate="True" />
+        </StackPanel>
+        
+        <Grid ColumnSpacing="8" ColumnDefinitions="* Auto" IsVisible="{Binding !GetLinkCommand.IsExecuting^}">
+            <TextBox UseFloatingWatermark="False" IsReadOnly="True" Text="{Binding Link}" />
+
+            <Button Grid.Column="1" Classes="icon copy" Command="{Binding CopyAsync}"/>
+        </Grid>
+    </Panel>
+</controls:ContentDialog>

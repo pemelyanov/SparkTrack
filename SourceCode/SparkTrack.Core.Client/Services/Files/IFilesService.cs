@@ -4,6 +4,8 @@ using Data;
 
 public interface IFilesService
 {
+    Task<string> GetLinkAsync(Guid id);
+    
     Task<Guid> UploadAsync(byte[] content, string? extension, LoadingProgress progress, CancellationToken cancellationToken = default);
     
     Task<Guid> UploadAsync(string inputPath, LoadingProgress progress, CancellationToken cancellationToken = default);

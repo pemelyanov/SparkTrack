@@ -28,6 +28,8 @@ public interface IAttachmentViewModel
     bool CanOpenInExplorer { get; }
 
     ICommand SaveAsCommand { get; }
+    
+    ICommand GetLinkCommand { get; }
 
     Task RemoveAsync();
 

@@ -6,8 +6,16 @@ using Core.Client.Services.Files;
 using Core.Client.Streams;
 using Delegates;
 
-public class FilesService(CustomClientFactory<FilesClient> clientFactory, Func<HttpClient> httpClientFactory) : IFilesService
+public class FilesService(CustomClientFactory<FilesClient> clientFactory, Func<HttpClient> httpClientFactory)
+    : IFilesService
 {
+    public async Task<string> GetLinkAsync(Guid id)
+    {
+        using var wrapper = clientFactory(httpClientFactory());
+
+        return await wrapper.Client.GetLinkAsync(id);
+    }
+
     public async Task<Guid> UploadAsync(
         byte[] content,
         string? extension,
@@ -51,8 +59,13 @@ public class FilesService(CustomClientFactory<FilesClient> clientFactory, Func<H
 
         await response.Stream.CopyToAsync(progressStream, cancellationToken);
     }
-    
-    private async Task<Guid> UploadAsync(LoadingProgress progress, CancellationToken cancellationToken, Stream stream, string? extension)
+
+    private async Task<Guid> UploadAsync(
+        LoadingProgress progress,
+        CancellationToken cancellationToken,
+        Stream stream,
+        string? extension
+    )
     {
         await using var progressStream = new ProgressReadStream(stream, progress);
 

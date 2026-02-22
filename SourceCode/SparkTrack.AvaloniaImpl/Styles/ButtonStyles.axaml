@@ -34,6 +34,14 @@
         </Style>
     </Style>
     
+    <Style Selector=":is(Button).copy">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="Copy" />
+            </Template>
+        </Setter>
+    </Style>
+    
     <Style Selector=":is(Button).more">
         <Setter Property="Content">
             <Template>

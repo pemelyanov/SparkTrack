@@ -12,6 +12,7 @@ using Services.LocalFilesManager;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using System.Windows.Input;
+using Windows.LinkShare;
 using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
 using NLog;
@@ -31,7 +32,8 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         IFilesService filesService,
         IAttachmentsPathCache attachmentsPathCache,
         IExplorerService explorerService,
-        IPopupNotificationService popupNotificationService
+        IPopupNotificationService popupNotificationService,
+        Func<Func<Task<string>>, LinkShareViewModel> linkShareFactory
     )
         : base(onRemove, dialogService, explorerService, LogManager.GetCurrentClassLogger())
     {
@@ -58,6 +60,13 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
         SaveAsCommand = ReactiveCommand.CreateFromTask(
             async () => { await SaveAsAsync(localFilesManager); }
+        );
+
+        GetLinkCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var shareViewModel = linkShareFactory(() => filesService.GetLinkAsync(attachment.FileId));
+                await dialogService.ShowAsync(shareViewModel);
+            }
         );
     }
 
