@@ -2,6 +2,9 @@
 
 using System.Reactive;
 using System.Reactive.Disposables;
+using Core.Client.Enums;
+using Core.Client.Services.PopupNotification;
+using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services.Clipboard;
@@ -9,14 +12,23 @@ using ViewModels;
 
 public class LinkShareViewModel : DialogViewModelBase
 {
-    private readonly IClipboardService m_clipboardService;
+    private static readonly ILogger           s_logger = LogManager.GetCurrentClassLogger();
+    private readonly        IClipboardService m_clipboardService;
 
-    public LinkShareViewModel(Func<Task<string>> linkFactory, IClipboardService clipboardService)
+    public LinkShareViewModel(Func<Task<string>> linkFactory, IClipboardService clipboardService, IPopupNotificationService popupNotificationService)
     {
         m_clipboardService = clipboardService;
         GetLinkCommand = ReactiveCommand.CreateFromTask(async () =>
         {
-            Link = await linkFactory();
+            try
+            {
+                Link = await linkFactory();
+            }
+            catch (Exception e)
+            {
+                s_logger.Error(e, "Error while fetching link");
+                popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка получения ссылки");
+            }
         });
     }
 
