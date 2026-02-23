@@ -153,7 +153,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         var listRequest = drive.Files.List();
         listRequest.Q =
             $"name contains '{fileName}' and '{m_folderId}' in parents and trashed = false";
-        listRequest.Fields = "files(id, name, webViewLink)";
+        listRequest.Fields = "files(id, name, size, webViewLink)";
         listRequest.PageSize = 1;
 
         s_logger.Info("Searching file in folder: {id}", fileName);
