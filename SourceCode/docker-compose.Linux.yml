@@ -8,4 +8,4 @@ services:
 
   postgres:
     volumes:
-      - /usr/share/SparkTrack/db/postgres:/var/lib/postgresql/data
+      - /usr/share/SparkTrack/db/postgres/data:/var/lib/postgresql/data
