@@ -4,3 +4,8 @@ services:
   spark-track-api:
     volumes:
       - /usr/share/SparkTrack/logs:/usr/share/SparkTrack/logs
+      - /usr/share/SparkTrack/db/telegram:/usr/share/SparkTrack/db
+
+  postgres:
+    volumes:
+      - /usr/share/SparkTrack/db/postgres:/var/lib/postgresql/data
