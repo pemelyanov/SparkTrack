@@ -13,6 +13,7 @@
              x:DataType="attachment:IAttachmentViewModel"
              x:Name="Root">
     <UserControl.Resources>
+        <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter" />
         <converters:UriToImageSourceConverter x:Key="PathToImageSourceConverter" />
         <converters:BytesToStringConverter x:Key="BytesToStringConverter" />
         <converters:FileExtensionToSymbolConverter x:Key="FileExtensionToSymbolConverter" />
@@ -53,20 +54,21 @@
         </Style>
     </UserControl.Styles>
     <Border Classes="card" x:Name="Container" Padding="0">
-        <Grid ColumnDefinitions="Auto * Auto" Width="256" Background="Transparent">
+        <Grid ColumnDefinitions="Auto * Auto" Width="296" Background="Transparent">
             <Grid.ContextMenu>
-                <ContextMenu>
+                <ContextMenu IsEnabled="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}">
                     <MenuItem Header="Сохранить как..." Command="{Binding SaveAsCommand}" />
                     <MenuItem Header="Открыть в проводнике" Command="{Binding OpenInExplorer}"
                               IsEnabled="{Binding CanOpenInExplorer}" />
-                    <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью"
+                    <MenuItem Header="Получить ссылку" Command="{Binding GetLinkCommand}" />
+                    <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью" IsEnabled="{Binding IsImage}"
                               Command="{Binding RaisePreviewSetRequested}" />
                 </ContextMenu>
             </Grid.ContextMenu>
             <ContentControl Classes.half-transparent="{Binding #Container.IsPointerOver}"
                             Classes.file="{Binding !IsImage}"
                             Classes.image="{Binding IsImage}"
-                            Grid.Column="0" Width="64" Height="64" />
+                            Grid.Column="0" Width="72" Height="72" />
 
             <Panel Grid.Column="0" Classes="file-actions">
                 <Panel.IsVisible>
@@ -115,22 +117,31 @@
                        TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Name}"
                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" />
 
-            <TextBlock Grid.Column="1" Text="{Binding Size, Converter={StaticResource BytesToStringConverter}}"
-                       HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
-                       IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}"
-                       FontSize="12" Opacity="0.75" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="8">
+                <TextBlock Text="{Binding Size, Converter={StaticResource BytesToStringConverter}}"
+                           IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}"
+                           FontSize="12" Opacity="0.75" />
 
-            <TextBlock Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="8"
-                       IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
-                       FontSize="12" Opacity="0.75">
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}{0} / {1}">
-                        <Binding Path="LoadProgress.Progress.CurrentProgress^"
-                                 Converter="{StaticResource BytesToStringConverter}" />
-                        <Binding Path="Size" Converter="{StaticResource BytesToStringConverter}" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+                <TextBlock IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
+                           FontSize="12" Opacity="0.75">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} / {1} • {2}/с">
+                            <Binding Path="LoadProgress.Progress.CurrentProgress^"
+                                     Converter="{StaticResource BytesToStringConverter}" FallbackValue="0" />
+                            <Binding Path="Size" Converter="{StaticResource BytesToStringConverter}" />
+                            <Binding Path="AverageSpeedBytesPerSecond"
+                                     Converter="{StaticResource BytesToStringConverter}" />
+                            <Binding Path="EstimatedTimeLeft" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+
+                <TextBlock IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
+                           FontSize="12" Opacity="0.75"
+                           Text="{Binding EstimatedTimeLeft, StringFormat='Оставшееся время: ~{0}', Converter={StaticResource TimeSpanToStringConverter}}">
+                </TextBlock>
+            </StackPanel>
+
 
             <StackPanel Grid.Column="2" Margin="4" IsVisible="{Binding #Container.IsPointerOver}" Spacing="4">
                 <Button Classes="icon small close"

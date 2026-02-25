@@ -167,8 +167,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
 
-        RefreshCommand = ReactiveCommand.CreateFromTask(() => Task.WhenAll([RefreshAsync(), RefreshCommentsAsync()])
-        );
+        RefreshCommand = ReactiveCommand.CreateFromTask(() => 
+            Task.WhenAll(RefreshAsync(), RefreshCommentsAsync()));
 
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
@@ -378,6 +378,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         try
         {
+            s_logger.Info("Saving feature {id}", m_feature?.Id);
+            
             await AttachmentsPanelViewModel.UploadLocalAttachments();
 
             var editData = CreateEditData();
@@ -431,6 +433,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         Name = feature?.Name ?? "Название идеи";
 
+        AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
         InitializeDescriptionProperties(feature?.Description);
         CreatedAt = feature?.CreatedAt;
         EditedAt = feature?.EditedAt;
@@ -446,8 +449,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         foreach (var oldTask in oldTasks)
             oldTask.Dispose();
-
-        AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
     }
 
     private void InitializeDescriptionProperties(string? description)
@@ -531,15 +532,32 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         if (m_feature is null || CommentEditViewModel is null) return;
 
-        await CommentEditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
+        try
+        {
+            s_logger.Info("Creating comment...");
+            
+            await CommentEditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
 
-        var commentEdit = CommentEditViewModel.ToModel();
+            var commentEdit = CommentEditViewModel.ToModel();
 
-        await m_commentsService.AddAsync(m_feature.Id, commentEdit);
+            await m_commentsService.AddAsync(m_feature.Id, commentEdit);
 
-        CommentEditViewModel = null;
+            CommentEditViewModel = null;
 
-        await RefreshCommentsCommand.Execute().ToTask();
+            await RefreshCommentsCommand.Execute().ToTask();
+            
+            s_logger.Info("Comment created");
+        }
+        catch (Exception e)
+        {
+            if (e is NotifyUIException)
+                s_logger.Warn(e.Message);
+            else
+                s_logger.Error(e);
+
+            m_popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка создания комментария");
+        }
+       
     }
 
     private void AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested(IAttachmentViewModel preview)
@@ -549,6 +567,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private void AttachmentsPanelViewModel_OnAttachmentAdded(IAttachmentViewModel attachment)
     {
-        if (AttachmentsPanelViewModel.AttachmentsList.Count == 1) PreviewAttachment = attachment;
+        if (AttachmentsPanelViewModel.AttachmentsList.Count == 1 && attachment.IsImage) PreviewAttachment = attachment;
     }
 }

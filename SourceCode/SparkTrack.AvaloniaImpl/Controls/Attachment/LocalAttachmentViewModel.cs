@@ -7,10 +7,10 @@ using Core.Client.Services.Files;
 using Core.Shared.Data.Entities;
 using Extensions;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 using Services.DialogHost;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Exceptions;
 using NLog;
 using Services.AttachmentsPathCache;
 
@@ -86,7 +86,7 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         }
         catch (Exception e)
         {
-            m_logger.Error(e, "File upload error");
+            throw new NotifyUIException($"При отправке файла {Name}.{Extension} произошла ошибка", e);
         }
         finally
         {

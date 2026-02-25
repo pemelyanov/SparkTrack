@@ -19,16 +19,36 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         configuration.GetRequiredSection("Google").GetSection("FolderId").Get<string>()
         ?? throw new InvalidOperationException("Set FolderId in configuration");
 
-    public async Task<Guid> UploadAsync(Stream stream, long contentLength,  CancellationToken cancellationToken)
+    public async Task<string> GetLinkAsync(Guid id)
+    {
+        s_logger.Info("Initializing drive");
+        var drive = await driveFactory();
+
+        var file = await GetFileByIdAsync(drive, id);
+
+        if (string.IsNullOrEmpty(file.WebViewLink))
+            throw new NotFoundException("Google Drive не вернул ссылку на файл");
+
+        s_logger.Info("Link generated for file {id}", id);
+
+        return file.WebViewLink;
+    }
+
+    public async Task<Guid> UploadAsync(Stream stream, long contentLength, string? extension, CancellationToken cancellationToken)
     {
         s_logger.Info("Initializing drive");
         var drive = await driveFactory();
 
         var fileId = Guid.NewGuid();
 
+        var fileName = fileId.ToString();
+
+        if (!string.IsNullOrEmpty(extension))
+            fileName += $".{extension}";
+
         var metadata = new File
         {
-            Name = fileId.ToString(),
+            Name = fileName,
             Parents =
             [
                 m_folderId,
@@ -43,8 +63,9 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
             "application/octet-stream"
         );
 
+        const int mb = 1024 * 1024;
         request.Fields = "id";
-        request.ChunkSize = ResumableUpload.DefaultChunkSize;
+        request.ChunkSize = 12 * mb;
 
         request.ProgressChanged += OnProgressChanged;
 
@@ -88,23 +109,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         s_logger.Info("Initializing drive");
         var drive = await driveFactory();
 
-        // Сначала ищем файл по имени в указанной папке
-        var listRequest = drive.Files.List();
-        var fileName = id.ToString();
-
-        listRequest.Q = $"name = '{fileName}' and '{m_folderId}' in parents and trashed = false";
-        listRequest.Fields = "files(id, name, size)";
-        listRequest.PageSize = 10;
-
-        s_logger.Info("Searching file in folder: {id}", fileName);
-        var searchResult = await listRequest.ExecuteAsync(cancellationToken);
-
-        if (searchResult.Files == null || searchResult.Files.Count == 0)
-        {
-            throw new NotFoundException($"Файл с именем '{fileName}' не найден в папке {m_folderId}");
-        }
-
-        var file = searchResult.Files[0];
+        var file = await GetFileByIdAsync(drive, id);
         var fileId = file.Id;
 
         if (file.Size is { } size)
@@ -114,9 +119,9 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
 
         var downloadStreamProxy = new ProgressWriteStream(stream, OnProgressChanged);
 
-        s_logger.Info($"Starting file download to stream: {fileName}");
+        s_logger.Info("Starting file download to stream: {fileName}", file.Name);
         await downloadRequest.DownloadAsync(downloadStreamProxy, cancellationToken);
-        s_logger.Info($"File download completed: {fileName}");
+        s_logger.Info("File download completed: {fileName}", file.Name);
         
         void OnProgressChanged(long bytes)
         {
@@ -138,5 +143,26 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         s_logger.Info("Deleting file from drive: {name}", id);
         // TODO: Добавить поиск по имени
         await drive.Files.Delete(id.ToString()).ExecuteAsync();
+    }
+    
+    private async Task<File> GetFileByIdAsync(DriveService drive, Guid id)
+    {
+        var fileName = id.ToString();
+
+        // Ищем файл в папке
+        var listRequest = drive.Files.List();
+        listRequest.Q =
+            $"name contains '{fileName}' and '{m_folderId}' in parents and trashed = false";
+        listRequest.Fields = "files(id, name, size, webViewLink)";
+        listRequest.PageSize = 1;
+
+        s_logger.Info("Searching file in folder: {id}", fileName);
+        var searchResult = await listRequest.ExecuteAsync();
+
+        if (searchResult.Files == null || searchResult.Files.Count == 0)
+            throw new NotFoundException($"Файл '{fileName}' не найден в папке {m_folderId}");
+
+        var file = searchResult.Files[0];
+        return file;
     }
 }

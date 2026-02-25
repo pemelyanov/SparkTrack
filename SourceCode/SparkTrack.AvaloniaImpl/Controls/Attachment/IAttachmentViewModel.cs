@@ -20,10 +20,16 @@ public interface IAttachmentViewModel
     long Size { get; }
 
     AttachmentLoadProgress? LoadProgress { get; }
+    
+    long AverageSpeedBytesPerSecond { get; }
+    
+    TimeSpan? EstimatedTimeLeft { get; }
 
     bool CanOpenInExplorer { get; }
 
     ICommand SaveAsCommand { get; }
+    
+    ICommand GetLinkCommand { get; }
 
     Task RemoveAsync();
 

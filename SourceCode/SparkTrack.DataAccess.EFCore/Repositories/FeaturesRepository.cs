@@ -36,7 +36,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         )
         // TODO: Add filter
         .Where(it => it.ArchivedAt == null)
-        .OrderBy(it => it.CreatedAt)
+        .OrderByDescending(it => it.CreatedAt)
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .AsPaginated(pageQuery)
         .CollectAsync();

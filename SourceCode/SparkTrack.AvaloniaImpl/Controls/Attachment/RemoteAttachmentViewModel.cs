@@ -12,13 +12,17 @@ using Services.LocalFilesManager;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using System.Windows.Input;
+using Windows.LinkShare;
+using Core.Client.Enums;
+using Core.Client.Services.PopupNotification;
 using NLog;
 using Services.AttachmentsPathCache;
 
 public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentViewModel
 {
-    private readonly Attachment    m_attachment;
-    private readonly IFilesService m_filesService;
+    private readonly Attachment                m_attachment;
+    private readonly IFilesService             m_filesService;
+    private readonly IPopupNotificationService m_popupNotificationService;
 
     public RemoteAttachmentViewModel(
         Attachment attachment,
@@ -27,12 +31,15 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         ILocalFilesManager localFilesManager,
         IFilesService filesService,
         IAttachmentsPathCache attachmentsPathCache,
-        IExplorerService explorerService
+        IExplorerService explorerService,
+        IPopupNotificationService popupNotificationService,
+        Func<Func<Task<string>>, LinkShareViewModel> linkShareFactory
     )
         : base(onRemove, dialogService, explorerService, LogManager.GetCurrentClassLogger())
     {
         m_attachment = attachment;
         m_filesService = filesService;
+        m_popupNotificationService = popupNotificationService;
         Name = attachment.Name;
         Extension = attachment.Extension;
         Size = attachment.Size;
@@ -53,6 +60,13 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
 
         SaveAsCommand = ReactiveCommand.CreateFromTask(
             async () => { await SaveAsAsync(localFilesManager); }
+        );
+
+        GetLinkCommand = ReactiveCommand.CreateFromTask(async () =>
+            {
+                var shareViewModel = linkShareFactory(() => filesService.GetLinkAsync(attachment.FileId));
+                await dialogService.ShowAsync(shareViewModel);
+            }
         );
     }
 
@@ -107,6 +121,10 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         catch (Exception e)
         {
             m_logger.Error(e, "Download failed");
+            m_popupNotificationService.Show(
+                ENotificationType.Error,
+                $"При загрузке файла {Name}.{Extension} произошла ошибка"
+            );
             IsDownloaded = CheckIsDownloaded();
         }
         finally

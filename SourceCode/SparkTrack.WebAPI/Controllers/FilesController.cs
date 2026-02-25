@@ -17,13 +17,24 @@ public class FilesController(IFilesService filesService) : Controller
     [DisableRequestTimeout]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public Task<ActionResult<Guid>> UploadAsync(CancellationToken cancellationToken, [FromHeader(Name = "Content-Length")] long contentLength)
+    public Task<ActionResult<Guid>> UploadAsync(
+        CancellationToken cancellationToken,
+        [FromHeader(Name = "Content-Length")] long contentLength,
+        [FromHeader(Name = "X-Extension")] string? extension = null
+    )
     {
-        return this.OkWithDomainExceptionsHandling(() => filesService.UploadAsync(Request.Body, contentLength, cancellationToken));
+        return this.OkWithDomainExceptionsHandling(() => filesService.UploadAsync(
+                Request.Body,
+                contentLength,
+                extension,
+                cancellationToken
+            )
+        );
     }
 
     [Authorize]
     [HttpGet("{id}")]
+    [DisableRequestTimeout]
     [ProducesResponseType(typeof(FileStreamResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,5 +53,15 @@ public class FilesController(IFilesService filesService) : Controller
         );
 
         return result;
+    }
+    
+    [Authorize]
+    [HttpGet("{id}/link")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public Task<ActionResult<string>> GetLinkAsync([FromRoute] Guid id)
+    {
+        return this.OkWithDomainExceptionsHandling(() => filesService.GetLinkAsync(id));
     }
 }

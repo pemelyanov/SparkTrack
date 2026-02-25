@@ -9,6 +9,7 @@ using SparkTrack.Core.Client.Extensions;
 
 namespace SparkTrack.AvaloniaImpl;
 
+using Windows.LinkShare;
 using Windows.Main;
 using API.AutofacModules;
 using Autofac;
@@ -87,6 +88,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<SettingsPageViewModel>().SingleInstance();
         builder.RegisterGeneric(typeof(TemplateSaveFormViewModel<>));
         builder.RegisterGeneric(typeof(TemplateSelectionFormViewModel<>));
+        builder.RegisterType<LinkShareViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

@@ -4,7 +4,9 @@ public class FileSystemFilesService : IFilesService
 {
     private const string FilesFolder = "UploadedFiles";
 
-    public async Task<Guid> UploadAsync(Stream stream, long contentLength, CancellationToken cancellationToken)
+    public Task<string> GetLinkAsync(Guid id) => throw new NotImplementedException();
+
+    public async Task<Guid> UploadAsync(Stream stream, long contentLength, string? extension, CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(FilesFolder);
         
