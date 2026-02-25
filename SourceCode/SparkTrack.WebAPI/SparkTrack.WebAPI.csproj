@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Autofac.Extensions.DependencyInjection" />
       <PackageReference Include="Google.Apis.Drive.v3" />
+      <PackageReference Include="JetBrains.Annotations" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="NLog" />
@@ -16,6 +17,7 @@
       <PackageReference Include="NLog.Web.AspNetCore" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
       <PackageReference Include="NSwag.AspNetCore" />
+      <PackageReference Include="Telegram.Bot" />
     </ItemGroup>
 
     <ItemGroup>
@@ -23,6 +25,8 @@
       <ProjectReference Include="..\SparkTrack.Core.Shared\SparkTrack.Core.Shared.csproj" />
       <ProjectReference Include="..\SparkTrack.Core\SparkTrack.Core.csproj" />
       <ProjectReference Include="..\SparkTrack.DataAccess.EFCore\SparkTrack.DataAccess.EFCore.csproj" />
+      <ProjectReference Include="..\SparkTrack.Telegram.Core\SparkTrack.Telegram.Core.csproj" />
+      <ProjectReference Include="..\SparkTrack.Telegram.DataAccess.LiteDb\SparkTrack.Telegram.DataAccess.LiteDb.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -96,7 +96,9 @@ public class NLogSink : ILogSink
     
     private void InitializeMinLogLevel()
     {
-        if(LogManager.Configuration!.Variables.TryGetValue("avaloniaMinLogLevel", out var minLogLevel))
+        if(LogManager.Configuration is null) return;
+        
+        if(LogManager.Configuration.Variables.TryGetValue("avaloniaMinLogLevel", out var minLogLevel))
             m_logEventLevel = GetLogLevel(minLogLevel.ToString()!);
         else
             m_logEventLevel = LogEventLevel.Warning;

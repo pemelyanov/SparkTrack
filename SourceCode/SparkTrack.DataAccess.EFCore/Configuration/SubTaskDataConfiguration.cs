@@ -51,7 +51,10 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(t => t.Feature)
-            .WithMany(it => it.TasksList);
+            .WithMany(it => it.TasksList)
+            .HasForeignKey(it => it.FeatureId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasIndex(t => t.ExecutorEmployeeId);
         builder.HasIndex(t => t.IsCompleted);

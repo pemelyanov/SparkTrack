@@ -50,7 +50,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .FirstOrDefaultAsync();
 
-    public async Task<int> AddAsync(FeatureEdit feature)
+    public async Task<Feature> AddAsync(FeatureEdit feature)
     {
         var featureData = new FeatureData
         {
@@ -72,7 +72,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         var addedFeature = await dbContext.Features.AddAsync(featureData);
         await dbContext.SaveChangesAsync();
 
-        return addedFeature.Entity.Id;
+        featureData = await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
+            .Include(it => it.TasksList)
+            .ThenInclude(it => it.ExecutorEmployee)
+            .Include(it => it.Project)
+            .FirstAsync();
+
+        return GetFeatureMapExpression(null).Compile().Invoke(featureData);
     }
 
     private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
@@ -88,7 +94,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         TimelyBonus = t.TimelyBonus,
     };
 
-    public async Task EditAsync(FeatureEdit feature)
+    public async Task<Feature> EditAsync(FeatureEdit feature)
     {
         var featureData = await dbContext.Features
             .Include(f => f.TasksList)
@@ -117,6 +123,14 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         {
             throw new ConflictException("Feature was modified early", e);
         }
+        
+        featureData = await dbContext.Features.Where(it => it.Id == feature.Id)
+            .Include(it => it.TasksList)
+            .ThenInclude(it => it.ExecutorEmployee)
+            .Include(it => it.Project)
+            .FirstAsync();
+
+        return GetFeatureMapExpression(null).Compile().Invoke(featureData);
     }
 
     private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
@@ -145,6 +159,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             existingTask.Cost = taskEdit.Cost;
             existingTask.TimelyBonus = taskEdit.TimelyBonus;
             existingTask.Version = taskEdit.Version;
+            existingTask.Deadline = taskEdit.Deadline;
 
             existingTasks.Remove(taskEdit.Id);
         }
@@ -188,7 +203,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         await dbContext.SaveChangesAsync();
     }
 
-    private static Expression<Func<FeatureData, Feature>> GetFeatureMapExpression(
+    public static Expression<Func<FeatureData, Feature>> 
+        GetFeatureMapExpression(
         Guid? subTaskEmployeeId
     ) => f => new Feature
     {
@@ -217,6 +233,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
                         Id = t.ExecutorEmployee.Id,
                         Name = t.ExecutorEmployee.Name,
                         Role = t.ExecutorEmployee.Role,
+                        TelegramTag = t.ExecutorEmployee.TelegramTag,
                         Email = t.ExecutorEmployee.Email,
                         ArchivedAt = t.ExecutorEmployee.ArchivedAt,
                         ArchiveSource = t.ExecutorEmployee.ArchiveSource

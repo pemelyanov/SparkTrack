@@ -98,7 +98,7 @@ public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventH
         await ReloadTableCommand.Execute().ToTask();
     }
 
-    public Task HandleAsync(LogoutEvent eventData)
+    public Task HandleAsync(LogoutEvent eventData,  CancellationToken cancellationToken = default)
     {
         m_userAddFormViewModel.Reset();
 

@@ -20,9 +20,13 @@ public class UserDataConfiguration : IEntityTypeConfiguration<UserData>
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(50);
-
+        
         builder.Property(u => u.TelegramTag)
             .IsRequired(false);
+        
+        builder.HasIndex(u => u.TelegramTag)
+            .IsUnique()
+            .HasFilter("\"TelegramTag\" IS NOT NULL AND \"TelegramTag\" != ''");
         
         builder.Property(p => p.ArchivedAt)
             .IsRequired(false);

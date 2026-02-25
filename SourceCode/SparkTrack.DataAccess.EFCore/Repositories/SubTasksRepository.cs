@@ -20,6 +20,15 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
         )
         .FirstOrDefaultAsync();
 
+    public Task<Feature?> GetParentFeatureAsync(Guid id) => dbContext.SubTasks
+        .AsNoTracking()
+        .Where(it => it.Id == id)
+        .Select(it => it.Feature)
+        .Select(
+            FeaturesRepository.GetFeatureMapExpression(null)
+        )
+        .FirstOrDefaultAsync();
+    
     public async Task<IReadOnlyList<SubTaskWithPayments>> GetListAsync(IReadOnlyList<Guid> idList) => await dbContext
         .SubTasks
         .Where(it => idList.Contains(it.Id))

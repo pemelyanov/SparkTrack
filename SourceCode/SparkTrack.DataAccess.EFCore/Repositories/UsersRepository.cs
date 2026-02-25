@@ -38,6 +38,15 @@ internal class UsersRepository(SparkTrackDbContext dbContext) : IUsersRepository
         )
         .FirstOrDefaultAsync();
 
+    public async Task<User?> GetByTelegramTagAsync(string tag)
+    {
+        tag = tag.TrimStart('@');
+        
+        return await dbContext.Users.Where(it => it.TelegramTag == tag)
+            .Select(GetMapToUserExpression())
+            .FirstOrDefaultAsync();
+    }
+
     public async Task UpdateAsync(User user)
     {
         var userData = await dbContext.Users.FindAsync(user.Id);

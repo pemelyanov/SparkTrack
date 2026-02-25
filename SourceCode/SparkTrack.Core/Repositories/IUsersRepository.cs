@@ -11,6 +11,8 @@ public interface IUsersRepository
     Task AddAsync(User user);
     
     Task<User?> GetByEmailAsync(string email);
+    
+    Task<User?> GetByTelegramTagAsync(string tag);
 
     Task UpdateAsync(User user);
 

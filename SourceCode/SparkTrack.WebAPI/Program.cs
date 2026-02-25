@@ -17,20 +17,18 @@ using SparkTrack.WebAPI.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(RegisterServices));
+builder.Host.UseServiceProviderFactory(
+    new AutofacServiceProviderFactory(it => RegisterServices(it, builder.Configuration)));
+
 builder.Logging.ClearProviders();
 builder.Host.UseNLog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 20L * 1024 * 1024 * 1024;
-});
+builder.Services.Configure<FormOptions>(options => { options.MultipartBodyLengthLimit = 20L * 1024 * 1024 * 1024; });
 
 builder.Services.AddOpenApiDocument();
-
 
 var jwtConfiguration = new JwtConfiguration();
 builder.Configuration.Bind("JwtConfiguration", jwtConfiguration);
@@ -63,30 +61,33 @@ builder.Services
                         // Read the token out of the query string
                         context.Token = accessToken;
                     }
+
                     return Task.CompletedTask;
                 }
             };
         }
     );
 
-void RegisterServices(ContainerBuilder container)
+void RegisterServices(ContainerBuilder container, IConfiguration configuration)
 {
     var isDevelopment = true;
-    
+
     #if !DEBUG
     isDevelopment = false;
     #endif
-    
-    container.Register(
-            _ => new DbContextOptionsBuilder<SparkTrackDbContext>()
-                .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-                .Options
+
+    container.Register(_ => new DbContextOptionsBuilder<SparkTrackDbContext>()
+            .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .Options
         )
         .SingleInstance();
-    container.RegisterModule<WebAPIModule>();
+
+    container.RegisterModule(new WebAPIModule(configuration));
     container.RegisterModule(new CoreModule(isDevelopment));
     container.RegisterModule<DataAccessEFModule>();
-    container.RegisterModule<AuthenticationDataAccessEFCoreModule>();// TODO: Для консистентности надо бы на экстеншны для ServiceCollection переделать
+    container
+        .RegisterModule<
+            AuthenticationDataAccessEFCoreModule>(); // TODO: Для консистентности надо бы на экстеншны для ServiceCollection переделать
 }
 
 var app = builder.Build();

@@ -1,6 +1,12 @@
-﻿namespace SparkTrack.WebAPI.AutofacModules;
+﻿using SparkTrack.Core.Shared.Eventing;
+using SparkTrack.WebAPI.BackgroundHandlers.Telegram;
+using SparkTrack.WebAPI.BackgroundServices;
+using SparkTrack.WebAPI.Events;
+
+namespace SparkTrack.WebAPI.AutofacModules;
 
 using Autofac;
+using Core.Events;
 using DataStore;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Auth.OAuth2.Flows;
@@ -10,8 +16,11 @@ using Middlewares;
 using NLog;
 using Services.Files;
 using Services.JwtAuthorization;
+using Telegram.Core.AutofacModules;
+using Telegram.Core.Extensions;
+using Telegram.DataAccess.LiteDb.AutofacModules;
 
-public class WebAPIModule : Module
+public class WebAPIModule(IConfiguration configuration) : Module
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
@@ -21,18 +30,47 @@ public class WebAPIModule : Module
         builder.RegisterType<JwtAuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         RegisterGoogleDrive(builder);
         builder.RegisterType<GoogleDriveFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+        builder.RegisterType<AutofacEventEmitter>().AsImplementedInterfaces().SingleInstance();
+        RegisterTelegramBotIfNeeded(builder);
+    }
+
+    private void RegisterTelegramBotIfNeeded(ContainerBuilder builder)
+    {
+        if (!configuration.GetSection("TelegramBot").Exists()) return;
+
+        HashSet<Type> handlingEvents =
+        [
+            typeof(FeatureCreatedEvent), typeof(FeatureUpdatedEvent), typeof(FeatureDeletedEvent),
+            typeof(SubTaskCompletedEvent)
+        ];
+
+        builder.RegisterModule(new TelegramCoreModule(configuration, handlingEvents));
+        builder.RegisterModule(new TelegramDataAccessLiteDbModule(configuration));
+
+        builder.RegisterType<TelegramBotBackgroundService>()
+            .As<IHostedService>()
+            .SingleInstance();
+
+        builder.RegisterGenericTypes(
+            typeof(TelegramBackgroundEventHandler<>),
+            typeof(IEventHandler<>),
+            handlingEvents,
+            registration => registration.As<IHostedService>().SingleInstance()
+        );
     }
 
     private void RegisterGoogleDrive(ContainerBuilder builder)
     {
         builder.Register(c =>
-        {
-            var configuration = c.Resolve<IConfiguration>();
-            return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(configuration));
-        }).SingleInstance();
+                {
+                    var eventEmitter = c.Resolve<IEventEmitter>();
+                    return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter));
+                }
+            )
+            .SingleInstance();
     }
 
-    private async Task<DriveService> AuthenticateDriveAsync(IConfiguration configuration)
+    private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter)
     {
         try
         {
@@ -73,6 +111,7 @@ public class WebAPIModule : Module
         catch (Exception e)
         {
             s_logger.Error(e, "Google Drive authenticating error:");
+            await eventEmitter.RaiseAsync(new GoogleAuthenticationExceptionEvent(e));
             throw;
         }
     }
