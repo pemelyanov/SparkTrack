@@ -23,7 +23,6 @@ public class CoreModule(bool isDevelopment) : Module
         builder.RegisterType<AuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PasswordHasher>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<UsersService>().AsImplementedInterfaces().InstancePerLifetimeScope();
-        //builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<CommentsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<SubTasksService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<PaymentBillsService>().AsImplementedInterfaces().InstancePerLifetimeScope();
@@ -53,5 +52,13 @@ public class CoreModule(bool isDevelopment) : Module
         if(!isDevelopment) return;
         
         RegisterSeeder<TSeeder>(builder);
+    }
+}
+
+public static class CoreModuleExtensions
+{
+    public static void RegisterFileSystemFileService(this ContainerBuilder builder)
+    {
+        builder.RegisterType<FileSystemFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
     }
 }

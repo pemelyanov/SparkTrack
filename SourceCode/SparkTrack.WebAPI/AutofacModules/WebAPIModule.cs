@@ -1,4 +1,5 @@
-﻿using SparkTrack.Core.Shared.Eventing;
+﻿using SparkTrack.Core.AutofacModules;
+using SparkTrack.Core.Shared.Eventing;
 using SparkTrack.WebAPI.BackgroundHandlers.Telegram;
 using SparkTrack.WebAPI.BackgroundServices;
 using SparkTrack.WebAPI.Events;
@@ -28,13 +29,13 @@ public class WebAPIModule(IConfiguration configuration) : Module
     {
         builder.RegisterType<AuthorizationServiceMiddleware>().InstancePerLifetimeScope();
         builder.RegisterType<JwtAuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
-        RegisterGoogleDrive(builder);
+        if(!TryRegisterGoogleDrive(builder)) builder.RegisterFileSystemFileService();
         builder.RegisterType<GoogleDriveFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<AutofacEventEmitter>().AsImplementedInterfaces().SingleInstance();
-        RegisterTelegramBotIfNeeded(builder);
+        TryRegisterTelegramBot(builder);
     }
 
-    private void RegisterTelegramBotIfNeeded(ContainerBuilder builder)
+    private void TryRegisterTelegramBot(ContainerBuilder builder)
     {
         if (!configuration.GetSection("TelegramBot").Exists()) return;
 
@@ -59,24 +60,30 @@ public class WebAPIModule(IConfiguration configuration) : Module
         );
     }
 
-    private void RegisterGoogleDrive(ContainerBuilder builder)
+    private bool TryRegisterGoogleDrive(ContainerBuilder builder)
     {
+        var googleSection = configuration.GetSection("Google");
+        
+        if(!googleSection.Exists()) return false;
+        
         builder.Register(c =>
                 {
                     var eventEmitter = c.Resolve<IEventEmitter>();
-                    return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter));
+                    return new Func<Task<DriveService>>(() => AuthenticateDriveAsync(eventEmitter, googleSection));
                 }
             )
             .SingleInstance();
+
+        return true;
     }
 
-    private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter)
+    private async Task<DriveService> AuthenticateDriveAsync(IEventEmitter eventEmitter, IConfigurationSection googleSection)
     {
         try
         {
             s_logger.Info("Authorizing in google drive...");
 
-            var googleSection = configuration.GetRequiredSection("Google");
+            
 
             var clientSecrets = await GoogleClientSecrets.FromFileAsync(googleSection["SecretsPath"]);
 
@@ -112,6 +119,7 @@ public class WebAPIModule(IConfiguration configuration) : Module
         {
             s_logger.Error(e, "Google Drive authenticating error:");
             await eventEmitter.RaiseAsync(new GoogleAuthenticationExceptionEvent(e));
+
             throw;
         }
     }

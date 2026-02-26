@@ -4,7 +4,7 @@ public class FileSystemFilesService : IFilesService
 {
     private const string FilesFolder = "UploadedFiles";
 
-    public Task<string> GetLinkAsync(Guid id) => throw new NotImplementedException();
+    public Task<string> GetLinkAsync(Guid id) => Task.FromResult(string.Empty);
 
     public async Task<Guid> UploadAsync(Stream stream, long contentLength, string? extension, CancellationToken cancellationToken)
     {
