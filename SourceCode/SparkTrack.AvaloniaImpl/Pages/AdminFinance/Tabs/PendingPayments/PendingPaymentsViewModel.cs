@@ -89,6 +89,7 @@ public class PendingPaymentsViewModel : ViewModelBase
             .CombineLatest(EmployeeFilterViewModel.WhenAnyValue(it => it.SelectedUser))
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
             .CombineLatest(this.WhenAnyValue(it => it.ShowPaid))
+            .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
@@ -140,6 +141,9 @@ public class PendingPaymentsViewModel : ViewModelBase
     [Reactive]
     public bool ShowPaid { get; set; }
 
+    [Reactive]
+    public bool ShowOnlyMine { get; set; } = true;
+
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
     public ProjectsFilterViewModel ProjectsFilterViewModel { get; }
@@ -175,6 +179,7 @@ public class PendingPaymentsViewModel : ViewModelBase
             ProjectsFilterViewModel.SelectedProject?.Id,
             DateRangeViewModel.TryGetStartDate(),
             DateRangeViewModel.TryGetEndDate(),
+            ShowOnlyMine,
             PaginatorViewModel.ToQuery()
         );
 
@@ -187,7 +192,7 @@ public class PendingPaymentsViewModel : ViewModelBase
     private async Task ReloadRemainingPaymentsAsync()
     {
         var payments =
-            await m_paymentBillsService.GetPendingPaymentsSummaryAsync(ProjectsFilterViewModel.SelectedProject?.Id);
+            await m_paymentBillsService.GetPendingPaymentsSummaryAsync(ProjectsFilterViewModel.SelectedProject?.Id, ShowOnlyMine);
 
         PendingPaymentsSummary = payments;
     }

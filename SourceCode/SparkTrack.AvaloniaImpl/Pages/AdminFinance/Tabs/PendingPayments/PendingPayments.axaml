@@ -30,6 +30,9 @@
 
             <ToggleSwitch OffContent="Показывать неоплаченные" OnContent="Показывать все"
                           IsChecked="{Binding ShowPaid, Mode=TwoWay}" />
+            
+            <CheckBox Content="Показывать только мои" IsChecked="{Binding ShowOnlyMine}"
+                      ToolTip.Tip="Если выбрано, будут показываться только те задачи, автором идей для которых являетесь вы"/>
         </WrapPanel>
 
         <StackPanel Grid.Row="2">

@@ -2765,14 +2765,14 @@ namespace SparkTrack.API
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, int? page, int? itemsPerPage)
         {
-            return GetBillsPageAsync(isPaid, employeeId, projectId, startDate, endDate, page, itemsPerPage, System.Threading.CancellationToken.None);
+            return GetBillsPageAsync(isPaid, employeeId, projectId, startDate, endDate, showOnlyMine, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2807,6 +2807,10 @@ namespace SparkTrack.API
                     if (endDate != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("endDate")).Append('=').Append(System.Uri.EscapeDataString(endDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     if (page != null)
                     {
@@ -2987,15 +2991,15 @@ namespace SparkTrack.API
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId)
+        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId, bool? showOnlyMine)
         {
-            return GetUsersRemainingPaymentsAsync(projectId, System.Threading.CancellationToken.None);
+            return GetUsersRemainingPaymentsAsync(projectId, showOnlyMine, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId, bool? showOnlyMine, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -3014,6 +3018,10 @@ namespace SparkTrack.API
                     if (projectId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 
@@ -3090,14 +3098,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId)
+        public virtual System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId, bool? showOnlyMine)
         {
-            return GetPendingPaymentsSummaryAsync(projectId, System.Threading.CancellationToken.None);
+            return GetPendingPaymentsSummaryAsync(projectId, showOnlyMine, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId, bool? showOnlyMine, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -3116,6 +3124,10 @@ namespace SparkTrack.API
                     if (projectId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 

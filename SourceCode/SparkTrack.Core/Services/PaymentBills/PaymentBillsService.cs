@@ -23,17 +23,20 @@ public class PaymentBillsService(
         Guid? projectId,
         DateTime? startDate,
         DateTime? endDate,
+        bool showOnlyMine,
         PageQuery pageQuery
     )
     {
-        return paymentBillsRepository.GetPageAsync(isPaid, employeeId, projectId, startDate, endDate, pageQuery);
+        var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
+        
+        return paymentBillsRepository.GetPageAsync(isPaid, employeeId, projectId, startDate, endDate, showOnlyMine ? currentUser.Id : null, pageQuery);
     }
 
-    public Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId) =>
-        paymentBillsRepository.GetUsersRemainingPaymentsAsync(projectId);
+    public Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId, bool showOnlyMine) =>
+        paymentBillsRepository.GetUsersRemainingPaymentsAsync(projectId, showOnlyMine ? authorizationService.GetUserOrThrowIfUnauthorized().Id : null);
 
-    public Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId) =>
-        paymentBillsRepository.GetPendingPaymentsSummaryAsync(projectId);
+    public Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId, bool showOnlyMine) =>
+        paymentBillsRepository.GetPendingPaymentsSummaryAsync(projectId, showOnlyMine ? authorizationService.GetUserOrThrowIfUnauthorized().Id : null);
 
     public Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
         Guid? adminId,

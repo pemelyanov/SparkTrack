@@ -14,7 +14,8 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         Guid? employeeId,
         Guid? projectId,
         DateTime? startDate,
-        DateTime? endDate,
+        DateTime? endDate, 
+        bool showOnlyMine,
         PageQuery pageQuery
     )
     {
@@ -26,6 +27,7 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
             projectId,
             startDate?.ToUniversalTime(),
             endDate?.ToUniversalTime(),
+            showOnlyMine,
             pageQuery.Page,
             pageQuery.ItemsPerPage
         );
@@ -33,20 +35,20 @@ public class PaymentBillsService(ClientFactory<FinanceClient> financeClientFacto
         return new ReadOnlyPagedData<PaymentBill>(page.Items.Select(it => it.ToDomain()).ToArray(), page.Total);
     }
 
-    public async Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId)
+    public async Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId, bool showOnlyMine)
     {
         using var wrapper = financeClientFactory.Invoke();
 
-        var list = await wrapper.Client.GetUsersRemainingPaymentsAsync(projectId);
+        var list = await wrapper.Client.GetUsersRemainingPaymentsAsync(projectId, showOnlyMine);
 
         return list.Select(it => it.ToDomain()).ToArray();
     }
 
-    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId)
+    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId, bool showOnlyMine)
     {
         using var wrapper = financeClientFactory.Invoke();
 
-        var dto = await wrapper.Client.GetPendingPaymentsSummaryAsync(projectId);
+        var dto = await wrapper.Client.GetPendingPaymentsSummaryAsync(projectId, showOnlyMine);
 
         return dto.ToDomain();
     }

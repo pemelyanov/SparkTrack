@@ -40,7 +40,7 @@ public class SubTaskCompletedEventHandler(
 
         users = users.Concat(adminsList);
 
-        foreach (var user in users.Where(it => it.TelegramTag is not null))
+        foreach (var user in users.Where(it => it.TelegramTag is not null).DistinctBy(it => it.Id))
         {
             try
             {
