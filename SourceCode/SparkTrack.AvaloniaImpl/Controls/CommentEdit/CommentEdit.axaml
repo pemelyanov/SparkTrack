@@ -36,7 +36,7 @@
     <StackPanel Spacing="8">
         <TextBlock Text="Комментарий" Classes="subtitle" />
         
-        <ToggleSwitch Classes="markdown-view-switch"
+        <ToggleSwitch Classes="edit-view-switch"
                       IsChecked="{Binding IsInPreviewMode, Mode=TwoWay}" />
 
         <ContentControl Classes.description-edit="{Binding !IsInPreviewMode}"

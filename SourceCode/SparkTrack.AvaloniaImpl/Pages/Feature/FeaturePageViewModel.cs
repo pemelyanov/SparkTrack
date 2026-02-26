@@ -157,13 +157,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_subTaskTemplateSelectionViewModelFactory = subTaskTemplateSelectionViewModelFactory;
         m_dialogService = dialogService;
         m_templateViewModelFactory = templateViewModelFactory;
-        IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
-        IsEditingLink = m_feature is null;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
         AttachmentsPanelViewModel.PreviewAttachmentSetRequested +=
             AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
-        if (feature is null) IsNameEditing = true;
+        if (feature is null) IsInEditMode = true;
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
 
@@ -181,9 +179,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         RefreshCommand.Execute().Subscribe().DisposeWith(disposables);
 
         this.WhenAnyValue(
-                it => it.IsEditingSubTask,
                 it => it.IsEditingComment,
-                (isEditingSubTask, isEditingComment) => !isEditingSubTask && !isEditingComment
+                (isEditingComment) => !isEditingComment
             )
             .Subscribe(canSaveByHotKey => CanSaveByHotKey = canSaveByHotKey)
             .DisposeWith(disposables);
@@ -200,22 +197,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public IAttachmentViewModel? PreviewAttachment { get; private set; }
 
     [Reactive]
-    public bool IsNameEditing { get; set; }
-
-    [Reactive]
-    public bool IsReelDescriptionInPreviewMode { get; set; }
-
-    [Reactive]
-    public bool IsPreviewDescriptionInPreviewMode { get; set; }
-
-    [Reactive]
-    public bool IsEditingLink { get; set; }
-
+    public bool IsInEditMode { get; set; }
+    
     [Reactive]
     public bool IsEditingComment { get; private set; }
-
-    [Reactive]
-    public bool IsEditingSubTask { get; private set; }
 
     [Reactive]
     public bool CanSaveByHotKey { get; private set; }
@@ -292,7 +277,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public void AddSubTask()
     {
         var subTask = CreateSubTaskViewModel();
-        subTask.IsInEditMode = true;
 
         SubTasksList.Add(subTask);
     }
@@ -305,7 +289,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             selectionViewModel.SelectedTemplate is not SubTaskTemplate template) return;
 
         SubTaskViewModel subTask = CreateSubTaskFromTemplate(template);
-        subTask.IsInEditMode = true;
 
         SubTasksList.Add(subTask);
     }
@@ -340,19 +323,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             m_availableEmployeesList,
             it => SubTasksList.Remove(it)
         );
-
-        var isEditSubscription = subTaskViewModel.WhenAnyValue(it => it.IsInEditMode)
-            .Do(_ => IsEditingSubTask = SubTasksList.Any(it => it.IsInEditMode))
-            .Where(isInEditMode => isInEditMode)
-            .Subscribe(_ =>
-                {
-                    foreach (var task in SubTasksList)
-                        if (subTaskViewModel != task)
-                            task.IsInEditMode = false;
-                }
-            );
-
-        subTaskViewModel.DisposeWithViewModel(isEditSubscription);
 
         return subTaskViewModel;
     }

@@ -224,6 +224,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         AttachmentsList = f.AttachmentsList
             .Select(a => GetAttachmentMapExpression().Invoke(a))
             .ToArray(),
+        AuthorsList =  f.AuthorsList.Select(a => GetUserMapExpression().Invoke(a)).ToArray(),
         CreatedAt = f.CreatedAt,
         EditedAt = f.EditedAt,
         Version = f.Version,

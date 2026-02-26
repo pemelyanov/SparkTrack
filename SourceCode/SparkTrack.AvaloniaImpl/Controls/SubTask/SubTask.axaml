@@ -17,7 +17,7 @@
         <Style Selector="ContentControl.edit-control">
             <Setter Property="Content">
                 <Template>
-                    <StackPanel IsVisible="{Binding IsInEditMode}" Spacing="8">
+                    <StackPanel IsVisible="{Binding #Root.IsInEditMode}" Spacing="8">
                         <TextBox Watermark="Задача" Text="{Binding Name}" />
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Исполнитель: " VerticalAlignment="Center" />
@@ -59,7 +59,7 @@
         <Style Selector="ContentControl.view-control">
             <Setter Property="Content">
                 <Template>
-                    <StackPanel IsVisible="{Binding !IsInEditMode}" Spacing="8">
+                    <StackPanel IsVisible="{Binding !#Root.IsInEditMode}" Spacing="8">
                         <TextBlock Classes="caption" Text="{Binding Name}" />
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
                             <TextBlock Text="Исполнитель: " />
@@ -97,19 +97,14 @@
         <Grid RowSpacing="8" RowDefinitions="* Auto Auto">
             <StackPanel Orientation="Horizontal" Spacing="8">
 
-                <ContentControl Width="300" Classes.edit-control="{Binding IsInEditMode}"
-                                Classes.view-control="{Binding !IsInEditMode}" />
+                <ContentControl Width="300" Classes.edit-control="{Binding #Root.IsInEditMode}"
+                                Classes.view-control="{Binding !#Root.IsInEditMode}" />
 
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
                             HorizontalAlignment="Right" VerticalAlignment="Top">
                     
-                    <Button Classes="icon template-add" IsVisible="{Binding IsInEditMode}"
+                    <Button Classes="icon template-add" IsVisible="{Binding #Root.IsInEditMode}"
                             Command="{Binding CreateTemplateAsync}" />
-                    
-                    <ToggleButton Classes="icon enter-hot-key"
-                                  Classes.edit="{Binding !IsInEditMode}"
-                                  Classes.save="{Binding IsInEditMode}"
-                                  IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
                     
                     <Button Classes="icon delete" Command="{Binding RemoveAsync}"/>
                 </StackPanel>

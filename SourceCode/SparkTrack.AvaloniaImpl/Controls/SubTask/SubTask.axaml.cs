@@ -24,4 +24,18 @@ public partial class SubTask : ReactiveUserControl<SubTaskViewModel>
     }
 
     #endregion
+
+    #region IsInEditMode
+
+    public static readonly StyledProperty<bool> IsInEditModeProperty =
+        AvaloniaProperty.Register<SubTask, bool>(
+            nameof(IsInEditMode));
+
+    public bool IsInEditMode
+    {
+        get => GetValue(IsInEditModeProperty);
+        set => SetValue(IsInEditModeProperty, value);
+    }
+
+    #endregion
 }

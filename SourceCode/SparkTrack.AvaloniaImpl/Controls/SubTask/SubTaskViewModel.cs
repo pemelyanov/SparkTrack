@@ -78,9 +78,6 @@ public class SubTaskViewModel : ViewModelBase
     }
 
     [Reactive]
-    public bool IsInEditMode { get; set; }
-
-    [Reactive]
     public string Name { get; set; } = string.Empty;
 
     [Reactive]
