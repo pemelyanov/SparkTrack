@@ -23,7 +23,7 @@ public class ProjectsArchiveService(
     {
         await projectsRepository.SetArchiveStatus(id, true, source);
 
-        var features = await featuresRepository.GetPageAsync(id, true, null, null, null, PageQuery.All);
+        var features = await featuresRepository.GetPageAsync(id, true, null, null, null, null, null, PageQuery.All);
 
         foreach (var feature in features.Items.Where(it => it.ArchiveSource != EArchiveSource.User))
             await featureArchiveService.ArchiveAsync(feature.Id, EArchiveSource.Parent, true);

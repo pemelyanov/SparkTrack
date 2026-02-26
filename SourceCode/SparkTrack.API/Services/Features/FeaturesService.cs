@@ -13,6 +13,8 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
         bool showCompleted,
         DateTime? startDate,
         DateTime? endDate,
+        bool showOnlyMine,
+        SortQuery? sortQuery,
         PageQuery pageQuery
     )
     {
@@ -22,6 +24,9 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
             showCompleted,
             startDate,
             endDate,
+            showOnlyMine,
+            sortQuery?.SortField,
+            sortQuery?.SortDescending,
             pageQuery.Page,
             pageQuery.ItemsPerPage
         );

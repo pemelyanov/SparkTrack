@@ -15,6 +15,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using ConfirmationOptions;
 using Controls.TemplateSelectionForm;
+using Core.Shared.Data;
 using Data.Templates;
 using Reactive;
 using Services.DialogHost;
@@ -65,6 +66,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             .CombineLatest(PaginatorViewModel.WhenChanged())
             .CombineLatest(this.WhenAnyValue(it => it.ShowCompleted))
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
@@ -85,6 +87,9 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public bool ShowCompleted { get; set; }
+
+    [Reactive]
+    public bool ShowOnlyMine { get; set; } = true;
 
     [Reactive]
     public IReadOnlyList<SelectableViewModel<Feature>> CurrentPageData { get; private set; } = [];
@@ -133,6 +138,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
                 ShowCompleted,
                 DateRangeViewModel.TryGetStartDate(),
                 DateRangeViewModel.TryGetEndDate(),
+                ShowOnlyMine,
+                new SortQuery("CreatedAt", true),
                 PaginatorViewModel.ToQuery()
             );
 

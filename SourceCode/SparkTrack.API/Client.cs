@@ -1427,14 +1427,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, string sortField, bool? sortDescending, int? page, int? itemsPerPage)
         {
-            return GetPageAsync(projectId, showCompleted, startDate, endDate, page, itemsPerPage, System.Threading.CancellationToken.None);
+            return GetPageAsync(projectId, showCompleted, startDate, endDate, showOnlyMine, sortField, sortDescending, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, string sortField, bool? sortDescending, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1465,6 +1465,18 @@ namespace SparkTrack.API
                     if (endDate != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("endDate")).Append('=').Append(System.Uri.EscapeDataString(endDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (sortField != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("SortField")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(sortField, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (sortDescending != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("SortDescending")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(sortDescending, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     if (page != null)
                     {

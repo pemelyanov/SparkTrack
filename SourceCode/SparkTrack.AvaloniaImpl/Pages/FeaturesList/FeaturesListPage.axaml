@@ -36,8 +36,11 @@
                                                      EndDate="{Binding DateRangeViewModel.Model.EndDate}" />
                 </disablingWrapper:DisablingWrapper>
 
-                <ToggleSwitch OffContent="Показывать незакрытые" OnContent="Показывать все"
+                <CheckBox Content="Показывать закрытые"
                               IsChecked="{Binding ShowCompleted, Mode=TwoWay}" />
+                
+                <CheckBox Content="Показывать только мои" IsVisible="{markupExtensions:CurrentUserInRole Admin}"
+                          IsChecked="{Binding ShowOnlyMine, Mode=TwoWay}" />
             </WrapPanel>
 
             <StackPanel Grid.Column="1" IsVisible="{markupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">

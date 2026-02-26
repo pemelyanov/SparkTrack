@@ -21,6 +21,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Guid? subTaskEmployeeId,
         DateTime? startDate,
         DateTime? endDate,
+        Guid? authorId,
+        SortQuery? sortQuery,
         PageQuery pageQuery
     ) => dbContext.Features
         .AsNoTracking()
@@ -36,9 +38,16 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             f => f.TasksList.Count == 0
                 || f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
         )
+        .WhereIf(authorId is not null, it => it.AuthorsList.Count == 0 || it.AuthorsList.Any(a => a.Id == authorId))
+        .OrderBy(sortQuery, () => sortQuery?.SortField switch
+        {
+            "Name" => it => it.Name,
+            "Deadline" => it => it.TasksList.Select(t => t.Deadline).Min(),
+            "CreatedAt" => it => it.CreatedAt,
+            _ => throw new NotSupportedException(sortQuery?.SortField)
+        })
         // TODO: Add filter
         .Where(it => it.ArchivedAt == null)
-        .OrderByDescending(it => it.CreatedAt)
         .AsExpandableEFCore()
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .AsPaginated(pageQuery)
