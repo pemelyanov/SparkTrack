@@ -73,6 +73,12 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             CreatedAt = DateTime.UtcNow
         };
 
+        var authors = await dbContext.Users.Where(it => feature.AuthorsIdList.Contains(it.Id))
+            .ToArrayAsync();
+
+        foreach (var userData in authors)
+            featureData.AuthorsList.Add(userData);
+
         var addedFeature = await dbContext.Features.AddAsync(featureData);
         await dbContext.SaveChangesAsync();
 
@@ -80,6 +86,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             .Include(it => it.TasksList)
             .ThenInclude(it => it.ExecutorEmployee)
             .Include(it => it.Project)
+            .Include(it => it.AuthorsList)
             .AsExpandableEFCore()
             .Select(GetFeatureMapExpression(null))
             .FirstAsync();
@@ -103,6 +110,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         var featureData = await dbContext.Features
             .Include(f => f.TasksList)
             .Include(f => f.AttachmentsList)
+            .Include(f => f.AuthorsList)
             .FirstOrDefaultAsync(f => f.Id == feature.Id);
 
         if (featureData is null)
@@ -119,6 +127,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
         AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
 
+        await HandleAuthorsAsync(feature, featureData);
+
         try
         {
             await dbContext.SaveChangesAsync();
@@ -127,14 +137,40 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         {
             throw new ConflictException("Feature was modified early", e);
         }
-        
+
         return await dbContext.Features.Where(it => it.Id == feature.Id)
             .Include(it => it.TasksList)
             .ThenInclude(it => it.ExecutorEmployee)
             .Include(it => it.Project)
+            .Include(it => it.AuthorsList)
             .AsExpandableEFCore()
             .Select(GetFeatureMapExpression(null))
             .FirstAsync();
+    }
+    
+    private async Task HandleAuthorsAsync(FeatureEdit feature, FeatureData featureData)
+    {
+        var existingAuthors = featureData.AuthorsList
+            .ToDictionary(t => t.Id);
+
+        foreach (var authorId in feature.AuthorsIdList)
+        {
+            if (existingAuthors.Remove(authorId))
+            {
+                continue;
+            }
+
+            var author = await dbContext.Users.FindAsync(authorId);
+            
+            if(author is null) continue;
+
+            featureData.AuthorsList.Add(author);
+
+            existingAuthors.Remove(authorId);
+        }
+
+        foreach (var author in existingAuthors.Values)
+            featureData.AuthorsList.Remove(author);
     }
 
     private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
@@ -207,10 +243,10 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         await dbContext.SaveChangesAsync();
     }
 
-    public static Expression<Func<FeatureData, Feature>> 
+    public static Expression<Func<FeatureData, Feature>>
         GetFeatureMapExpression(
-        Guid? subTaskEmployeeId
-    ) => f => new Feature
+            Guid? subTaskEmployeeId
+        ) => f => new Feature
     {
         Id = f.Id,
         Name = f.Name,
@@ -224,7 +260,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         AttachmentsList = f.AttachmentsList
             .Select(a => GetAttachmentMapExpression().Invoke(a))
             .ToArray(),
-        AuthorsList =  f.AuthorsList.Select(a => GetUserMapExpression().Invoke(a)).ToArray(),
+        AuthorsList = f.AuthorsList.Select(a => GetUserMapExpression().Invoke(a)).ToArray(),
         CreatedAt = f.CreatedAt,
         EditedAt = f.EditedAt,
         Version = f.Version,
@@ -234,7 +270,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
     private static Expression<Func<ProjectData, Project>> GetProjectMapExpression()
     {
-        return  project => new Project
+        return project => new Project
         {
             Id = project.Id,
             Name = project.Name,
@@ -243,7 +279,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             ArchiveSource = project.ArchiveSource
         };
     }
-    
+
     private static Expression<Func<UserData, User>> GetUserMapExpression()
     {
         return user => new User
@@ -257,7 +293,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             ArchiveSource = user.ArchiveSource
         };
     }
-    
+
     private static Expression<Func<SubTaskData, SubTask>> GetSubTaskMapExpression()
     {
         return subTask => new SubTask
@@ -275,7 +311,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             IsTimelyBonusApproved = subTask.IsTimelyBonusApproved
         };
     }
-    
+
     private static Expression<Func<AttachmentData, Attachment>> GetAttachmentMapExpression()
     {
         return attachment => new Attachment

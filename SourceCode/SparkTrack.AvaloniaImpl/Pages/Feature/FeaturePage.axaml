@@ -91,20 +91,22 @@
                 </Template>
             </Setter>
         </Style>
-        
+
         <Style Selector="ContentControl.author-edit">
             <Style Selector="^ Border.card">
                 <Setter Property="Padding" Value="4" />
             </Style>
             <Setter Property="Content">
                 <Template>
-                   <Border Classes="card">
-                       <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
-                           <userName:UserName User="{Binding .}" VerticalAlignment="Center"/>
-                           
-                           <Button Grid.Column="1" Classes="icon delete"/>
-                       </Grid>
-                   </Border>
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                            <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="8 0 0 0" />
+
+                            <Button Grid.Column="1" Classes="icon delete"
+                                    Command="{Binding #Root.ViewModel.RemoveAuthor, FallbackValue={x:Null}}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </Border>
                 </Template>
             </Setter>
         </Style>
@@ -112,7 +114,7 @@
         <Style Selector="ContentControl.author-view">
             <Setter Property="Content">
                 <Template>
-                    <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="0 0 0 8"/>
+                    <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="0 0 0 8" />
                 </Template>
             </Setter>
         </Style>
@@ -122,13 +124,13 @@
             <StackPanel Spacing="8">
                 <Border Classes="card" Padding="16 8 16 16">
                     <StackPanel Spacing="8">
-                        <Panel Classes="title-container" HorizontalAlignment="Left" Height="36"
+                        <Panel Classes="title-container" HorizontalAlignment="Left" Height="32"
                                Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}">
                             <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsInEditMode}"
                                                  Classes="subtitle"
                                                  Text="{Binding Name}"
                                                  TextTrimming="CharacterEllipsis" MaxWidth="500" />
-                            <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500"
+                            <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500" Height="30"
                                      IsVisible="{Binding IsInEditMode}"
                                      Classes="subtitle" Text="{Binding Name}" />
                         </Panel>
@@ -141,18 +143,20 @@
                         </StackPanel>
 
                         <Separator />
-                        
+
                         <StackPanel Spacing="8" HorizontalAlignment="Left">
                             <TextBlock Text="Авторы:" />
                             <ItemsControl ItemsSource="{Binding AuthorsList}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <ContentControl Classes.author-edit="{Binding #Root.ViewModel.IsInEditMode}"
-                                                        Classes.author-view="{Binding !#Root.ViewModel.IsInEditMode}"/>
+                                                        Classes.author-view="{Binding !#Root.ViewModel.IsInEditMode}" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <Button Content="Добавить" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsVisible="{Binding IsInEditMode}"/>
+                            <Button Content="Добавить" HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center" IsVisible="{Binding IsInEditMode}"
+                                    Command="{Binding AddAuthorAsync}" />
                         </StackPanel>
 
                         <Separator />
@@ -290,13 +294,14 @@
                 Classes.esc-hot-key="{Binding !IsEditingComment}" />
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
-            <Border Classes="card" Padding="8 2"  IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}">
+            <Border Classes="card" Padding="8 2" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Режим: " VerticalAlignment="Center" />
-                    <ToggleSwitch Classes="edit-view-switch" IsChecked="{Binding IsInEditMode, Mode=TwoWay}" VerticalAlignment="Center" />
+                    <ToggleSwitch Classes="edit-view-switch" IsChecked="{Binding IsInEditMode, Mode=TwoWay}"
+                                  VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
-           
+
 
             <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" />
 

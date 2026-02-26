@@ -5989,6 +5989,9 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
         public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("authorsList")]
+        public System.Collections.Generic.IReadOnlyList<UserDTO> AuthorsList { get; init; }
+
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public System.DateTime CreatedAt { get; init; }
 
@@ -6175,6 +6178,9 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
         public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("authorsIdList")]
+        public System.Collections.Generic.IReadOnlyList<System.Guid> AuthorsIdList { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("version")]
         public System.Guid Version { get; init; }

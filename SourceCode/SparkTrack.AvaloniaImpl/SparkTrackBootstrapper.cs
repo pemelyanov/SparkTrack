@@ -1,5 +1,4 @@
 ﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
-using SparkTrack.AvaloniaImpl.Data;
 using SparkTrack.AvaloniaImpl.Data.Configurations;
 using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Pages.Settings;
@@ -11,6 +10,7 @@ namespace SparkTrack.AvaloniaImpl;
 
 using Windows.LinkShare;
 using Windows.Main;
+using Windows.UserSelection;
 using API.AutofacModules;
 using Autofac;
 using Controls.Account;
@@ -89,6 +89,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterGeneric(typeof(TemplateSaveFormViewModel<>));
         builder.RegisterGeneric(typeof(TemplateSelectionFormViewModel<>));
         builder.RegisterType<LinkShareViewModel>();
+        builder.RegisterType<UserSelectionViewModel>();
     }
 
     protected override void RegisterServices(ContainerBuilder builder)

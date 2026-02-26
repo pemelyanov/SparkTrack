@@ -1,7 +1,5 @@
 ﻿namespace SparkTrack.WebAPI.DTO.Edit;
 
-using Core.Shared.Data.Entities;
-
 public record FeatureEditDTO
 {
     public int Id { get; init; }
@@ -15,6 +13,8 @@ public record FeatureEditDTO
     public string Description { get; init; } = string.Empty;
 
     public IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; } = [];
+    
+    public IReadOnlyList<Guid> AuthorsIdList { get; init; } = [];
     
     public Guid Version { get; init; }
 }
