@@ -14,6 +14,7 @@
              xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
              xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel"
@@ -90,6 +91,31 @@
                 </Template>
             </Setter>
         </Style>
+        
+        <Style Selector="ContentControl.author-edit">
+            <Style Selector="^ Border.card">
+                <Setter Property="Padding" Value="4" />
+            </Style>
+            <Setter Property="Content">
+                <Template>
+                   <Border Classes="card">
+                       <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                           <userName:UserName User="{Binding .}" VerticalAlignment="Center"/>
+                           
+                           <Button Grid.Column="1" Classes="icon delete"/>
+                       </Grid>
+                   </Border>
+                </Template>
+            </Setter>
+        </Style>
+
+        <Style Selector="ContentControl.author-view">
+            <Setter Property="Content">
+                <Template>
+                    <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="0 0 0 8"/>
+                </Template>
+            </Setter>
+        </Style>
     </UserControl.Styles>
     <Panel>
         <ScrollViewer x:Name="MainScrollViewer">
@@ -112,6 +138,21 @@
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="Канал:" />
                             <link:Link Text="{Binding Project.Name}" Url="{Binding Project.Link}" />
+                        </StackPanel>
+
+                        <Separator />
+                        
+                        <StackPanel Spacing="8" HorizontalAlignment="Left">
+                            <TextBlock Text="Авторы:" />
+                            <ItemsControl ItemsSource="{Binding AuthorsList}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <ContentControl Classes.author-edit="{Binding #Root.ViewModel.IsInEditMode}"
+                                                        Classes.author-view="{Binding !#Root.ViewModel.IsInEditMode}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Content="Добавить" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsVisible="{Binding IsInEditMode}"/>
                         </StackPanel>
 
                         <Separator />

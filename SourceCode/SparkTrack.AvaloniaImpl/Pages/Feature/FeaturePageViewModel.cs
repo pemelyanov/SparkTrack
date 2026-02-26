@@ -241,6 +241,24 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
 
+    public IReadOnlyList<User> AuthorsList { get; } =
+    [
+        new ()
+        {
+            Name = "asdasd",
+            Role = ERole.Admin,
+            Email = "asdda",
+            TelegramTag = "aaaaa"
+        },
+        new ()
+        {
+            Name = "asdasd",
+            Role = ERole.Admin,
+            Email = "asdda",
+            TelegramTag = "aaaaa"
+        },
+    ];
+
     public async Task CreateTemplateAsync()
     {
         var template = new FeatureTemplate

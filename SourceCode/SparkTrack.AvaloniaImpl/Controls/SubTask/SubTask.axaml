@@ -106,7 +106,7 @@
                     <Button Classes="icon template-add" IsVisible="{Binding #Root.IsInEditMode}"
                             Command="{Binding CreateTemplateAsync}" />
                     
-                    <Button Classes="icon delete" Command="{Binding RemoveAsync}"/>
+                    <Button Classes="icon delete" Command="{Binding RemoveAsync}" IsVisible="{Binding #Root.IsInEditMode}"/>
                 </StackPanel>
             </StackPanel>
 
