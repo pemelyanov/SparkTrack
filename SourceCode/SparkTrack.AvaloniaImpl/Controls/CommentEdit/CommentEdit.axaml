@@ -13,7 +13,7 @@
             <Setter Property="Content">
                 <Template>
                     <TextBox AcceptsReturn="True" AcceptsTab="True" UseFloatingWatermark="False"
-                             Text="{Binding Text}"
+                             Text="{Binding Text}" TextWrapping="Wrap"
                              MinHeight="200" PastingFromClipboard="TextBox_OnPastingFromClipboard" />
                 </Template>
             </Setter>
