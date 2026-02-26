@@ -125,13 +125,14 @@
                 <TextBlock IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
                            FontSize="12" Opacity="0.75">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}{0} / {1} • {2}/с">
-                            <Binding Path="LoadProgress.Progress.CurrentProgress^"
-                                     Converter="{StaticResource BytesToStringConverter}" FallbackValue="0" />
-                            <Binding Path="Size" Converter="{StaticResource BytesToStringConverter}" />
+                        <MultiBinding StringFormat="{}{0} • {1}/с">
+                            <MultiBinding Converter="{StaticResource BytesToStringConverter}">
+                                <Binding Path="LoadProgress.Progress.CurrentProgress^" FallbackValue="0" />
+                                <Binding Path="Size" />
+                            </MultiBinding>
+                           
                             <Binding Path="AverageSpeedBytesPerSecond"
                                      Converter="{StaticResource BytesToStringConverter}" />
-                            <Binding Path="EstimatedTimeLeft" />
                         </MultiBinding>
                     </TextBlock.Text>
                 </TextBlock>
