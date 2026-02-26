@@ -1,4 +1,6 @@
-﻿namespace SparkTrack.DataAccess.EFCore.Repositories;
+﻿using LinqKit;
+
+namespace SparkTrack.DataAccess.EFCore.Repositories;
 
 using Core.Exceptions;
 using System.Linq.Expressions;
@@ -37,6 +39,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         // TODO: Add filter
         .Where(it => it.ArchivedAt == null)
         .OrderByDescending(it => it.CreatedAt)
+        .AsExpandableEFCore()
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .AsPaginated(pageQuery)
         .CollectAsync();
@@ -47,6 +50,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
     ) => dbContext.Features
         .AsNoTracking()
         .Where(f => f.Id == id)
+        .AsExpandableEFCore()
         .Select(GetFeatureMapExpression(subTaskEmployeeId))
         .FirstOrDefaultAsync();
 
@@ -72,13 +76,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         var addedFeature = await dbContext.Features.AddAsync(featureData);
         await dbContext.SaveChangesAsync();
 
-        featureData = await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
+        return await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
             .Include(it => it.TasksList)
             .ThenInclude(it => it.ExecutorEmployee)
             .Include(it => it.Project)
+            .AsExpandableEFCore()
+            .Select(GetFeatureMapExpression(null))
             .FirstAsync();
-
-        return GetFeatureMapExpression(null).Compile().Invoke(featureData);
     }
 
     private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
@@ -124,13 +128,13 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             throw new ConflictException("Feature was modified early", e);
         }
         
-        featureData = await dbContext.Features.Where(it => it.Id == feature.Id)
+        return await dbContext.Features.Where(it => it.Id == feature.Id)
             .Include(it => it.TasksList)
             .ThenInclude(it => it.ExecutorEmployee)
             .Include(it => it.Project)
+            .AsExpandableEFCore()
+            .Select(GetFeatureMapExpression(null))
             .FirstAsync();
-
-        return GetFeatureMapExpression(null).Compile().Invoke(featureData);
     }
 
     private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
@@ -211,54 +215,14 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         Id = f.Id,
         Name = f.Name,
         Description = f.Description,
-        Project = new Project
-        {
-            Id = f.Project.Id,
-            Name = f.Project.Name,
-            Link = f.Project.Link,
-            ArchivedAt = f.Project.ArchivedAt,
-            ArchiveSource = f.Project.ArchiveSource
-        },
+        Project = GetProjectMapExpression().Invoke(f.Project),
         TasksList = f.TasksList
             .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId)
             .OrderBy(t => t.Deadline)
-            .Select(t => new SubTask
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    Deadline = t.Deadline,
-                    Cost = t.Cost,
-                    ExecutorEmployee = new User
-                    {
-                        Id = t.ExecutorEmployee.Id,
-                        Name = t.ExecutorEmployee.Name,
-                        Role = t.ExecutorEmployee.Role,
-                        TelegramTag = t.ExecutorEmployee.TelegramTag,
-                        Email = t.ExecutorEmployee.Email,
-                        ArchivedAt = t.ExecutorEmployee.ArchivedAt,
-                        ArchiveSource = t.ExecutorEmployee.ArchiveSource
-                    },
-                    PaymentStatus = t.PaymentStatus,
-                    IsCompleted = t.IsCompleted,
-                    Version = t.Version,
-                    CompletedAt = t.CompletedAt,
-                    TimelyBonus = t.TimelyBonus,
-                    IsTimelyBonusApproved = t.IsTimelyBonusApproved
-                }
-            )
+            .Select(t => GetSubTaskMapExpression().Invoke(t))
             .ToArray(),
         AttachmentsList = f.AttachmentsList
-            .Select(a => new Attachment
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Extension = a.Extension,
-                    Size = a.Size,
-                    FileId = a.FileId,
-                    IsImage = a.IsImage,
-                    Checksum = a.Checksum
-                }
-            )
+            .Select(a => GetAttachmentMapExpression().Invoke(a))
             .ToArray(),
         CreatedAt = f.CreatedAt,
         EditedAt = f.EditedAt,
@@ -266,4 +230,62 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
         ArchivedAt = f.ArchivedAt,
         ArchiveSource = f.ArchiveSource
     };
+
+    private static Expression<Func<ProjectData, Project>> GetProjectMapExpression()
+    {
+        return  project => new Project
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Link = project.Link,
+            ArchivedAt = project.ArchivedAt,
+            ArchiveSource = project.ArchiveSource
+        };
+    }
+    
+    private static Expression<Func<UserData, User>> GetUserMapExpression()
+    {
+        return user => new User
+        {
+            Id = user.Id,
+            Name = user.Name,
+            Role = user.Role,
+            TelegramTag = user.TelegramTag,
+            Email = user.Email,
+            ArchivedAt = user.ArchivedAt,
+            ArchiveSource = user.ArchiveSource
+        };
+    }
+    
+    private static Expression<Func<SubTaskData, SubTask>> GetSubTaskMapExpression()
+    {
+        return subTask => new SubTask
+        {
+            Id = subTask.Id,
+            Name = subTask.Name,
+            Deadline = subTask.Deadline,
+            Cost = subTask.Cost,
+            ExecutorEmployee = GetUserMapExpression().Invoke(subTask.ExecutorEmployee),
+            PaymentStatus = subTask.PaymentStatus,
+            IsCompleted = subTask.IsCompleted,
+            Version = subTask.Version,
+            CompletedAt = subTask.CompletedAt,
+            TimelyBonus = subTask.TimelyBonus,
+            IsTimelyBonusApproved = subTask.IsTimelyBonusApproved
+        };
+    }
+    
+    private static Expression<Func<AttachmentData, Attachment>> GetAttachmentMapExpression()
+    {
+        return attachment => new Attachment
+        {
+            Id = attachment.Id,
+            Name = attachment.Name,
+            Extension = attachment.Extension,
+            Size = attachment.Size,
+            FileId = attachment.FileId,
+            IsImage = attachment.IsImage,
+            Checksum = attachment.Checksum
+        };
+    }
 }

@@ -30,7 +30,6 @@ public class WebAPIModule(IConfiguration configuration) : Module
         builder.RegisterType<AuthorizationServiceMiddleware>().InstancePerLifetimeScope();
         builder.RegisterType<JwtAuthorizationService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         if(!TryRegisterGoogleDrive(builder)) builder.RegisterFileSystemFileService();
-        builder.RegisterType<GoogleDriveFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
         builder.RegisterType<AutofacEventEmitter>().AsImplementedInterfaces().SingleInstance();
         TryRegisterTelegramBot(builder);
     }
@@ -73,6 +72,8 @@ public class WebAPIModule(IConfiguration configuration) : Module
                 }
             )
             .SingleInstance();
+        
+        builder.RegisterType<GoogleDriveFilesService>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
         return true;
     }

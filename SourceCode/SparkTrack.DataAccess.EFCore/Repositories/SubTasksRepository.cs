@@ -1,3 +1,5 @@
+using LinqKit;
+
 namespace SparkTrack.DataAccess.EFCore.Repositories;
 
 using Core.Data.Entities;
@@ -24,6 +26,7 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
         .AsNoTracking()
         .Where(it => it.Id == id)
         .Select(it => it.Feature)
+        .AsExpandableEFCore()
         .Select(
             FeaturesRepository.GetFeatureMapExpression(null)
         )
