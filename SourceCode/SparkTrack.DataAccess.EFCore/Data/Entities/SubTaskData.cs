@@ -19,6 +19,10 @@ public record SubTaskData
     public int FeatureId { get; set; }
 
     public ICollection<PaymentData> Payments { get; } = [];
+
+    public ICollection<SubTaskData> DependsOnList { get; init; } = [];
+    
+    public ICollection<SubTaskData> DependentForList { get; init; } = [];
     
     public float Cost { get; set; }
     

@@ -58,5 +58,8 @@ public class SubTaskDataConfiguration : IEntityTypeConfiguration<SubTaskData>
         
         builder.HasIndex(t => t.ExecutorEmployeeId);
         builder.HasIndex(t => t.IsCompleted);
+        
+        builder.HasMany(it => it.DependsOnList)
+            .WithMany(it => it.DependentForList);
     }
 }
