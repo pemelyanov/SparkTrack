@@ -9,6 +9,7 @@
              xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
              xmlns:enums="clr-namespace:SparkTrack.Core.Shared.Enums;assembly=SparkTrack.Core.Shared"
              xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
              x:DataType="subTask:SubTaskViewModel"
@@ -63,13 +64,14 @@
                         <TextBlock Classes="caption" Text="{Binding Name}" />
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
                             <TextBlock Text="Исполнитель: " />
-                            <TextBlock Text="{Binding SelectedEmployee.Name}" />
-                            <telegramTag:TelegramTag Text="{Binding SelectedEmployee.TelegramTag, StringFormat='@{0}'}"
-                                                     IsVisible="{Binding SelectedEmployee.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            <TextBlock Text="{Binding SelectedEmployee.Name, FallbackValue=''}" />
+                            <telegramTag:TelegramTag
+                                Text="{Binding SelectedEmployee.TelegramTag, StringFormat='@{0}', FallbackValue=''}"
+                                IsVisible="{Binding SelectedEmployee.TelegramTag, FallbackValue={x:False}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Дедлайн: " />
-                            <TextBlock Text="{Binding Deadline, StringFormat='dd.MM.yyyy'}" />
+                            <TextBlock Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Стоимость: " />
@@ -102,11 +104,12 @@
 
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
                             HorizontalAlignment="Right" VerticalAlignment="Top">
-                    
+
                     <Button Classes="icon template-add" IsVisible="{Binding #Root.IsInEditMode}"
                             Command="{Binding CreateTemplateAsync}" />
-                    
-                    <Button Classes="icon delete" Command="{Binding RemoveAsync}" IsVisible="{Binding #Root.IsInEditMode}"/>
+
+                    <Button Classes="icon delete" Command="{Binding RemoveAsync}"
+                            IsVisible="{Binding #Root.IsInEditMode}" />
                 </StackPanel>
             </StackPanel>
 

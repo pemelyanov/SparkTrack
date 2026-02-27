@@ -88,9 +88,13 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True"
+                                    Header="Создана" Width="180"
+                                    Binding="{Binding Model.CreatedAt, Mode=OneWay,
+                                    StringFormat={x:Static constants:DateFormats.LongRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
+                <DataGridTextColumn IsReadOnly="True"
                                     Header="Дедлайн" Width="180"
                                     Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
-                                    StringFormat={x:Static constants:DateFormats.ShortRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
+                                    StringFormat={x:Static constants:DateFormats.LongRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
                 <DataGridTemplateColumn IsReadOnly="True" Width="180"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>

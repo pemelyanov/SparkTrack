@@ -12,7 +12,7 @@ namespace SparkTrack.DataAccess.EFCore.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-           
+           // TODO: Вернуть код начальной инициализации после деплоя миграций на проде
         }
 
         /// <inheritdoc />

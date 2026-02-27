@@ -36,7 +36,7 @@
                                 <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0}₽'}" />
                                 <TextBlock>
                                     <Run Text="Дедлайн:"/>
-                                    <Run Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
+                                    <Run Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
                                 </TextBlock>
                             </StackPanel>
                         </ToolTip.Tip>

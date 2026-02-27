@@ -115,9 +115,9 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Дедлайн" IsReadOnly="True"
-                                    Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.ShortRu}}" />
+                                    Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
                 <DataGridTextColumn Header="Дата выполнения" IsReadOnly="True"
-                                    Binding="{Binding Model.SubTask.CompletedAt, StringFormat={x:Static constants:DateFormats.ShortRu},
+                                    Binding="{Binding Model.SubTask.CompletedAt, StringFormat={x:Static constants:DateFormats.LongRu},
                                     TargetNullValue={x:Static constants:CommonStrings.EmptyValue}}" />
                 <DataGridTemplateColumn Header="Стоимость (опл./всего)" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
