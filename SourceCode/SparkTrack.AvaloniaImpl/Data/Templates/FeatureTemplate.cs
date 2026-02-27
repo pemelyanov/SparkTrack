@@ -8,5 +8,7 @@ public class FeatureTemplate : ITemplate
 
     public IReadOnlyList<SubTaskTemplate> TasksList { get; init; } = [];
 
+    public IReadOnlyList<UserSelectionTemplate> Authors { get; init; } = [];
+
     public string Description { get; init; } = string.Empty;
 }

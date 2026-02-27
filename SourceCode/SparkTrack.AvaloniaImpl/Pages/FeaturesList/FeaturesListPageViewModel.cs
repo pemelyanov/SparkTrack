@@ -119,7 +119,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             selectionViewModel.SelectedTemplate is not FeatureTemplate template) return;
 
         var featureViewModel = m_featureAddPageViewModelFactory(project);
-        featureViewModel.InitializeFromTemplate(template);
+        await featureViewModel.InitializeFromTemplateAsync(template);
 
         HostScreen.Router.NavigateOnUIThread(featureViewModel);
     }

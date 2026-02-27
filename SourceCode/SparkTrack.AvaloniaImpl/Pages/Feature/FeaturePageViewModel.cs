@@ -94,7 +94,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         dialogService,
         templateViewModelFactory,
         userSelectionFactory
-    ) { }
+    )
+    {
+    }
 
     public FeaturePageViewModel(
         Feature feature,
@@ -129,7 +131,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         dialogService,
         templateViewModelFactory,
         userSelectionFactory
-    ) { }
+    )
+    {
+    }
 
     private FeaturePageViewModel(
         Feature? feature,
@@ -281,6 +285,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             Name = Name,
             Description = GetDescription(),
             TasksList = SubTasksList.Select(it => it.GetTemplate()).ToArray(),
+            Authors = AuthorsList.Select(it => new UserSelectionTemplate { Id = it.Id, Name = it.Name }).ToArray()
         };
 
         var viewModel = m_templateViewModelFactory(template);
@@ -326,7 +331,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         SubTasksList.Add(subTask);
     }
 
-    public void InitializeFromTemplate(FeatureTemplate template)
+    public async Task InitializeFromTemplateAsync(FeatureTemplate template)
     {
         Name = template.Name;
 
@@ -335,6 +340,28 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTasks = template.TasksList.Select(CreateSubTaskFromTemplate);
 
         SubTasksList.AddRange(subTasks);
+
+        // TODO: По хорошему это переделать на отдельный запрос списка пользователей по списку ID
+        var admins = await m_usersService.GetPageAsync(ERole.Admin, PageQuery.All);
+
+        List<User> authorsList = [m_authorizationService.CurrentUser.Value!];
+
+        foreach (var authorTemplate in template.Authors)
+        {
+            if(authorTemplate.Id == m_authorizationService.CurrentUser.Value?.Id) continue;
+            
+            var author = admins.Items.FirstOrDefault(it => it.Id == authorTemplate.Id);
+
+            if (author is null)
+            {
+                s_logger.Warn("Cannot find author by template {authorTemplate}", authorTemplate);
+                continue;
+            }
+
+            authorsList.Add(author);
+        }
+
+        AuthorsList = authorsList;
     }
 
     private SubTaskViewModel CreateSubTaskFromTemplate(SubTaskTemplate template)
@@ -346,6 +373,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         subTask.Cost = template.Cost;
         subTask.TimelyBonus = template.TimelyBonus;
         subTask.Deadline = DateTime.Now.EndOfTheDay() + template.Deadline;
+
         return subTask;
     }
 
