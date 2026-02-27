@@ -1,4 +1,7 @@
-﻿namespace SparkTrack.AvaloniaImpl.Controls.SubTask;
+﻿using Avalonia.Controls;
+using SparkTrack.Core.Shared.Extensions;
+
+namespace SparkTrack.AvaloniaImpl.Controls.SubTask;
 
 using Avalonia;
 using Avalonia.Input;
@@ -38,4 +41,12 @@ public partial class SubTask : ReactiveUserControl<SubTaskViewModel>
     }
 
     #endregion
+
+
+    private void CalendarDatePicker_OnSelectedDateChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if(ViewModel is null || ViewModel.Deadline.TimeOfDay != TimeSpan.Zero) return;
+
+        ViewModel.Deadline = ViewModel.Deadline.EndOfTheDay();
+    }
 }

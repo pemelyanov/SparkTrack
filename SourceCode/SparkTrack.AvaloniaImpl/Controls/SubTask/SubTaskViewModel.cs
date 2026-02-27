@@ -146,7 +146,7 @@ public class SubTaskViewModel : ViewModelBase
         Id = m_subTask?.Id ?? Guid.Empty,
         Name = Name,
         ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NotifyUIException($"Выберите сотрудника для задачи {Name}"),
-        Deadline = Deadline.EndOfTheDay(),
+        Deadline = Deadline,
         Cost = Cost,
         Version = m_subTask?.Version ?? Guid.Empty,
         TimelyBonus = TimelyBonus

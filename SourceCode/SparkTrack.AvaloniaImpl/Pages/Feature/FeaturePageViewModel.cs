@@ -1,6 +1,7 @@
 ﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
 using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Services.DialogHost;
+using SparkTrack.Core.Shared.Extensions;
 
 namespace SparkTrack.AvaloniaImpl.Pages.Feature;
 
@@ -344,7 +345,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         subTask.Cost = template.Cost;
         subTask.TimelyBonus = template.TimelyBonus;
-        subTask.Deadline = DateTime.Now + template.Deadline;
+        subTask.Deadline = DateTime.Now.EndOfTheDay() + template.Deadline;
         return subTask;
     }
 

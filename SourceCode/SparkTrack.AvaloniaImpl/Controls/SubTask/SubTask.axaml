@@ -30,7 +30,8 @@
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Дедлайн: " VerticalAlignment="Center" />
                             <CalendarDatePicker SelectedDate="{Binding Deadline}"
-                                                Grid.Column="1" HorizontalAlignment="Stretch" />
+                                                Grid.Column="1" HorizontalAlignment="Stretch"
+                                                SelectedDateChanged="CalendarDatePicker_OnSelectedDateChanged"/>
                         </Grid>
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Стоимость (₽): " VerticalAlignment="Center" />
