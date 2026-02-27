@@ -364,6 +364,21 @@ namespace SparkTrack.DataAccess.EFCore.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("SubTaskDataSubTaskData", b =>
+                {
+                    b.Property<Guid>("DependentForListId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DependsOnListId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("DependentForListId", "DependsOnListId");
+
+                    b.HasIndex("DependsOnListId");
+
+                    b.ToTable("SubTaskDataSubTaskData");
+                });
+
             modelBuilder.Entity("FeatureDataUserData", b =>
                 {
                     b.HasOne("SparkTrack.DataAccess.EFCore.Data.Entities.UserData", null)
@@ -477,6 +492,21 @@ namespace SparkTrack.DataAccess.EFCore.Migrations
                     b.Navigation("ExecutorEmployee");
 
                     b.Navigation("Feature");
+                });
+
+            modelBuilder.Entity("SubTaskDataSubTaskData", b =>
+                {
+                    b.HasOne("SparkTrack.DataAccess.EFCore.Data.Entities.SubTaskData", null)
+                        .WithMany()
+                        .HasForeignKey("DependentForListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SparkTrack.DataAccess.EFCore.Data.Entities.SubTaskData", null)
+                        .WithMany()
+                        .HasForeignKey("DependsOnListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SparkTrack.DataAccess.EFCore.Data.Entities.CommentData", b =>
