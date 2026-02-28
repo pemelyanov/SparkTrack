@@ -31,7 +31,11 @@ public class SubTaskCompletedEventHandler(
         var subTask = eventData.SubTask;
         var employee = subTask.ExecutorEmployee;
 
-        var users = eventData.ParentFeature.TasksList.Select(it => it.ExecutorEmployee)
+        var tasksMap = eventData.ParentFeature.TasksList.ToDictionary(it => it.Id);
+
+        var users = eventData.ParentFeature.TasksList
+            .Where(it => it.DependsOnIdList.Any(id => tasksMap[id].Id == subTask.Id))
+            .Select(it => it.ExecutorEmployee)
             .Where(it => it.Id != employee.Id);
 
         var adminsList = eventData.ParentFeature.AuthorsList.Any()
