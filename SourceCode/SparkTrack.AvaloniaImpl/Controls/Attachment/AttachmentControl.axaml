@@ -120,10 +120,10 @@
             <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="8">
                 <TextBlock Text="{Binding Size, Converter={StaticResource BytesToStringConverter}}"
                            IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}"
-                           FontSize="12" Opacity="0.75" />
+                           FontSize="12" Opacity="0.75" FontFamily="monospace" />
 
                 <TextBlock IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}"
-                           FontSize="12" Opacity="0.75">
+                           FontSize="12" Opacity="0.75" FontFamily="monospace">
                     <TextBlock.Text>
                         <MultiBinding StringFormat="{}{0} • {1}/с">
                             <MultiBinding Converter="{StaticResource BytesToStringConverter}">

@@ -9,8 +9,7 @@ namespace SparkTrack.DataAccess.EFCore.Migrations
     /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
-        // TODO: Включить после первого деплоя с миграциями
-        private readonly bool m_isEnabled = false;
+        private readonly bool m_isEnabled = true;
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
