@@ -111,6 +111,14 @@ public class SubTaskViewModel : ViewModelBase
                     AvailableDependencyTasksList =
                         list.Where(it => it != this && !IsRecurseSelected(it, this) && !DependsOnList.Contains(it))
                             .ToArray();
+
+                    var deletedTasks = DependsOnList.Where(it => !list.Contains(it)).ToArray();
+
+                    using (DependsOnList.SuspendNotifications())
+                    {
+                        foreach (var task in deletedTasks)
+                            DependsOnList.Remove(task);
+                    }
                 }
             )
             .DisposeWith(disposables);

@@ -124,7 +124,7 @@
             <StackPanel Spacing="8">
                 <Border Classes="card" Padding="16 8 16 16">
                     <StackPanel Spacing="8">
-                        <Panel Classes="title-container" HorizontalAlignment="Left" Height="32"
+                        <Panel Classes="title-container" HorizontalAlignment="Left" Height="30"
                                Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}">
                             <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsInEditMode}"
                                                  Classes="subtitle"

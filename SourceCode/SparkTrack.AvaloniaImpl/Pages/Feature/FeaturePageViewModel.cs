@@ -423,12 +423,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             {
                 await m_featuresService.AddAsync(editData);
 
+                m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно создана");
+                
                 Back();
 
                 return;
             }
 
             await m_featuresService.EditAsync(editData);
+            
+            m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно сохранена");
 
             await RefreshCommand.Execute().ToTask();
         }

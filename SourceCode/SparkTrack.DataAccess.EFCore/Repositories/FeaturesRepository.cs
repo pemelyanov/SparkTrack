@@ -134,43 +134,57 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
     {
         var featureData = await dbContext.Features
             .Include(f => f.TasksList)
+            .ThenInclude(t => t.DependsOnList)
             .Include(f => f.AttachmentsList)
             .Include(f => f.AuthorsList)
             .FirstOrDefaultAsync(f => f.Id == feature.Id);
 
         if (featureData is null)
         {
-            throw new InvalidOperationException($"Feature with id {feature.Id} not found");
+            throw new NotFoundException($"Feature with id {feature.Id} not found");
         }
 
-        featureData.Name = feature.Name;
-        featureData.Description = feature.Description;
-        featureData.Version = feature.Version;
-        featureData.EditedAt = DateTime.UtcNow;
-
-        HandleSubTasks(feature, featureData);
-
-        AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
-
-        await HandleAuthorsAsync(feature, featureData);
-
-        try
+        return await transactionWrapper.ExecuteInTransactionAsync(async () =>
         {
-            await dbContext.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException e)
-        {
-            throw new ConflictException("Feature was modified early", e);
-        }
+            featureData.Name = feature.Name;
+            featureData.Description = feature.Description;
+            featureData.Version = feature.Version;
+            featureData.EditedAt = DateTime.UtcNow;
 
-        return await dbContext.Features.Where(it => it.Id == feature.Id)
-            .Include(it => it.TasksList)
-            .ThenInclude(it => it.ExecutorEmployee)
-            .Include(it => it.Project)
-            .Include(it => it.AuthorsList)
-            .AsExpandableEFCore()
-            .Select(GetFeatureMapExpression(null))
-            .FirstAsync();
+            var tasksMap = HandleSubTasks(feature, featureData);
+
+            AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
+
+            await HandleAuthorsAsync(feature, featureData);
+
+            try
+            {
+                await dbContext.SaveChangesAsync();
+                
+                foreach (var subTaskEdit in feature.TasksList)
+                {
+                    var subTask = tasksMap[subTaskEdit.Id];
+
+                    foreach (var dependencyId in subTaskEdit.DependsOnIdList)
+                    {
+                        var dependency = tasksMap[dependencyId];
+
+                        subTask.DependsOnList.Add(dependency);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException e)
+            {
+                throw new ConflictException("Feature was modified early", e);
+            }
+            
+            return await dbContext.Features.Where(it => it.Id == feature.Id)
+                .AsExpandableEFCore()
+                .Select(GetFeatureMapExpression(null))
+                .FirstAsync();
+        });
     }
     
     private async Task HandleAuthorsAsync(FeatureEdit feature, FeatureData featureData)
@@ -198,18 +212,23 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             featureData.AuthorsList.Remove(author);
     }
 
-    private void HandleSubTasks(FeatureEdit feature, FeatureData featureData)
+    private IDictionary<Guid, SubTaskData> HandleSubTasks(FeatureEdit feature, FeatureData featureData)
     {
         var existingTasks = featureData.TasksList
             .ToDictionary(t => t.Id);
 
+        Dictionary<Guid, SubTaskData> editDataMap = [];
+
         foreach (var taskEdit in feature.TasksList)
         {
-            if (taskEdit.Id == Guid.Empty)
+            if (!existingTasks.ContainsKey(taskEdit.Id))
             {
+                var data = ToSubTaskData(taskEdit);
                 featureData.TasksList.Add(
-                    ToSubTaskData(taskEdit)
+                    data
                 );
+
+                editDataMap[taskEdit.Id] = data;
 
                 continue;
             }
@@ -225,6 +244,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             existingTask.TimelyBonus = taskEdit.TimelyBonus;
             existingTask.Version = taskEdit.Version;
             existingTask.Deadline = taskEdit.Deadline;
+            
+            editDataMap[taskEdit.Id] = existingTask;
 
             existingTasks.Remove(taskEdit.Id);
         }
@@ -233,6 +254,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
         {
             dbContext.SubTasks.RemoveRange(existingTasks.Values);
         }
+
+        return editDataMap;
     }
 
     public async Task DeleteAsync(int id)
