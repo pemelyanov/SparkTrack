@@ -88,5 +88,25 @@ public static class RouterExtensions
     /// <param name="router"></param>
     /// <param name="viewModel"></param>
     public static void ResetToOnUIThread(this RoutingState router, IRoutableViewModel viewModel) =>
-        Dispatcher.UIThread.Invoke(() => router.NavigateAndReset.Execute(viewModel));
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            var suspension = (router.NavigationStack as SuspendableObservableCollection<IRoutableViewModel>)?
+                .SuspendNotifications();
+            
+            router.NavigateAndReset.Execute(viewModel);
+            
+            suspension?.Dispose();
+        });
+    
+    /// <summary>
+    /// Производит навигацию на шаг назад, если в стеке больше одного элемента
+    /// </summary>
+    /// <param name="router"></param>
+    public static void SafeBackOnUIThread(this RoutingState router) =>
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            if (router.NavigationStack.Count < 2) return;
+
+            router.NavigateBack.Execute();
+        });
 }

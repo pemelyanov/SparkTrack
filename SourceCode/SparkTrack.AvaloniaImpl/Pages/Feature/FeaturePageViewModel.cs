@@ -309,7 +309,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void CancelComment() => CommentEditViewModel = null;
 
-    public void Back() => HostScreen.Router.BackOnUIThread();
+    public void Back() => HostScreen.Router.SafeBackOnUIThread();
 
     public void AddSubTask()
     {
