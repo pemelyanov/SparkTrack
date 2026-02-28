@@ -177,7 +177,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         if (feature is null)
         {
             IsInEditMode = true;
-            AuthorsList = [authorizationService.CurrentUser.Value!];
+            AuthorsList.Add(m_authorizationService.CurrentUser.Value!);
         }
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
@@ -240,6 +240,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public SuspendableObservableCollection<CommentViewModel> CommentsList { get; } = [];
 
+    public SuspendableObservableCollection<User> AuthorsList { get; } = [];
+
     [Reactive]
     public string ReelLink { get; set; } = string.Empty;
 
@@ -259,9 +261,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
 
-    [Reactive]
-    public IReadOnlyList<User> AuthorsList { get; private set; } = [];
-
     public async Task AddAuthorAsync()
     {
         var userSelectionViewModel = m_userSelectionFactory();
@@ -273,10 +272,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         if (AuthorsList.Any(it => it.Id == selectedUser.Id)) return;
 
-        AuthorsList = [..AuthorsList, selectedUser];
+        AuthorsList.Add(selectedUser);
     }
 
-    public void RemoveAuthor(User author) => AuthorsList = AuthorsList.Where(it => it.Id != author.Id).ToArray();
+    public void RemoveAuthor(User author) => AuthorsList.Remove(author);
 
     public async Task CreateTemplateAsync()
     {
@@ -361,7 +360,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             authorsList.Add(author);
         }
 
-        AuthorsList = authorsList;
+        using (AuthorsList.SuspendNotifications())
+        {
+            AuthorsList.Clear();
+            AuthorsList.AddRange(authorsList);
+        }
     }
 
     private SubTaskViewModel CreateSubTaskFromTemplate(SubTaskTemplate template)
@@ -382,6 +385,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTaskViewModel = m_subTaskViewModelFactory.Invoke(
             subTask,
             m_availableEmployeesList,
+            SubTasksList.GetListObservable(),
             it => SubTasksList.Remove(it)
         );
 
@@ -465,7 +469,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     {
         Name = feature?.Name ?? "Название идеи";
 
-        AuthorsList = feature?.AuthorsList ?? [];
+        using (AuthorsList.SuspendNotifications())
+        {
+            AuthorsList.Clear();
+            AuthorsList.AddRange(feature?.AuthorsList ?? []);
+        }
 
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
         InitializeDescriptionProperties(feature?.Description);

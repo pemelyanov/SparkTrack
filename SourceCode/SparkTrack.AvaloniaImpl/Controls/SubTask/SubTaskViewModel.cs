@@ -13,34 +13,41 @@ using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Core.Shared.Extensions;
 using Data.Templates;
 using Exceptions;
 using TemplateSaveForm;
 
 public class SubTaskViewModel : ViewModelBase
 {
-    private          bool                                             m_isUserInitiallySet;
-    private          SubTaskData?                                     m_subTask;
-    private readonly IObservable<IReadOnlyList<User>>                 m_availableEmployees;
-    private readonly Action<SubTaskViewModel>                         m_onRemove;
-    private readonly ISubTasksService                                 m_subTasksService;
-    private readonly IDialogService                                   m_dialogService;
+    private          bool                                                              m_isUserInitiallySet;
+    private          SubTaskData?                                                      m_subTask;
+    private readonly IObservable<IReadOnlyList<User>>                                  m_availableEmployees;
+    private readonly IObservable<IReadOnlyList<SubTaskViewModel>>                      m_availableSubTasks;
+    private readonly Action<SubTaskViewModel>                                          m_onRemove;
+    private readonly ISubTasksService                                                  m_subTasksService;
+    private readonly IDialogService                                                    m_dialogService;
     private readonly Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> m_templateViewModelFactory;
 
-    public SubTaskViewModel(SubTaskData? subTask,
-                            IObservable<IReadOnlyList<User>> availableEmployees,
-                            Action<SubTaskViewModel> onRemove,
-                            ISubTasksService subTasksService,
-                            IDialogService dialogService,
-                            Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory)
+    public SubTaskViewModel(
+        SubTaskData? subTask,
+        IObservable<IReadOnlyList<User>> availableEmployees,
+        IObservable<IReadOnlyList<SubTaskViewModel>> availableSubTasks,
+        Action<SubTaskViewModel> onRemove,
+        ISubTasksService subTasksService,
+        IDialogService dialogService,
+        Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory
+    )
     {
         m_subTask = subTask;
         m_availableEmployees = availableEmployees;
+        m_availableSubTasks = availableSubTasks;
         m_onRemove = onRemove;
         m_subTasksService = subTasksService;
         m_dialogService = dialogService;
         m_templateViewModelFactory = templateViewModelFactory;
+
+        Id = m_subTask?.Id ?? Guid.NewGuid();
+        IsNew = m_subTask is null;
         UpdateProperties(subTask);
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
@@ -53,29 +60,51 @@ public class SubTaskViewModel : ViewModelBase
 
         m_availableEmployees
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(
-                it =>
+            .Subscribe(it =>
                 {
                     AvailableEmployees = it;
-                    
-                    if(it.Count == 0) return;
+
+                    if (it.Count == 0) return;
 
                     if (m_isUserInitiallySet) return;
                     m_isUserInitiallySet = true;
 
                     if (EmployeeToSelectOnNextLoad is not null || m_subTask?.ExecutorEmployee is null)
                     {
-                        SelectedEmployee = AvailableEmployees.FirstOrDefault(u => u.Id == EmployeeToSelectOnNextLoad?.Id);
+                        SelectedEmployee =
+                            AvailableEmployees.FirstOrDefault(u => u.Id == EmployeeToSelectOnNextLoad?.Id);
                         EmployeeToSelectOnNextLoad = null;
-                        
+
                         return;
                     }
-                    
+
                     SelectedEmployee = it.FirstOrDefault(u => u.Id == m_subTask?.ExecutorEmployee.Id);
                 }
             )
             .DisposeWith(disposables);
+
+        m_availableSubTasks.Select(list =>
+                list.Select(it => it.DependsOnList.GetListObservable()).CombineLatest().Select(_ => list)
+            )
+            .Switch()
+            .Subscribe(list =>
+                {
+                    AvailableDependencyTasksList =
+                        list.Where(it => it != this && !it.DependsOnList.Contains(this) && !DependsOnList.Contains(it))
+                            .ToArray();
+                }
+            )
+            .DisposeWith(disposables);
     }
+
+    public Guid Id { get; }
+
+    public bool IsNew { get; }
+
+    [Reactive]
+    public IReadOnlyList<SubTaskViewModel> AvailableDependencyTasksList { get; private set; } = [];
+
+    public SuspendableObservableCollection<SubTaskViewModel> DependsOnList { get; } = [];
 
     [Reactive]
     public string Name { get; set; } = string.Empty;
@@ -85,7 +114,7 @@ public class SubTaskViewModel : ViewModelBase
 
     [Reactive]
     public User? SelectedEmployee { get; set; }
-    
+
     public UserSelectionTemplate? EmployeeToSelectOnNextLoad { get; set; }
 
     [Reactive]
@@ -93,19 +122,23 @@ public class SubTaskViewModel : ViewModelBase
 
     [Reactive]
     public float Cost { get; set; }
-    
+
     [Reactive]
     public float TimelyBonus { get; set; }
-    
+
     [Reactive]
     public bool IsCompleted { get; private set; }
-    
+
     [Reactive]
     public EPaymentStatus PaymentStatus { get; private set; }
-    
+
     public ReactiveCommand<Unit, Unit> ToggleCompletionStatusCommand { get; }
-    
+
     public ReactiveCommand<Unit, Unit> TogglePaymentStatusCommand { get; }
+
+    public void AddDependency(SubTaskViewModel dependency) => DependsOnList.Add(dependency);
+
+    public void RemoveDependency(SubTaskViewModel dependency) => DependsOnList.Remove(dependency);
 
     public async Task RemoveAsync()
     {
@@ -113,10 +146,10 @@ public class SubTaskViewModel : ViewModelBase
             "Вы уверены что хотите удалить задачу?",
             "Удаление задачи"
         )) return;
-        
+
         m_onRemove(this);
     }
-    
+
     public SubTaskTemplate GetTemplate() => new()
     {
         Name = Name,
@@ -135,7 +168,7 @@ public class SubTaskViewModel : ViewModelBase
     public async Task CreateTemplateAsync()
     {
         var template = GetTemplate();
-        
+
         var viewModel = m_templateViewModelFactory(template);
 
         await m_dialogService.ShowAsync(viewModel);
@@ -145,7 +178,8 @@ public class SubTaskViewModel : ViewModelBase
     {
         Id = m_subTask?.Id ?? Guid.Empty,
         Name = Name,
-        ExecutorEmployeeId = SelectedEmployee?.Id ?? throw new NotifyUIException($"Выберите сотрудника для задачи {Name}"),
+        ExecutorEmployeeId =
+            SelectedEmployee?.Id ?? throw new NotifyUIException($"Выберите сотрудника для задачи {Name}"),
         Deadline = Deadline,
         Cost = Cost,
         Version = m_subTask?.Version ?? Guid.Empty,
@@ -154,16 +188,16 @@ public class SubTaskViewModel : ViewModelBase
 
     private async Task ToggleCompletionStatusAsync()
     {
-        if(m_subTask is null) return;
+        if (m_subTask is null) return;
 
         m_subTask = await m_subTasksService.SetIsCompletedAsync(m_subTask.Id, !IsCompleted, m_subTask.Version);
-        
+
         UpdateProperties(m_subTask);
     }
-    
+
     private async Task TogglePaymentStatusAsync()
     {
-        if(m_subTask is null) return;
+        if (m_subTask is null) return;
 
         var paymentStatus = PaymentStatus;
 
@@ -175,12 +209,12 @@ public class SubTaskViewModel : ViewModelBase
         {
             paymentStatus = EPaymentStatus.None;
         }
-        
+
         m_subTask = await m_subTasksService.SetPaymentStatusAsync(m_subTask.Id, paymentStatus, m_subTask.Version);
-        
+
         UpdateProperties(m_subTask);
     }
-    
+
     private void UpdateProperties(SubTaskData? subTask)
     {
         Name = subTask?.Name ?? string.Empty;

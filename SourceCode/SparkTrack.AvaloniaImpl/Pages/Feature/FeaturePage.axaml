@@ -102,7 +102,7 @@
                         <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
                             <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="8 0 0 0" />
 
-                            <Button Grid.Column="1" Classes="icon delete"
+                            <Button Grid.Column="1" Classes="icon medium delete"
                                     Command="{Binding #Root.ViewModel.RemoveAuthor, FallbackValue={x:Null}}"
                                     CommandParameter="{Binding .}" />
                         </Grid>
