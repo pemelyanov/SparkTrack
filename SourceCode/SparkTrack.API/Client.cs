@@ -6089,6 +6089,9 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("isTimelyBonusApproved")]
         public bool IsTimelyBonusApproved { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("dependsOnIdList")]
+        public System.Collections.Generic.IReadOnlyList<System.Guid> DependsOnIdList { get; init; }
+
         [System.Text.Json.Serialization.JsonPropertyName("completedAt")]
         public System.DateTime? CompletedAt { get; init; }
 
@@ -6223,6 +6226,9 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("executorEmployeeId")]
         public System.Guid ExecutorEmployeeId { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dependsOnIdList")]
+        public System.Collections.Generic.IReadOnlyList<System.Guid> DependsOnIdList { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("deadline")]
         public System.DateTime Deadline { get; init; }

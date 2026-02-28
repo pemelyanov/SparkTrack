@@ -14,12 +14,14 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Data.Templates;
+using DynamicData;
 using Exceptions;
 using TemplateSaveForm;
 
 public class SubTaskViewModel : ViewModelBase
 {
     private          bool                                                              m_isUserInitiallySet;
+    private          bool                                                              m_isDependenciesInitiallySet;
     private          SubTaskData?                                                      m_subTask;
     private readonly IObservable<IReadOnlyList<User>>                                  m_availableEmployees;
     private readonly IObservable<IReadOnlyList<SubTaskViewModel>>                      m_availableSubTasks;
@@ -60,11 +62,11 @@ public class SubTaskViewModel : ViewModelBase
 
         m_availableEmployees
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(it =>
+            .Subscribe(list =>
                 {
-                    AvailableEmployees = it;
+                    AvailableEmployees = list;
 
-                    if (it.Count == 0) return;
+                    if (list.Count == 0) return;
 
                     if (m_isUserInitiallySet) return;
                     m_isUserInitiallySet = true;
@@ -78,7 +80,24 @@ public class SubTaskViewModel : ViewModelBase
                         return;
                     }
 
-                    SelectedEmployee = it.FirstOrDefault(u => u.Id == m_subTask?.ExecutorEmployee.Id);
+                    SelectedEmployee = list.FirstOrDefault(u => u.Id == m_subTask?.ExecutorEmployee.Id);
+                }
+            )
+            .DisposeWith(disposables);
+
+        m_availableSubTasks.Subscribe(list =>
+                {
+                    if (list.Count == 0) return;
+
+                    if (m_isDependenciesInitiallySet) return;
+                    m_isDependenciesInitiallySet = true;
+
+                    if (m_subTask is null) return;
+
+                    using (DependsOnList.SuspendNotifications())
+                    {
+                        DependsOnList.AddRange(list.Where(it => m_subTask.DependsOnIdList.Contains(it.Id)));
+                    }
                 }
             )
             .DisposeWith(disposables);
@@ -176,10 +195,11 @@ public class SubTaskViewModel : ViewModelBase
 
     public SubTaskEdit MapToEdit() => new()
     {
-        Id = m_subTask?.Id ?? Guid.Empty,
+        Id = Id,
         Name = Name,
         ExecutorEmployeeId =
             SelectedEmployee?.Id ?? throw new NotifyUIException($"Выберите сотрудника для задачи {Name}"),
+        DependsOnIdList = DependsOnList.Select(it => it.Id).ToArray(),
         Deadline = Deadline,
         Cost = Cost,
         Version = m_subTask?.Version ?? Guid.Empty,

@@ -11,6 +11,7 @@ public static class SubTaskMappingExtensions
         Id = it.Id,
         Name = it.Name,
         ExecutorEmployeeId = it.ExecutorEmployeeId,
+        DependsOnIdList = it.DependsOnIdList,
         Deadline = it.Deadline.ToUniversalTime(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,
@@ -19,24 +20,12 @@ public static class SubTaskMappingExtensions
         TimelyBonus = it.TimelyBonus
     };
 
-    public static SubTaskEdit ToDomain(this SubTaskEditDTO it) => new()
-    {
-        Id = it.Id,
-        Name = it.Name,
-        ExecutorEmployeeId = it.ExecutorEmployeeId,
-        Deadline = it.Deadline.ToLocalTime(),
-        Cost = it.Cost,
-        IsCompleted = it.IsCompleted,
-        PaymentStatus = it.PaymentStatus.Cast<Core.Shared.Enums.EPaymentStatus>(),
-        Version = it.Version,
-        TimelyBonus = it.TimelyBonus
-    };
-    
     public static SubTask ToDomain(this SubTaskDTO it) => new()
     {
         Id = it.Id,
         Name = it.Name,
         ExecutorEmployee = it.ExecutorEmployee.ToDomain(),
+        DependsOnIdList = it.DependsOnIdList,
         Deadline = it.Deadline.ToLocalTime(),
         Cost = it.Cost,
         IsCompleted = it.IsCompleted,

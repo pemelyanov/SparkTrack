@@ -9,11 +9,12 @@ using Core.Shared.Data;
 using Core.Shared.Data.Edit;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
+using Core.Transactions;
 using Data.Entities;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
 
-internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeaturesRepository
+internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransactionWrapper transactionWrapper) : IFeaturesRepository
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         Guid? projectId,
@@ -65,16 +66,17 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
 
     public async Task<Feature> AddAsync(FeatureEdit feature)
     {
+        var subTasksDataMap = feature.TasksList.Select(
+                ToSubTaskData
+            )
+            .ToDictionary(it => it.Id);
+        
         var featureData = new FeatureData
         {
             Name = feature.Name,
             ProjectId = feature.ProjectId,
             Description = feature.Description,
-            TasksList = feature.TasksList
-                .Select(
-                    ToSubTaskData
-                )
-                .ToList(),
+            TasksList = subTasksDataMap.Values,
             AttachmentsList = feature.AttachmentsList.Select(
                     AttachmentsUtils.ToAttachmentData
                 )
@@ -82,23 +84,37 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             CreatedAt = DateTime.UtcNow
         };
 
-        var authors = await dbContext.Users.Where(it => feature.AuthorsIdList.Contains(it.Id))
-            .ToArrayAsync();
+        return await transactionWrapper.ExecuteInTransactionAsync(async () =>
+            {
+                var authors = await dbContext.Users.Where(it => feature.AuthorsIdList.Contains(it.Id))
+                    .ToArrayAsync();
 
-        foreach (var userData in authors)
-            featureData.AuthorsList.Add(userData);
+                foreach (var userData in authors)
+                    featureData.AuthorsList.Add(userData);
 
-        var addedFeature = await dbContext.Features.AddAsync(featureData);
-        await dbContext.SaveChangesAsync();
+                var addedFeature = await dbContext.Features.AddAsync(featureData);
+                await dbContext.SaveChangesAsync();
 
-        return await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
-            .Include(it => it.TasksList)
-            .ThenInclude(it => it.ExecutorEmployee)
-            .Include(it => it.Project)
-            .Include(it => it.AuthorsList)
-            .AsExpandableEFCore()
-            .Select(GetFeatureMapExpression(null))
-            .FirstAsync();
+                foreach (var subTaskEdit in feature.TasksList)
+                {
+                    var subTask = subTasksDataMap[subTaskEdit.Id];
+
+                    foreach (var dependencyId in subTaskEdit.DependsOnIdList)
+                    {
+                        var dependency = subTasksDataMap[dependencyId];
+
+                        subTask.DependsOnList.Add(dependency);
+                    }
+                }
+
+                await dbContext.SaveChangesAsync();
+
+                return await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
+                    .AsExpandableEFCore()
+                    .Select(GetFeatureMapExpression(null))
+                    .FirstAsync();
+            }
+        );
     }
 
     private static SubTaskData ToSubTaskData(SubTaskEdit t) => new()
@@ -317,7 +333,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext) : IFeatu
             Version = subTask.Version,
             CompletedAt = subTask.CompletedAt,
             TimelyBonus = subTask.TimelyBonus,
-            IsTimelyBonusApproved = subTask.IsTimelyBonusApproved
+            IsTimelyBonusApproved = subTask.IsTimelyBonusApproved,
+            DependsOnIdList = subTask.DependsOnList.Select(s => s.Id).ToArray()
         };
     }
 
