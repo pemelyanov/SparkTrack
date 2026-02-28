@@ -75,6 +75,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             )
             .ToDictionary(it => it.Id);
 
+        foreach (var subTask in subTasksDataMap.Values)
+            subTask.Id = Guid.Empty;
+
         var featureData = new FeatureData
         {
             Name = feature.Name,
@@ -229,6 +232,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             if (!existingTasks.ContainsKey(taskEdit.Id))
             {
                 var data = ToSubTaskData(taskEdit);
+
+                data.Id = Guid.Empty;
+                
                 featureData.TasksList.Add(
                     data
                 );

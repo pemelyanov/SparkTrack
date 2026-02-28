@@ -52,7 +52,6 @@ public class SubTaskViewModel : ViewModelBase
         m_templateViewModelFactory = templateViewModelFactory;
 
         Id = m_subTask?.Id ?? Guid.NewGuid();
-        IsNew = m_subTask is null;
         UpdateProperties(subTask);
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
@@ -60,7 +59,8 @@ public class SubTaskViewModel : ViewModelBase
         SelectedEmployee = m_subTask?.ExecutorEmployee;
 
         var currentUser = authorizationService.CurrentUser.Value!;
-        IsOwnedByCurrentUser = currentUser.Role.IsAnyRole(ERole.Admin) || m_subTask?.ExecutorEmployee.Id == currentUser.Id;
+        IsOwnedByCurrentUser =
+            currentUser.Role.IsAnyRole(ERole.Admin) || m_subTask?.ExecutorEmployee.Id == currentUser.Id;
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -98,6 +98,13 @@ public class SubTaskViewModel : ViewModelBase
 
                     if (m_isDependenciesInitiallySet) return;
                     m_isDependenciesInitiallySet = true;
+
+                    if (DependsOnIdListToSelectOnNextLoad.Count > 0)
+                    {
+                        DependsOnList.AddRange(list.Where(it => DependsOnIdListToSelectOnNextLoad.Contains(it.Id)));
+
+                        return;
+                    }
 
                     if (m_subTask is null) return;
 
@@ -137,12 +144,10 @@ public class SubTaskViewModel : ViewModelBase
 
         return source.DependsOnList.Any(i => IsRecurseSelected(i, target));
     }
-    
+
     public bool IsOwnedByCurrentUser { get; }
 
-    public Guid Id { get; }
-
-    public bool IsNew { get; }
+    public Guid Id { get; set; }
 
     [Reactive]
     public IReadOnlyList<SubTaskViewModel> AvailableDependencyTasksList { get; private set; } = [];
@@ -159,6 +164,8 @@ public class SubTaskViewModel : ViewModelBase
     public User? SelectedEmployee { get; set; }
 
     public UserSelectionTemplate? EmployeeToSelectOnNextLoad { get; set; }
+
+    public IReadOnlyList<Guid> DependsOnIdListToSelectOnNextLoad { get; set; } = [];
 
     [Reactive]
     public DateTime Deadline { get; set; }
@@ -195,6 +202,7 @@ public class SubTaskViewModel : ViewModelBase
 
     public SubTaskTemplate GetTemplate() => new()
     {
+        TaskId = Id,
         Name = Name,
         Deadline = Deadline.Date - DateTime.Now.Date,
         ExecutorEmployee = SelectedEmployee is null
@@ -204,6 +212,7 @@ public class SubTaskViewModel : ViewModelBase
                 Id = SelectedEmployee.Id,
                 Name = SelectedEmployee.Name
             },
+        DependsOnIdList = DependsOnList.Select(it => it.Id).ToArray(),
         Cost = Cost,
         TimelyBonus = TimelyBonus
     };

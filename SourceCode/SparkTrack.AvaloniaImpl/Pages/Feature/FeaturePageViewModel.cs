@@ -370,8 +370,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private SubTaskViewModel CreateSubTaskFromTemplate(SubTaskTemplate template)
     {
         var subTask = CreateSubTaskViewModel();
+
+        subTask.Id = template.TaskId;
         subTask.Name = template.Name;
         subTask.EmployeeToSelectOnNextLoad = template.ExecutorEmployee;
+        subTask.DependsOnIdListToSelectOnNextLoad = template.DependsOnIdList;
 
         subTask.Cost = template.Cost;
         subTask.TimelyBonus = template.TimelyBonus;
@@ -394,7 +397,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task RefreshAsync()
     {
-        await Task.Delay(2000);
         s_logger.Info("Refresh executed");
 
         if (m_authorizationService.CurrentUser.Value?.Role is not ERole.Employee)
@@ -528,8 +530,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task RefreshCommentsAsync()
     {
-        await Task.Delay(2000);
-        
         if (m_feature is null) return;
 
         var page = await m_commentsService.GetPageAsync(m_feature.Id, PageQuery.All);

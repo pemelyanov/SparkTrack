@@ -122,7 +122,7 @@
     <Panel>
         <ScrollViewer x:Name="MainScrollViewer">
             <StackPanel Spacing="8">
-                <Border Classes="card" Padding="16 8 16 16">
+                <Border Classes="card" Padding="16 8 16 16" IsEnabled="{Binding !RefreshCommand.IsExecuting^}">
                     <StackPanel Spacing="8">
                         <Panel Classes="title-container" HorizontalAlignment="Left" Height="30"
                                Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}">
@@ -179,17 +179,19 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                            Orientation="Horizontal">
-                                    <Button Classes="icon medium-content"
-                                            Content="{markupExtensions:SymbolIcon Symbol=Add}"
-                                            Command="{Binding AddSubTask}"
-                                            CornerRadius="4 0 0 4"
-                                            ToolTip.Tip="Добавить задачу" />
+                                <Panel IsVisible="{Binding IsInEditMode}">
+                                    <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
+                                                Orientation="Horizontal">
+                                        <Button Classes="icon medium-content"
+                                                Content="{markupExtensions:SymbolIcon Symbol=Add}"
+                                                Command="{Binding AddSubTask}"
+                                                CornerRadius="4 0 0 4"
+                                                ToolTip.Tip="Добавить задачу" />
 
-                                    <Button Classes="icon template" CornerRadius="0 4 4 0"
-                                            Command="{Binding AddSubTaskFromTemplateAsync}" />
-                                </StackPanel>
+                                        <Button Classes="icon template" CornerRadius="0 4 4 0"
+                                                Command="{Binding AddSubTaskFromTemplateAsync}" />
+                                    </StackPanel>
+                                </Panel>
                             </StackPanel>
                         </ScrollViewer>
 
