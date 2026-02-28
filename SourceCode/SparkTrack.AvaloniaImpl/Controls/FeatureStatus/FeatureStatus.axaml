@@ -33,7 +33,8 @@
                             <StackPanel>
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" />
                                 <TextBlock Text="{Binding ExecutorEmployee.Name, StringFormat='Исполнитель: {0}'}" />
-                                <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0}₽'}" />
+                                <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0:C}'}" IsVisible="{Binding Cost}" />
+                                <TextBlock Text="{Binding TimelyBonus, StringFormat='Бонус за срок: {0:C}'}" IsVisible="{Binding TimelyBonus}" />
                                 <TextBlock>
                                     <Run Text="Дедлайн:"/>
                                     <Run Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />

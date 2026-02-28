@@ -13,6 +13,8 @@ using Services.DialogHost;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Core.Client.Services.Authorization;
+using Core.Shared.Extensions;
 using Data.Templates;
 using DynamicData;
 using Exceptions;
@@ -37,7 +39,8 @@ public class SubTaskViewModel : ViewModelBase
         Action<SubTaskViewModel> onRemove,
         ISubTasksService subTasksService,
         IDialogService dialogService,
-        Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory
+        Func<SubTaskTemplate, TemplateSaveFormViewModel<SubTaskTemplate>> templateViewModelFactory,
+        IAuthorizationService authorizationService
     )
     {
         m_subTask = subTask;
@@ -54,6 +57,10 @@ public class SubTaskViewModel : ViewModelBase
 
         ToggleCompletionStatusCommand = ReactiveCommand.CreateFromTask(ToggleCompletionStatusAsync);
         TogglePaymentStatusCommand = ReactiveCommand.CreateFromTask(TogglePaymentStatusAsync);
+        SelectedEmployee = m_subTask?.ExecutorEmployee;
+
+        var currentUser = authorizationService.CurrentUser.Value!;
+        IsOwnedByCurrentUser = currentUser.Role.IsAnyRole(ERole.Admin) || m_subTask?.ExecutorEmployee.Id == currentUser.Id;
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -130,6 +137,8 @@ public class SubTaskViewModel : ViewModelBase
 
         return source.DependsOnList.Any(i => IsRecurseSelected(i, target));
     }
+    
+    public bool IsOwnedByCurrentUser { get; }
 
     public Guid Id { get; }
 

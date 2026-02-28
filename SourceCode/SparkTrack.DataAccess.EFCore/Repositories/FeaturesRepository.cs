@@ -14,7 +14,8 @@ using Data.Entities;
 using Extensions;
 using Microsoft.EntityFrameworkCore;
 
-internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransactionWrapper transactionWrapper) : IFeaturesRepository
+internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransactionWrapper transactionWrapper)
+    : IFeaturesRepository
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         Guid? projectId,
@@ -40,13 +41,16 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
                 || f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
         )
         .WhereIf(authorId is not null, it => it.AuthorsList.Count == 0 || it.AuthorsList.Any(a => a.Id == authorId))
-        .OrderBy(sortQuery, () => sortQuery?.SortField switch
-        {
-            "Name" => it => it.Name,
-            "Deadline" => it => it.TasksList.Select(t => t.Deadline).Min(),
-            "CreatedAt" => it => it.CreatedAt,
-            _ => throw new NotSupportedException(sortQuery?.SortField)
-        })
+        .OrderBy(
+            sortQuery,
+            () => sortQuery?.SortField switch
+            {
+                "Name" => it => it.Name,
+                "Deadline" => it => it.TasksList.Select(t => t.Deadline).Min(),
+                "CreatedAt" => it => it.CreatedAt,
+                _ => throw new NotSupportedException(sortQuery?.SortField)
+            }
+        )
         // TODO: Add filter
         .Where(it => it.ArchivedAt == null)
         .AsExpandableEFCore()
@@ -70,7 +74,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
                 ToSubTaskData
             )
             .ToDictionary(it => it.Id);
-        
+
         var featureData = new FeatureData
         {
             Name = feature.Name,
@@ -111,7 +115,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
 
                 return await dbContext.Features.Where(it => it.Id == addedFeature.Entity.Id)
                     .AsExpandableEFCore()
-                    .Select(GetFeatureMapExpression(null))
+                    .Select(GetFeatureMapExpression())
                     .FirstAsync();
             }
         );
@@ -145,48 +149,49 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
         }
 
         return await transactionWrapper.ExecuteInTransactionAsync(async () =>
-        {
-            featureData.Name = feature.Name;
-            featureData.Description = feature.Description;
-            featureData.Version = feature.Version;
-            featureData.EditedAt = DateTime.UtcNow;
-
-            var tasksMap = HandleSubTasks(feature, featureData);
-
-            AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
-
-            await HandleAuthorsAsync(feature, featureData);
-
-            try
             {
-                await dbContext.SaveChangesAsync();
-                
-                foreach (var subTaskEdit in feature.TasksList)
+                featureData.Name = feature.Name;
+                featureData.Description = feature.Description;
+                featureData.Version = feature.Version;
+                featureData.EditedAt = DateTime.UtcNow;
+
+                var tasksMap = HandleSubTasks(feature, featureData);
+
+                AttachmentsUtils.HandleAttachments(dbContext, feature.AttachmentsList, featureData);
+
+                await HandleAuthorsAsync(feature, featureData);
+
+                try
                 {
-                    var subTask = tasksMap[subTaskEdit.Id];
+                    await dbContext.SaveChangesAsync();
 
-                    foreach (var dependencyId in subTaskEdit.DependsOnIdList)
+                    foreach (var subTaskEdit in feature.TasksList)
                     {
-                        var dependency = tasksMap[dependencyId];
+                        var subTask = tasksMap[subTaskEdit.Id];
 
-                        subTask.DependsOnList.Add(dependency);
+                        foreach (var dependencyId in subTaskEdit.DependsOnIdList)
+                        {
+                            var dependency = tasksMap[dependencyId];
+
+                            subTask.DependsOnList.Add(dependency);
+                        }
                     }
+
+                    await dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException e)
+                {
+                    throw new ConflictException("Feature was modified early", e);
                 }
 
-                await dbContext.SaveChangesAsync();
+                return await dbContext.Features.Where(it => it.Id == feature.Id)
+                    .AsExpandableEFCore()
+                    .Select(GetFeatureMapExpression())
+                    .FirstAsync();
             }
-            catch (DbUpdateConcurrencyException e)
-            {
-                throw new ConflictException("Feature was modified early", e);
-            }
-            
-            return await dbContext.Features.Where(it => it.Id == feature.Id)
-                .AsExpandableEFCore()
-                .Select(GetFeatureMapExpression(null))
-                .FirstAsync();
-        });
+        );
     }
-    
+
     private async Task HandleAuthorsAsync(FeatureEdit feature, FeatureData featureData)
     {
         var existingAuthors = featureData.AuthorsList
@@ -200,8 +205,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             }
 
             var author = await dbContext.Users.FindAsync(authorId);
-            
-            if(author is null) continue;
+
+            if (author is null) continue;
 
             featureData.AuthorsList.Add(author);
 
@@ -244,7 +249,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             existingTask.TimelyBonus = taskEdit.TimelyBonus;
             existingTask.Version = taskEdit.Version;
             existingTask.Deadline = taskEdit.Deadline;
-            
+
             editDataMap[taskEdit.Id] = existingTask;
 
             existingTasks.Remove(taskEdit.Id);
@@ -293,7 +298,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
 
     public static Expression<Func<FeatureData, Feature>>
         GetFeatureMapExpression(
-            Guid? subTaskEmployeeId
+            Guid? subTaskEmployeeId = null
         ) => f => new Feature
     {
         Id = f.Id,
@@ -301,9 +306,11 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
         Description = f.Description,
         Project = GetProjectMapExpression().Invoke(f.Project),
         TasksList = f.TasksList
-            .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId)
+            .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId
+                || t.DependentForList.Any(d => d.ExecutorEmployeeId == subTaskEmployeeId)
+            )
             .OrderBy(t => t.Deadline)
-            .Select(t => GetSubTaskMapExpression().Invoke(t))
+            .Select(t => GetSubTaskMapExpression(subTaskEmployeeId).Invoke(t))
             .ToArray(),
         AttachmentsList = f.AttachmentsList
             .Select(a => GetAttachmentMapExpression().Invoke(a))
@@ -342,20 +349,20 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
         };
     }
 
-    private static Expression<Func<SubTaskData, SubTask>> GetSubTaskMapExpression()
+    private static Expression<Func<SubTaskData, SubTask>> GetSubTaskMapExpression(Guid? employeeDataFilter = null)
     {
         return subTask => new SubTask
         {
             Id = subTask.Id,
             Name = subTask.Name,
             Deadline = subTask.Deadline,
-            Cost = subTask.Cost,
+            Cost = employeeDataFilter == null || employeeDataFilter == subTask.ExecutorEmployeeId ? subTask.Cost : 0,
             ExecutorEmployee = GetUserMapExpression().Invoke(subTask.ExecutorEmployee),
             PaymentStatus = subTask.PaymentStatus,
             IsCompleted = subTask.IsCompleted,
             Version = subTask.Version,
             CompletedAt = subTask.CompletedAt,
-            TimelyBonus = subTask.TimelyBonus,
+            TimelyBonus = employeeDataFilter == null || employeeDataFilter == subTask.ExecutorEmployeeId ? subTask.TimelyBonus : 0,
             IsTimelyBonusApproved = subTask.IsTimelyBonusApproved,
             DependsOnIdList = subTask.DependsOnList.Select(s => s.Id).ToArray()
         };

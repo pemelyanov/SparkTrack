@@ -3,9 +3,12 @@
 using System.Linq.Expressions;
 using Core.Shared.Data;
 using Data;
+using NLog;
 
 public static class QueryableExtensions
 {
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+    
     public static IQueryable<TData> WhereIf<TData>(
         this IQueryable<TData> queryable,
         bool condition,
@@ -25,9 +28,19 @@ public static class QueryableExtensions
     {
         if (query is null || string.IsNullOrEmpty(query.SortField)) return queryable;
 
-        if (query.SortDescending) return queryable.OrderByDescending(expressionSelector());
+        try
+        {
+            var expression = expressionSelector();
 
-        return queryable.OrderBy(expressionSelector());
+            if (query.SortDescending) return queryable.OrderByDescending(expression);
+
+            return queryable.OrderBy(expression);
+        }
+        catch (NotSupportedException e)
+        {
+            s_logger.Warn(e, "Unsupported sort field");
+            return queryable;
+        }
     }
 
     public static PaginatedQueryable<TData> AsPaginated<TData>(this IQueryable<TData> queryable, PageQuery query) =>

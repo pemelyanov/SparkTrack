@@ -67,25 +67,28 @@
                             <TextBlock Text="Зависит от: " />
 
                             <DropDownButton Content="Добавить" HorizontalAlignment="Stretch"
-                                            HorizontalContentAlignment="Center" IsEnabled="{Binding AvailableDependencyTasksList.Count}">
+                                            HorizontalContentAlignment="Center"
+                                            IsEnabled="{Binding AvailableDependencyTasksList.Count}">
                                 <DropDownButton.Flyout>
                                     <Flyout>
-                                        <ItemsControl ItemsSource="{Binding AvailableDependencyTasksList}" Width="{Binding $parent[Button].Bounds.Width}">
+                                        <ItemsControl ItemsSource="{Binding AvailableDependencyTasksList}"
+                                                      Width="{Binding $parent[Button].Bounds.Width}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
-                                                    <StackPanel Spacing="8"/>
+                                                    <StackPanel Spacing="8" />
                                                 </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="{Binding Name}" HorizontalAlignment="Stretch" Click="DependencySubTaskButton_OnClick" />
+                                                    <Button Content="{Binding Name}" HorizontalAlignment="Stretch"
+                                                            Click="DependencySubTaskButton_OnClick" />
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
                                     </Flyout>
                                 </DropDownButton.Flyout>
                             </DropDownButton>
-                            
+
                             <ItemsControl ItemsSource="{Binding DependsOnList}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -113,7 +116,9 @@
                 <Template>
                     <StackPanel IsVisible="{Binding !#Root.IsInEditMode}" Spacing="8">
                         <TextBlock Classes="caption" Text="{Binding Name}" />
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
+                        <StackPanel Orientation="Horizontal"
+                                    IsVisible="{markupExtensions:MultiBinding {Binding !#Root.IsForEmployee}, {Binding !#Root.ViewModel.IsOwnedByCurrentUser, FallbackValue={x:False}}, 
+                                    Converter={x:Static BoolConverters.Or}}">
                             <TextBlock Text="Исполнитель: " />
                             <TextBlock Text="{Binding SelectedEmployee.Name, FallbackValue=''}" />
                             <telegramTag:TelegramTag
@@ -124,7 +129,7 @@
                             <TextBlock Text="Дедлайн: " />
                             <TextBlock Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding Cost}">
                             <TextBlock Text="Стоимость: " />
                             <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
                         </StackPanel>
@@ -187,7 +192,8 @@
 
             <Separator Grid.Row="1" IsVisible="{Binding !#Root.IsInEditMode}" />
 
-            <WrapPanel Grid.Row="2" ItemSpacing="16" LineSpacing="8" IsVisible="{Binding !#Root.IsInEditMode}">
+            <WrapPanel Grid.Row="2" ItemSpacing="16" LineSpacing="8" IsVisible="{Binding !#Root.IsInEditMode}"
+                       IsEnabled="{Binding IsOwnedByCurrentUser}">
                 <manualCheckBox:ManualCheckBox Content="Выполнено" HorizontalAlignment="Right"
                                                IsChecked="{Binding IsCompleted}"
                                                Command="{Binding ToggleCompletionStatusCommand}" />
