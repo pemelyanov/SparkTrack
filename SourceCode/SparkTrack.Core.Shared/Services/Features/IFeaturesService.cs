@@ -14,12 +14,16 @@ public interface IFeaturesService
     /// <param name="pageQuery">Параметры пагинации</param>
     /// <param name="endDate">Максимальная дата создания</param>
     /// <param name="startDate">Минимальная дата создания</param>
+    /// <param name="sortQuery">Параметры сортировки</param>
+    /// <param name="showOnlyMine">Показывать только фичи текущего пользователя (используется только для администратора)</param>
     /// <returns></returns>
     Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         Guid? projectId,
         bool showCompleted,
         DateTime? startDate,
         DateTime? endDate,
+        bool showOnlyMine,
+        SortQuery? sortQuery,
         PageQuery pageQuery
     );
 

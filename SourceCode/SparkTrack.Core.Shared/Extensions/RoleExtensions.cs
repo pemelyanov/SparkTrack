@@ -10,4 +10,11 @@ public static class RoleExtensions
         ERole.God => ERole.Admin,
         _ => throw new NotSupportedException()
     };
+
+    public static bool IsAnyRole(this ERole currentRole, ERole roles)
+    {
+        var intersection = currentRole & roles;
+
+        return intersection != 0;
+    }
 }

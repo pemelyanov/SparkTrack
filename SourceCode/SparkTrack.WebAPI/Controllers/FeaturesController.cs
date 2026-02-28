@@ -38,6 +38,8 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
         bool showCompleted = false,
         DateTime? startDate = null,
         DateTime? endDate = null,
+        bool showOnlyMine = true,
+        [FromQuery] SortQueryDTO? sortQuery = null,
         [FromQuery] PageQueryDTO? pageQuery = null
     )
     {
@@ -46,6 +48,8 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
             showCompleted,
             startDate?.ToUniversalTime(),
             endDate?.ToUniversalTime(),
+            showOnlyMine,
+            sortQuery?.ToDomain(),
             pageQuery?.ToDomain() ?? PageQuery.All
         );
 

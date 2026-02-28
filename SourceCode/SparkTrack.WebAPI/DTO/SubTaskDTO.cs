@@ -18,6 +18,8 @@ public record SubTaskDTO
     
     public bool IsTimelyBonusApproved { get; init; }
     
+    public IReadOnlyList<Guid> DependsOnIdList { get; init; } = [];
+    
     public DateTime? CompletedAt { get; init; }
     
     public bool IsCompleted { get; init; }

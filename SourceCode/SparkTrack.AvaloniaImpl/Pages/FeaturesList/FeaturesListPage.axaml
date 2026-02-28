@@ -36,8 +36,11 @@
                                                      EndDate="{Binding DateRangeViewModel.Model.EndDate}" />
                 </disablingWrapper:DisablingWrapper>
 
-                <ToggleSwitch OffContent="Показывать незакрытые" OnContent="Показывать все"
+                <CheckBox Content="Показывать закрытые"
                               IsChecked="{Binding ShowCompleted, Mode=TwoWay}" />
+                
+                <CheckBox Content="Показывать только мои" IsVisible="{markupExtensions:CurrentUserInRole Admin}"
+                          IsChecked="{Binding ShowOnlyMine, Mode=TwoWay}" />
             </WrapPanel>
 
             <StackPanel Grid.Column="1" IsVisible="{markupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
@@ -85,9 +88,13 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True"
+                                    Header="Создана" Width="180"
+                                    Binding="{Binding Model.CreatedAt, Mode=OneWay,
+                                    StringFormat={x:Static constants:DateFormats.LongRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
+                <DataGridTextColumn IsReadOnly="True"
                                     Header="Дедлайн" Width="180"
                                     Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
-                                    StringFormat={x:Static constants:DateFormats.ShortRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
+                                    StringFormat={x:Static constants:DateFormats.LongRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
                 <DataGridTemplateColumn IsReadOnly="True" Width="180"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>

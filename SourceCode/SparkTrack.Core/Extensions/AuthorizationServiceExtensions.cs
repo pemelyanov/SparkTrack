@@ -4,6 +4,7 @@ using Exceptions;
 using Services.Authorization;
 using Shared.Data.Entities;
 using Shared.Enums;
+using Shared.Extensions;
 
 public static class AuthorizationServiceExtensions
 {
@@ -27,9 +28,8 @@ public static class AuthorizationServiceExtensions
                 $"Authorize user using {nameof(IAuthorizationService)}.{nameof(IAuthorizationService.AuthorizeAsync)}"
             );
         
-        var intersection = service.CurrentUser.Role & role;
 
-        if (intersection == 0)
+        if (!service.CurrentUser.Role.IsAnyRole(role))
             throw new ForbiddenException(
                 $"Authorize user with required role ({role}) using {nameof(IAuthorizationService)}.{nameof(IAuthorizationService.AuthorizeAsync)}"
             );

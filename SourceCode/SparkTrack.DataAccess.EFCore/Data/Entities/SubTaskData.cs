@@ -4,7 +4,7 @@ using Core.Shared.Enums;
 
 public record SubTaskData
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
     
     public required string Name { get; set; }
 
@@ -19,6 +19,10 @@ public record SubTaskData
     public int FeatureId { get; set; }
 
     public ICollection<PaymentData> Payments { get; } = [];
+
+    public ICollection<SubTaskData> DependsOnList { get; init; } = [];
+    
+    public ICollection<SubTaskData> DependentForList { get; init; } = [];
     
     public float Cost { get; set; }
     

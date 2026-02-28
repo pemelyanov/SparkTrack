@@ -14,6 +14,7 @@
              xmlns:editDates="clr-namespace:SparkTrack.AvaloniaImpl.Controls.EditDates"
              xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel"
@@ -45,6 +46,7 @@
             <Setter Property="Content">
                 <Template>
                     <TextBox x:Name="MarkdownEdit" AcceptsReturn="True" AcceptsTab="True" UseFloatingWatermark="False"
+                             TextWrapping="Wrap"
                              MinHeight="200" PastingFromClipboard="TextBox_OnPastingFromClipboard" />
                 </Template>
             </Setter>
@@ -89,39 +91,74 @@
                 </Template>
             </Setter>
         </Style>
+
+        <Style Selector="ContentControl.author-edit">
+            <Style Selector="^ Border.card">
+                <Setter Property="Padding" Value="4" />
+            </Style>
+            <Setter Property="Content">
+                <Template>
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                            <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="8 0 0 0" />
+
+                            <Button Grid.Column="1" Classes="icon medium delete"
+                                    Command="{Binding #Root.ViewModel.RemoveAuthor, FallbackValue={x:Null}}"
+                                    CommandParameter="{Binding .}" />
+                        </Grid>
+                    </Border>
+                </Template>
+            </Setter>
+        </Style>
+
+        <Style Selector="ContentControl.author-view">
+            <Setter Property="Content">
+                <Template>
+                    <userName:UserName User="{Binding .}" VerticalAlignment="Center" Margin="0 0 0 8" />
+                </Template>
+            </Setter>
+        </Style>
     </UserControl.Styles>
     <Panel>
         <ScrollViewer x:Name="MainScrollViewer">
             <StackPanel Spacing="8">
-                <Border Classes="card" Padding="16 8 16 16">
+                <Border Classes="card" Padding="16 8 16 16" IsEnabled="{Binding !RefreshCommand.IsExecuting^}">
                     <StackPanel Spacing="8">
-                        <StackPanel Classes="title-container"
-                                    Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}"
-                                    Spacing="8" Orientation="Horizontal" HorizontalAlignment="Left">
-                            <Panel>
-                                <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsNameEditing}"
-                                                     Classes="subtitle"
-                                                     Text="{Binding Name}"
-                                                     TextTrimming="CharacterEllipsis" MaxWidth="500" />
-                                <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500"
-                                         IsVisible="{Binding IsNameEditing}"
-                                         Classes="subtitle" Text="{Binding Name}" />
-                            </Panel>
+                        <Panel Classes="title-container" HorizontalAlignment="Left" Height="30"
+                               Classes.back-offset="{Binding #MainScrollViewer.Offset.Y, Converter={StaticResource LessOrEqualConverter}, ConverterParameter=32}">
+                            <SelectableTextBlock Margin="0 2 0 0" IsVisible="{Binding !IsInEditMode}"
+                                                 Classes="subtitle"
+                                                 Text="{Binding Name}"
+                                                 TextTrimming="CharacterEllipsis" MaxWidth="500" />
+                            <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500" Height="30"
+                                     IsVisible="{Binding IsInEditMode}"
+                                     Classes="subtitle" Text="{Binding Name}" />
+                        </Panel>
 
-                            <ToggleButton Classes="icon"
-                                          IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                          Classes.edit="{Binding !IsNameEditing}"
-                                          Classes.save="{Binding IsNameEditing}"
-                                          IsChecked="{Binding IsNameEditing, Mode=TwoWay}" />
-                        </StackPanel>
-                        
                         <Separator />
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="Канал:" />
                             <link:Link Text="{Binding Project.Name}" Url="{Binding Project.Link}" />
                         </StackPanel>
-                        
+
+                        <Separator />
+
+                        <StackPanel Spacing="8" HorizontalAlignment="Left">
+                            <TextBlock Text="Авторы:" />
+                            <ItemsControl ItemsSource="{Binding AuthorsList}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <ContentControl Classes.author-edit="{Binding #Root.ViewModel.IsInEditMode}"
+                                                        Classes.author-view="{Binding !#Root.ViewModel.IsInEditMode}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Content="Добавить" HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center" IsVisible="{Binding IsInEditMode}"
+                                    Command="{Binding AddAuthorAsync}" />
+                        </StackPanel>
+
                         <Separator />
 
                         <TextBlock Text="Задачи: " />
@@ -136,23 +173,25 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <subTask:SubTask
-                                                IsForEmployee="{localMarkupExtensions:CurrentUserInRole Employee}" />
+                                            <subTask:SubTask IsInEditMode="{Binding #Root.ViewModel.IsInEditMode}"
+                                                             IsForEmployee="{localMarkupExtensions:CurrentUserInRole Employee}" />
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
 
-                                <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                            Orientation="Horizontal">
-                                    <Button Classes="icon medium-content"
-                                            Content="{markupExtensions:SymbolIcon Symbol=Add}"
-                                            Command="{Binding AddSubTask}"
-                                            CornerRadius="4 0 0 4"
-                                            ToolTip.Tip="Добавить задачу" />
+                                <Panel IsVisible="{Binding IsInEditMode}">
+                                    <StackPanel Spacing="4" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
+                                                Orientation="Horizontal">
+                                        <Button Classes="icon medium-content"
+                                                Content="{markupExtensions:SymbolIcon Symbol=Add}"
+                                                Command="{Binding AddSubTask}"
+                                                CornerRadius="4 0 0 4"
+                                                ToolTip.Tip="Добавить задачу" />
 
-                                    <Button Classes="icon template" CornerRadius="0 4 4 0"
-                                            Command="{Binding AddSubTaskFromTemplateAsync}" />
-                                </StackPanel>
+                                        <Button Classes="icon template" CornerRadius="0 4 4 0"
+                                                Command="{Binding AddSubTaskFromTemplateAsync}" />
+                                    </StackPanel>
+                                </Panel>
                             </StackPanel>
                         </ScrollViewer>
 
@@ -163,50 +202,35 @@
                         <!-- но я не хочу жертвовать гибкостью системы, поэтому будем хранить описание Json строкой вот такой структуры, -->
                         <!-- возможно потом можно будет сделать механизм подключения разных шаблонов для описания -->
                         <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto * *" RowSpacing="8" ColumnSpacing="8">
-                            <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="* Auto" ColumnSpacing="8">
-                                <link:Link Grid.Column="0" Url="{Binding ReelLink}"
-                                           IsVisible="{Binding !IsEditingLink}" VerticalAlignment="Center" />
-                                <TextBox Grid.Column="0" Text="{Binding ReelLink}" IsVisible="{Binding IsEditingLink}"
+                            <Panel Grid.Column="0" Grid.Row="0">
+                                <link:Link Url="{Binding ReelLink}"
+                                           IsVisible="{Binding !IsInEditMode}" VerticalAlignment="Center" />
+                                <TextBox Text="{Binding ReelLink}" IsVisible="{Binding IsInEditMode}"
                                          PastingFromClipboard="TextBox_OnPastingFromClipboard" />
-                                <ToggleButton Grid.Column="1" Classes="icon"
-                                              Classes.edit="{Binding !IsEditingLink}"
-                                              Classes.save="{Binding IsEditingLink}"
-                                              IsChecked="{Binding IsEditingLink, Mode=TwoWay}"
-                                              IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />
-                            </Grid>
+                            </Panel>
 
                             <Border Classes="card" Grid.Row="1" Grid.Column="0">
                                 <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Ролик:" VerticalAlignment="Center" />
-                                        <ToggleSwitch Classes="markdown-view-switch"
-                                                      IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                                      IsChecked="{Binding IsReelDescriptionInPreviewMode, Mode=TwoWay}" />
-                                    </StackPanel>
+                                    <TextBlock Text="Ролик:" VerticalAlignment="Center" />
 
                                     <Separator />
 
                                     <ContentControl Classes="reel-description"
-                                                    Classes.description-edit="{Binding !IsReelDescriptionInPreviewMode}"
-                                                    Classes.description-view="{Binding IsReelDescriptionInPreviewMode}"
+                                                    Classes.description-edit="{Binding IsInEditMode}"
+                                                    Classes.description-view="{Binding !IsInEditMode}"
                                                     Tag="{Binding ReelDescription, Mode=TwoWay}" />
                                 </StackPanel>
                             </Border>
 
                             <Border Classes="card" Grid.Row="2" Grid.Column="0">
                                 <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="Превью:" VerticalAlignment="Center" />
-                                        <ToggleSwitch Classes="markdown-view-switch"
-                                                      IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
-                                                      IsChecked="{Binding IsPreviewDescriptionInPreviewMode, Mode=TwoWay}" />
-                                    </StackPanel>
+                                    <TextBlock Text="Превью:" VerticalAlignment="Center" />
 
                                     <Separator />
 
                                     <ContentControl Classes="preview-description"
-                                                    Classes.description-edit="{Binding !IsPreviewDescriptionInPreviewMode}"
-                                                    Classes.description-view="{Binding IsPreviewDescriptionInPreviewMode}"
+                                                    Classes.description-edit="{Binding IsInEditMode}"
+                                                    Classes.description-view="{Binding !IsInEditMode}"
                                                     Tag="{Binding PreviewDescription, Mode=TwoWay}" />
                                 </StackPanel>
                             </Border>
@@ -231,10 +255,14 @@
                 </Border>
 
                 <Panel IsVisible="{Binding CanAddComments}">
-                    <TextBlock Text="Комментарии: " VerticalAlignment="Center" />
+                    <Panel IsVisible="{Binding !RefreshCommentsCommand.IsExecuting^}">
+                        <TextBlock Text="Комментарии: " VerticalAlignment="Center" />
 
-                    <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
-                            Command="{Binding CreateComment}" />
+                        <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
+                                Command="{Binding CreateComment}" />
+                    </Panel>
+                    
+                    <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommentsCommand.IsExecuting^}" />
                 </Panel>
 
                 <ItemsControl ItemsSource="{Binding CommentsList}">
@@ -266,12 +294,23 @@
                 </Border>
             </StackPanel>
         </ScrollViewer>
+        
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommand.IsExecuting^}" VerticalAlignment="Top" />
 
         <Button Classes="icon back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top"
                 Command="{Binding Back}"
                 Classes.esc-hot-key="{Binding !IsEditingComment}" />
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
+            <Border Classes="card" Padding="8 2" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Режим: " VerticalAlignment="Center" />
+                    <ToggleSwitch Classes="edit-view-switch" IsChecked="{Binding IsInEditMode, Mode=TwoWay}"
+                                  VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+
             <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" />
 
             <Button Classes="icon template-add" Command="{Binding CreateTemplateAsync}"

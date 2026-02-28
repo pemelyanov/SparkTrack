@@ -18,6 +18,8 @@ public record UserData
     
     public ICollection<BonusPaymentData> Bonuses { get; } = [];
     
+    public ICollection<FeatureData> FeaturesList { get; } = [];
+    
     public DateTime? ArchivedAt { get; set; }
     
     public EArchiveSource? ArchiveSource { get; set; }

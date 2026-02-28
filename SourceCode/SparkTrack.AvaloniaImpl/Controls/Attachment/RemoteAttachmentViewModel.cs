@@ -116,7 +116,8 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         }
         catch (TaskCanceledException)
         {
-            m_logger.Warn("Download is cancelled");
+            m_logger.Warn("Download is cancelled. Removing file...");
+            if (File.Exists(uri)) File.Delete(uri);
         }
         catch (Exception e)
         {
@@ -153,6 +154,10 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     {
         if (!File.Exists(Uri)) return false;
 
+        var fileInfo = new FileInfo(Uri);
+
+        return fileInfo.Length == Size;
+        // MD5 Занимает оч много времени, пока проверяем просто по размеру
         return Md5Helper.VerifyFileMd5(Uri, m_attachment.Checksum);
     }
     

@@ -1,0 +1,19 @@
+﻿<controls:ContentDialog xmlns="https://github.com/avaloniaui"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+                        xmlns:userSelection="clr-namespace:SparkTrack.AvaloniaImpl.Windows.UserSelection"
+                        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                        x:Class="SparkTrack.AvaloniaImpl.Windows.UserSelection.UserSelectionDialog"
+                        x:DataType="userSelection:UserSelectionViewModel"
+                        PrimaryButtonText="Выбрать"
+                        CloseButtonText="Отмена"
+                        DefaultButton="Primary"
+                        IsPrimaryButtonEnabled="{Binding SelectedUser, Converter={x:Static ObjectConverters.IsNotNull}}"
+                        PrimaryButtonCommand="{Binding Close}"
+                        PrimaryButtonCommandParameter="{x:True}"
+                        Title="Выбор пользователя">
+    <ComboBox ItemsSource="{Binding UsersList}" SelectedItem="{Binding SelectedUser}"
+              DisplayMemberBinding="{Binding Name}" HorizontalAlignment="Stretch" />
+</controls:ContentDialog>

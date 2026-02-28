@@ -23,6 +23,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
         Guid? projectId,
         DateTime? startDate,
         DateTime? endDate,
+        bool showOnlyMine,
         [FromQuery] PageQueryDTO pageQuery
     )
     {
@@ -34,6 +35,7 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
                     projectId,
                     startDate?.ToUniversalTime(),
                     endDate?.ToUniversalTime(),
+                    showOnlyMine,
                     pageQuery.ToDomain()
                 );
 
@@ -48,11 +50,14 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [Obsolete("Use GetPendingPaymentsSummaryAsync")]
-    public Task<ActionResult<IReadOnlyList<UserPaymentDTO>>> GetUsersRemainingPaymentsAsync(Guid? projectId)
+    public Task<ActionResult<IReadOnlyList<UserPaymentDTO>>> GetUsersRemainingPaymentsAsync(
+        Guid? projectId,
+        bool showOnlyMine
+    )
     {
         return this.OkWithDomainExceptionsHandling(async () =>
             {
-                var data = await paymentBillsService.GetUsersRemainingPaymentsAsync(projectId);
+                var data = await paymentBillsService.GetUsersRemainingPaymentsAsync(projectId, showOnlyMine);
 
                 return data.Select(it => it.ToDTO()).ToArray() as IReadOnlyList<UserPaymentDTO>;
             }
@@ -64,11 +69,14 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public Task<ActionResult<PendingPaymentsSummaryDTO>> GetPendingPaymentsSummaryAsync(Guid? projectId)
+    public Task<ActionResult<PendingPaymentsSummaryDTO>> GetPendingPaymentsSummaryAsync(
+        Guid? projectId,
+        bool showOnlyMine
+    )
     {
         return this.OkWithDomainExceptionsHandling(async () =>
             {
-                var data = await paymentBillsService.GetPendingPaymentsSummaryAsync(projectId);
+                var data = await paymentBillsService.GetPendingPaymentsSummaryAsync(projectId, showOnlyMine);
 
                 return data.ToDTO();
             }

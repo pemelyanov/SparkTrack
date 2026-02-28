@@ -17,6 +17,8 @@ public record SubTask
     public float TimelyBonus { get; init; }
     
     public bool IsTimelyBonusApproved { get; init; }
+
+    public IReadOnlyList<Guid> DependsOnIdList { get; init; } = [];
     
     public DateTime? CompletedAt { get; init; }
     

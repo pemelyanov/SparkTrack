@@ -93,6 +93,6 @@ public class AuthorizationPageViewModel : ViewModelBase, IRoutableViewModel
 
         var targetPage = Locator.Current.GetService(targetPageType) as IRoutableViewModel;
         
-        HostScreen.Router.NavigateOnUIThread(targetPage!);
+        HostScreen.Router.ResetToOnUIThread(targetPage!);
     }
 }

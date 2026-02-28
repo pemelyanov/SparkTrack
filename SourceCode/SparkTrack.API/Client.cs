@@ -1427,14 +1427,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, string sortField, bool? sortDescending, int? page, int? itemsPerPage)
         {
-            return GetPageAsync(projectId, showCompleted, startDate, endDate, page, itemsPerPage, System.Threading.CancellationToken.None);
+            return GetPageAsync(projectId, showCompleted, startDate, endDate, showOnlyMine, sortField, sortDescending, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfFeatureDTO> GetPageAsync(System.Guid? projectId, bool? showCompleted, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, string sortField, bool? sortDescending, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -1465,6 +1465,18 @@ namespace SparkTrack.API
                     if (endDate != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("endDate")).Append('=').Append(System.Uri.EscapeDataString(endDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (sortField != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("SortField")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(sortField, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (sortDescending != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("SortDescending")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(sortDescending, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     if (page != null)
                     {
@@ -2753,14 +2765,14 @@ namespace SparkTrack.API
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response);
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage)
+        public virtual System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, int? page, int? itemsPerPage)
         {
-            return GetBillsPageAsync(isPaid, employeeId, projectId, startDate, endDate, page, itemsPerPage, System.Threading.CancellationToken.None);
+            return GetBillsPageAsync(isPaid, employeeId, projectId, startDate, endDate, showOnlyMine, page, itemsPerPage, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PagedDTOOfPaymentBillDTO> GetBillsPageAsync(bool? isPaid, System.Guid? employeeId, System.Guid? projectId, System.DateTime? startDate, System.DateTime? endDate, bool? showOnlyMine, int? page, int? itemsPerPage, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -2795,6 +2807,10 @@ namespace SparkTrack.API
                     if (endDate != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("endDate")).Append('=').Append(System.Uri.EscapeDataString(endDate.Value.ToString("s", System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     if (page != null)
                     {
@@ -2975,15 +2991,15 @@ namespace SparkTrack.API
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId)
+        public virtual System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId, bool? showOnlyMine)
         {
-            return GetUsersRemainingPaymentsAsync(projectId, System.Threading.CancellationToken.None);
+            return GetUsersRemainingPaymentsAsync(projectId, showOnlyMine, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         [System.Obsolete]
-        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<UserPaymentDTO>> GetUsersRemainingPaymentsAsync(System.Guid? projectId, bool? showOnlyMine, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -3002,6 +3018,10 @@ namespace SparkTrack.API
                     if (projectId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 
@@ -3078,14 +3098,14 @@ namespace SparkTrack.API
         }
 
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId)
+        public virtual System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId, bool? showOnlyMine)
         {
-            return GetPendingPaymentsSummaryAsync(projectId, System.Threading.CancellationToken.None);
+            return GetPendingPaymentsSummaryAsync(projectId, showOnlyMine, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <exception cref="ApiException">A server side error occurred.</exception>
-        public virtual async System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId, System.Threading.CancellationToken cancellationToken)
+        public virtual async System.Threading.Tasks.Task<PendingPaymentsSummaryDTO> GetPendingPaymentsSummaryAsync(System.Guid? projectId, bool? showOnlyMine, System.Threading.CancellationToken cancellationToken)
         {
             var client_ = _httpClient;
             var disposeClient_ = false;
@@ -3104,6 +3124,10 @@ namespace SparkTrack.API
                     if (projectId != null)
                     {
                         urlBuilder_.Append(System.Uri.EscapeDataString("projectId")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(projectId, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
+                    }
+                    if (showOnlyMine != null)
+                    {
+                        urlBuilder_.Append(System.Uri.EscapeDataString("showOnlyMine")).Append('=').Append(System.Uri.EscapeDataString(ConvertToString(showOnlyMine, System.Globalization.CultureInfo.InvariantCulture))).Append('&');
                     }
                     urlBuilder_.Length--;
 
@@ -5989,6 +6013,9 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
         public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("authorsList")]
+        public System.Collections.Generic.IReadOnlyList<UserDTO> AuthorsList { get; init; }
+
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public System.DateTime CreatedAt { get; init; }
 
@@ -6061,6 +6088,9 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("isTimelyBonusApproved")]
         public bool IsTimelyBonusApproved { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dependsOnIdList")]
+        public System.Collections.Generic.IReadOnlyList<System.Guid> DependsOnIdList { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("completedAt")]
         public System.DateTime? CompletedAt { get; init; }
@@ -6176,6 +6206,9 @@ namespace SparkTrack.API
         [System.Text.Json.Serialization.JsonPropertyName("attachmentsList")]
         public System.Collections.Generic.IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("authorsIdList")]
+        public System.Collections.Generic.IReadOnlyList<System.Guid> AuthorsIdList { get; init; }
+
         [System.Text.Json.Serialization.JsonPropertyName("version")]
         public System.Guid Version { get; init; }
 
@@ -6193,6 +6226,9 @@ namespace SparkTrack.API
 
         [System.Text.Json.Serialization.JsonPropertyName("executorEmployeeId")]
         public System.Guid ExecutorEmployeeId { get; init; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dependsOnIdList")]
+        public System.Collections.Generic.IReadOnlyList<System.Guid> DependsOnIdList { get; init; }
 
         [System.Text.Json.Serialization.JsonPropertyName("deadline")]
         public System.DateTime Deadline { get; init; }

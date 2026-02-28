@@ -93,7 +93,7 @@ public class UpdatePageViewModel : ViewModelBase, IRoutableViewModel
                             return;
                         }
                         
-                        HostScreen.Router.NavigateOnUIThread(m_firstPageFactory());
+                        HostScreen.Router.ResetToOnUIThread(m_firstPageFactory());
                     }
                     catch (Exception e)
                     {
