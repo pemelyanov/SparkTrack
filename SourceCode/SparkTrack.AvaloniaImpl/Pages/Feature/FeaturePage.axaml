@@ -253,10 +253,14 @@
                 </Border>
 
                 <Panel IsVisible="{Binding CanAddComments}">
-                    <TextBlock Text="Комментарии: " VerticalAlignment="Center" />
+                    <Panel IsVisible="{Binding !RefreshCommentsCommand.IsExecuting^}">
+                        <TextBlock Text="Комментарии: " VerticalAlignment="Center" />
 
-                    <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
-                            Command="{Binding CreateComment}" />
+                        <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
+                                Command="{Binding CreateComment}" />
+                    </Panel>
+                    
+                    <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommentsCommand.IsExecuting^}" />
                 </Panel>
 
                 <ItemsControl ItemsSource="{Binding CommentsList}">
@@ -288,6 +292,8 @@
                 </Border>
             </StackPanel>
         </ScrollViewer>
+        
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommand.IsExecuting^}" VerticalAlignment="Top" />
 
         <Button Classes="icon back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top"
                 Command="{Binding Back}"

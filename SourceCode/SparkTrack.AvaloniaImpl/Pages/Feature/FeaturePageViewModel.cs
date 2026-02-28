@@ -182,12 +182,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
 
-        RefreshCommand = ReactiveCommand.CreateFromTask(() =>
-            Task.WhenAll(RefreshAsync(), RefreshCommentsAsync())
-        );
-
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
+        
+        RefreshCommand = ReactiveCommand.CreateFromTask(() =>
+            Task.WhenAll(RefreshAsync(), RefreshCommentsCommand.Execute().ToTask())
+        );
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -394,6 +394,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task RefreshAsync()
     {
+        await Task.Delay(2000);
         s_logger.Info("Refresh executed");
 
         if (m_authorizationService.CurrentUser.Value?.Role is not ERole.Employee)
@@ -527,6 +528,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task RefreshCommentsAsync()
     {
+        await Task.Delay(2000);
+        
         if (m_feature is null) return;
 
         var page = await m_commentsService.GetPageAsync(m_feature.Id, PageQuery.All);
