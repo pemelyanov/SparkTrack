@@ -434,6 +434,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             }
 
             await m_featuresService.EditAsync(editData);
+
+            IsInEditMode = false;
             
             m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно сохранена");
 
