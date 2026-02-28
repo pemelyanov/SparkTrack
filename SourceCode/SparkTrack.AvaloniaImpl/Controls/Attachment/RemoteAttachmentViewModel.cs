@@ -154,6 +154,10 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
     {
         if (!File.Exists(Uri)) return false;
 
+        var fileInfo = new FileInfo(Uri);
+
+        return fileInfo.Length == Size;
+        // MD5 Занимает оч много времени, пока проверяем просто по размеру
         return Md5Helper.VerifyFileMd5(Uri, m_attachment.Checksum);
     }
     
