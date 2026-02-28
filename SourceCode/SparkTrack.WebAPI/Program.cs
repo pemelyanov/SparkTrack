@@ -117,7 +117,7 @@ app.MapControllers();
 var database = app.Services.GetRequiredService<SparkTrackDbContext>().Database;
 
 //database.EnsureDeleted();
-database.EnsureCreated();
+database.Migrate();
 
 var seeders = app.Services.GetServices<IDataSeeder>();
 

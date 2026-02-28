@@ -56,12 +56,12 @@ public class MainWindowViewModel : ViewModelBase, IScreen
                 {
                     var selectedPageType = args.First.GetType();
                     var navigationList = args.Second;
+                    
+                    s_logger.Info("Current page changed to {page}", selectedPageType.Name);
 
                     if (!navigationList.Contains(selectedPageType)) return;
 
                     SelectedPageType = selectedPageType;
-
-                    s_logger.Info("Selected page changed to {page}", SelectedPageType.Name);
                 }
             )
             .DisposeWith(disposables);

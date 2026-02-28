@@ -15,7 +15,7 @@ using SparkTrack.Core.Shared.Data;
 using SparkTrack.Core.Shared.Data.Entities;
 using SparkTrack.Core.Shared.Enums;
 
-public class FeatureCompletedEventHandler(
+public class SubTaskCompletedEventHandler(
     ITelegramMessageSender messageSender,
     ITelegramUsersRepository telegramUsersRepository,
     IUsersService usersService
@@ -31,14 +31,20 @@ public class FeatureCompletedEventHandler(
         var subTask = eventData.SubTask;
         var employee = subTask.ExecutorEmployee;
 
-        var users = eventData.ParentFeature.TasksList.Select(it => it.ExecutorEmployee)
+        var tasksMap = eventData.ParentFeature.TasksList.ToDictionary(it => it.Id);
+
+        var users = eventData.ParentFeature.TasksList
+            .Where(it => it.DependsOnIdList.Any(id => tasksMap[id].Id == subTask.Id))
+            .Select(it => it.ExecutorEmployee)
             .Where(it => it.Id != employee.Id);
 
-        var adminsPage = await usersService.GetPageAsync(ERole.Admin, PageQuery.All);
+        var adminsList = eventData.ParentFeature.AuthorsList.Any()
+            ? eventData.ParentFeature.AuthorsList
+            : (await usersService.GetPageAsync(ERole.Admin, PageQuery.All)).Items;
 
-        users = users.Concat(adminsPage.Items);
+        users = users.Concat(adminsList);
 
-        foreach (var user in users.Where(it => it.TelegramTag is not null))
+        foreach (var user in users.Where(it => it.TelegramTag is not null).DistinctBy(it => it.Id))
         {
             try
             {

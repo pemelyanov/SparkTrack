@@ -9,6 +9,8 @@ public record SubTaskEdit
     public required string Name { get; init; }
     
     public required Guid ExecutorEmployeeId { get; init; }
+
+    public IReadOnlyList<Guid> DependsOnIdList { get; init; } = [];
     
     public required DateTime Deadline { get; init; }
     

@@ -16,6 +16,8 @@ public record FeatureDTO
 
     public IReadOnlyList<AttachmentDTO> AttachmentsList { get; init; } = [];
     
+    public IReadOnlyList<UserDTO> AuthorsList { get; init; } = [];
+    
     public DateTime CreatedAt { get; init; }
     
     public DateTime? EditedAt { get; init; }

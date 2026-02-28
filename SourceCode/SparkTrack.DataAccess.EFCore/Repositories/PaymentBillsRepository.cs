@@ -71,21 +71,28 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         Guid? projectId,
         DateTime? startDate,
         DateTime? endDate,
+        Guid? authorId,
         PageQuery pageQuery
     )
     {
-        var targetPaymentStatus = isPaid ? EPaymentStatus.Paid : EPaymentStatus.OnPayment;
-
         var page = await dbContext.SubTasks
             .AsNoTracking()
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .WhereIf(employeeId is not null, it => it.ExecutorEmployeeId == employeeId)
             .WhereIf(startDate is not null, it => it.Feature.CreatedAt >= startDate)
             .WhereIf(endDate is not null, it => it.Feature.CreatedAt <= endDate)
+            .WhereIf(
+                authorId is not null,
+                it => it.Feature.AuthorsList.Count == 0 || it.Feature.AuthorsList.Any(a => a.Id == authorId)
+            )
             // TODO: Add filter
             .Where(it => it.Feature.ArchivedAt == null)
             .Where(it => it.ExecutorEmployee.ArchivedAt == null)
-            .Where(it => it.PaymentStatus == targetPaymentStatus)
+            .Where(it =>
+                isPaid
+                    ? it.PaymentStatus == EPaymentStatus.Paid || it.PaymentStatus == EPaymentStatus.OnPayment
+                    : it.PaymentStatus == EPaymentStatus.OnPayment
+            )
             .Select(data => new PaymentBill
                 {
                     Feature = new Feature
@@ -156,11 +163,15 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
         return page;
     }
 
-    public async Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId)
+    public async Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId, Guid? authorId)
     {
         return await dbContext.SubTasks
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
+            .WhereIf(
+                authorId is not null,
+                it => it.Feature.AuthorsList.Count == 0 || it.Feature.AuthorsList.Any(a => a.Id == authorId)
+            )
             // TODO: Add filter
             .Where(it => it.Feature.ArchivedAt == null)
             .Where(it => it.ExecutorEmployee.ArchivedAt == null)
@@ -199,13 +210,18 @@ public class PaymentBillsRepository(SparkTrackDbContext dbContext) : IPaymentBil
             .ToArrayAsync();
     }
 
-    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId)
+    public async Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId, Guid? authorId)
     {
-        var userRemainingPayments = await GetUsersRemainingPaymentsAsync(projectId);
+        var userRemainingPayments = await GetUsersRemainingPaymentsAsync(projectId, authorId);
 
         var adminPaidPayments = await dbContext.SubTasks
             .AsNoTracking()
             .WhereIf(projectId is not null, it => it.Feature.ProjectId == projectId)
+            .WhereIf(
+                authorId is not null,
+                it => it.Feature.AuthorsList.Count == 0 || it.Feature.AuthorsList
+                    .Any(a => a.Id == authorId)
+            )
             .Where(it => it.PaymentStatus == EPaymentStatus.OnPayment)
             // TODO: Add filter
             .Where(it => it.Feature.ArchivedAt == null)

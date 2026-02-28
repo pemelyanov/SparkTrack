@@ -1,6 +1,7 @@
 ﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
 using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Services.DialogHost;
+using SparkTrack.Core.Shared.Extensions;
 
 namespace SparkTrack.AvaloniaImpl.Pages.Feature;
 
@@ -29,6 +30,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Text.Json;
+using Windows.UserSelection;
 using Controls.Attachment;
 using Controls.TemplateSaveForm;
 using Core.Client.Enums;
@@ -56,6 +58,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Func<TemplateSelectionFormViewModel<SubTaskTemplate>> m_subTaskTemplateSelectionViewModelFactory;
     private readonly IDialogService m_dialogService;
     private readonly Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> m_templateViewModelFactory;
+    private readonly Func<UserSelectionViewModel> m_userSelectionFactory;
     private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -72,7 +75,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IPopupNotificationService popupNotificationService,
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
-        Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory
+        Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
+        Func<UserSelectionViewModel> userSelectionFactory
     ) : this(
         null,
         project,
@@ -88,8 +92,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         popupNotificationService,
         subTaskTemplateSelectionViewModelFactory,
         dialogService,
-        templateViewModelFactory
-    ) { }
+        templateViewModelFactory,
+        userSelectionFactory
+    )
+    {
+    }
 
     public FeaturePageViewModel(
         Feature feature,
@@ -105,7 +112,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IPopupNotificationService popupNotificationService,
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
-        Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory
+        Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
+        Func<UserSelectionViewModel> userSelectionFactory
     ) : this(
         feature,
         feature.Project,
@@ -121,8 +129,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         popupNotificationService,
         subTaskTemplateSelectionViewModelFactory,
         dialogService,
-        templateViewModelFactory
-    ) { }
+        templateViewModelFactory,
+        userSelectionFactory
+    )
+    {
+    }
 
     private FeaturePageViewModel(
         Feature? feature,
@@ -139,7 +150,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IPopupNotificationService popupNotificationService,
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
-        Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory
+        Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
+        Func<UserSelectionViewModel> userSelectionFactory
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -157,21 +169,25 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_subTaskTemplateSelectionViewModelFactory = subTaskTemplateSelectionViewModelFactory;
         m_dialogService = dialogService;
         m_templateViewModelFactory = templateViewModelFactory;
-        IsReelDescriptionInPreviewMode = IsPreviewDescriptionInPreviewMode = m_feature is not null;
-        IsEditingLink = m_feature is null;
+        m_userSelectionFactory = userSelectionFactory;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
         AttachmentsPanelViewModel.PreviewAttachmentSetRequested +=
             AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
-        if (feature is null) IsNameEditing = true;
+        if (feature is null)
+        {
+            IsInEditMode = true;
+            AuthorsList.Add(m_authorizationService.CurrentUser.Value!);
+        }
 
         SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
 
-        RefreshCommand = ReactiveCommand.CreateFromTask(() => 
-            Task.WhenAll(RefreshAsync(), RefreshCommentsAsync()));
-
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
+        
+        RefreshCommand = ReactiveCommand.CreateFromTask(() =>
+            Task.WhenAll(RefreshAsync(), RefreshCommentsCommand.Execute().ToTask())
+        );
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -181,9 +197,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         RefreshCommand.Execute().Subscribe().DisposeWith(disposables);
 
         this.WhenAnyValue(
-                it => it.IsEditingSubTask,
                 it => it.IsEditingComment,
-                (isEditingSubTask, isEditingComment) => !isEditingSubTask && !isEditingComment
+                (isEditingComment) => !isEditingComment
             )
             .Subscribe(canSaveByHotKey => CanSaveByHotKey = canSaveByHotKey)
             .DisposeWith(disposables);
@@ -200,22 +215,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public IAttachmentViewModel? PreviewAttachment { get; private set; }
 
     [Reactive]
-    public bool IsNameEditing { get; set; }
-
-    [Reactive]
-    public bool IsReelDescriptionInPreviewMode { get; set; }
-
-    [Reactive]
-    public bool IsPreviewDescriptionInPreviewMode { get; set; }
-
-    [Reactive]
-    public bool IsEditingLink { get; set; }
+    public bool IsInEditMode { get; set; }
 
     [Reactive]
     public bool IsEditingComment { get; private set; }
-
-    [Reactive]
-    public bool IsEditingSubTask { get; private set; }
 
     [Reactive]
     public bool CanSaveByHotKey { get; private set; }
@@ -237,6 +240,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public SuspendableObservableCollection<CommentViewModel> CommentsList { get; } = [];
 
+    public SuspendableObservableCollection<User> AuthorsList { get; } = [];
+
     [Reactive]
     public string ReelLink { get; set; } = string.Empty;
 
@@ -256,6 +261,22 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
 
+    public async Task AddAuthorAsync()
+    {
+        var userSelectionViewModel = m_userSelectionFactory();
+        userSelectionViewModel.UserRole = ERole.Admin;
+        userSelectionViewModel.ExcludedUserIdsList = AuthorsList.Select(it => it.Id).ToHashSet();
+
+        if (await m_dialogService.ShowAsync(userSelectionViewModel) is not true
+            || userSelectionViewModel.SelectedUser is not { } selectedUser) return;
+
+        if (AuthorsList.Any(it => it.Id == selectedUser.Id)) return;
+
+        AuthorsList.Add(selectedUser);
+    }
+
+    public void RemoveAuthor(User author) => AuthorsList.Remove(author);
+
     public async Task CreateTemplateAsync()
     {
         var template = new FeatureTemplate
@@ -263,6 +284,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             Name = Name,
             Description = GetDescription(),
             TasksList = SubTasksList.Select(it => it.GetTemplate()).ToArray(),
+            Authors = AuthorsList.Select(it => new UserSelectionTemplate { Id = it.Id, Name = it.Name }).ToArray()
         };
 
         var viewModel = m_templateViewModelFactory(template);
@@ -287,12 +309,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void CancelComment() => CommentEditViewModel = null;
 
-    public void Back() => HostScreen.Router.BackOnUIThread();
+    public void Back() => HostScreen.Router.SafeBackOnUIThread();
 
     public void AddSubTask()
     {
         var subTask = CreateSubTaskViewModel();
-        subTask.IsInEditMode = true;
 
         SubTasksList.Add(subTask);
     }
@@ -305,12 +326,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             selectionViewModel.SelectedTemplate is not SubTaskTemplate template) return;
 
         SubTaskViewModel subTask = CreateSubTaskFromTemplate(template);
-        subTask.IsInEditMode = true;
 
         SubTasksList.Add(subTask);
     }
 
-    public void InitializeFromTemplate(FeatureTemplate template)
+    public async Task InitializeFromTemplateAsync(FeatureTemplate template)
     {
         Name = template.Name;
 
@@ -319,17 +339,47 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTasks = template.TasksList.Select(CreateSubTaskFromTemplate);
 
         SubTasksList.AddRange(subTasks);
+
+        // TODO: По хорошему это переделать на отдельный запрос списка пользователей по списку ID
+        var admins = await m_usersService.GetPageAsync(ERole.Admin, PageQuery.All);
+
+        List<User> authorsList = [m_authorizationService.CurrentUser.Value!];
+
+        foreach (var authorTemplate in template.Authors)
+        {
+            if(authorTemplate.Id == m_authorizationService.CurrentUser.Value?.Id) continue;
+            
+            var author = admins.Items.FirstOrDefault(it => it.Id == authorTemplate.Id);
+
+            if (author is null)
+            {
+                s_logger.Warn("Cannot find author by template {authorTemplate}", authorTemplate);
+                continue;
+            }
+
+            authorsList.Add(author);
+        }
+
+        using (AuthorsList.SuspendNotifications())
+        {
+            AuthorsList.Clear();
+            AuthorsList.AddRange(authorsList);
+        }
     }
 
     private SubTaskViewModel CreateSubTaskFromTemplate(SubTaskTemplate template)
     {
         var subTask = CreateSubTaskViewModel();
+
+        subTask.Id = template.TaskId;
         subTask.Name = template.Name;
         subTask.EmployeeToSelectOnNextLoad = template.ExecutorEmployee;
+        subTask.DependsOnIdListToSelectOnNextLoad = template.DependsOnIdList;
 
         subTask.Cost = template.Cost;
         subTask.TimelyBonus = template.TimelyBonus;
-        subTask.Deadline = DateTime.Now + template.Deadline;
+        subTask.Deadline = DateTime.Now.EndOfTheDay() + template.Deadline;
+
         return subTask;
     }
 
@@ -338,21 +388,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         var subTaskViewModel = m_subTaskViewModelFactory.Invoke(
             subTask,
             m_availableEmployeesList,
+            SubTasksList.GetListObservable(),
             it => SubTasksList.Remove(it)
         );
-
-        var isEditSubscription = subTaskViewModel.WhenAnyValue(it => it.IsInEditMode)
-            .Do(_ => IsEditingSubTask = SubTasksList.Any(it => it.IsInEditMode))
-            .Where(isInEditMode => isInEditMode)
-            .Subscribe(_ =>
-                {
-                    foreach (var task in SubTasksList)
-                        if (subTaskViewModel != task)
-                            task.IsInEditMode = false;
-                }
-            );
-
-        subTaskViewModel.DisposeWithViewModel(isEditSubscription);
 
         return subTaskViewModel;
     }
@@ -379,7 +417,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         try
         {
             s_logger.Info("Saving feature {id}", m_feature?.Id);
-            
+
             await AttachmentsPanelViewModel.UploadLocalAttachments();
 
             var editData = CreateEditData();
@@ -388,12 +426,18 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             {
                 await m_featuresService.AddAsync(editData);
 
+                m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно создана");
+                
                 Back();
 
                 return;
             }
 
             await m_featuresService.EditAsync(editData);
+
+            IsInEditMode = false;
+            
+            m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно сохранена");
 
             await RefreshCommand.Execute().ToTask();
         }
@@ -416,7 +460,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         TasksList = SubTasksList.Select(it => it.MapToEdit()).ToArray(),
         AttachmentsList = AttachmentsPanelViewModel.AttachmentsList.Select(it => it.ToModel()).ToArray(),
         Description = GetDescription(),
-        Version = m_feature?.Version ?? Guid.Empty
+        Version = m_feature?.Version ?? Guid.Empty,
+        AuthorsIdList = AuthorsList.Select(it => it.Id).Distinct().ToArray()
     };
 
     private string GetDescription() => JsonSerializer.Serialize(
@@ -432,6 +477,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private void InitializeProperties(Feature? feature)
     {
         Name = feature?.Name ?? "Название идеи";
+
+        using (AuthorsList.SuspendNotifications())
+        {
+            AuthorsList.Clear();
+            AuthorsList.AddRange(feature?.AuthorsList ?? []);
+        }
 
         AttachmentsPanelViewModel.ReplaceWithRemoteAttachments(feature?.AttachmentsList ?? []);
         InitializeDescriptionProperties(feature?.Description);
@@ -535,7 +586,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         try
         {
             s_logger.Info("Creating comment...");
-            
+
             await CommentEditViewModel.AttachmentsPanelViewModel.UploadLocalAttachments();
 
             var commentEdit = CommentEditViewModel.ToModel();
@@ -545,7 +596,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             CommentEditViewModel = null;
 
             await RefreshCommentsCommand.Execute().ToTask();
-            
+
             s_logger.Info("Comment created");
         }
         catch (Exception e)
@@ -557,7 +608,6 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
             m_popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка создания комментария");
         }
-       
     }
 
     private void AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested(IAttachmentViewModel preview)

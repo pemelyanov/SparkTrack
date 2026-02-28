@@ -6,9 +6,21 @@
         </Border>
     </Design.PreviewWith>
 
-    <Style Selector="ToggleSwitch.markdown-view-switch">
+    <Style Selector="ToggleSwitch.edit-view-switch">
         <Setter Property="OnContent" Value="View" />
         <Setter Property="OffContent" Value="Edit" />
-        <Setter Property="ToolTip.Tip" Value="Переключить верстка\превью" />
+        <Setter Property="ToolTip.Tip" Value="Переключить редактирование\превью" />
+        
+        <Style Selector="^ /template/ Grid">
+            <Style Selector="^>ContentPresenter">
+                <Setter Property="Margin" Value="0" />
+            </Style>
+            <Style Selector="^>Grid">
+                <Setter Property="Height" Value="30" />
+            </Style>
+            <Style Selector="^>Grid>:is(Control)">
+                <Setter Property="Margin" Value="0 -5 0 0" />
+            </Style>
+        </Style>
     </Style>
 </Styles>

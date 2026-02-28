@@ -57,7 +57,15 @@ public class FeaturesSeeder(
         foreach (var project in projectsList)
         {
             projectNumber++;
-            var existingFeatures = (await featuresService.GetPageAsync(project.Id, true, null, null, PageQuery.None))
+            var existingFeatures = (await featuresService.GetPageAsync(
+                    project.Id,
+                    true,
+                    null,
+                    null,
+                    false,
+                    null,
+                    PageQuery.None
+                ))
                 .Total;
 
             if (existingFeatures > 0) continue;

@@ -10,6 +10,8 @@ public record SubTaskEditDTO
     
     public required Guid ExecutorEmployeeId { get; init; }
     
+    public IReadOnlyList<Guid> DependsOnIdList { get; init; } = [];
+    
     public required DateTime Deadline { get; init; }
     
     public float Cost { get; init; }

@@ -12,6 +12,7 @@ using Shared.Data;
 using Shared.Data.Edit;
 using Shared.Data.Entities;
 using Shared.Enums;
+using Shared.Extensions;
 using Shared.Services.Features;
 
 internal class FeaturesService(
@@ -19,7 +20,7 @@ internal class FeaturesService(
     IAuthorizationService authorizationService,
     IFeatureArchiveService featureArchiveService,
     IEventEmitter eventEmitter
-    )
+)
     : IFeaturesService
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
@@ -27,6 +28,8 @@ internal class FeaturesService(
         bool showCompleted,
         DateTime? startDate,
         DateTime? endDate,
+        bool showOnlyMine,
+        SortQuery? sortQuery,
         PageQuery pageQuery
     )
     {
@@ -34,7 +37,20 @@ internal class FeaturesService(
 
         Guid? employeeFilter = currentUser.GetEmployeeIdOrNull();
 
-        return featuresRepository.GetPageAsync(projectId, showCompleted, employeeFilter, startDate, endDate, pageQuery);
+        Guid? authorId = null;
+
+        if (currentUser.Role.IsAnyRole(ERole.Admin) && showOnlyMine) authorId = currentUser.Id;
+
+        return featuresRepository.GetPageAsync(
+            projectId,
+            showCompleted,
+            employeeFilter,
+            startDate,
+            endDate,
+            authorId,
+            sortQuery,
+            pageQuery
+        );
     }
 
     public Task<Feature?> GetAsync(int id)
@@ -51,7 +67,7 @@ internal class FeaturesService(
         var addedFeature = await featuresRepository.AddAsync(feature);
 
         await eventEmitter.RaiseAsync(new FeatureCreatedEvent(addedFeature));
-        
+
         return addedFeature.Id;
     }
 
@@ -60,7 +76,7 @@ internal class FeaturesService(
         var oldInfo = await featuresRepository.GetAsync(feature.Id, null);
 
         if (oldInfo is null) throw new NotFoundException();
-        
+
         var newInfo = await featuresRepository.EditAsync(feature);
 
         await eventEmitter.RaiseAsync(new FeatureUpdatedEvent(oldInfo, newInfo));
@@ -73,11 +89,11 @@ internal class FeaturesService(
             var feature = await featuresRepository.GetAsync(id, null);
 
             if (feature is null) throw new NotFoundException();
-            
+
             await featuresRepository.DeleteAsync(id);
             await eventEmitter.RaiseAsync(new FeatureDeletedEvent(feature));
         }
-        
+
         await featureArchiveService.ArchiveAsync(id, EArchiveSource.User);
     }
 }

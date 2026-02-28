@@ -15,12 +15,13 @@ public interface IPaymentBillsRepository
         Guid? projectId,
         DateTime? startDate,
         DateTime? endDate,
+        Guid? authorId,
         PageQuery pageQuery
     );
 
-    Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
+    Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId, Guid? authorId);
 
-    Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
+    Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId, Guid? authorId);
 
     Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
         Guid? adminId,

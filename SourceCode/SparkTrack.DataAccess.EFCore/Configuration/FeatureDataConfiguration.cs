@@ -47,5 +47,8 @@ public class FeatureDataConfiguration : IEntityTypeConfiguration<FeatureData>
         
         builder.Property(p => p.ArchiveSource)
             .IsRequired(false);
+
+        builder.HasMany(it => it.AuthorsList)
+            .WithMany(it => it.FeaturesList);
     }
 }

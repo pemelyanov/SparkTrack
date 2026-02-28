@@ -116,7 +116,8 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         }
         catch (TaskCanceledException)
         {
-            m_logger.Warn("Download is cancelled");
+            m_logger.Warn("Download is cancelled. Removing file...");
+            if (File.Exists(uri)) File.Delete(uri);
         }
         catch (Exception e)
         {

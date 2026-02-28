@@ -16,5 +16,7 @@ public record FeatureEdit
 
     public IReadOnlyList<Attachment> AttachmentsList { get; init; } = [];
     
+    public IReadOnlyList<Guid> AuthorsIdList { get; init; } = [];
+    
     public Guid Version { get; init; }
 }

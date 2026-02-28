@@ -10,14 +10,15 @@ public interface IPaymentBillsService
         Guid? employeeId,
         Guid? projectId,
         DateTime? startDate,
-        DateTime? endDate,
+        DateTime? endDate, 
+        bool showOnlyMine,
         PageQuery pageQuery
     );
 
     [Obsolete("Use GetPendingPaymentsSummaryAsync")]
-    Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId);
+    Task<IReadOnlyList<UserPayment>> GetUsersRemainingPaymentsAsync(Guid? projectId, bool showOnlyMine);
 
-    Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId);
+    Task<PendingPaymentsSummary> GetPendingPaymentsSummaryAsync(Guid? projectId, bool showOnlyMine);
 
     Task<IReadOnlyPagedData<PaymentDetails>> GetPaidPaymentsListAsync(
         Guid? adminId,

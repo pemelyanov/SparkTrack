@@ -18,6 +18,8 @@ public record FeatureData : IAttachmentsOwner
 
     public ICollection<AttachmentData> AttachmentsList { get; init; } = [];
     
+    public ICollection<UserData> AuthorsList { get; init; } = [];
+    
     public DateTime CreatedAt { get; init; }
     
     public DateTime? EditedAt { get; set; }

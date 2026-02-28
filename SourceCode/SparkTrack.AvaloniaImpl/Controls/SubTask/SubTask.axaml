@@ -9,15 +9,23 @@
              xmlns:manualCheckBox="clr-namespace:SparkTrack.AvaloniaImpl.Controls.ManualCheckBox"
              xmlns:enums="clr-namespace:SparkTrack.Core.Shared.Enums;assembly=SparkTrack.Core.Shared"
              xmlns:telegramTag="clr-namespace:SparkTrack.AvaloniaImpl.Controls.TelegramTag"
+             xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.SubTask.SubTask"
              x:DataType="subTask:SubTaskViewModel"
              x:Name="Root">
     <UserControl.Styles>
+        <Style Selector="TextBlock.completed">
+            <Setter Property="Foreground" Value="SeaGreen" />
+        </Style>
+        <Style Selector="Border.thin">
+            <Setter Property="Padding" Value="4" />
+        </Style>
+
         <Style Selector="ContentControl.edit-control">
             <Setter Property="Content">
                 <Template>
-                    <StackPanel IsVisible="{Binding IsInEditMode}" Spacing="8">
+                    <StackPanel IsVisible="{Binding #Root.IsInEditMode}" Spacing="8">
                         <TextBox Watermark="Задача" Text="{Binding Name}" />
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Исполнитель: " VerticalAlignment="Center" />
@@ -29,7 +37,8 @@
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Дедлайн: " VerticalAlignment="Center" />
                             <CalendarDatePicker SelectedDate="{Binding Deadline}"
-                                                Grid.Column="1" HorizontalAlignment="Stretch" />
+                                                Grid.Column="1" HorizontalAlignment="Stretch"
+                                                SelectedDateChanged="CalendarDatePicker_OnSelectedDateChanged" />
                         </Grid>
                         <Grid ColumnDefinitions="Auto *">
                             <TextBlock Text="Стоимость (₽): " VerticalAlignment="Center" />
@@ -51,6 +60,52 @@
                                 </Interaction.Behaviors>
                             </TextBox>
                         </Grid>
+
+                        <Separator />
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Зависит от: " />
+
+                            <DropDownButton Content="Добавить" HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Center"
+                                            IsEnabled="{Binding AvailableDependencyTasksList.Count}">
+                                <DropDownButton.Flyout>
+                                    <Flyout>
+                                        <ItemsControl ItemsSource="{Binding AvailableDependencyTasksList}"
+                                                      Width="{Binding $parent[Button].Bounds.Width}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Spacing="8" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="{Binding Name}" HorizontalAlignment="Stretch"
+                                                            Click="DependencySubTaskButton_OnClick" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Flyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+
+                            <ItemsControl ItemsSource="{Binding DependsOnList}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="card thin">
+                                            <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                                           Margin="8 0 0 0" />
+
+                                                <Button Grid.Column="1" Classes="icon medium delete"
+                                                        Command="{Binding #Root.ViewModel.RemoveDependency, FallbackValue={x:Null}}"
+                                                        CommandParameter="{Binding .}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </StackPanel>
                 </Template>
             </Setter>
@@ -59,19 +114,22 @@
         <Style Selector="ContentControl.view-control">
             <Setter Property="Content">
                 <Template>
-                    <StackPanel IsVisible="{Binding !IsInEditMode}" Spacing="8">
+                    <StackPanel IsVisible="{Binding !#Root.IsInEditMode}" Spacing="8">
                         <TextBlock Classes="caption" Text="{Binding Name}" />
-                        <StackPanel Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}">
+                        <StackPanel Orientation="Horizontal"
+                                    IsVisible="{markupExtensions:MultiBinding {Binding !#Root.IsForEmployee}, {Binding !#Root.ViewModel.IsOwnedByCurrentUser, FallbackValue={x:False}}, 
+                                    Converter={x:Static BoolConverters.Or}}">
                             <TextBlock Text="Исполнитель: " />
-                            <TextBlock Text="{Binding SelectedEmployee.Name}" />
-                            <telegramTag:TelegramTag Text="{Binding SelectedEmployee.TelegramTag, StringFormat='@{0}'}"
-                                                     IsVisible="{Binding SelectedEmployee.TelegramTag, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                            <TextBlock Text="{Binding SelectedEmployee.Name, FallbackValue=''}" />
+                            <telegramTag:TelegramTag
+                                Text="{Binding SelectedEmployee.TelegramTag, StringFormat='@{0}', FallbackValue=''}"
+                                IsVisible="{Binding SelectedEmployee.TelegramTag, FallbackValue={x:False}, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Дедлайн: " />
-                            <TextBlock Text="{Binding Deadline, StringFormat='dd.MM.yyyy'}" />
+                            <TextBlock Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding Cost}">
                             <TextBlock Text="Стоимость: " />
                             <TextBlock Text="{Binding Cost, StringFormat='{}{0:C}'}" />
                         </StackPanel>
@@ -79,6 +137,28 @@
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding TimelyBonus}">
                             <TextBlock Text="Бонус за срок: " />
                             <TextBlock Text="{Binding TimelyBonus, StringFormat='{}{0:C}'}" />
+                        </StackPanel>
+
+                        <Separator IsVisible="{Binding DependsOnList.Count}" />
+
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding DependsOnList.Count}">
+                            <TextBlock Text="Зависит от: " Margin="0 4 0 0" />
+
+                            <ItemsControl ItemsSource="{Binding DependsOnList}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="card thin">
+                                            <TextBlock Classes.completed="{Binding IsCompleted}" Text="{Binding Name}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </StackPanel>
                 </Template>
@@ -96,28 +176,24 @@
     <Border Classes="card">
         <Grid RowSpacing="8" RowDefinitions="* Auto Auto">
             <StackPanel Orientation="Horizontal" Spacing="8">
-
-                <ContentControl Width="300" Classes.edit-control="{Binding IsInEditMode}"
-                                Classes.view-control="{Binding !IsInEditMode}" />
+                <ContentControl Width="300" Classes.edit-control="{Binding #Root.IsInEditMode}"
+                                Classes.view-control="{Binding !#Root.IsInEditMode}" />
 
                 <StackPanel Spacing="8" Orientation="Horizontal" IsVisible="{Binding !#Root.IsForEmployee}"
                             HorizontalAlignment="Right" VerticalAlignment="Top">
-                    
-                    <Button Classes="icon template-add" IsVisible="{Binding IsInEditMode}"
+
+                    <Button Classes="icon template-add" IsVisible="{Binding #Root.IsInEditMode}"
                             Command="{Binding CreateTemplateAsync}" />
-                    
-                    <ToggleButton Classes="icon enter-hot-key"
-                                  Classes.edit="{Binding !IsInEditMode}"
-                                  Classes.save="{Binding IsInEditMode}"
-                                  IsChecked="{Binding IsInEditMode, Mode=TwoWay}" />
-                    
-                    <Button Classes="icon delete" Command="{Binding RemoveAsync}"/>
+
+                    <Button Classes="icon delete" Command="{Binding RemoveAsync}"
+                            IsVisible="{Binding #Root.IsInEditMode}" />
                 </StackPanel>
             </StackPanel>
 
-            <Separator Grid.Row="1" />
+            <Separator Grid.Row="1" IsVisible="{Binding !#Root.IsInEditMode}" />
 
-            <WrapPanel Grid.Row="2" ItemSpacing="16" LineSpacing="8">
+            <WrapPanel Grid.Row="2" ItemSpacing="16" LineSpacing="8" IsVisible="{Binding !#Root.IsInEditMode}"
+                       IsEnabled="{Binding IsOwnedByCurrentUser}">
                 <manualCheckBox:ManualCheckBox Content="Выполнено" HorizontalAlignment="Right"
                                                IsChecked="{Binding IsCompleted}"
                                                Command="{Binding ToggleCompletionStatusCommand}" />
