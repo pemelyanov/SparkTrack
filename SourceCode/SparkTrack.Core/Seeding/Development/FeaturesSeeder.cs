@@ -79,6 +79,7 @@ public class FeaturesSeeder(
                     TasksList = s_availableTasks.Take(Random.Shared.Next(2, 4))
                         .Select(it => it with
                             {
+                                Id = Guid.NewGuid(),
                                 ExecutorEmployeeId = employeesList[Random.Shared.Next(0, employeesList.Count)].Id
                             }
                         )
