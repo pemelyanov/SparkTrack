@@ -109,11 +109,18 @@ public class SubTaskViewModel : ViewModelBase
             .Subscribe(list =>
                 {
                     AvailableDependencyTasksList =
-                        list.Where(it => it != this && !it.DependsOnList.Contains(this) && !DependsOnList.Contains(it))
+                        list.Where(it => it != this && !IsRecurseSelected(it, this) && !DependsOnList.Contains(it))
                             .ToArray();
                 }
             )
             .DisposeWith(disposables);
+    }
+
+    private static bool IsRecurseSelected(SubTaskViewModel source, SubTaskViewModel target)
+    {
+        if (source.DependsOnList.Contains(target)) return true;
+
+        return source.DependsOnList.Any(i => IsRecurseSelected(i, target));
     }
 
     public Guid Id { get; }

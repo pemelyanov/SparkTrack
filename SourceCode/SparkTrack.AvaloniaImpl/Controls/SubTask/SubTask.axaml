@@ -66,23 +66,6 @@
                         <StackPanel Spacing="8">
                             <TextBlock Text="Зависит от: " />
 
-                            <ItemsControl ItemsSource="{Binding DependsOnList}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Classes="card thin">
-                                            <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
-                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
-                                                           Margin="8 0 0 0" />
-
-                                                <Button Grid.Column="1" Classes="icon medium delete"
-                                                        Command="{Binding #Root.ViewModel.RemoveDependency, FallbackValue={x:Null}}"
-                                                        CommandParameter="{Binding .}" />
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
                             <DropDownButton Content="Добавить" HorizontalAlignment="Stretch"
                                             HorizontalContentAlignment="Center" IsEnabled="{Binding AvailableDependencyTasksList.Count}">
                                 <DropDownButton.Flyout>
@@ -102,6 +85,23 @@
                                     </Flyout>
                                 </DropDownButton.Flyout>
                             </DropDownButton>
+                            
+                            <ItemsControl ItemsSource="{Binding DependsOnList}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Classes="card thin">
+                                            <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                                           Margin="8 0 0 0" />
+
+                                                <Button Grid.Column="1" Classes="icon medium delete"
+                                                        Command="{Binding #Root.ViewModel.RemoveDependency, FallbackValue={x:Null}}"
+                                                        CommandParameter="{Binding .}" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </StackPanel>
                 </Template>
