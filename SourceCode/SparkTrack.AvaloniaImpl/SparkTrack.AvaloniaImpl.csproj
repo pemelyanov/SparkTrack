@@ -60,8 +60,4 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Windows\Progress\" />
-    </ItemGroup>
 </Project>

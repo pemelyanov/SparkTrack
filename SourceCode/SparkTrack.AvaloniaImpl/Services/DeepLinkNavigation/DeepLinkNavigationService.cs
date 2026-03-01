@@ -2,10 +2,12 @@
 
 using System.Reactive.Disposables;
 using System.Threading.Channels;
+using Windows.Progress;
 using Core.Shared.Data.Entities;
 using Core.Shared.Services.Features;
 using DeepLink;
 using DeepLink.Data;
+using DialogHost;
 using Extensions;
 using NLog;
 using Pages.Feature;
@@ -14,7 +16,8 @@ using ReactiveUI;
 public class DeepLinkNavigationService(
     Lazy<IScreen> hostScreen,
     IFeaturesService featuresService,
-    Func<Feature, FeaturePageViewModel> featurePageFactory
+    Func<Feature, FeaturePageViewModel> featurePageFactory,
+    IDialogService dialogService
 ) : IDeepLinkNavigationService
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
@@ -87,9 +90,24 @@ public class DeepLinkNavigationService(
             return;
         }
 
+        var cts = new CancellationTokenSource();
+
+        await using CancellationTokenRegistration
+            mainTokenRegistration = cancellationToken.Register(() => cts.Cancel());
+        
+        var progressViewModel = new ProgressViewModel(
+            "Получаем информацию о идее..",
+            "Переход к идее",
+            cts
+        );
+
         try
         {
+            _ = Task.Run(() => dialogService.ShowAsync(progressViewModel));
+            
             var feature = await featuresService.GetAsync(featurePageData.Id);
+            
+            cts.Token.ThrowIfCancellationRequested();
 
             if (feature is null)
             {
@@ -106,6 +124,10 @@ public class DeepLinkNavigationService(
         catch (Exception e)
         {
             s_logger.Warn(e);
+        }
+        finally
+        {
+            progressViewModel.Close(null);
         }
     }
 }

@@ -13,6 +13,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
@@ -20,8 +21,12 @@ using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using Services.Clipboard;
 using Services.DialogHost;
+using ViewModels;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService, IClipboardService
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
+                                  IDialogService,
+                                  IPopupNotificationService,
+                                  IClipboardService
 {
     private readonly WindowNotificationManager m_notificationManager;
 
@@ -35,7 +40,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         InitializeComponent();
 
         m_scale = m_interfaceConfiguration.Config.Scale / 100d;
-        
+
         m_notificationManager = new WindowNotificationManager
         {
             Position = NotificationPosition.BottomCenter,
@@ -54,7 +59,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
 
     public static readonly StyledProperty<double> ContentWidthProperty =
         AvaloniaProperty.Register<MainWindow, double>(
-            nameof(ContentWidth), defaultValue: Double.NaN);
+            nameof(ContentWidth),
+            defaultValue: Double.NaN
+        );
 
     public double ContentWidth
     {
@@ -66,7 +73,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
 
     public static readonly StyledProperty<double> ContentHeightProperty =
         AvaloniaProperty.Register<MainWindow, double>(
-            nameof(ContentHeight), defaultValue: Double.NaN);
+            nameof(ContentHeight),
+            defaultValue: Double.NaN
+        );
 
     public double ContentHeight
     {
@@ -95,20 +104,24 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         ViewModel?.SelectPage(type);
     }
 
-    public async Task<bool?> ShowAsync(ReactiveObject viewModel)
-    {
-        var view = ViewLocator.Current.ResolveView(viewModel);
-
-        if (view != null) view.ViewModel = viewModel;
-
-        var result = await (view switch
+    public Task<bool?> ShowAsync(ReactiveObject viewModel) => Dispatcher.UIThread.InvokeAsync(async () =>
         {
-            ContentDialog contentDialog => contentDialog.ShowAsync(this),
-            _ => throw new NotSupportedException()
-        });
+            if (viewModel is DialogViewModelBase { IsClosed: true } dialogViewModelBase)
+                return dialogViewModelBase.Result;
+            
+            var view = ViewLocator.Current.ResolveView(viewModel);
 
-        return ToBool(result);
-    }
+            if (view != null) view.ViewModel = viewModel;
+
+            var result = await (view switch
+            {
+                ContentDialog contentDialog => contentDialog.ShowAsync(this),
+                _ => throw new NotSupportedException()
+            });
+
+            return ToBool(result);
+        }
+    );
 
     private bool? ToBool(ContentDialogResult result) => result switch
     {
@@ -116,10 +129,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         _ => null
     };
 
-    public void Show(ENotificationType type, string message, string? title = null)
-    {
-        m_notificationManager.Show(CreateNotification(message, title, type.Cast<NotificationType>()));
-    }
+    public void Show(ENotificationType type, string message, string? title = null) => Dispatcher.UIThread.Invoke(() =>
+        {
+            m_notificationManager.Show(CreateNotification(message, title, type.Cast<NotificationType>()));
+        }
+    );
 
     private Notification CreateNotification(string message, string? title, NotificationType type) => new()
     {
@@ -137,9 +151,9 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
     public async Task SaveToClipboardAsync(string text, string? notificationText = null)
     {
         if (Clipboard is null) return;
-            
+
         await Clipboard.SetTextAsync(text);
-        
-        if(!string.IsNullOrEmpty(notificationText)) Show(ENotificationType.Information, notificationText);
+
+        if (!string.IsNullOrEmpty(notificationText)) Show(ENotificationType.Information, notificationText);
     }
 }
