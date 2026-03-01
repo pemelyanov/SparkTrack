@@ -5,6 +5,7 @@ namespace SparkTrack.Desktop;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using AvaloniaImpl;
+using DeepLink;
 using Fanatiki.MVVM.Extensions;
 using NLog;
 using ReactiveUI;
@@ -34,7 +35,16 @@ sealed class Program
         if (args.Length > 0)
         {
             deepLink = args[0];
-            s_logger.Info("App started by deeplink: {deeplink}", deepLink);
+            s_logger.Info("App starting with deeplink: {deeplink}", deepLink);
+
+            try
+            {
+                App.StartupDeepLink = SparkTrackDeepLink.Parse(deepLink);
+            }
+            catch (Exception e)
+            {
+                s_logger.Warn(e, "Error handling deeplink");
+            }
         }
         
         bool createdNew;
@@ -64,6 +74,7 @@ sealed class Program
         {
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
+            
             s_logger.Info("App shutted down");
         }
         catch (Exception e)

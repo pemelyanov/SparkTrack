@@ -35,8 +35,10 @@ using Controls.Attachment;
 using Controls.TemplateSaveForm;
 using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
+using DeepLink;
 using DescriptionTemplates;
 using Exceptions;
+using FeaturesList;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
 
@@ -44,22 +46,23 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
-    private          Feature? m_feature;
-    private readonly Project m_project;
-    private readonly Lazy<IScreen> m_hostScreen;
-    private readonly IFeaturesService m_featuresService;
-    private readonly IUsersService m_usersService;
-    private readonly Func<Comment?, CommentEditViewModel> m_commentEditFactory;
-    private readonly ICommentsService m_commentsService;
-    private readonly CommentViewModelFactory m_commentFactory;
-    private readonly IAuthorizationService m_authorizationService;
-    private readonly SubTaskViewModelFactory m_subTaskViewModelFactory;
-    private readonly IPopupNotificationService m_popupNotificationService;
-    private readonly Func<TemplateSelectionFormViewModel<SubTaskTemplate>> m_subTaskTemplateSelectionViewModelFactory;
-    private readonly IDialogService m_dialogService;
+    private          Feature?                                                          m_feature;
+    private readonly Project                                                           m_project;
+    private readonly Lazy<IScreen>                                                     m_hostScreen;
+    private readonly IFeaturesService                                                  m_featuresService;
+    private readonly IUsersService                                                     m_usersService;
+    private readonly Func<Comment?, CommentEditViewModel>                              m_commentEditFactory;
+    private readonly ICommentsService                                                  m_commentsService;
+    private readonly CommentViewModelFactory                                           m_commentFactory;
+    private readonly IAuthorizationService                                             m_authorizationService;
+    private readonly SubTaskViewModelFactory                                           m_subTaskViewModelFactory;
+    private readonly IPopupNotificationService                                         m_popupNotificationService;
+    private readonly Func<TemplateSelectionFormViewModel<SubTaskTemplate>>             m_subTaskTemplateSelectionViewModelFactory;
+    private readonly IDialogService                                                    m_dialogService;
     private readonly Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> m_templateViewModelFactory;
-    private readonly Func<UserSelectionViewModel> m_userSelectionFactory;
-    private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
+    private readonly Func<UserSelectionViewModel>                                      m_userSelectionFactory;
+    private readonly Func<FeaturesListPageViewModel>                                   m_featuresListPageFactory;
+    private readonly BehaviorSubject<IReadOnlyList<User>>                              m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
         Project project,
@@ -76,7 +79,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
-        Func<UserSelectionViewModel> userSelectionFactory
+        Func<UserSelectionViewModel> userSelectionFactory,
+        Func<FeaturesListPageViewModel> featuresListPageFactory
     ) : this(
         null,
         project,
@@ -93,7 +97,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         subTaskTemplateSelectionViewModelFactory,
         dialogService,
         templateViewModelFactory,
-        userSelectionFactory
+        userSelectionFactory,
+        featuresListPageFactory
     )
     {
     }
@@ -113,7 +118,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
-        Func<UserSelectionViewModel> userSelectionFactory
+        Func<UserSelectionViewModel> userSelectionFactory,
+        Func<FeaturesListPageViewModel> featuresListPageFactory
     ) : this(
         feature,
         feature.Project,
@@ -130,7 +136,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         subTaskTemplateSelectionViewModelFactory,
         dialogService,
         templateViewModelFactory,
-        userSelectionFactory
+        userSelectionFactory,
+        featuresListPageFactory
     )
     {
     }
@@ -151,7 +158,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
-        Func<UserSelectionViewModel> userSelectionFactory
+        Func<UserSelectionViewModel> userSelectionFactory,
+        Func<FeaturesListPageViewModel> featuresListPageFactory
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -170,6 +178,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_dialogService = dialogService;
         m_templateViewModelFactory = templateViewModelFactory;
         m_userSelectionFactory = userSelectionFactory;
+        m_featuresListPageFactory = featuresListPageFactory;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
         AttachmentsPanelViewModel.PreviewAttachmentSetRequested +=
             AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
@@ -198,13 +207,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         this.WhenAnyValue(
                 it => it.IsEditingComment,
-                (isEditingComment) => !isEditingComment
+                isEditingComment => !isEditingComment
             )
             .Subscribe(canSaveByHotKey => CanSaveByHotKey = canSaveByHotKey)
             .DisposeWith(disposables);
     }
 
-    public string UrlPathSegment => "feature";
+    public string UrlPathSegment => SparkTrackDeepLink.FeaturePage;
 
     public IScreen HostScreen => m_hostScreen.Value;
 
@@ -309,7 +318,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public void CancelComment() => CommentEditViewModel = null;
 
-    public void Back() => HostScreen.Router.SafeBackOnUIThread();
+    public void Back()
+    {
+        if (HostScreen.Router.NavigationStack.Count > 1)
+        {
+            HostScreen.Router.SafeBackOnUIThread();
+            return;
+        }
+        
+        HostScreen.Router.PopToOnUIThread(m_featuresListPageFactory());
+    }
 
     public void AddSubTask()
     {
