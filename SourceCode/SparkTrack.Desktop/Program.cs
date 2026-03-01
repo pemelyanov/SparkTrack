@@ -14,17 +14,34 @@ sealed class Program
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
     private static          Mutex?  s_mutex;
     
+    #if DEBUG
+    private const           string  MutexName = "SparkTrackDebugMutex";
+    #else
+    private const           string  MutexName = "SparkTrackMutex";
+    #endif
+    
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args)
     {
+        SetupLogger();
+        s_logger.Info("Logger configured");
+        
+        var deepLink = string.Empty;
+
+        if (args.Length > 0)
+        {
+            deepLink = args[0];
+            s_logger.Info("App started by deeplink: {deeplink}", deepLink);
+        }
+        
         bool createdNew;
 
         try
         {
-            s_mutex = new Mutex(true, "SparkTrackMutex", out createdNew);
+            s_mutex = new Mutex(true, MutexName, out createdNew);
         }
         catch
         {
@@ -34,16 +51,14 @@ sealed class Program
         if (!createdNew)
         {
             // Сообщаем первому инстансу, что нужно показать окно
-            SingleInstanceIpc.SignalFirstInstance();
+            s_logger.Info("Found existing app instance, redirecting to one...");
+            SingleInstanceIpc.SignalFirstInstance(deepLink);
             return;
         }
         
-        SetupLogger();
-        s_logger.Info("Logger configured");
-        
         RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
         
-        s_logger.Info("Starting app...");
+        s_logger.Info("Starting app v{version}...", typeof(Program).Assembly.GetName().Version);
 
         try
         {

@@ -16,6 +16,11 @@ using SparkTrack.WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// В дебаге можем добавить конфигурацию для разработки, но с чувствительными данными. Данный файл не коммитится.
+#if DEBUG
+builder.Configuration.AddJsonFile("appsettings.Development.Local.json", optional: true);
+#endif
+
 // Add services to the container.
 builder.Host.UseServiceProviderFactory(
     new AutofacServiceProviderFactory(it => RegisterServices(it, builder.Configuration)));

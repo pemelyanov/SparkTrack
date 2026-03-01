@@ -34,7 +34,7 @@ public partial class App : Application
             mainWindow.DataContext = Locator.Current.GetService<MainWindowViewModel>();
             desktop.MainWindow = mainWindow;
             
-            SingleInstanceIpc.StartListening(() =>
+            SingleInstanceIpc.StartListening(deeplink =>
             {
                 Dispatcher.UIThread.Post(() =>
                 {
