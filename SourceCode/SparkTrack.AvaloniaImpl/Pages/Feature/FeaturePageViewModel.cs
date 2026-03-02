@@ -1,4 +1,5 @@
-﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
+﻿using Microsoft.Extensions.Configuration;
+using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
 using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Services.DialogHost;
 using SparkTrack.Core.Shared.Extensions;
@@ -62,6 +63,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> m_templateViewModelFactory;
     private readonly Func<UserSelectionViewModel>                                      m_userSelectionFactory;
     private readonly Func<FeaturesListPageViewModel>                                   m_featuresListPageFactory;
+    private readonly LinkShareViewModelFactory                                         m_linkShareFactory;
+    private readonly IConfiguration                                                    m_configuration;
     private readonly BehaviorSubject<IReadOnlyList<User>>                              m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
@@ -80,7 +83,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
         Func<UserSelectionViewModel> userSelectionFactory,
-        Func<FeaturesListPageViewModel> featuresListPageFactory
+        Func<FeaturesListPageViewModel> featuresListPageFactory,
+        LinkShareViewModelFactory linkShareFactory,
+        IConfiguration configuration
     ) : this(
         null,
         project,
@@ -98,7 +103,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         dialogService,
         templateViewModelFactory,
         userSelectionFactory,
-        featuresListPageFactory
+        featuresListPageFactory,
+        linkShareFactory,
+        configuration
     )
     {
     }
@@ -119,7 +126,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
         Func<UserSelectionViewModel> userSelectionFactory,
-        Func<FeaturesListPageViewModel> featuresListPageFactory
+        Func<FeaturesListPageViewModel> featuresListPageFactory,
+        LinkShareViewModelFactory linkShareFactory,
+        IConfiguration configuration
     ) : this(
         feature,
         feature.Project,
@@ -137,7 +146,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         dialogService,
         templateViewModelFactory,
         userSelectionFactory,
-        featuresListPageFactory
+        featuresListPageFactory,
+        linkShareFactory,
+        configuration
     )
     {
     }
@@ -159,7 +170,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
         Func<UserSelectionViewModel> userSelectionFactory,
-        Func<FeaturesListPageViewModel> featuresListPageFactory
+        Func<FeaturesListPageViewModel> featuresListPageFactory,
+        LinkShareViewModelFactory linkShareFactory,
+        IConfiguration configuration
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -179,12 +192,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_templateViewModelFactory = templateViewModelFactory;
         m_userSelectionFactory = userSelectionFactory;
         m_featuresListPageFactory = featuresListPageFactory;
+        m_linkShareFactory = linkShareFactory;
+        m_configuration = configuration;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
         AttachmentsPanelViewModel.PreviewAttachmentSetRequested +=
             AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
         if (feature is null)
         {
+            IsNew = true;
             IsInEditMode = true;
             AuthorsList.Add(m_authorizationService.CurrentUser.Value!);
         }
@@ -195,7 +211,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
         
         RefreshCommand = ReactiveCommand.CreateFromTask(() =>
-            Task.WhenAll(RefreshAsync(), RefreshCommentsCommand.Execute().ToTask())
+            Task.WhenAll(RefreshAsync(), RefreshCommentsCommand.Execute().ToTask()),
+            this.WhenAnyValue(it => it.IsNew).Select(isNew => !isNew)
         );
     }
 
@@ -260,6 +277,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     [Reactive]
     public string PreviewDescription { get; set; } = string.Empty;
 
+    public bool IsNew { get; }
+
     public Project Project => m_project;
 
     public ReactiveCommand<Unit, Unit> SaveCommand { get; }
@@ -269,6 +288,19 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     public ReactiveCommand<Unit, Unit> RefreshCommentsCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
+
+    public async Task ShareAsync()
+    {
+        if(m_feature is not {} feature) return;
+
+        var link = SparkTrackDeepLink.ToFeature(feature.Id, m_configuration.GetDeepLinkBaseUrl());
+        
+        s_logger.Info("Sharing link to feature {id}: {link}", feature.Id, link);
+
+        var linkShareViewModel = m_linkShareFactory(() => Task.FromResult(link));
+
+        await m_dialogService.ShowAsync(linkShareViewModel);
+    }
 
     public async Task AddAuthorAsync()
     {

@@ -1,3 +1,4 @@
+using SparkTrack.AvaloniaImpl.Delegates;
 using SparkTrack.AvaloniaImpl.Services.Explorer;
 
 namespace SparkTrack.AvaloniaImpl.Controls.Attachment;
@@ -12,7 +13,6 @@ using Services.LocalFilesManager;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using System.Windows.Input;
-using Windows.LinkShare;
 using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
 using NLog;
@@ -33,7 +33,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         IAttachmentsPathCache attachmentsPathCache,
         IExplorerService explorerService,
         IPopupNotificationService popupNotificationService,
-        Func<Func<Task<string>>, LinkShareViewModel> linkShareFactory
+        LinkShareViewModelFactory linkShareFactory
     )
         : base(onRemove, dialogService, explorerService, LogManager.GetCurrentClassLogger())
     {

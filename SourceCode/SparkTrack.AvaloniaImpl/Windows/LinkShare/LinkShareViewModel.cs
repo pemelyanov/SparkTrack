@@ -15,7 +15,8 @@ public class LinkShareViewModel : DialogViewModelBase
     private static readonly ILogger           s_logger = LogManager.GetCurrentClassLogger();
     private readonly        IClipboardService m_clipboardService;
 
-    public LinkShareViewModel(Func<Task<string>> linkFactory, IClipboardService clipboardService, IPopupNotificationService popupNotificationService)
+    public LinkShareViewModel(Func<Task<string>> linkFactory, IClipboardService clipboardService,
+        IPopupNotificationService popupNotificationService)
     {
         m_clipboardService = clipboardService;
         GetLinkCommand = ReactiveCommand.CreateFromTask(async () =>

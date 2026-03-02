@@ -95,6 +95,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
     protected override void RegisterServices(ContainerBuilder builder)
     {
+        builder.RegisterInstance(s_configuration).As<IConfiguration>().SingleInstance();
         builder.RegisterType<MainWindow>().AsSelf().AsImplementedInterfaces().SingleInstance();
 
         builder.RegisterAvaloniaServices();
