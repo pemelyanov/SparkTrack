@@ -6,6 +6,7 @@ namespace SparkTrack.Telegram.Core.EventHandlers;
 using System.Net;
 using System.Text;
 using Extensions;
+using Microsoft.Extensions.Configuration;
 using NLog;
 using Repositories;
 using Services;
@@ -18,7 +19,8 @@ using SparkTrack.Core.Shared.Enums;
 public class SubTaskCompletedEventHandler(
     ITelegramMessageSender messageSender,
     ITelegramUsersRepository telegramUsersRepository,
-    IUsersService usersService
+    IUsersService usersService,
+    IConfiguration configuration
 ) : ITelegramEventHandler<SubTaskCompletedEvent>
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
@@ -95,7 +97,7 @@ public class SubTaskCompletedEventHandler(
 
         var message = BuildMessage(subTask, eventData.ParentFeature, telegramUser.TimeZone);
 
-        var action = new InlineKeyboardButton("Перейти к идее", "link");
+        var action = new InlineKeyboardButton("Перейти к идее", configuration.GetDeepLinkBaseUrl());
 
         await messageSender.SendAsync(
             telegramUser.ChatId,
