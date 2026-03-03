@@ -120,6 +120,17 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             "interface-configuration.json"
         ));
 
+        var configsFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "SparkTrack",
+            "Configs"
+        );
+        
+        builder.RegisterJsonConfiguration<WindowStateConfig>(Path.Combine(
+            configsFolder,
+            "window-state.json"
+        ));
+
         RegisterUpdatingIfNeeded(builder);
         
         RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");
