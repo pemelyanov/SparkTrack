@@ -18,45 +18,48 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
     : IFeaturesRepository
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
-        Guid? projectId,
-        bool showCompleted,
-        Guid? subTaskEmployeeId,
-        DateTime? startDate,
-        DateTime? endDate,
-        Guid? authorId,
-        SortQuery? sortQuery,
-        PageQuery pageQuery
-    ) => dbContext.Features
-        .AsNoTracking()
-        .WhereIf(projectId is not null, f => f.ProjectId == projectId)
-        .WhereIf(startDate is not null, it => it.CreatedAt >= startDate)
-        .WhereIf(endDate is not null, it => it.CreatedAt <= endDate)
-        .WhereIf(
-            subTaskEmployeeId is not null,
-            f => f.TasksList.Any(t => t.ExecutorEmployeeId == subTaskEmployeeId)
-        )
-        .WhereIf(
-            !showCompleted,
-            f => f.TasksList.Count == 0
-                || f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
-        )
-        .WhereIf(authorId is not null, it => it.AuthorsList.Count == 0 || it.AuthorsList.Any(a => a.Id == authorId))
-        .OrderBy(
-            sortQuery,
-            () => sortQuery?.SortField switch
-            {
-                "Name" => it => it.Name,
-                "Deadline" => it => it.TasksList.Select(t => t.Deadline).Min(),
-                "CreatedAt" => it => it.CreatedAt,
-                _ => throw new NotSupportedException(sortQuery?.SortField)
-            }
-        )
-        // TODO: Add filter
-        .Where(it => it.ArchivedAt == null)
-        .AsExpandableEFCore()
-        .Select(GetFeatureMapExpression(subTaskEmployeeId))
-        .AsPaginated(pageQuery)
-        .CollectAsync();
+        Guid? subTaskEmployeeId = null,
+        Guid? authorId = null,
+        FeatureFilterQuery? featureFilterQuery = null,
+        SortQuery? sortQuery = null,
+        PageQuery? pageQuery = null
+    )
+    {
+        featureFilterQuery ??= new();
+        pageQuery ??= PageQuery.All;
+        
+        return dbContext.Features
+            .AsNoTracking()
+            .WhereIf(featureFilterQuery.ProjectId is not null, f => f.ProjectId == featureFilterQuery.ProjectId)
+            .WhereIf(featureFilterQuery.StartDate is not null, it => it.CreatedAt >= featureFilterQuery.StartDate)
+            .WhereIf(featureFilterQuery.EndDate is not null, it => it.CreatedAt <= featureFilterQuery.EndDate)
+            .WhereIf(
+                subTaskEmployeeId is not null,
+                f => f.TasksList.Any(t => t.ExecutorEmployeeId == subTaskEmployeeId)
+            )
+            .WhereIf(
+                !featureFilterQuery.ShowClosed,
+                f => f.TasksList.Count == 0
+                    || f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
+            )
+            .WhereIf(authorId is not null, it => it.AuthorsList.Count == 0 || it.AuthorsList.Any(a => a.Id == authorId))
+            .OrderBy(
+                sortQuery,
+                () => sortQuery?.SortField switch
+                {
+                    "Name" => it => it.Name,
+                    "Deadline" => it => it.TasksList.Select(t => t.Deadline).Min(),
+                    "CreatedAt" => it => it.CreatedAt,
+                    _ => throw new NotSupportedException(sortQuery?.SortField)
+                }
+            )
+            // TODO: Add filter
+            .Where(it => it.ArchivedAt == null)
+            .AsExpandableEFCore()
+            .Select(GetFeatureMapExpression(subTaskEmployeeId))
+            .AsPaginated(pageQuery)
+            .CollectAsync();
+    }
 
     public Task<Feature?> GetAsync(
         int id,
