@@ -55,26 +55,30 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         };
 
         this.WhenActivated(OnActivated);
-
-        if (m_windowStateConfig.Config.Position is { } position)
-            Position = new PixelPoint(position.X, position.Y);
-
-        if (m_windowStateConfig.Config.Size is { } size)
-        {
-            Width = size.Width;
-            Height = size.Height;
-        }
     }
 
     private void OnActivated(CompositeDisposable disposables)
     {
+        if (m_windowStateConfig.Config.Position is { } savedPosition)
+            Position = new PixelPoint(savedPosition.X, savedPosition.Y);
+
+        if (m_windowStateConfig.Config.Size is { } savedSize)
+        {
+            Width = savedSize.Width;
+            Height = savedSize.Height;
+        }
+
+        if (m_windowStateConfig.Config.IsFullScreen is true) WindowState = WindowState.Maximized;
+        
         m_windowPosition.CombineLatest(m_windowSize, (position, size) => new { position, size })
-            .Throttle(TimeSpan.FromSeconds(1))
+            .Throttle(TimeSpan.FromSeconds(0.5))
             .Skip(1)
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(value => m_windowStateConfig.Update(it => it with
             {
                 Position = value.position,
-                Size = value.size
+                Size = value.size,
+                IsFullScreen = WindowState == WindowState.Maximized
             }))
             .DisposeWith(disposables);
     }
