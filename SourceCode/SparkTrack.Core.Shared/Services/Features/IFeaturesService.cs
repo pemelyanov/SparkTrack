@@ -10,13 +10,13 @@ public interface IFeaturesService
     /// Возвращает список фич на странице
     /// </summary>\
     /// <param name="pageQuery">Параметры пагинации</param>
-    /// <param name="featureFilterQuery">Набор фильтров</param>
+    /// <param name="filterQuery">Набор фильтров</param>
     /// <param name="sortQuery">Параметры сортировки</param>
     /// <param name="showOnlyMine">Показывать только фичи текущего пользователя (используется только для администратора)</param>
     /// <returns></returns>
     Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         bool showOnlyMine = true,
-        FeatureFilterQuery? featureFilterQuery = null,
+        FeatureFilterQuery? filterQuery = null,
         SortQuery? sortQuery = null,
         PageQuery? pageQuery = null
     );

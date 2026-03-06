@@ -29,6 +29,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     private readonly IDialogService                                        m_dialogService;
     private readonly Func<TemplateSelectionFormViewModel<FeatureTemplate>> m_templateSelectionViewModelFactory;
     private readonly BehaviorObservableSubject<IReadOnlyList<Feature>>     m_selectedFeatures = new([]);
+    private readonly BehaviorObservableSubject<FeatureFilterQuery?>        m_filterQuery      = new(null);
 
     public FeaturesListPageViewModel(
         Lazy<IScreen> screen,
@@ -63,11 +64,24 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             .DisposeWith(disposables);
 
         ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
-            .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowClosed))
             .CombineLatest(this.WhenAnyValue(it => it.ShowCompleted))
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
-            .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
             .Throttle(TimeSpan.FromMilliseconds(50))
+            .Select(_ => new FeatureFilterQuery
+            {
+                ProjectId = ProjectsFilterViewModel.SelectedProject?.Id,
+                EndDate = DateRangeViewModel.TryGetEndDate(),
+                StartDate = DateRangeViewModel.TryGetStartDate(),
+                ShowClosed = ShowClosed,
+                ShowCompleted = ShowCompleted,
+            })
+            .Subscribe(m_filterQuery)
+            .DisposeWith(disposables);
+        
+        m_filterQuery
+            .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
             .Subscribe()
@@ -86,7 +100,10 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     };
 
     [Reactive]
-    public bool ShowCompleted { get; set; }
+    public bool ShowClosed { get; set; }
+
+    [Reactive]
+    public bool ShowCompleted { get; set; } = true;
 
     [Reactive]
     public bool ShowOnlyMine { get; set; } = true;
@@ -134,11 +151,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(async () =>
         {
             var page = await m_featuresService.GetPageAsync(
-                ProjectsFilterViewModel.SelectedProject?.Id,
-                ShowCompleted,
-                DateRangeViewModel.TryGetStartDate(),
-                DateRangeViewModel.TryGetEndDate(),
                 ShowOnlyMine,
+                m_filterQuery.Value,
                 new SortQuery("CreatedAt", true),
                 PaginatorViewModel.ToQuery()
             );

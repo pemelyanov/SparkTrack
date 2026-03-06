@@ -27,7 +27,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
     {
         featureFilterQuery ??= new();
         pageQuery ??= PageQuery.All;
-        
+
         return dbContext.Features
             .AsNoTracking()
             .WhereIf(featureFilterQuery.ProjectId is not null, f => f.ProjectId == featureFilterQuery.ProjectId)
@@ -37,11 +37,16 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
                 subTaskEmployeeId is not null,
                 f => f.TasksList.Any(t => t.ExecutorEmployeeId == subTaskEmployeeId)
             )
+            .WhereIf(!featureFilterQuery.ShowCompleted, f => f.TasksList.Count == 0
+                                                             || f.TasksList.Where(t =>
+                                                                 subTaskEmployeeId == null || t.ExecutorEmployeeId ==
+                                                                 subTaskEmployeeId).Any(t => !t.IsCompleted)
+                                                             )
             .WhereIf(
-                !featureFilterQuery.ShowClosed,
-                f => f.TasksList.Count == 0
-                    || f.TasksList.Any(t => !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
-            )
+                !featureFilterQuery.ShowClosed, f => f.TasksList.Count == 0
+                                                     || f.TasksList.Any(t =>
+                                                         !t.IsCompleted || t.PaymentStatus != EPaymentStatus.Paid)
+                                                     )
             .WhereIf(authorId is not null, it => it.AuthorsList.Count == 0 || it.AuthorsList.Any(a => a.Id == authorId))
             .OrderBy(
                 sortQuery,
@@ -237,7 +242,7 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
                 var data = ToSubTaskData(taskEdit);
 
                 data.Id = Guid.Empty;
-                
+
                 featureData.TasksList.Add(
                     data
                 );
@@ -316,7 +321,8 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
         Project = GetProjectMapExpression().Invoke(f.Project),
         TasksList = f.TasksList
             .Where(t => subTaskEmployeeId == null || t.ExecutorEmployeeId == subTaskEmployeeId
-                || t.DependentForList.Any(d => d.ExecutorEmployeeId == subTaskEmployeeId)
+                                                  || t.DependentForList.Any(d =>
+                                                      d.ExecutorEmployeeId == subTaskEmployeeId)
             )
             .OrderBy(t => t.Deadline)
             .Select(t => GetSubTaskMapExpression(subTaskEmployeeId).Invoke(t))
@@ -371,7 +377,9 @@ internal sealed class FeaturesRepository(SparkTrackDbContext dbContext, ITransac
             IsCompleted = subTask.IsCompleted,
             Version = subTask.Version,
             CompletedAt = subTask.CompletedAt,
-            TimelyBonus = employeeDataFilter == null || employeeDataFilter == subTask.ExecutorEmployeeId ? subTask.TimelyBonus : 0,
+            TimelyBonus = employeeDataFilter == null || employeeDataFilter == subTask.ExecutorEmployeeId
+                ? subTask.TimelyBonus
+                : 0,
             IsTimelyBonusApproved = subTask.IsTimelyBonusApproved,
             DependsOnIdList = subTask.DependsOnList.Select(s => s.Id).ToArray()
         };

@@ -25,7 +25,7 @@ internal class FeaturesService(
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
         bool showOnlyMine = true,
-        FeatureFilterQuery? featureFilterQuery = null,
+        FeatureFilterQuery? filterQuery = null,
         SortQuery? sortQuery = null,
         PageQuery? pageQuery = null
     )
@@ -41,7 +41,7 @@ internal class FeaturesService(
         return featuresRepository.GetPageAsync(
             employeeFilter,
             authorId,
-            featureFilterQuery,
+            filterQuery,
             sortQuery,
             pageQuery
         );

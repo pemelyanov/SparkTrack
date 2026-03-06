@@ -37,10 +37,16 @@
                 </disablingWrapper:DisablingWrapper>
 
                 <CheckBox Content="Показывать закрытые"
-                              IsChecked="{Binding ShowCompleted, Mode=TwoWay}" />
+                              IsChecked="{Binding ShowClosed, Mode=TwoWay}"
+                              ToolTip.Tip="Завершенной считается идея, в которой все задачи выполнены и оплачены"/>
+                
+                <CheckBox Content="Показывать выполненные"
+                          IsChecked="{Binding ShowCompleted, Mode=TwoWay}"
+                          ToolTip.Tip="Выполненной считается та идея, в которой все доступные ВАМ задачи выполнены"/>
                 
                 <CheckBox Content="Показывать только мои" IsVisible="{markupExtensions:CurrentUserInRole Admin}"
-                          IsChecked="{Binding ShowOnlyMine, Mode=TwoWay}" />
+                          IsChecked="{Binding ShowOnlyMine, Mode=TwoWay}"
+                          ToolTip.Tip="Вашими считаются те идеи, где вы указаны как автор, а также те идеи, у которых не указано ни одного автора"/>
             </WrapPanel>
 
             <StackPanel Grid.Column="1" IsVisible="{markupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
