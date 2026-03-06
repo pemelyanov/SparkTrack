@@ -14,5 +14,5 @@ public record FeaturesPageConfig
     
     public SortQuery? Sort { get; init; }
 
-    public Dictionary<string, string> ColumnWidths = [];
+    public Dictionary<string, double> ColumnWidths { get; init; } = [];
 }
