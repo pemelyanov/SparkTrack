@@ -130,6 +130,11 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             configsFolder,
             "window-state.json"
         ));
+        
+        builder.RegisterJsonConfiguration<FeaturesPageConfig>(Path.Combine(
+            configsFolder,
+            "features-page.json"
+        ));
 
         RegisterUpdatingIfNeeded(builder);
         

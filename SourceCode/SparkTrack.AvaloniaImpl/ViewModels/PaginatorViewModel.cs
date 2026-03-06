@@ -14,7 +14,7 @@ public class PaginatorViewModel : ReactiveObject
     public int CurrentPage { get; set; }
 
     [Reactive]
-    public int ItemsPerPage { get; set; }
+    public int ItemsPerPage { get; set; } = 25;
 
     public PageQuery ToQuery() => new(CurrentPage, ItemsPerPage);
 

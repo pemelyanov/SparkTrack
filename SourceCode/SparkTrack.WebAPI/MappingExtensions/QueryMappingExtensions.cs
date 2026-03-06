@@ -13,9 +13,9 @@ public static class QueryMappingExtensions
     public static FeatureFilterQuery ToDomain(this FeatureFilterQueryDTO it) => new()
     {
         ProjectId = it.ProjectId,
-        EndDate = it.EndDate,
+        EndDate = it.EndDate?.ToUniversalTime(),
         ShowClosed = it.ShowClosed,
         ShowCompleted = it.ShowCompleted,
-        StartDate = it.StartDate
+        StartDate = it.StartDate?.ToUniversalTime()
     };
 }
