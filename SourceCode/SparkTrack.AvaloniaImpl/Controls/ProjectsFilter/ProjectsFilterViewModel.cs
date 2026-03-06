@@ -11,6 +11,7 @@ using System.Reactive.Disposables;
 public class ProjectsFilterViewModel : ViewModelBase
 {
     private readonly IProjectsService m_projectsService;
+    private          Guid?            m_idToSelectOnNextUpdate;
 
     public ProjectsFilterViewModel(IProjectsService projectsService)
     {
@@ -24,6 +25,18 @@ public class ProjectsFilterViewModel : ViewModelBase
         base.OnActivated(disposables);
 
         LoadListCommand.Execute().Subscribe().DisposeWith(disposables);
+
+        this.WhenAnyValue(it => it.ProjectsList)
+            .Subscribe(list =>
+                {
+                    if (m_idToSelectOnNextUpdate is null ||
+                        list.FirstOrDefault(it => it.Id == m_idToSelectOnNextUpdate) is not { } project) return;
+
+                    m_idToSelectOnNextUpdate = null;
+                    SelectedProject = project;
+                }
+            )
+            .DisposeWith(disposables);
     }
 
     [Reactive]
@@ -33,6 +46,11 @@ public class ProjectsFilterViewModel : ViewModelBase
     public Project? SelectedProject { get; set; }
     
     public ReactiveCommand<Unit, Unit> LoadListCommand { get; }
+    
+    public void AutoSelectOnceOnNextUpdate(Guid id)
+    {
+        m_idToSelectOnNextUpdate = id;
+    }
 
     private async Task LoadListAsync()
     {

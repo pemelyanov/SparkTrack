@@ -2,7 +2,7 @@ using SparkTrack.Core.Shared.Data;
 
 namespace SparkTrack.AvaloniaImpl.Data.Configurations;
 
-public record FeaturesPageConfig
+public struct FeaturesPageConfig() : IColumnsConfig
 {
     public bool? ShowOnlyMine { get; init; }
 

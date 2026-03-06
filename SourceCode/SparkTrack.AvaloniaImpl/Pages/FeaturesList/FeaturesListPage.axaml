@@ -83,7 +83,7 @@
                   Unloaded="FeaturesTable_OnUnloaded"
                   ItemsSource="{Binding CurrentPageData}">
             <DataGrid.Columns>
-                <dataGridColumns:DataGridSelectionColumn Tag="Selection" Binding="{Binding IsSelected, Mode=TwoWay}" />
+                <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
                 <DataGridTextColumn Tag="Name" Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
                 <DataGridTemplateColumn Tag="Project" IsReadOnly="True" Width="220"

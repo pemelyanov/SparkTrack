@@ -37,11 +37,10 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     private readonly Func<Project, FeaturePageViewModel>                   m_featureAddPageViewModelFactory;
     private readonly IDialogService                                        m_dialogService;
     private readonly Func<TemplateSelectionFormViewModel<FeatureTemplate>> m_templateSelectionViewModelFactory;
-    private readonly IConfigurationService<FeaturesPageConfig>             m_featuresPageConfig;
+    private readonly IConfigurationService<FeaturesPageConfig>             m_pageConfig;
     private readonly IPopupNotificationService                             m_popupNotificationService;
     private readonly BehaviorObservableSubject<IReadOnlyList<Feature>>     m_selectedFeatures = new([]);
     private readonly BehaviorObservableSubject<FeatureFilterQuery?>        m_filterQuery      = new(null);
-    private          Guid?                                                 m_projectToSelectOnNextLoad;
 
     public FeaturesListPageViewModel(
         Lazy<IScreen> screen,
@@ -51,7 +50,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         ProjectsFilterViewModel projectsFilterViewModel,
         IDialogService dialogService,
         Func<TemplateSelectionFormViewModel<FeatureTemplate>> templateSelectionViewModelFactory,
-        IConfigurationService<FeaturesPageConfig> featuresPageConfig,
+        IConfigurationService<FeaturesPageConfig> pageConfig,
         IPopupNotificationService popupNotificationService
     )
     {
@@ -61,7 +60,7 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         m_featureAddPageViewModelFactory = featureAddPageViewModelFactory;
         m_dialogService = dialogService;
         m_templateSelectionViewModelFactory = templateSelectionViewModelFactory;
-        m_featuresPageConfig = featuresPageConfig;
+        m_pageConfig = pageConfig;
         m_popupNotificationService = popupNotificationService;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
@@ -71,14 +70,14 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         SendOnPaymentCommand = ReactiveCommand.CreateFromTask(SendOnPaymentAsync, isSelectedPipe);
         MarkAsCompletedCommand = ReactiveCommand.CreateFromTask(MarkAsCompletedAsync, isSelectedPipe);
 
-        if (featuresPageConfig.Config.ShowOnlyMine is { } showOnlyMine) ShowOnlyMine = showOnlyMine;
+        if (pageConfig.Config.ShowOnlyMine is { } showOnlyMine) ShowOnlyMine = showOnlyMine;
 
-        if (featuresPageConfig.Config.ItemsPerPage is { } itemsPerPage) PaginatorViewModel.ItemsPerPage = itemsPerPage;
+        if (pageConfig.Config.ItemsPerPage is { } itemsPerPage) PaginatorViewModel.ItemsPerPage = itemsPerPage;
 
-        if (featuresPageConfig.Config.IsDatesFilterEnabled is { } isDatesFilterEnabled)
+        if (pageConfig.Config.IsDatesFilterEnabled is { } isDatesFilterEnabled)
             DateRangeViewModel.IsSelected = isDatesFilterEnabled;
 
-        if (featuresPageConfig.Config.Filters is { } filters)
+        if (pageConfig.Config.Filters is { } filters)
         {
             m_filterQuery.Value = filters;
 
@@ -86,7 +85,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             ShowCompleted = filters.ShowCompleted;
             DateRangeViewModel.Model.StartDate = filters.StartDate;
             DateRangeViewModel.Model.EndDate = filters.EndDate;
-            m_projectToSelectOnNextLoad = filters.ProjectId;
+            
+            if(filters.ProjectId is {} projectId) ProjectsFilterViewModel.AutoSelectOnceOnNextUpdate(projectId);
         }
     }
 
@@ -120,46 +120,19 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             .Switch()
             .Subscribe()
             .DisposeWith(disposables);
+    }
 
-        m_filterQuery.Skip(1)
-            .Subscribe(value => m_featuresPageConfig.Update(it => it with
-            {
-                Filters = value
-            }))
-            .DisposeWith(disposables);
-
-        this.WhenAnyValue(it => it.ShowOnlyMine).Skip(1)
-            .Subscribe(value => m_featuresPageConfig.Update(it => it with
-            {
-                ShowOnlyMine = value
-            }))
-            .DisposeWith(disposables);
-
-        DateRangeViewModel.WhenAnyValue(it => it.IsSelected)
-            .Subscribe(value => m_featuresPageConfig.Update(it => it with
-            {
-                IsDatesFilterEnabled = value
-            }))
-            .DisposeWith(disposables);
-
-        PaginatorViewModel.WhenAnyValue(it => it.ItemsPerPage)
-            .Skip(1)
-            .Subscribe(value => m_featuresPageConfig.Update(it => it with
-            {
-                ItemsPerPage = value
-            }))
-            .DisposeWith(disposables);
-
-        ProjectsFilterViewModel.WhenAnyValue(it => it.ProjectsList)
-            .Subscribe(list =>
-            {
-                if (m_projectToSelectOnNextLoad is null ||
-                    list.FirstOrDefault(it => it.Id == m_projectToSelectOnNextLoad) is not { } project) return;
-
-                m_projectToSelectOnNextLoad = null;
-                ProjectsFilterViewModel.SelectedProject = project;
-            })
-            .DisposeWith(disposables);
+    protected override void OnDeactivated()
+    {
+        base.OnDeactivated();
+        
+        m_pageConfig.Update(it => it with
+        {
+            ShowOnlyMine = ShowOnlyMine,
+            IsDatesFilterEnabled = DateRangeViewModel.IsSelected,
+            ItemsPerPage = PaginatorViewModel.ItemsPerPage,
+            Filters = m_filterQuery.Value
+        });
     }
 
     public string UrlPathSegment => "features";

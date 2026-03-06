@@ -8,11 +8,14 @@ using Controls.BonusForm;
 using Controls.PaymentForm;
 using Controls.ProjectsFilter;
 using Controls.UsersFilter;
+using Core.Client.Extensions;
+using Core.Client.Services.Configuration;
 using Core.Shared.Data;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.PaymentBills;
 using Core.Shared.Services.SubTasks;
+using Data.Configurations;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using Reactive;
@@ -23,10 +26,11 @@ using ViewModels;
 
 public class PendingPaymentsViewModel : ViewModelBase
 {
-    private readonly IPaymentBillsService     m_paymentBillsService;
-    private readonly ISubTasksService         m_subTasksService;
-    private readonly IDialogService           m_dialogService;
-    private readonly Func<BonusFormViewModel> m_bonusFormViewModelFactory;
+    private readonly IPaymentBillsService                                  m_paymentBillsService;
+    private readonly ISubTasksService                                      m_subTasksService;
+    private readonly IDialogService                                        m_dialogService;
+    private readonly Func<BonusFormViewModel>                              m_bonusFormViewModelFactory;
+    private readonly IConfigurationService<AdminPendingPaymentsPageConfig> m_pageConfig;
 
     private readonly BehaviorObservableSubject<IReadOnlyList<PaymentBillViewModel>> m_selectedBills = new([]);
 
@@ -36,13 +40,15 @@ public class PendingPaymentsViewModel : ViewModelBase
         ISubTasksService subTasksService,
         IDialogService dialogService,
         Func<BonusFormViewModel> bonusFormViewModelFactory,
-        UserFilterViewModel employeeFilterViewModel
+        UserFilterViewModel employeeFilterViewModel,
+        IConfigurationService<AdminPendingPaymentsPageConfig> pageConfig
     )
     {
         m_paymentBillsService = paymentBillsService;
         m_subTasksService = subTasksService;
         m_dialogService = dialogService;
         m_bonusFormViewModelFactory = bonusFormViewModelFactory;
+        m_pageConfig = pageConfig;
         EmployeeFilterViewModel = employeeFilterViewModel;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
@@ -78,6 +84,23 @@ public class PendingPaymentsViewModel : ViewModelBase
         );
 
         PayBonusCommand = ReactiveCommand.CreateFromTask(PayBonusAsync);
+        
+        if(m_pageConfig.Config.ProjectId is { } projectId) ProjectsFilterViewModel.AutoSelectOnceOnNextUpdate(projectId);
+
+        if (m_pageConfig.Config.IsDatesFilterEnabled is { } isDatesFilterEnabled)
+            DateRangeViewModel.IsSelected = isDatesFilterEnabled;
+
+        if (m_pageConfig.Config.StartDate is { } startDate) DateRangeViewModel.Model.StartDate = startDate;
+        
+        if (m_pageConfig.Config.EndDate is { } endDate) DateRangeViewModel.Model.StartDate = endDate;
+        
+        if (m_pageConfig.Config.ShowOnlyMine is { } showOnlyMine) ShowOnlyMine = showOnlyMine;
+
+        if (m_pageConfig.Config.ShowPaid is { } showPaid) ShowPaid = showPaid;
+        
+        if (m_pageConfig.Config.EmployeeId is { } employeeId) EmployeeFilterViewModel.AutoSelectOnceOnNextUpdate(employeeId);
+        
+        if (m_pageConfig.Config.ItemsPerPage is { } itemsPerPage) PaginatorViewModel.ItemsPerPage = itemsPerPage;
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -124,6 +147,23 @@ public class PendingPaymentsViewModel : ViewModelBase
             .Select(it => it is null ? 0 : it.RemainingPayments.Sum(p => p.Payment))
             .Subscribe(value => TotalRemainingPayments = value)
             .DisposeWith(disposables);
+    }
+
+    protected override void OnDeactivated()
+    {
+        base.OnDeactivated();
+        
+        m_pageConfig.Update(it => it with
+        {
+            ProjectId = ProjectsFilterViewModel.SelectedProject?.Id,
+            ShowOnlyMine = ShowOnlyMine,
+            EmployeeId = EmployeeFilterViewModel.SelectedUser?.Id,
+            StartDate = DateRangeViewModel.TryGetStartDate(),
+            EndDate = DateRangeViewModel.TryGetEndDate(),
+            IsDatesFilterEnabled = DateRangeViewModel.IsSelected,
+            ShowPaid = ShowPaid,
+            ItemsPerPage = PaginatorViewModel.ItemsPerPage
+        });
     }
 
     [Reactive]

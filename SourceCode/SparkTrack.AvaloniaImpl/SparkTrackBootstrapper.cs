@@ -135,6 +135,11 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             configsFolder,
             "features-page.json"
         ));
+        
+        builder.RegisterJsonConfiguration<AdminPendingPaymentsPageConfig>(Path.Combine(
+            configsFolder,
+            "admin-pending-payments-page.json"
+        ));
 
         RegisterUpdatingIfNeeded(builder);
         
