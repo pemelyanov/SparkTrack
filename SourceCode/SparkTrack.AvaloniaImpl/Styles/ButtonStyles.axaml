@@ -67,6 +67,14 @@
         </Setter>
     </Style>
     
+    <Style Selector=":is(Button).share">
+        <Setter Property="Content">
+            <Template>
+                <avalonia:SymbolIcon Symbol="Share" />
+            </Template>
+        </Setter>
+    </Style>
+    
     <Style Selector=":is(Button).reload">
         <Setter Property="Content">
             <Template>

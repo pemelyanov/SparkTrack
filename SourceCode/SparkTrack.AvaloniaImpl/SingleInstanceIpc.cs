@@ -8,7 +8,7 @@ public static class SingleInstanceIpc
     private static CancellationTokenSource s_cancellationTokenSource = new();
     private static Task?                   s_task;
 
-    public static void StartListening(Action onSignal)
+    public static void StartListening(Action<string> onSignal)
     {
         if (s_task is not null) return;
 
@@ -26,7 +26,11 @@ public static class SingleInstanceIpc
                         );
 
                         await server.WaitForConnectionAsync(s_cancellationTokenSource.Token);
-                        onSignal();
+                        
+                        using var reader = new StreamReader(server);
+                        var deeplink = await reader.ReadToEndAsync();
+                        
+                        onSignal(deeplink);
                     }
                     catch
                     {
@@ -37,12 +41,19 @@ public static class SingleInstanceIpc
         );
     }
 
-    public static void SignalFirstInstance()
+    public static void SignalFirstInstance(string deeplink = "")
     {
         try
         {
             using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
             client.Connect(200);
+            
+            if (!string.IsNullOrEmpty(deeplink))
+            {
+                using var writer = new StreamWriter(client);
+                writer.Write(deeplink);
+                writer.Flush();
+            }
         }
         catch
         {

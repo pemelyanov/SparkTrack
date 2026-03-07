@@ -10,12 +10,15 @@ using Services;
 using System.Net;
 using System.Text;
 using Data;
+using DeepLink;
 using Extensions;
+using Microsoft.Extensions.Configuration;
 using SparkTrack.Core.Shared.Data.Entities;
 
 public class FeatureCreatedEventHandler(
     ITelegramMessageSender messageSender,
-    ITelegramUsersRepository telegramUsersRepository
+    ITelegramUsersRepository telegramUsersRepository,
+    IConfiguration configuration
 )
     : ITelegramEventHandler<FeatureCreatedEvent>
 {
@@ -81,7 +84,10 @@ public class FeatureCreatedEventHandler(
             user.Role
         );
 
-        var action = new InlineKeyboardButton("Перейти к идее", "link");
+        var action = new InlineKeyboardButton(
+            "Перейти к идее",
+            SparkTrackDeepLink.ToFeature(eventData.Feature.Id, configuration.GetDeepLinkBaseUrl())
+        );
 
         var message = BuildMessage(eventData.Feature, tasks, telegramUser);
 

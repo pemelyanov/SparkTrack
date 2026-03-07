@@ -302,16 +302,17 @@
                 Classes.esc-hot-key="{Binding !IsEditingComment}" />
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
-            <Border Classes="card" Padding="8 2" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}">
+            <Border Classes="card" Padding="8 2" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" Margin="0 0 16 0">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Режим: " VerticalAlignment="Center" />
                     <ToggleSwitch Classes="edit-view-switch" IsChecked="{Binding IsInEditMode, Mode=TwoWay}"
                                   VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
+            
+            <Button Classes="icon share" Command="{Binding ShareAsync}" IsVisible="{Binding !IsNew}" />
 
-
-            <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" />
+            <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" IsVisible="{Binding !IsNew}" />
 
             <Button Classes="icon template-add" Command="{Binding CreateTemplateAsync}"
                     IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />

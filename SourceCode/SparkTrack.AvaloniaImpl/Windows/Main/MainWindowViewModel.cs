@@ -5,6 +5,7 @@ namespace SparkTrack.AvaloniaImpl.Windows.Main;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Controls.Account;
+using Core.Client.Services.Authorization;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using NLog;
@@ -13,21 +14,29 @@ using Pages.Update;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Routing;
+using Services.DeepLinkNavigation;
 using Services.NavigationListResolver;
 using Splat;
 using ILogger = NLog.ILogger;
 
 public class MainWindowViewModel : ViewModelBase, IScreen
 {
-    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+    private readonly        IDeepLinkNavigationService m_deepLinkNavigationService;
+    private readonly        IAuthorizationService      m_authorizationService;
+    private static readonly ILogger                    s_logger = LogManager.GetCurrentClassLogger();
+    private                 IDisposable?               m_deeplinkServiceSubscription;
 
     public MainWindowViewModel(
         AuthorizationPageViewModel startPage,
         INavigationListResolver navigationListResolver,
         AccountViewModel accountViewModel,
+        IDeepLinkNavigationService deepLinkNavigationService,
+        IAuthorizationService authorizationService,
         UpdatePageViewModel? updatePage = null
     )
     {
+        m_deepLinkNavigationService = deepLinkNavigationService;
+        m_authorizationService = authorizationService;
         AccountViewModel = accountViewModel;
         NavigationList = navigationListResolver.NavigationList.ObserveOn(RxApp.MainThreadScheduler);
 
@@ -65,6 +74,25 @@ public class MainWindowViewModel : ViewModelBase, IScreen
                 }
             )
             .DisposeWith(disposables);
+
+        m_authorizationService.CurrentUser
+            .Select(it => it is not null)
+            .DistinctUntilChanged()
+            .Subscribe(isAuthorized =>
+                {
+                    if (isAuthorized && m_deepLinkNavigationService.Start() is { } subscription)
+                    {
+                        m_deeplinkServiceSubscription = subscription;
+                        return;
+                    }
+
+                    ClearDeepLinkServiceSubscription();
+                }
+            )
+            .DisposeWith(disposables);
+
+        Disposable.Create(ClearDeepLinkServiceSubscription)
+            .DisposeWith(disposables);
     }
 
     public RoutingState Router { get; } = CreateRouter();
@@ -88,4 +116,10 @@ public class MainWindowViewModel : ViewModelBase, IScreen
     }
 
     private static RoutingState CreateRouter() => new SuspendableRoutingState();
+    
+    private void ClearDeepLinkServiceSubscription()
+    {
+        m_deeplinkServiceSubscription?.Dispose();
+        m_deeplinkServiceSubscription = null;
+    }
 }

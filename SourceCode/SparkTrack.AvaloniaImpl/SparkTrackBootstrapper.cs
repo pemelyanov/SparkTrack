@@ -47,6 +47,7 @@ using Pages.Update;
 using Pages.UsersList;
 using ReactiveUI;
 using Services.AttachmentsPathCache;
+using Services.DeepLinkNavigation;
 using Splat;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
@@ -94,6 +95,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
     protected override void RegisterServices(ContainerBuilder builder)
     {
+        builder.RegisterInstance(s_configuration).As<IConfiguration>().SingleInstance();
         builder.RegisterType<MainWindow>().AsSelf().AsImplementedInterfaces().SingleInstance();
 
         builder.RegisterAvaloniaServices();
@@ -150,6 +152,8 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         
         RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");
         RegisterTemplateService<FeatureTemplate>(builder, "Features");
+
+        builder.RegisterType<DeepLinkNavigationService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterUpdatingIfNeeded(ContainerBuilder builder)

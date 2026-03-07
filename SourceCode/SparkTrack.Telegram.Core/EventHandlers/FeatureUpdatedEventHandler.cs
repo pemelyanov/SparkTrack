@@ -5,7 +5,9 @@ namespace SparkTrack.Telegram.Core.EventHandlers;
 
 using System.Net;
 using System.Text;
+using DeepLink;
 using Extensions;
+using Microsoft.Extensions.Configuration;
 using NLog;
 using Repositories;
 using Services;
@@ -14,7 +16,8 @@ using SparkTrack.Core.Shared.Data.Entities;
 
 public class FeatureUpdatedEventHandler(
     ITelegramMessageSender messageSender,
-    ITelegramUsersRepository telegramUsersRepository
+    ITelegramUsersRepository telegramUsersRepository,
+    IConfiguration configuration
 ) : ITelegramEventHandler<FeatureUpdatedEvent>
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
@@ -79,7 +82,10 @@ public class FeatureUpdatedEventHandler(
         var changes = GetChangesForEmployee(oldFeature, newFeature, employee.Id, telegramUser.TimeZone);
         var message = BuildMessage(newFeature, changes, telegramUser.TimeZone);
 
-        var action = new InlineKeyboardButton("Перейти к идее", "link");
+        var action = new InlineKeyboardButton(
+            "Перейти к идее",
+            SparkTrackDeepLink.ToFeature(newFeature.Id, configuration.GetDeepLinkBaseUrl())
+        );
 
         await messageSender.SendAsync(
             telegramUser.ChatId,

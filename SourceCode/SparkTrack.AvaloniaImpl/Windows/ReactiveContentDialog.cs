@@ -2,6 +2,7 @@
 
 using Avalonia;
 using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using ViewModels;
@@ -49,14 +50,21 @@ public abstract class ReactiveContentDialog<TViewModel> : ContentDialog, IViewFo
         
         if(DataContext is not DialogViewModelBase dialogViewModelBase) return;
 
+        if (dialogViewModelBase.IsClosed)
+        {
+            Hide();
+            return;
+        }
+        
         m_lastDialogViewModel = dialogViewModelBase;
         dialogViewModelBase.CloseSignal += DialogViewModel_OnCloseSignal;
     }
 
-    private void DialogViewModel_OnCloseSignal(bool? result)
-    {
-        Hide(GetResult(result));
-    }
+    private void DialogViewModel_OnCloseSignal(bool? result) => Dispatcher.UIThread.Invoke(() =>
+        {
+            Hide(GetResult(result));
+        }
+    );
 
     object? IViewFor.ViewModel
     {
