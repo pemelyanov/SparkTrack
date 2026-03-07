@@ -6,9 +6,12 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Controls.ProjectsFilter;
 using Controls.UsersFilter;
+using Core.Client.Extensions;
+using Core.Client.Services.Configuration;
 using Core.Shared.Data.Entities;
 using Core.Shared.Enums;
 using Core.Shared.Services.PaymentBills;
+using Data.Configurations;
 using Extensions;
 using Fanatiki.MVVM.ViewModels;
 using ReactiveUI;
@@ -18,19 +21,22 @@ using ViewModels;
 
 public class PaymentsHistoryViewModel : ViewModelBase
 {
-    private readonly IPaymentBillsService m_paymentBillsService;
-    private readonly IDialogService       m_dialogService;
+    private readonly IPaymentBillsService                                  m_paymentBillsService;
+    private readonly IDialogService                                        m_dialogService;
+    private readonly IConfigurationService<AdminPaymentsHistoryPageConfig> m_pageConfig;
 
     public PaymentsHistoryViewModel(
         ProjectsFilterViewModel projectsFilterViewModel,
         IPaymentBillsService paymentBillsService,
         IDialogService dialogService,
         UserFilterViewModel adminFilterViewModel,
-        UserFilterViewModel employeeFilterViewModel
+        UserFilterViewModel employeeFilterViewModel,
+        IConfigurationService<AdminPaymentsHistoryPageConfig> pageConfig
     )
     {
         m_paymentBillsService = paymentBillsService;
         m_dialogService = dialogService;
+        m_pageConfig = pageConfig;
         AdminFilterViewModel = adminFilterViewModel;
         EmployeeFilterViewModel = employeeFilterViewModel;
         ProjectsFilterViewModel = projectsFilterViewModel;
@@ -45,6 +51,23 @@ public class PaymentsHistoryViewModel : ViewModelBase
                 return Unit.Default;
             }
         );
+        
+        if(m_pageConfig.Config.ProjectId is { } projectId) ProjectsFilterViewModel.AutoSelectOnceOnNextUpdate(projectId);
+
+        if (m_pageConfig.Config.IsDatesFilterEnabled is { } isDatesFilterEnabled)
+            DateRangeViewModel.IsSelected = isDatesFilterEnabled;
+
+        if (m_pageConfig.Config.StartDate is { } startDate) DateRangeViewModel.Model.StartDate = startDate;
+        
+        if (m_pageConfig.Config.EndDate is { } endDate) DateRangeViewModel.Model.EndDate = endDate;
+
+        if (m_pageConfig.Config.PaymentKind is { } paymentKind) SelectedPaymentKind = paymentKind;
+        
+        if (m_pageConfig.Config.EmployeeId is { } employeeId) EmployeeFilterViewModel.AutoSelectOnceOnNextUpdate(employeeId);
+        
+        if (m_pageConfig.Config.AdminId is { } adminId) AdminFilterViewModel.AutoSelectOnceOnNextUpdate(adminId);
+        
+        if (m_pageConfig.Config.ItemsPerPage is { } itemsPerPage) PaginatorViewModel.ItemsPerPage = itemsPerPage;
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -63,6 +86,23 @@ public class PaymentsHistoryViewModel : ViewModelBase
             .Subscribe()
             .DisposeWith(disposables);
     }
+    
+    protected override void OnDeactivated()
+    {
+        base.OnDeactivated();
+        
+        m_pageConfig.Update(it => it with
+        {
+            ProjectId = ProjectsFilterViewModel.SelectedProject?.Id,
+            PaymentKind = SelectedPaymentKind,
+            EmployeeId = EmployeeFilterViewModel.SelectedUser?.Id,
+            AdminId = AdminFilterViewModel.SelectedUser?.Id,
+            StartDate = DateRangeViewModel.TryGetStartDate(),
+            EndDate = DateRangeViewModel.TryGetEndDate(),
+            IsDatesFilterEnabled = DateRangeViewModel.IsSelected,
+            ItemsPerPage = PaginatorViewModel.ItemsPerPage
+        });
+    }
 
     public PaginatorViewModel PaginatorViewModel { get; } = new();
 
@@ -77,11 +117,11 @@ public class PaymentsHistoryViewModel : ViewModelBase
         IsSelected = true
     };
 
-    public IReadOnlyList<PaymentKind> PaymentKinds { get; } =
-        [PaymentKind.Primary.Instance, PaymentKind.Bonus.Instance];
+    public IReadOnlyList<EPaymentKind> PaymentKinds { get; } =
+        [EPaymentKind.Primary, EPaymentKind.Bonus];
 
     [Reactive]
-    public PaymentKind SelectedPaymentKind { get; set; } = PaymentKind.Primary.Instance;
+    public EPaymentKind SelectedPaymentKind { get; set; } = EPaymentKind.Primary;
 
     [Reactive]
     public IReadOnlyList<PaymentDetails> PaymentDetailsPageData { get; private set; } = [];
@@ -106,7 +146,7 @@ public class PaymentsHistoryViewModel : ViewModelBase
 
     private async Task ReloadTableAsync()
     {
-        if (SelectedPaymentKind is PaymentKind.Bonus)
+        if (SelectedPaymentKind is EPaymentKind.Bonus)
         {
             await LoadBonusHistory();
             return;
@@ -142,18 +182,5 @@ public class PaymentsHistoryViewModel : ViewModelBase
 
         BonusPaymentsPageData = page.Items;
         PaginatorViewModel.SetPagesQuantity(page.Total);
-    }
-}
-
-public abstract record PaymentKind(string Name)
-{
-    public record Primary() : PaymentKind("Постоянные платежи")
-    {
-        public static Primary Instance { get; } = new();
-    }
-
-    public record Bonus() : PaymentKind("Премия")
-    {
-        public static Bonus Instance { get; } = new();
     }
 }

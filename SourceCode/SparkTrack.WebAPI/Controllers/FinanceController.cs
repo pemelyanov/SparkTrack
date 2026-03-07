@@ -131,8 +131,8 @@ public class FinanceController(IPaymentBillsService paymentBillsService) : Contr
                 var data = await paymentBillsService.GetPaidBonusPaymentsListAsync(
                     adminId,
                     employeeId,
-                    startDate,
-                    endDate,
+                    startDate?.ToUniversalTime(),
+                    endDate?.ToUniversalTime(),
                     pageQuery.ToDomain()
                 );
 
