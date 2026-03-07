@@ -39,6 +39,8 @@ public class ViewModelBase : ReactiveValidationObject, IActivatableViewModel
                 {
                     OnActivated(disposables);
                 }
+
+                Disposable.Create(OnDeactivated).DisposeWith(disposables);
             }
         );
     }
@@ -62,6 +64,11 @@ public class ViewModelBase : ReactiveValidationObject, IActivatableViewModel
     /// </param>
     protected virtual void OnActivated(CompositeDisposable disposables)
     {
+    }
+
+    protected virtual void OnDeactivated()
+    {
+        
     }
 
     #endregion

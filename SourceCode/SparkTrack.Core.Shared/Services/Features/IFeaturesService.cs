@@ -8,23 +8,17 @@ public interface IFeaturesService
 {
     /// <summary>
     /// Возвращает список фич на странице
-    /// </summary>
-    /// <param name="projectId">Id проекта для поиска фич, если null - выборка будет по всем проектам</param>
-    /// <param name="showCompleted">Попадут ли в выборку завершенные фичи</param>
+    /// </summary>\
     /// <param name="pageQuery">Параметры пагинации</param>
-    /// <param name="endDate">Максимальная дата создания</param>
-    /// <param name="startDate">Минимальная дата создания</param>
+    /// <param name="filterQuery">Набор фильтров</param>
     /// <param name="sortQuery">Параметры сортировки</param>
     /// <param name="showOnlyMine">Показывать только фичи текущего пользователя (используется только для администратора)</param>
     /// <returns></returns>
     Task<IReadOnlyPagedData<Feature>> GetPageAsync(
-        Guid? projectId,
-        bool showCompleted,
-        DateTime? startDate,
-        DateTime? endDate,
-        bool showOnlyMine,
-        SortQuery? sortQuery,
-        PageQuery pageQuery
+        bool showOnlyMine = true,
+        FeatureFilterQuery? filterQuery = null,
+        SortQuery? sortQuery = null,
+        PageQuery? pageQuery = null
     );
 
     /// <summary>

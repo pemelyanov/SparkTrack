@@ -10,24 +10,18 @@ public interface IFeaturesRepository
     /// <summary>
     /// Возвращает список фич на странице
     /// </summary>
-    /// <param name="projectId">Id проекта для поиска фич, если null - выборка будет по всем проектам</param>
-    /// <param name="showCompleted">Попадут ли в выборку завершенные фичи</param>
     /// <param name="subTaskEmployeeId">Id сотрудника для фильтрации списка подзадач в фиче. Если null - будет выведен список всех подзадач</param>
+    /// <param name="authorId">Id автора фичи</param>
+    /// <param name="featureFilterQuery">Набор фильтров</param>
     /// <param name="sortQuery">Параметры сортировки</param>
     /// <param name="pageQuery">Параметры пагинации</param>
-    /// <param name="endDate">Максимальная дата создания</param>
-    /// <param name="startDate">Минимальная дата создания</param>
-    /// <param name="authorId">Id автора для фильтрации</param>
     /// <returns></returns>
     Task<IReadOnlyPagedData<Feature>> GetPageAsync(
-        Guid? projectId,
-        bool showCompleted,
-        Guid? subTaskEmployeeId,
-        DateTime? startDate,
-        DateTime? endDate,
-        Guid? authorId,
-        SortQuery? sortQuery,
-        PageQuery pageQuery
+        Guid? subTaskEmployeeId = null,
+        Guid? authorId = null,
+        FeatureFilterQuery? featureFilterQuery = null,
+        SortQuery? sortQuery = null,
+        PageQuery? pageQuery = null
     );
 
     /// <summary>

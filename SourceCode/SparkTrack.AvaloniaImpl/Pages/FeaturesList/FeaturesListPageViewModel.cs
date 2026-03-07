@@ -1,4 +1,11 @@
-﻿namespace SparkTrack.AvaloniaImpl.Pages.FeaturesList;
+﻿using NLog;
+using SparkTrack.AvaloniaImpl.Data.Configurations;
+using SparkTrack.Core.Client.Enums;
+using SparkTrack.Core.Client.Extensions;
+using SparkTrack.Core.Client.Services.Configuration;
+using SparkTrack.Core.Client.Services.PopupNotification;
+
+namespace SparkTrack.AvaloniaImpl.Pages.FeaturesList;
 
 using Controls.ProjectsFilter;
 using Fanatiki.MVVM.ViewModels;
@@ -22,13 +29,18 @@ using Services.DialogHost;
 
 public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 {
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+
     private readonly Lazy<IScreen>                                         m_screen;
     private readonly IFeaturesService                                      m_featuresService;
     private readonly Func<Feature, FeaturePageViewModel>                   m_featureEditPageViewModelFactory;
     private readonly Func<Project, FeaturePageViewModel>                   m_featureAddPageViewModelFactory;
     private readonly IDialogService                                        m_dialogService;
     private readonly Func<TemplateSelectionFormViewModel<FeatureTemplate>> m_templateSelectionViewModelFactory;
+    private readonly IConfigurationService<FeaturesPageConfig>             m_pageConfig;
+    private readonly IPopupNotificationService                             m_popupNotificationService;
     private readonly BehaviorObservableSubject<IReadOnlyList<Feature>>     m_selectedFeatures = new([]);
+    private readonly BehaviorObservableSubject<FeatureFilterQuery?>        m_filterQuery      = new(null);
 
     public FeaturesListPageViewModel(
         Lazy<IScreen> screen,
@@ -37,7 +49,9 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         Func<Project, FeaturePageViewModel> featureAddPageViewModelFactory,
         ProjectsFilterViewModel projectsFilterViewModel,
         IDialogService dialogService,
-        Func<TemplateSelectionFormViewModel<FeatureTemplate>> templateSelectionViewModelFactory
+        Func<TemplateSelectionFormViewModel<FeatureTemplate>> templateSelectionViewModelFactory,
+        IConfigurationService<FeaturesPageConfig> pageConfig,
+        IPopupNotificationService popupNotificationService
     )
     {
         m_screen = screen;
@@ -46,6 +60,8 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         m_featureAddPageViewModelFactory = featureAddPageViewModelFactory;
         m_dialogService = dialogService;
         m_templateSelectionViewModelFactory = templateSelectionViewModelFactory;
+        m_pageConfig = pageConfig;
+        m_popupNotificationService = popupNotificationService;
         ProjectsFilterViewModel = projectsFilterViewModel;
 
         ReloadTableCommand = CreateReloadTableCommand();
@@ -53,6 +69,25 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, isSelectedPipe);
         SendOnPaymentCommand = ReactiveCommand.CreateFromTask(SendOnPaymentAsync, isSelectedPipe);
         MarkAsCompletedCommand = ReactiveCommand.CreateFromTask(MarkAsCompletedAsync, isSelectedPipe);
+
+        if (pageConfig.Config.ShowOnlyMine is { } showOnlyMine) ShowOnlyMine = showOnlyMine;
+
+        if (pageConfig.Config.ItemsPerPage is { } itemsPerPage) PaginatorViewModel.ItemsPerPage = itemsPerPage;
+
+        if (pageConfig.Config.IsDatesFilterEnabled is { } isDatesFilterEnabled)
+            DateRangeViewModel.IsSelected = isDatesFilterEnabled;
+
+        if (pageConfig.Config.Filters is { } filters)
+        {
+            m_filterQuery.Value = filters;
+
+            ShowClosed = filters.ShowClosed;
+            ShowCompleted = filters.ShowCompleted;
+            DateRangeViewModel.Model.StartDate = filters.StartDate;
+            DateRangeViewModel.Model.EndDate = filters.EndDate;
+            
+            if(filters.ProjectId is {} projectId) ProjectsFilterViewModel.AutoSelectOnceOnNextUpdate(projectId);
+        }
     }
 
     protected override void OnActivated(CompositeDisposable disposables)
@@ -63,15 +98,41 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
             .DisposeWith(disposables);
 
         ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
-            .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowClosed))
             .CombineLatest(this.WhenAnyValue(it => it.ShowCompleted))
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
-            .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
             .Throttle(TimeSpan.FromMilliseconds(50))
+            .Select(_ => new FeatureFilterQuery
+            {
+                ProjectId = ProjectsFilterViewModel.SelectedProject?.Id,
+                EndDate = DateRangeViewModel.TryGetEndDate(),
+                StartDate = DateRangeViewModel.TryGetStartDate(),
+                ShowClosed = ShowClosed,
+                ShowCompleted = ShowCompleted,
+            })
+            .Subscribe(m_filterQuery)
+            .DisposeWith(disposables);
+
+        m_filterQuery
+            .CombineLatest(PaginatorViewModel.WhenChanged())
+            .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
             .Subscribe()
             .DisposeWith(disposables);
+    }
+
+    protected override void OnDeactivated()
+    {
+        base.OnDeactivated();
+        
+        m_pageConfig.Update(it => it with
+        {
+            ShowOnlyMine = ShowOnlyMine,
+            IsDatesFilterEnabled = DateRangeViewModel.IsSelected,
+            ItemsPerPage = PaginatorViewModel.ItemsPerPage,
+            Filters = m_filterQuery.Value
+        });
     }
 
     public string UrlPathSegment => "features";
@@ -86,7 +147,10 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
     };
 
     [Reactive]
-    public bool ShowCompleted { get; set; }
+    public bool ShowClosed { get; set; }
+
+    [Reactive]
+    public bool ShowCompleted { get; set; } = true;
 
     [Reactive]
     public bool ShowOnlyMine { get; set; } = true;
@@ -133,18 +197,31 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
     private ReactiveCommand<Unit, Unit> CreateReloadTableCommand() => ReactiveCommand.CreateFromTask(async () =>
         {
-            var page = await m_featuresService.GetPageAsync(
-                ProjectsFilterViewModel.SelectedProject?.Id,
-                ShowCompleted,
-                DateRangeViewModel.TryGetStartDate(),
-                DateRangeViewModel.TryGetEndDate(),
-                ShowOnlyMine,
-                new SortQuery("CreatedAt", true),
-                PaginatorViewModel.ToQuery()
-            );
+            try
+            {
+                var sort = new SortQuery("CreatedAt", true);
+                var pagination = PaginatorViewModel.ToQuery();
+                
+                s_logger.Info(
+                    "Loading features page. showOnlyMine: {showOnlyMine}; filter: {filter}; sort: {sort}; pagination: {pagination}",
+                    ShowOnlyMine, m_filterQuery.Value, sort, pagination);
 
-            CurrentPageData = page.Items.Select(it => new SelectableViewModel<Feature>(it)).ToArray();
-            PaginatorViewModel.SetPagesQuantity(page.Total);
+                var page = await m_featuresService.GetPageAsync(
+                    ShowOnlyMine,
+                    m_filterQuery.Value,
+                    sort,
+                    pagination
+                );
+
+                CurrentPageData = page.Items.Select(it => new SelectableViewModel<Feature>(it)).ToArray();
+                PaginatorViewModel.SetPagesQuantity(page.Total);
+            }
+            catch (Exception e)
+            {
+                s_logger.Warn(e);
+
+                m_popupNotificationService.Show(ENotificationType.Error, e.Message, "Ошибка загрузки страницы");
+            }
         }
     );
 
@@ -155,10 +232,10 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         var forceOption = new ForceDeleteOption();
 
         if (!await m_dialogService.ConfirmAsync(
-            $"Вы уверены что хотите удалить выбранные идеи ({m_selectedFeatures.Value.Count})? Идеи имеющие связь с оплаченными задачами будут добавлены в архив, остальные будут полностью удалены.",
-            "Удаление пользователей",
-            additionalOptionsList: [forceOption]
-        )) return;
+                $"Вы уверены что хотите удалить выбранные идеи ({m_selectedFeatures.Value.Count})? Идеи имеющие связь с оплаченными задачами будут добавлены в архив, остальные будут полностью удалены.",
+                "Удаление пользователей",
+                additionalOptionsList: [forceOption]
+            )) return;
 
         var errorsList = new List<(Exception exception, Feature feature)>();
 

@@ -69,7 +69,7 @@ public partial class Paginator : ReactiveUserControl<Paginator>
 
     public static readonly StyledProperty<int> ItemsPerPageProperty =
         AvaloniaProperty.Register<Paginator, int>(nameof(ItemsPerPage), defaultValue: 25,
-            defaultBindingMode: BindingMode.OneWayToSource);
+            defaultBindingMode: BindingMode.TwoWay);
 
     #endregion
 

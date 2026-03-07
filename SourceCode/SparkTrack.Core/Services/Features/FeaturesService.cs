@@ -24,13 +24,10 @@ internal class FeaturesService(
     : IFeaturesService
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
-        Guid? projectId,
-        bool showCompleted,
-        DateTime? startDate,
-        DateTime? endDate,
-        bool showOnlyMine,
-        SortQuery? sortQuery,
-        PageQuery pageQuery
+        bool showOnlyMine = true,
+        FeatureFilterQuery? filterQuery = null,
+        SortQuery? sortQuery = null,
+        PageQuery? pageQuery = null
     )
     {
         var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
@@ -42,12 +39,9 @@ internal class FeaturesService(
         if (currentUser.Role.IsAnyRole(ERole.Admin) && showOnlyMine) authorId = currentUser.Id;
 
         return featuresRepository.GetPageAsync(
-            projectId,
-            showCompleted,
             employeeFilter,
-            startDate,
-            endDate,
             authorId,
+            filterQuery,
             sortQuery,
             pageQuery
         );

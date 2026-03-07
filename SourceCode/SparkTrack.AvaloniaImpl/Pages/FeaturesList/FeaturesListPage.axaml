@@ -37,10 +37,16 @@
                 </disablingWrapper:DisablingWrapper>
 
                 <CheckBox Content="Показывать закрытые"
-                              IsChecked="{Binding ShowCompleted, Mode=TwoWay}" />
+                              IsChecked="{Binding ShowClosed, Mode=TwoWay}"
+                              ToolTip.Tip="Завершенной считается идея, в которой все задачи выполнены и оплачены"/>
+                
+                <CheckBox Content="Показывать выполненные"
+                          IsChecked="{Binding ShowCompleted, Mode=TwoWay}"
+                          ToolTip.Tip="Выполненной считается та идея, в которой все доступные ВАМ задачи выполнены"/>
                 
                 <CheckBox Content="Показывать только мои" IsVisible="{markupExtensions:CurrentUserInRole Admin}"
-                          IsChecked="{Binding ShowOnlyMine, Mode=TwoWay}" />
+                          IsChecked="{Binding ShowOnlyMine, Mode=TwoWay}"
+                          ToolTip.Tip="Вашими считаются те идеи, где вы указаны как автор, а также те идеи, у которых не указано ни одного автора"/>
             </WrapPanel>
 
             <StackPanel Grid.Column="1" IsVisible="{markupExtensions:CurrentUserInRole Admin}" Orientation="Horizontal" Spacing="4" VerticalAlignment="Bottom">
@@ -69,16 +75,18 @@
 
 
         <DataGrid Grid.Row="3"
+                  x:Name="FeaturesTable"
                   Classes="readonly"
                   Sorting="DataGrid_OnSorting"
                   LoadingRow="DataGrid_OnLoadingRow"
                   UnloadingRow="DataGrid_OnUnloadingRow"
+                  Unloaded="FeaturesTable_OnUnloaded"
                   ItemsSource="{Binding CurrentPageData}">
             <DataGrid.Columns>
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
-                <DataGridTextColumn Width="*" IsReadOnly="True"
+                <DataGridTextColumn Tag="Name" Width="*" IsReadOnly="True"
                                     Header="Идея" Binding="{Binding Model.Name}" />
-                <DataGridTemplateColumn IsReadOnly="True" Width="220"
+                <DataGridTemplateColumn Tag="Project" IsReadOnly="True" Width="220"
                                         Header="Канал"
                                         IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}">
                     <DataGridTemplateColumn.CellTemplate>
@@ -87,15 +95,15 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True"
+                <DataGridTextColumn Tag="CreatedAt" IsReadOnly="True"
                                     Header="Создана" Width="180"
                                     Binding="{Binding Model.CreatedAt, Mode=OneWay,
                                     StringFormat={x:Static constants:DateFormats.LongRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTextColumn IsReadOnly="True"
+                <DataGridTextColumn Tag="Deadline" IsReadOnly="True"
                                     Header="Дедлайн" Width="180"
                                     Binding="{Binding Model, Mode=OneWay, Converter={StaticResource FeatureDeadlineConverter},
                                     StringFormat={x:Static constants:DateFormats.LongRu}, FallbackValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTemplateColumn IsReadOnly="True" Width="180"
+                <DataGridTemplateColumn Tag="Status" IsReadOnly="True" Width="180"
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

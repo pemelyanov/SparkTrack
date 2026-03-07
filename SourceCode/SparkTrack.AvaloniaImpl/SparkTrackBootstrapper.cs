@@ -122,6 +122,32 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             "interface-configuration.json"
         ));
 
+        var configsFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "SparkTrack",
+            "Configs"
+        );
+        
+        builder.RegisterJsonConfiguration<WindowStateConfig>(Path.Combine(
+            configsFolder,
+            "window-state.json"
+        ));
+        
+        builder.RegisterJsonConfiguration<FeaturesPageConfig>(Path.Combine(
+            configsFolder,
+            "features-page.json"
+        ));
+        
+        builder.RegisterJsonConfiguration<AdminPendingPaymentsPageConfig>(Path.Combine(
+            configsFolder,
+            "admin-pending-payments-page.json"
+        ));
+        
+        builder.RegisterJsonConfiguration<AdminPaymentsHistoryPageConfig>(Path.Combine(
+            configsFolder,
+            "admin-payments-history-page.json"
+        ));
+
         RegisterUpdatingIfNeeded(builder);
         
         RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");

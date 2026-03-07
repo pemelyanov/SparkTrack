@@ -89,22 +89,23 @@
             <TextBlock Text="{Binding TotalBill, StringFormat='{}{0:C}'}" FontWeight="Bold" />
         </StackPanel>
 
-        <DataGrid Grid.Row="5" ItemsSource="{Binding CurrentPageData}"
+        <DataGrid x:Name="PendingPaymentsTable" Grid.Row="5" ItemsSource="{Binding CurrentPageData}"
                   Classes="readonly child-checkboxes-handle-tapped" CanUserSortColumns="False"
                   LoadingRow="DataGrid_OnLoadingRow"
-                  UnloadingRow="DataGrid_OnUnloadingRow">
+                  UnloadingRow="DataGrid_OnUnloadingRow"
+                  Unloaded="PendingPaymentsTable_OnUnloaded">
             <DataGrid.Columns>
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected}" />
                 <DataGridTextColumn Header="Идея" Width="*" IsReadOnly="True" Binding="{Binding Model.Feature.Name}" />
-                <DataGridTextColumn Header="Задача" IsReadOnly="True" Binding="{Binding Model.SubTask.Name}" />
-                <DataGridTemplateColumn Header="Исполнитель" IsReadOnly="True">
+                <DataGridTextColumn Tag="SubTask" Header="Задача" IsReadOnly="True" Binding="{Binding Model.SubTask.Name}" />
+                <DataGridTemplateColumn Tag="Executor" Header="Исполнитель" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <userName:UserName User="{Binding Model.SubTask.ExecutorEmployee}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn IsReadOnly="True"
+                <DataGridTemplateColumn Tag="Project" IsReadOnly="True"
                                         Header="Канал"
                                         IsVisible="{Binding #Root.ViewModel.ProjectsFilterViewModel.SelectedProject, Converter={x:Static ObjectConverters.IsNull}, FallbackValue={x:True}}">
                     <DataGridTemplateColumn.CellTemplate>
@@ -114,12 +115,12 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Дедлайн" IsReadOnly="True"
+                <DataGridTextColumn Tag="Deadline" Header="Дедлайн" IsReadOnly="True"
                                     Binding="{Binding Model.SubTask.Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
                 <DataGridTextColumn Header="Дата выполнения" IsReadOnly="True"
                                     Binding="{Binding Model.SubTask.CompletedAt, StringFormat={x:Static constants:DateFormats.LongRu},
                                     TargetNullValue={x:Static constants:CommonStrings.EmptyValue}}" />
-                <DataGridTemplateColumn Header="Стоимость (опл./всего)" IsReadOnly="True">
+                <DataGridTemplateColumn Tag="Cost" Header="Стоимость (опл./всего)" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <remainingPaymentCell:RemainingPaymentCell PaymentType="Main"
@@ -127,7 +128,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Бонус за срок (опл./всего)" IsReadOnly="True">
+                <DataGridTemplateColumn Tag="TimelyBonus" Header="Бонус за срок (опл./всего)" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <remainingPaymentCell:RemainingPaymentCell PaymentType="TimelyBonus"
@@ -135,7 +136,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Одобрение премии" IsReadOnly="True">
+                <DataGridTemplateColumn Tag="TimelyBonusApprovement" Header="Одобрение премии" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <manualCheckBox:ManualCheckBox

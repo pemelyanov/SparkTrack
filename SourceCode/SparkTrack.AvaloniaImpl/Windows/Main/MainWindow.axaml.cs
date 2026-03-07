@@ -1,8 +1,13 @@
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Avalonia;
-using SparkTrack.AvaloniaImpl.Data;
 using SparkTrack.AvaloniaImpl.Data.Configurations;
+using SparkTrack.Core.Client.Extensions;
 using SparkTrack.Core.Client.Services.Configuration;
 using Splat;
+using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
 
 namespace SparkTrack.AvaloniaImpl.Windows.Main;
 
@@ -13,7 +18,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
-using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
@@ -21,17 +25,20 @@ using FluentAvalonia.UI.Controls;
 using ReactiveUI;
 using Services.Clipboard;
 using Services.DialogHost;
-using ViewModels;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
-                                  IDialogService,
-                                  IPopupNotificationService,
-                                  IClipboardService
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService,
+    IClipboardService
 {
     private readonly WindowNotificationManager m_notificationManager;
 
     private readonly IConfigurationService<InterfaceConfiguration> m_interfaceConfiguration =
         Locator.Current.GetService<IConfigurationService<InterfaceConfiguration>>()!;
+
+    private readonly IConfigurationService<WindowStateConfig> m_windowStateConfig =
+        Locator.Current.GetService<IConfigurationService<WindowStateConfig>>()!;
+
+    private readonly BehaviorSubject<Point?> m_windowPosition = new(null);
+    private readonly BehaviorSubject<Size?>  m_windowSize     = new(null);
 
     private readonly double m_scale;
 
@@ -46,6 +53,34 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
             Position = NotificationPosition.BottomCenter,
             ZIndex = 1000
         };
+
+        this.WhenActivated(OnActivated);
+    }
+
+    private void OnActivated(CompositeDisposable disposables)
+    {
+        if (m_windowStateConfig.Config.Position is { } savedPosition)
+            Position = new PixelPoint(savedPosition.X, savedPosition.Y);
+
+        if (m_windowStateConfig.Config.Size is { } savedSize)
+        {
+            Width = savedSize.Width;
+            Height = savedSize.Height;
+        }
+
+        if (m_windowStateConfig.Config.IsFullScreen is true) WindowState = WindowState.Maximized;
+        
+        m_windowPosition.CombineLatest(m_windowSize, (position, size) => new { position, size })
+            .Throttle(TimeSpan.FromSeconds(0.5))
+            .Skip(1)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(value => m_windowStateConfig.Update(it => it with
+            {
+                Position = value.position,
+                Size = value.size,
+                IsFullScreen = WindowState == WindowState.Maximized
+            }))
+            .DisposeWith(disposables);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -59,9 +94,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
 
     public static readonly StyledProperty<double> ContentWidthProperty =
         AvaloniaProperty.Register<MainWindow, double>(
-            nameof(ContentWidth),
-            defaultValue: Double.NaN
-        );
+            nameof(ContentWidth), defaultValue: Double.NaN);
 
     public double ContentWidth
     {
@@ -73,9 +106,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
 
     public static readonly StyledProperty<double> ContentHeightProperty =
         AvaloniaProperty.Register<MainWindow, double>(
-            nameof(ContentHeight),
-            defaultValue: Double.NaN
-        );
+            nameof(ContentHeight), defaultValue: Double.NaN);
 
     public double ContentHeight
     {
@@ -104,24 +135,20 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
         ViewModel?.SelectPage(type);
     }
 
-    public Task<bool?> ShowAsync(ReactiveObject viewModel) => Dispatcher.UIThread.InvokeAsync(async () =>
+    public async Task<bool?> ShowAsync(ReactiveObject viewModel)
+    {
+        var view = ViewLocator.Current.ResolveView(viewModel);
+
+        if (view != null) view.ViewModel = viewModel;
+
+        var result = await (view switch
         {
-            if (viewModel is DialogViewModelBase { IsClosed: true } dialogViewModelBase)
-                return dialogViewModelBase.Result;
-            
-            var view = ViewLocator.Current.ResolveView(viewModel);
+            ContentDialog contentDialog => contentDialog.ShowAsync(this),
+            _ => throw new NotSupportedException()
+        });
 
-            if (view != null) view.ViewModel = viewModel;
-
-            var result = await (view switch
-            {
-                ContentDialog contentDialog => contentDialog.ShowAsync(this),
-                _ => throw new NotSupportedException()
-            });
-
-            return ToBool(result);
-        }
-    );
+        return ToBool(result);
+    }
 
     private bool? ToBool(ContentDialogResult result) => result switch
     {
@@ -129,11 +156,10 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
         _ => null
     };
 
-    public void Show(ENotificationType type, string message, string? title = null) => Dispatcher.UIThread.Invoke(() =>
-        {
-            m_notificationManager.Show(CreateNotification(message, title, type.Cast<NotificationType>()));
-        }
-    );
+    public void Show(ENotificationType type, string message, string? title = null)
+    {
+        m_notificationManager.Show(CreateNotification(message, title, type.Cast<NotificationType>()));
+    }
 
     private Notification CreateNotification(string message, string? title, NotificationType type) => new()
     {
@@ -155,5 +181,15 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
         await Clipboard.SetTextAsync(text);
 
         if (!string.IsNullOrEmpty(notificationText)) Show(ENotificationType.Information, notificationText);
+    }
+
+    private void Window_OnPositionChanged(object? sender, PixelPointEventArgs e)
+    {
+        m_windowPosition.OnNext(new Point(Position.X, Position.Y));
+    }
+
+    private void Window_OnSizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        m_windowSize.OnNext(new Size((int)Bounds.Width, (int)Bounds.Height));
     }
 }

@@ -111,7 +111,7 @@
 
             <ComboBox SelectedIndex="0" ItemsSource="{Binding PaymentKinds}"
                       SelectedItem="{Binding SelectedPaymentKind}"
-                      DisplayMemberBinding="{Binding Name}" />
+                      DisplayMemberBinding="{Binding ., Converter={x:Static paymentsHistory:PaymentsHistory.PaymentTypeConverter}}" />
 
             <usersFilter:UserFilter DataContext="{Binding AdminFilterViewModel}" />
 
@@ -130,9 +130,9 @@
         <ScrollViewer Grid.Row="2">
             <ItemsControl
                 Classes.main="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
-                      ConverterParameter={x:Static paymentsHistory:PaymentKind+Primary.Instance}}"
+                      ConverterParameter={x:Static paymentsHistory:EPaymentKind.Primary}}"
                 Classes.bonus="{Binding SelectedPaymentKind, Converter={x:Static ObjectConverters.Equal}, 
-                      ConverterParameter={x:Static paymentsHistory:PaymentKind+Bonus.Instance}}">
+                      ConverterParameter={x:Static paymentsHistory:EPaymentKind.Bonus}}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Spacing="8" />
