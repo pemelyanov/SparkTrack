@@ -97,25 +97,26 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         this.SetupSelectionList(it => it.CurrentPageData, m_selectedFeatures)
             .DisposeWith(disposables);
 
-        ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
+        ProjectsFilterViewModel.SelectedIdChanged()
             .CombineLatest(this.WhenAnyValue(it => it.ShowClosed))
             .CombineLatest(this.WhenAnyValue(it => it.ShowCompleted))
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
-            .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => new FeatureFilterQuery
             {
-                ProjectId = ProjectsFilterViewModel.SelectedProject?.Id,
+                ProjectId = ProjectsFilterViewModel.SelectedId,
                 EndDate = DateRangeViewModel.TryGetEndDate(),
                 StartDate = DateRangeViewModel.TryGetStartDate(),
                 ShowClosed = ShowClosed,
                 ShowCompleted = ShowCompleted,
             })
+            .DistinctUntilChanged()
             .Subscribe(m_filterQuery)
             .DisposeWith(disposables);
 
         m_filterQuery
             .CombineLatest(PaginatorViewModel.WhenChanged())
             .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
+            .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
             .Switch()
             .Subscribe()

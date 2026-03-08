@@ -107,9 +107,9 @@ public class PendingPaymentsViewModel : ViewModelBase
     {
         base.OnActivated(disposables);
 
-        ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
+        ProjectsFilterViewModel.SelectedIdChanged()
             .CombineLatest(PaginatorViewModel.WhenChanged())
-            .CombineLatest(EmployeeFilterViewModel.WhenAnyValue(it => it.SelectedUser))
+            .CombineLatest(EmployeeFilterViewModel.SelectedIdChanged())
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
             .CombineLatest(this.WhenAnyValue(it => it.ShowPaid))
             .CombineLatest(this.WhenAnyValue(it => it.ShowOnlyMine))
@@ -215,8 +215,8 @@ public class PendingPaymentsViewModel : ViewModelBase
     {
         var page = await m_paymentBillsService.GetPageAsync(
             ShowPaid,
-            EmployeeFilterViewModel.SelectedUser?.Id,
-            ProjectsFilterViewModel.SelectedProject?.Id,
+            EmployeeFilterViewModel.SelectedId,
+            ProjectsFilterViewModel.SelectedId,
             DateRangeViewModel.TryGetStartDate(),
             DateRangeViewModel.TryGetEndDate(),
             ShowOnlyMine,

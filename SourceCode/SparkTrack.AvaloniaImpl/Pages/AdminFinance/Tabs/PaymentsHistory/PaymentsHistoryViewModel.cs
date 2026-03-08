@@ -74,11 +74,11 @@ public class PaymentsHistoryViewModel : ViewModelBase
     {
         base.OnActivated(disposables);
 
-        ProjectsFilterViewModel.WhenAnyValue(it => it.SelectedProject)
+        ProjectsFilterViewModel.SelectedIdChanged()
             .CombineLatest(this.WhenAnyValue(it => it.SelectedPaymentKind))
             .CombineLatest(PaginatorViewModel.WhenChanged())
-            .CombineLatest(AdminFilterViewModel.WhenAnyValue(it => it.SelectedUser))
-            .CombineLatest(EmployeeFilterViewModel.WhenAnyValue(it => it.SelectedUser))
+            .CombineLatest(AdminFilterViewModel.SelectedIdChanged())
+            .CombineLatest(EmployeeFilterViewModel.SelectedIdChanged())
             .CombineLatest(DateRangeViewModel.GetChangingObservable())
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => ReloadTableCommand.Execute())
@@ -158,9 +158,9 @@ public class PaymentsHistoryViewModel : ViewModelBase
     private async Task LoadPrimaryHistory()
     {
         var page = await m_paymentBillsService.GetPaidPaymentsListAsync(
-            AdminFilterViewModel.SelectedUser?.Id,
-            EmployeeFilterViewModel.SelectedUser?.Id,
-            ProjectsFilterViewModel.SelectedProject?.Id,
+            AdminFilterViewModel.SelectedId,
+            EmployeeFilterViewModel.SelectedId,
+            ProjectsFilterViewModel.SelectedId,
             DateRangeViewModel.TryGetStartDate(),
             DateRangeViewModel.TryGetEndDate(),
             PaginatorViewModel.ToQuery()
@@ -173,10 +173,10 @@ public class PaymentsHistoryViewModel : ViewModelBase
     private async Task LoadBonusHistory()
     {
         var page = await m_paymentBillsService.GetPaidBonusPaymentsListAsync(
-            AdminFilterViewModel.SelectedUser?.Id,
-            EmployeeFilterViewModel.SelectedUser?.Id,
-            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.StartDate : null,
-            DateRangeViewModel.IsSelected ? DateRangeViewModel.Model.EndDate : null,
+            AdminFilterViewModel.SelectedId,
+            EmployeeFilterViewModel.SelectedId,
+            DateRangeViewModel.TryGetStartDate(),
+            DateRangeViewModel.TryGetEndDate(),
             PaginatorViewModel.ToQuery()
         );
 
