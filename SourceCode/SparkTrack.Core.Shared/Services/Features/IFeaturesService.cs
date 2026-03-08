@@ -33,4 +33,6 @@ public interface IFeaturesService
     Task EditAsync(FeatureEdit feature);
 
     Task DeleteAsync(int id, bool force);
+
+    Task SendOnPaymentAsync(IReadOnlyList<int> featuresIdList);
 }

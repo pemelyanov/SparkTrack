@@ -68,7 +68,6 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
         var isSelectedPipe = m_selectedFeatures.Select(it => it.Count > 0);
         DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, isSelectedPipe);
         SendOnPaymentCommand = ReactiveCommand.CreateFromTask(SendOnPaymentAsync, isSelectedPipe);
-        MarkAsCompletedCommand = ReactiveCommand.CreateFromTask(MarkAsCompletedAsync, isSelectedPipe);
 
         if (pageConfig.Config.ShowOnlyMine is { } showOnlyMine) ShowOnlyMine = showOnlyMine;
 
@@ -167,8 +166,6 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> SendOnPaymentCommand { get; }
 
-    public ReactiveCommand<Unit, Unit> MarkAsCompletedCommand { get; }
-
     public void OpenFeature(Feature feature)
     {
         HostScreen.Router.NavigateOnUIThread(m_featureEditPageViewModelFactory(feature));
@@ -265,11 +262,20 @@ public class FeaturesListPageViewModel : ViewModelBase, IRoutableViewModel
 
     private async Task SendOnPaymentAsync()
     {
-        await m_dialogService.NotifyAsync("W.I.P");
-    }
+        try
+        {
+            s_logger.Info("Sending {count} features on payment", m_selectedFeatures.Value.Count);
+            
+            await m_featuresService.SendOnPaymentAsync(m_selectedFeatures.Value.Select(it => it.Id).ToArray());
+            
+            m_popupNotificationService.Show(ENotificationType.Success, $"{m_selectedFeatures.Value.Count} идей отправлены на оплату");
 
-    private async Task MarkAsCompletedAsync()
-    {
-        await m_dialogService.NotifyAsync("W.I.P");
+            await ReloadTableCommand.Execute().ToTask();
+        }
+        catch (Exception e)
+        {
+            s_logger.Error(e, "Error sending on payment");
+            m_popupNotificationService.Show(ENotificationType.Success, e.Message, "Ошибка отправки на оплату");
+        }
     }
 }

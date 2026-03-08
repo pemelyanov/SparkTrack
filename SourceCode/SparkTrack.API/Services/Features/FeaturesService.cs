@@ -64,4 +64,11 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
 
         await clientWrapper.Client.DeleteAsync(id, force);
     }
+
+    public async Task SendOnPaymentAsync(IReadOnlyList<int> featuresIdList)
+    {
+        using var clientWrapper = featuresClientFactory();
+
+        await clientWrapper.Client.SendOnPaymentAsync(featuresIdList);
+    }
 }

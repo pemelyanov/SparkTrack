@@ -68,8 +68,6 @@
             <Button Content="Перевести на оплату" Command="{Binding SendOnPaymentCommand}"
                     IsVisible="{markupExtensions:CurrentUserInRole Admin}" />
 
-            <Button Content="Пометить как выполненные" Command="{Binding MarkAsCompletedCommand}" />
-
             <Button Classes="icon reload" Command="{Binding ReloadTableCommand}" />
         </StackPanel>
 

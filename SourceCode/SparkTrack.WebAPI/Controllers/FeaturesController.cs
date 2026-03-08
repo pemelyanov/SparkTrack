@@ -139,4 +139,14 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     {
         return this.OkWithDomainExceptionsHandling(() => commentsService.DeleteAsync(id));
     }
+    
+    [HttpPatch("send-on-payment")]
+    [Authorize(Roles = $"{nameof(ERole.Admin)}, {nameof(ERole.God)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> SendOnPaymentAsync([FromBody] IReadOnlyList<int> featuresIdList)
+    {
+        return this.OkWithDomainExceptionsHandling(() => featuresService.SendOnPaymentAsync(featuresIdList));
+    }
 }

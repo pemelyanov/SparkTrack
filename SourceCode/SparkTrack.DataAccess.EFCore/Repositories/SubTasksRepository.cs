@@ -11,6 +11,7 @@ using Core.Transactions;
 using Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using Core.Shared.Data;
 
 internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWrapper transactionWrapper) : ISubTasksRepository
 {
@@ -21,6 +22,13 @@ internal class SubTasksRepository(SparkTrackDbContext dbContext, ITransactionWra
             GetToSubTaskExpression()
         )
         .FirstOrDefaultAsync();
+
+    public async Task<IReadOnlyList<EditableEntityIdentity>> GetIdentityListByFeatureIdListAsync(IReadOnlyList<int> featuresIdList) => await dbContext
+        .SubTasks
+        .AsNoTracking()
+        .Where(it => featuresIdList.Contains(it.FeatureId))
+        .Select(it => new EditableEntityIdentity(it.Id, it.Version))
+        .ToArrayAsync();
 
     public Task<Feature?> GetParentFeatureAsync(Guid id) => dbContext.SubTasks
         .AsNoTracking()
