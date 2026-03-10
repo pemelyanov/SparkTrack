@@ -105,7 +105,7 @@
                                         Header="Статус">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" VerticalAlignment="Center" />
+                            <featureStatus:FeatureStatus SubTasksList="{Binding Model.TasksList}" VerticalAlignment="Center" Margin="12 0 12 0" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

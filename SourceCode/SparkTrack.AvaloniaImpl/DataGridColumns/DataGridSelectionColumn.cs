@@ -32,6 +32,7 @@ public class DataGridSelectionColumn : DataGridBoundColumn
         CanUserReorder = false;
         CanUserResize = false;
         CanUserSort = false;
+        Width = new DataGridLength(70);
 
         HeaderTemplate = new FuncDataTemplate(
             _ => true,

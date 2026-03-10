@@ -34,7 +34,7 @@
                   UnloadingRow="DataGrid_OnUnloadingRow">
             <DataGrid.Columns>
                 <dataGridColumns:DataGridSelectionColumn Binding="{Binding IsSelected, Mode=TwoWay}" />
-                <DataGridTextColumn IsReadOnly="True"
+                <DataGridTextColumn IsReadOnly="True" Width="200"
                                     Header="Канал" Binding="{Binding Model.Name}" />
                 <DataGridTextColumn Width="*" IsReadOnly="True"
                                     Header="Ссылка" Binding="{Binding Model.Link}" />
