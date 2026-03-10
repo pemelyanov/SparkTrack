@@ -30,11 +30,14 @@ public class ProjectsFilterViewModel : ViewModelBase
         this.WhenAnyValue(it => it.ProjectsList)
             .Subscribe(list =>
                 {
-                    if (m_idToSelectOnNextUpdate is null ||
-                        list.FirstOrDefault(it => it.Id == m_idToSelectOnNextUpdate) is not { } project) return;
-
+                    if(list.Count == 0) return;
+                    
+                    var idToSelectOnNextUpdate = m_idToSelectOnNextUpdate;
                     m_idToSelectOnNextUpdate = null;
-                    SelectedProject = project;
+                    
+                    if (idToSelectOnNextUpdate is null) return;
+
+                    SelectedProject = list.FirstOrDefault(it => it.Id == idToSelectOnNextUpdate);
                 }
             )
             .DisposeWith(disposables);

@@ -36,11 +36,14 @@ public class UserFilterViewModel : ViewModelBase
         this.WhenAnyValue(it => it.UsersList)
             .Subscribe(list =>
                 {
-                    if (m_idToSelectOnNextUpdate is null ||
-                        list.FirstOrDefault(it => it.Id == m_idToSelectOnNextUpdate) is not { } user) return;
-
+                    if(list.Count == 0) return;
+                    
+                    var idToSelectOnNextUpdate = m_idToSelectOnNextUpdate;
                     m_idToSelectOnNextUpdate = null;
-                    SelectedUser = user;
+                    
+                    if (idToSelectOnNextUpdate is null) return;
+
+                    SelectedUser = list.FirstOrDefault(it => it.Id == idToSelectOnNextUpdate);
                 }
             )
             .DisposeWith(disposables);
