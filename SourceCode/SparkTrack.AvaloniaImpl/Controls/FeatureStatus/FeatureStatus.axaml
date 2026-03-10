@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:entities="clr-namespace:SparkTrack.Core.Shared.Data.Entities;assembly=SparkTrack.Core.Shared"
              xmlns:constants="clr-namespace:SparkTrack.AvaloniaImpl.Constants"
+             xmlns:enums="clr-namespace:SparkTrack.Core.Shared.Enums;assembly=SparkTrack.Core.Shared"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.FeatureStatus.FeatureStatus"
              x:Name="Root">
@@ -11,9 +12,18 @@
         <Style Selector="Border.completed">
             <Setter Property="Background" Value="SeaGreen" />
         </Style>
-        
+
         <Style Selector="Border.in-progress">
             <Setter Property="Background" Value="DarkGray" />
+        </Style>
+
+        <Style Selector="Ellipse.on-payment">
+            <Setter Property="StrokeDashArray" Value="3, 2" />
+            <Setter Property="Stroke" Value="Goldenrod" />
+        </Style>
+
+        <Style Selector="Ellipse.paid">
+            <Setter Property="Stroke" Value="Goldenrod" />
         </Style>
     </UserControl.Styles>
     <Panel>
@@ -23,25 +33,35 @@
                     <WrapPanel ItemSpacing="8" LineSpacing="8" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            
+
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="entities:SubTask">
-                    <Border CornerRadius="999" Width="24" Height="24" BorderThickness="2" BorderBrush="DimGray"
-                            Classes.completed="{Binding IsCompleted}"
-                            Classes.in-progress="{Binding !IsCompleted}">
-                        <ToolTip.Tip>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold" />
-                                <TextBlock Text="{Binding ExecutorEmployee.Name, StringFormat='Исполнитель: {0}'}" />
-                                <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0:C}'}" IsVisible="{Binding Cost}" />
-                                <TextBlock Text="{Binding TimelyBonus, StringFormat='Бонус за срок: {0:C}'}" IsVisible="{Binding TimelyBonus}" />
-                                <TextBlock>
-                                    <Run Text="Дедлайн:"/>
-                                    <Run Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
-                                </TextBlock>
-                            </StackPanel>
-                        </ToolTip.Tip>
-                    </Border>
+                    <Panel>
+                        <Border CornerRadius="999" Width="24" Height="24" BorderThickness="2" BorderBrush="DimGray"
+                                Classes.completed="{Binding IsCompleted}"
+                                Classes.in-progress="{Binding !IsCompleted}">
+                            <ToolTip.Tip>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding ExecutorEmployee.Name, StringFormat='Исполнитель: {0}'}" />
+                                    <TextBlock Text="{Binding Cost, StringFormat='Стоимость: {0:C}'}"
+                                               IsVisible="{Binding Cost}" />
+                                    <TextBlock Text="{Binding TimelyBonus, StringFormat='Бонус за срок: {0:C}'}"
+                                               IsVisible="{Binding TimelyBonus}" />
+                                    <TextBlock>
+                                        <Run Text="Дедлайн:" />
+                                        <Run
+                                            Text="{Binding Deadline, StringFormat={x:Static constants:DateFormats.LongRu}}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip.Tip>
+                        </Border>
+
+                        <Ellipse
+                            Classes.on-payment="{Binding PaymentStatus, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static enums:EPaymentStatus.OnPayment}}"
+                            Classes.paid="{Binding PaymentStatus, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static enums:EPaymentStatus.Paid}}"
+                            StrokeThickness="2" />
+                    </Panel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
