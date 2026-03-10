@@ -19,6 +19,7 @@ public class CommentViewModel : ViewModelBase
     private static readonly ILogger                                   s_logger = LogManager.GetCurrentClassLogger();
     private readonly        Func<CommentModel?, CommentEditViewModel> m_editViewModelFactory;
     private readonly        ICommentsService                          m_commentsService;
+    private readonly        IDialogService                            m_dialogService;
     private readonly        IPopupNotificationService                 m_popupNotificationService;
 
     public CommentViewModel(
@@ -32,6 +33,7 @@ public class CommentViewModel : ViewModelBase
     {
         m_editViewModelFactory = editViewModelFactory;
         m_commentsService = commentsService;
+        m_dialogService = dialogService;
         m_popupNotificationService = popupNotificationService;
         Model = model;
 
@@ -61,7 +63,15 @@ public class CommentViewModel : ViewModelBase
 
     public void Edit() => EditViewModel = m_editViewModelFactory.Invoke(Model);
 
-    public void CancelEdit() => EditViewModel = null;
+    public async Task CancelEditAsync(bool force = false)
+    {
+        if (!force && !await m_dialogService.ConfirmAsync(
+            "Вы уверены что хотите отменить редактирование? Несохраненные данные будут потеряны.",
+            "Отмена редактирования комментария"
+        )) return;
+        
+        EditViewModel = null;
+    }
 
     private async Task SaveAsync()
     {

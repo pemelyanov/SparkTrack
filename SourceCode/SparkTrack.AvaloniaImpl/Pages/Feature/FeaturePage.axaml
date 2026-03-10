@@ -259,7 +259,7 @@
                         <TextBlock Text="Комментарии: " VerticalAlignment="Center" />
 
                         <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
-                                Command="{Binding CreateComment}" />
+                                Command="{Binding CreateCommentAsync}" />
                     </Panel>
                     
                     <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommentsCommand.IsExecuting^}" />
@@ -288,7 +288,7 @@
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                             <Button Classes="accent" Content="Создать" Command="{Binding SaveCommentCommand}"
                                     HotKey="Enter" />
-                            <Button Content="Отмена" Command="{Binding CancelComment}" HotKey="Escape" />
+                            <Button Content="Отмена" Command="{Binding CancelCommentAsync}" CommandParameter="{x:False}" HotKey="Escape" />
                         </StackPanel>
                     </StackPanel>
                 </Border>

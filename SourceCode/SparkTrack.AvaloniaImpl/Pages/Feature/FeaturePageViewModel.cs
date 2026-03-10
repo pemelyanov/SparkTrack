@@ -340,15 +340,23 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         AttachmentsPanelViewModel.AddAttachment(image, extension);
     }
 
-    public void CreateComment()
+    public async Task CreateCommentAsync()
     {
         CommentEditViewModel = m_commentEditFactory(null);
 
         foreach (var commentViewModel in CommentsList)
-            commentViewModel.CancelEdit();
+            await commentViewModel.CancelEditAsync(true);
     }
 
-    public void CancelComment() => CommentEditViewModel = null;
+    public async Task CancelCommentAsync(bool force = false)
+    {
+        if (!force && !await m_dialogService.ConfirmAsync(
+            "Вы уверены что хотите отменить создание комментария? Несохраненные данные будут потеряны.",
+            "Отмена создание комментария"
+        )) return;
+        
+        CommentEditViewModel = null;
+    }
 
     public void Back()
     {
@@ -594,15 +602,19 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
                     .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
                     .WhereNotNull()
                     .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
-                    .Subscribe(source =>
+                    .Select(async source =>
                         {
                             foreach (var otherComment in CommentsList)
                                 if (otherComment != source)
-                                    otherComment.CancelEdit();
+                                    await otherComment.CancelEditAsync(true);
 
-                            CancelComment();
+                            await CancelCommentAsync(true);
+                            
+                            return Unit.Default;
                         }
-                    );
+                    )
+                    .Switch()
+                    .Subscribe();
 
                 commentViewModel.DisposeWithViewModel(editSubscription);
 
