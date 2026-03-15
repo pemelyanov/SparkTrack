@@ -55,5 +55,6 @@
     <PackageVersion Include="Xaml.Behaviors.Interactions" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.0" />
   </ItemGroup>
 </Project>
