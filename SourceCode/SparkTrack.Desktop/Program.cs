@@ -96,10 +96,31 @@ sealed class Program
         .WithInterFont()
         .LogToNLog()
         .UseReactiveUI()
-        .With(() => new Win32PlatformOptions { OverlayPopups = true })
-        .With(() => new SkiaOptions { UseOpacitySaveLayer = true, MaxGpuResourceSizeBytes = 512 * 1024 * 1024})
+        .With(() =>
+            {
+                var options = new Win32PlatformOptions
+                {
+                    OverlayPopups = true
+                };
+
+                if (SparkTrackBootstrapper.Configuration["RenderingMode"] is { } renderingModeString
+                    && Enum.TryParse<Win32RenderingMode>(renderingModeString, out var renderingMode))
+                {
+                    s_logger.Info("Setting custom rendering mode: {renderingMode}", renderingMode);
+                    options.RenderingMode = [renderingMode];
+                }
+
+                return options;
+            }
+        )
+        .With(() => new SkiaOptions
+            {
+                UseOpacitySaveLayer = true,
+                MaxGpuResourceSizeBytes = 512 * 1024 * 1024
+            }
+        )
         .UseBootstrapper<SparkTrackBootstrapper>([typeof(App).Assembly]);
-    
+
     private static void SetupLogger()
     {
         NLogConfigManager.EnsureNLogConfig(typeof(App).Assembly, "SparkTrack.AvaloniaImpl.NLog.config");
@@ -107,4 +128,6 @@ sealed class Program
         LogManager.Setup(cfg => cfg.LoadConfigurationFromFile(NLogConfigManager.NLogConfigPath));
         LogManager.ReconfigExistingLoggers();
     }
+    
+    
 }

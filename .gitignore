@@ -456,4 +456,5 @@ $RECYCLE.BIN/
 
 # Custom stuff
 appsettings.*.Local.json
+appsettings.Local.json
 Redist
