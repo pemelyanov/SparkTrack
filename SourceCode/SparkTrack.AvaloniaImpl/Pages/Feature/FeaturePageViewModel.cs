@@ -203,9 +203,15 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             IsNew = true;
             IsInEditMode = true;
             AuthorsList.Add(m_authorizationService.CurrentUser.Value!);
+            CanChooseBetweenSaveAndSaveWithClose = false;
         }
 
-        SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
+        SaveCommand = ReactiveCommand.CreateFromTask<bool?, Unit>(async arg =>
+        {
+            await SaveAsync(arg ?? false);
+            
+            return Unit.Default;
+        });
 
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
@@ -281,7 +287,9 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public Project Project => m_project;
 
-    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+    public bool CanChooseBetweenSaveAndSaveWithClose { get; } = true;
+
+    public ReactiveCommand<bool?, Unit> SaveCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
@@ -470,7 +478,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         InitializeProperties(m_feature);
     }
 
-    private async Task SaveAsync()
+    private async Task SaveAsync(bool backAfterSave = false)
     {
         try
         {
@@ -496,6 +504,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             IsInEditMode = false;
             
             m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно сохранена");
+
+            if (backAfterSave)
+            {
+                Back();
+                return;
+            }
 
             await RefreshCommand.Execute().ToTask();
         }

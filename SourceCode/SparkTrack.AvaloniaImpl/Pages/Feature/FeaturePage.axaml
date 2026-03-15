@@ -316,12 +316,26 @@
 
             <Button Classes="icon template-add" Command="{Binding CreateTemplateAsync}"
                     IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />
-
-            <Button Classes="accent" Content="Сохранить"
-                    Classes.enter-hot-key="{Binding CanSaveByHotKey}"
-                    Command="{Binding SaveCommand}"
-                    IsEnabled="{Binding $self.IsVisible}"
-                    IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />
+            
+            <Panel IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}">
+                <Button Classes="accent" Content="Сохранить"
+                        Classes.enter-hot-key="{Binding CanSaveByHotKey}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding $self.IsVisible}"
+                        IsVisible="{Binding !CanChooseBetweenSaveAndSaveWithClose}" />
+                
+                <SplitButton Classes="accent" Content="Сохранить"
+                        Classes.enter-hot-key="{Binding CanSaveByHotKey}"
+                        Command="{Binding SaveCommand}"
+                        IsEnabled="{Binding $self.IsVisible}"
+                        IsVisible="{Binding CanChooseBetweenSaveAndSaveWithClose}">
+                    <SplitButton.Flyout>
+                        <Flyout>
+                            <Button Content="Сохранить и закрыть" Click="SaveAndClose_OnClick"/>
+                        </Flyout>
+                    </SplitButton.Flyout>
+                </SplitButton>
+            </Panel>
         </StackPanel>
     </Panel>
 </UserControl>
