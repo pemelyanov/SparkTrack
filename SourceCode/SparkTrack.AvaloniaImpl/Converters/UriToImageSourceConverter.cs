@@ -6,14 +6,15 @@ using System.Globalization;
 
 public class UriToImageSourceConverter : IValueConverter
 {
+    private const string Base64Mark = "base64:";
+    
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string uri || string.IsNullOrEmpty(uri)) return null;
-
-        var base64Mark = "base64:";
-        if (uri.StartsWith(base64Mark))
+        
+        if (uri.StartsWith(Base64Mark))
         {
-            var base64 = uri.Substring(base64Mark.Length);
+            var base64 = uri.Substring(Base64Mark.Length);
             var data = System.Convert.FromBase64String(base64);
             using var memoryStream = new MemoryStream(data);
             return new Bitmap(memoryStream);
@@ -22,6 +23,19 @@ public class UriToImageSourceConverter : IValueConverter
         if (!File.Exists(uri)) return null;
 
         return new Bitmap(uri);
+    }
+
+    public static byte[]? ExtractBytes(string uri)
+    {
+        if (uri.StartsWith(Base64Mark))
+        {
+            var base64 = uri.Substring(Base64Mark.Length);
+            return System.Convert.FromBase64String(base64);
+        }
+
+        if (!File.Exists(uri)) return null;
+
+        return File.ReadAllBytes(uri);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();

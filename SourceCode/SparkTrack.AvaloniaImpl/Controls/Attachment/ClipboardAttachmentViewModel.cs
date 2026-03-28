@@ -34,11 +34,10 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         Uri = Base64Mask + Convert.ToBase64String(data);
         IsImage = data.GetImageExtensionBySignature() is not null;
         CanOpenInExplorer = false;
+        IsDownloaded = true;
     }
 
     protected override IAttachmentViewModel GetThis() => this;
-
-    public bool IsDownloaded => true;
 
     public string Extension { get; }
 
@@ -97,7 +96,8 @@ public class ClipboardAttachmentViewModel : AttachmentViewModelBase, IAttachment
         }
         catch (Exception e)
         {
-            throw new NotifyUIException($"При отправке файла {Name}.{Extension} произошла ошибка", e);
+            m_logger.Warn(e);
+            throw new NotifyUIException($"При отправке файла {Name} произошла ошибка", e);
         }
         finally
         {

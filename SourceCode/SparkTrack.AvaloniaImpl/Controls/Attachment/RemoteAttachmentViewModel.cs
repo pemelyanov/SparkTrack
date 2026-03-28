@@ -79,9 +79,6 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
         if (m_attachment.IsImage && !IsDownloaded) DownloadAsync().ToObservable().Subscribe().DisposeWith(disposables);
     }
 
-    [Reactive]
-    public bool IsDownloaded { get; private set; }
-
     public string Extension { get; }
 
     public long Size { get; }
@@ -124,7 +121,7 @@ public class RemoteAttachmentViewModel : AttachmentViewModelBase, IAttachmentVie
             m_logger.Error(e, "Download failed");
             m_popupNotificationService.Show(
                 ENotificationType.Error,
-                $"При загрузке файла {Name}.{Extension} произошла ошибка"
+                $"При загрузке файла {Name} произошла ошибка"
             );
             IsDownloaded = CheckIsDownloaded();
         }

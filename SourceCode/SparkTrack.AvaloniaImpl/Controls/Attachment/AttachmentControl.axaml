@@ -64,6 +64,8 @@
                     <MenuItem Header="Получить ссылку" Command="{Binding GetLinkCommand}" />
                     <MenuItem x:Name="PreviewRequestMenuItem" Header="Сделать основным превью" IsEnabled="{Binding IsImage}"
                               Command="{Binding RaisePreviewSetRequested}" />
+                    <MenuItem Header="Копировать" IsVisible="{Binding IsImage}"
+                              Command="{Binding CopyToClipboardCommand}" />
                 </ContextMenu>
             </Grid.ContextMenu>
             <ContentControl Classes.half-transparent="{Binding #Container.IsPointerOver}"
