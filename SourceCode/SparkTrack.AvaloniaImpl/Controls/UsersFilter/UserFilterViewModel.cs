@@ -14,6 +14,7 @@ using ReactiveUI.Fody.Helpers;
 public class UserFilterViewModel : ViewModelBase
 {
     private readonly IUsersService m_usersService;
+    private          Guid?         m_idToSelectOnNextUpdate;
 
     public UserFilterViewModel(IUsersService usersService)
     {
@@ -31,6 +32,21 @@ public class UserFilterViewModel : ViewModelBase
             .Switch()
             .Subscribe()
             .DisposeWith(disposables);
+        
+        this.WhenAnyValue(it => it.UsersList)
+            .Subscribe(list =>
+                {
+                    if(list.Count == 0) return;
+                    
+                    var idToSelectOnNextUpdate = m_idToSelectOnNextUpdate;
+                    m_idToSelectOnNextUpdate = null;
+                    
+                    if (idToSelectOnNextUpdate is null) return;
+
+                    SelectedUser = list.FirstOrDefault(it => it.Id == idToSelectOnNextUpdate);
+                }
+            )
+            .DisposeWith(disposables);
     }
 
     [Reactive]
@@ -41,11 +57,20 @@ public class UserFilterViewModel : ViewModelBase
     
     [Reactive]
     public User? SelectedUser { get; set; }
+    
+    public Guid? SelectedId => m_idToSelectOnNextUpdate ?? SelectedUser?.Id;
 
     [Reactive]
     public bool ShowLabel { get; set; } = true;
     
     public ReactiveCommand<Unit, Unit> LoadUsersCommand { get; }
+
+    public void AutoSelectOnceOnNextUpdate(Guid id) => m_idToSelectOnNextUpdate = id;
+    
+    public IObservable<Guid?> SelectedIdChanged() => this.WhenAnyValue(it => it.SelectedUser)
+        .Select(it => it?.Id)
+        .StartWith(m_idToSelectOnNextUpdate)
+        .DistinctUntilChanged();
 
     private async Task LoadUsersAsync()
     {

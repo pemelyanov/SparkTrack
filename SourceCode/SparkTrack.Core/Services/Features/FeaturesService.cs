@@ -14,23 +14,25 @@ using Shared.Data.Entities;
 using Shared.Enums;
 using Shared.Extensions;
 using Shared.Services.Features;
+using Shared.Services.SubTasks;
+using Transactions;
 
 internal class FeaturesService(
     IFeaturesRepository featuresRepository,
+    ISubTasksRepository subTasksRepository,
+    ISubTasksService subTasksService,
     IAuthorizationService authorizationService,
     IFeatureArchiveService featureArchiveService,
-    IEventEmitter eventEmitter
+    IEventEmitter eventEmitter,
+    ITransactionWrapper transactionWrapper
 )
     : IFeaturesService
 {
     public Task<IReadOnlyPagedData<Feature>> GetPageAsync(
-        Guid? projectId,
-        bool showCompleted,
-        DateTime? startDate,
-        DateTime? endDate,
-        bool showOnlyMine,
-        SortQuery? sortQuery,
-        PageQuery pageQuery
+        bool showOnlyMine = true,
+        FeatureFilterQuery? filterQuery = null,
+        SortQuery? sortQuery = null,
+        PageQuery? pageQuery = null
     )
     {
         var currentUser = authorizationService.GetUserOrThrowIfUnauthorized();
@@ -42,12 +44,9 @@ internal class FeaturesService(
         if (currentUser.Role.IsAnyRole(ERole.Admin) && showOnlyMine) authorId = currentUser.Id;
 
         return featuresRepository.GetPageAsync(
-            projectId,
-            showCompleted,
             employeeFilter,
-            startDate,
-            endDate,
             authorId,
+            filterQuery,
             sortQuery,
             pageQuery
         );
@@ -95,5 +94,21 @@ internal class FeaturesService(
         }
 
         await featureArchiveService.ArchiveAsync(id, EArchiveSource.User);
+    }
+
+    public async Task SendOnPaymentAsync(IReadOnlyList<int> featuresIdList)
+    {
+        var tasksIdentities = await subTasksRepository.GetIdentityListByFeatureIdListAsync(featuresIdList);
+
+        await transactionWrapper.ExecuteInTransactionAsync(async () =>
+            {
+                foreach (var identity in tasksIdentities)
+                    await subTasksService.SetPaymentStatusAsync(
+                        identity.Id,
+                        EPaymentStatus.OnPayment,
+                        identity.Version
+                    );
+            }
+        );
     }
 }

@@ -1,4 +1,5 @@
-﻿using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
+﻿using Microsoft.Extensions.Configuration;
+using SparkTrack.AvaloniaImpl.Controls.TemplateSelectionForm;
 using SparkTrack.AvaloniaImpl.Data.Templates;
 using SparkTrack.AvaloniaImpl.Services.DialogHost;
 using SparkTrack.Core.Shared.Extensions;
@@ -35,8 +36,10 @@ using Controls.Attachment;
 using Controls.TemplateSaveForm;
 using Core.Client.Enums;
 using Core.Client.Services.PopupNotification;
+using DeepLink;
 using DescriptionTemplates;
 using Exceptions;
+using FeaturesList;
 using Comment = Core.Shared.Data.Entities.Comment;
 using SubTask = Core.Shared.Data.Entities.SubTask;
 
@@ -44,22 +47,25 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
-    private          Feature? m_feature;
-    private readonly Project m_project;
-    private readonly Lazy<IScreen> m_hostScreen;
-    private readonly IFeaturesService m_featuresService;
-    private readonly IUsersService m_usersService;
-    private readonly Func<Comment?, CommentEditViewModel> m_commentEditFactory;
-    private readonly ICommentsService m_commentsService;
-    private readonly CommentViewModelFactory m_commentFactory;
-    private readonly IAuthorizationService m_authorizationService;
-    private readonly SubTaskViewModelFactory m_subTaskViewModelFactory;
-    private readonly IPopupNotificationService m_popupNotificationService;
-    private readonly Func<TemplateSelectionFormViewModel<SubTaskTemplate>> m_subTaskTemplateSelectionViewModelFactory;
-    private readonly IDialogService m_dialogService;
+    private          Feature?                                                          m_feature;
+    private readonly Project                                                           m_project;
+    private readonly Lazy<IScreen>                                                     m_hostScreen;
+    private readonly IFeaturesService                                                  m_featuresService;
+    private readonly IUsersService                                                     m_usersService;
+    private readonly Func<Comment?, CommentEditViewModel>                              m_commentEditFactory;
+    private readonly ICommentsService                                                  m_commentsService;
+    private readonly CommentViewModelFactory                                           m_commentFactory;
+    private readonly IAuthorizationService                                             m_authorizationService;
+    private readonly SubTaskViewModelFactory                                           m_subTaskViewModelFactory;
+    private readonly IPopupNotificationService                                         m_popupNotificationService;
+    private readonly Func<TemplateSelectionFormViewModel<SubTaskTemplate>>             m_subTaskTemplateSelectionViewModelFactory;
+    private readonly IDialogService                                                    m_dialogService;
     private readonly Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> m_templateViewModelFactory;
-    private readonly Func<UserSelectionViewModel> m_userSelectionFactory;
-    private readonly BehaviorSubject<IReadOnlyList<User>> m_availableEmployeesList = new([]);
+    private readonly Func<UserSelectionViewModel>                                      m_userSelectionFactory;
+    private readonly Func<FeaturesListPageViewModel>                                   m_featuresListPageFactory;
+    private readonly LinkShareViewModelFactory                                         m_linkShareFactory;
+    private readonly IConfiguration                                                    m_configuration;
+    private readonly BehaviorSubject<IReadOnlyList<User>>                              m_availableEmployeesList = new([]);
 
     public FeaturePageViewModel(
         Project project,
@@ -76,7 +82,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
-        Func<UserSelectionViewModel> userSelectionFactory
+        Func<UserSelectionViewModel> userSelectionFactory,
+        Func<FeaturesListPageViewModel> featuresListPageFactory,
+        LinkShareViewModelFactory linkShareFactory,
+        IConfiguration configuration
     ) : this(
         null,
         project,
@@ -93,7 +102,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         subTaskTemplateSelectionViewModelFactory,
         dialogService,
         templateViewModelFactory,
-        userSelectionFactory
+        userSelectionFactory,
+        featuresListPageFactory,
+        linkShareFactory,
+        configuration
     )
     {
     }
@@ -113,7 +125,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
-        Func<UserSelectionViewModel> userSelectionFactory
+        Func<UserSelectionViewModel> userSelectionFactory,
+        Func<FeaturesListPageViewModel> featuresListPageFactory,
+        LinkShareViewModelFactory linkShareFactory,
+        IConfiguration configuration
     ) : this(
         feature,
         feature.Project,
@@ -130,7 +145,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         subTaskTemplateSelectionViewModelFactory,
         dialogService,
         templateViewModelFactory,
-        userSelectionFactory
+        userSelectionFactory,
+        featuresListPageFactory,
+        linkShareFactory,
+        configuration
     )
     {
     }
@@ -151,7 +169,10 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         Func<TemplateSelectionFormViewModel<SubTaskTemplate>> subTaskTemplateSelectionViewModelFactory,
         IDialogService dialogService,
         Func<FeatureTemplate, TemplateSaveFormViewModel<FeatureTemplate>> templateViewModelFactory,
-        Func<UserSelectionViewModel> userSelectionFactory
+        Func<UserSelectionViewModel> userSelectionFactory,
+        Func<FeaturesListPageViewModel> featuresListPageFactory,
+        LinkShareViewModelFactory linkShareFactory,
+        IConfiguration configuration
     )
     {
         AttachmentsPanelViewModel = attachmentsPanelViewModel;
@@ -170,23 +191,34 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         m_dialogService = dialogService;
         m_templateViewModelFactory = templateViewModelFactory;
         m_userSelectionFactory = userSelectionFactory;
+        m_featuresListPageFactory = featuresListPageFactory;
+        m_linkShareFactory = linkShareFactory;
+        m_configuration = configuration;
         AttachmentsPanelViewModel.AttachmentAdded += AttachmentsPanelViewModel_OnAttachmentAdded;
         AttachmentsPanelViewModel.PreviewAttachmentSetRequested +=
             AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested;
 
         if (feature is null)
         {
+            IsNew = true;
             IsInEditMode = true;
             AuthorsList.Add(m_authorizationService.CurrentUser.Value!);
+            CanChooseBetweenSaveAndSaveWithClose = false;
         }
 
-        SaveCommand = ReactiveCommand.CreateFromTask(SaveAsync);
+        SaveCommand = ReactiveCommand.CreateFromTask<bool?, Unit>(async arg =>
+        {
+            await SaveAsync(arg ?? false);
+            
+            return Unit.Default;
+        });
 
         RefreshCommentsCommand = ReactiveCommand.CreateFromTask(RefreshCommentsAsync);
         SaveCommentCommand = ReactiveCommand.CreateFromTask(SaveCommentAsync);
         
         RefreshCommand = ReactiveCommand.CreateFromTask(() =>
-            Task.WhenAll(RefreshAsync(), RefreshCommentsCommand.Execute().ToTask())
+            Task.WhenAll(RefreshAsync(), RefreshCommentsCommand.Execute().ToTask()),
+            this.WhenAnyValue(it => it.IsNew).Select(isNew => !isNew)
         );
     }
 
@@ -198,13 +230,13 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         this.WhenAnyValue(
                 it => it.IsEditingComment,
-                (isEditingComment) => !isEditingComment
+                isEditingComment => !isEditingComment
             )
             .Subscribe(canSaveByHotKey => CanSaveByHotKey = canSaveByHotKey)
             .DisposeWith(disposables);
     }
 
-    public string UrlPathSegment => "feature";
+    public string UrlPathSegment => SparkTrackDeepLink.FeaturePage;
 
     public IScreen HostScreen => m_hostScreen.Value;
 
@@ -251,15 +283,32 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
     [Reactive]
     public string PreviewDescription { get; set; } = string.Empty;
 
+    public bool IsNew { get; }
+
     public Project Project => m_project;
 
-    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
+    public bool CanChooseBetweenSaveAndSaveWithClose { get; } = true;
+
+    public ReactiveCommand<bool?, Unit> SaveCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshCommand { get; }
 
     public ReactiveCommand<Unit, Unit> RefreshCommentsCommand { get; }
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
+
+    public async Task ShareAsync()
+    {
+        if(m_feature is not {} feature) return;
+
+        var link = SparkTrackDeepLink.ToFeature(feature.Id, m_configuration.GetDeepLinkBaseUrl());
+        
+        s_logger.Info("Sharing link to feature {id}: {link}", feature.Id, link);
+
+        var linkShareViewModel = m_linkShareFactory(() => Task.FromResult(link));
+
+        await m_dialogService.ShowAsync(linkShareViewModel);
+    }
 
     public async Task AddAuthorAsync()
     {
@@ -299,17 +348,34 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         AttachmentsPanelViewModel.AddAttachment(image, extension);
     }
 
-    public void CreateComment()
+    public async Task CreateCommentAsync()
     {
         CommentEditViewModel = m_commentEditFactory(null);
 
         foreach (var commentViewModel in CommentsList)
-            commentViewModel.CancelEdit();
+            await commentViewModel.CancelEditAsync(true);
     }
 
-    public void CancelComment() => CommentEditViewModel = null;
+    public async Task CancelCommentAsync(bool force = false)
+    {
+        if (!force && !await m_dialogService.ConfirmAsync(
+            "Вы уверены что хотите отменить создание комментария? Несохраненные данные будут потеряны.",
+            "Отмена создание комментария"
+        )) return;
+        
+        CommentEditViewModel = null;
+    }
 
-    public void Back() => HostScreen.Router.SafeBackOnUIThread();
+    public void Back()
+    {
+        if (HostScreen.Router.NavigationStack.Count > 1)
+        {
+            HostScreen.Router.SafeBackOnUIThread();
+            return;
+        }
+        
+        HostScreen.Router.PopToOnUIThread(m_featuresListPageFactory());
+    }
 
     public void AddSubTask()
     {
@@ -412,7 +478,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
         InitializeProperties(m_feature);
     }
 
-    private async Task SaveAsync()
+    private async Task SaveAsync(bool backAfterSave = false)
     {
         try
         {
@@ -438,6 +504,12 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             IsInEditMode = false;
             
             m_popupNotificationService.Show(ENotificationType.Success, "Идея успешно сохранена");
+
+            if (backAfterSave)
+            {
+                Back();
+                return;
+            }
 
             await RefreshCommand.Execute().ToTask();
         }
@@ -544,15 +616,19 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
                     .Do(_ => IsEditingComment = CommentsList.Any(vm => vm.EditViewModel is not null))
                     .WhereNotNull()
                     .CombineLatest(Observable.Return(commentViewModel), (_, source) => source)
-                    .Subscribe(source =>
+                    .Select(async source =>
                         {
                             foreach (var otherComment in CommentsList)
                                 if (otherComment != source)
-                                    otherComment.CancelEdit();
+                                    await otherComment.CancelEditAsync(true);
 
-                            CancelComment();
+                            await CancelCommentAsync(true);
+                            
+                            return Unit.Default;
                         }
-                    );
+                    )
+                    .Switch()
+                    .Subscribe();
 
                 commentViewModel.DisposeWithViewModel(editSubscription);
 

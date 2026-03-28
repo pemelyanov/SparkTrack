@@ -13,7 +13,7 @@ public class NLogSink : ILogSink
 {
     #region Fields
 
-    private LogEventLevel                             m_logEventLevel;
+    private                 LogEventLevel                             m_logEventLevel;
     private readonly        HashSet<string>?                          m_areas;
     private static readonly ConcurrentDictionary<string, NLog.Logger> s_loggerCache = new();
 
@@ -22,12 +22,13 @@ public class NLogSink : ILogSink
     #region LifeCycle
 
     public NLogSink(
-        IList<string>? areas = null)
+        IList<string>? areas = null
+    )
     {
         LogManager.ConfigurationChanged += LogManager_OnConfigurationChanged;
-        
+
         InitializeMinLogLevel();
-        
+
         m_areas = areas?.Count > 0 ? new HashSet<string>(areas) : null;
     }
 
@@ -48,8 +49,13 @@ public class NLogSink : ILogSink
         logger.Log(GetLogLevel(level), messageTemplate);
     }
 
-    public void Log(LogEventLevel level, string area, object? source, string messageTemplate,
-        params object?[] propertyValues)
+    public void Log(
+        LogEventLevel level,
+        string area,
+        object? source,
+        string messageTemplate,
+        params object?[] propertyValues
+    )
     {
         if (!IsEnabled(level, area)) return;
 
@@ -62,6 +68,8 @@ public class NLogSink : ILogSink
         var loggerName = source?.ToString() ?? area;
         if (string.IsNullOrEmpty(loggerName))
             loggerName = typeof(NLogSink).ToString();
+
+        loggerName = $"AvaloniaSink::{loggerName}";
 
         if (!s_loggerCache.TryGetValue(loggerName, out var logger))
         {
@@ -82,7 +90,7 @@ public class NLogSink : ILogSink
         LogEventLevel.Fatal => LogLevel.Fatal,
         _ => LogLevel.Trace
     };
-    
+
     private static LogEventLevel GetLogLevel(string level) => level switch
     {
         "Trace" => LogEventLevel.Verbose,
@@ -91,14 +99,14 @@ public class NLogSink : ILogSink
         "Warn" => LogEventLevel.Warning,
         "Error" => LogEventLevel.Error,
         "Fatal" => LogEventLevel.Fatal,
-        _ => LogEventLevel.Verbose 
+        _ => LogEventLevel.Verbose
     };
-    
+
     private void InitializeMinLogLevel()
     {
-        if(LogManager.Configuration is null) return;
-        
-        if(LogManager.Configuration.Variables.TryGetValue("avaloniaMinLogLevel", out var minLogLevel))
+        if (LogManager.Configuration is null) return;
+
+        if (LogManager.Configuration.Variables.TryGetValue("avaloniaMinLogLevel", out var minLogLevel))
             m_logEventLevel = GetLogLevel(minLogLevel.ToString()!);
         else
             m_logEventLevel = LogEventLevel.Warning;

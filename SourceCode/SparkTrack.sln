@@ -68,6 +68,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Telegram.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.Telegram.DataAccess.LiteDb", "SparkTrack.Telegram.DataAccess.LiteDb\SparkTrack.Telegram.DataAccess.LiteDb.csproj", "{BF222A8F-F70A-4CDD-9493-23916F6B7EF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTrack.DeepLink", "SparkTrack.DeepLink\SparkTrack.DeepLink.csproj", "{E0995E7C-7B88-4565-BD69-4802FC091089}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clipboard", "Clipboard", "{65909D42-3461-4DCF-B12A-79D50EE88975}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clowd.Clipboard", "Clowd.Clipboard\Clowd.Clipboard.csproj", "{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +101,7 @@ Global
 		{3EB9280C-ED55-43E1-AC2F-D0BAE55FF8A9} = {D8EB2169-C16E-4DAC-824E-EE64974C1B2E}
 		{D60F7536-7335-44D8-A0B4-11171B126608} = {3EB9280C-ED55-43E1-AC2F-D0BAE55FF8A9}
 		{BF222A8F-F70A-4CDD-9493-23916F6B7EF8} = {3EB9280C-ED55-43E1-AC2F-D0BAE55FF8A9}
+		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22} = {65909D42-3461-4DCF-B12A-79D50EE88975}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3D679824-3986-472A-B08F-51BADB3B0D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -185,5 +192,13 @@ Global
 		{BF222A8F-F70A-4CDD-9493-23916F6B7EF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF222A8F-F70A-4CDD-9493-23916F6B7EF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF222A8F-F70A-4CDD-9493-23916F6B7EF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0995E7C-7B88-4565-BD69-4802FC091089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0995E7C-7B88-4565-BD69-4802FC091089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0995E7C-7B88-4565-BD69-4802FC091089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0995E7C-7B88-4565-BD69-4802FC091089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

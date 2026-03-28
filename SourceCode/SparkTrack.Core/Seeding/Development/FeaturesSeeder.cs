@@ -58,13 +58,8 @@ public class FeaturesSeeder(
         {
             projectNumber++;
             var existingFeatures = (await featuresService.GetPageAsync(
-                    project.Id,
-                    true,
-                    null,
-                    null,
-                    false,
-                    null,
-                    PageQuery.None
+                    filterQuery: new FeatureFilterQuery { ProjectId = project.Id },
+                    pageQuery: PageQuery.None
                 ))
                 .Total;
 

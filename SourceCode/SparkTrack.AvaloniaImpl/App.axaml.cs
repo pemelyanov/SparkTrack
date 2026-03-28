@@ -9,11 +9,19 @@ using Windows.Main;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Core.Shared.Eventing;
+using DeepLink;
 using Events;
+using NLog;
+using Services.DeepLinkNavigation;
 using Splat;
+using ILogger = NLog.ILogger;
 
 public partial class App : Application
 {
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
+    
+    public static SparkTrackDeepLink? StartupDeepLink { get; set; }
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -21,6 +29,11 @@ public partial class App : Application
 
     public override async void OnFrameworkInitializationCompleted()
     {
+        var deepLinkNavigationService = Locator.Current.GetService<IDeepLinkNavigationService>();
+        
+        if(StartupDeepLink is not null)
+            deepLinkNavigationService?.Enqueue(StartupDeepLink);
+        
         var eventEmitter = Locator.Current.GetService<IEventEmitter>()!;
 
         await eventEmitter.RaiseAsync(new StartupEvent());
@@ -34,8 +47,17 @@ public partial class App : Application
             mainWindow.DataContext = Locator.Current.GetService<MainWindowViewModel>();
             desktop.MainWindow = mainWindow;
             
-            SingleInstanceIpc.StartListening(() =>
+            SingleInstanceIpc.StartListening(deeplink =>
             {
+                try
+                {
+                    deepLinkNavigationService?.Enqueue( SparkTrackDeepLink.Parse(deeplink));
+                }
+                catch (Exception e)
+                {
+                    s_logger.Warn(e, "Error handling deeplink");
+                }
+                
                 Dispatcher.UIThread.Post(() =>
                 {
                     if (mainWindow.WindowState == WindowState.Minimized)

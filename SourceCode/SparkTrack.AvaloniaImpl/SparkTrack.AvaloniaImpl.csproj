@@ -44,10 +44,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Clowd.Clipboard\Clowd.Clipboard.csproj" />
       <ProjectReference Include="..\Fanatiki.MVVM\Fanatiki.MVVM.csproj" />
       <ProjectReference Include="..\Fanatiki.Updating.GitHub\Fanatiki.Updating.GitHub.csproj" />
       <ProjectReference Include="..\SparkTrack.API\SparkTrack.API.csproj" />
       <ProjectReference Include="..\SparkTrack.Core.Client\SparkTrack.Core.Client.csproj" />
+      <ProjectReference Include="..\SparkTrack.DeepLink\SparkTrack.DeepLink.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -8,6 +8,7 @@ using Avalonia.ReactiveUI;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Avalonia.Controls.Primitives;
 using Extensions;
 
 public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
@@ -55,5 +56,25 @@ public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
     private async void TextBox_OnPastingFromClipboard(object? sender, RoutedEventArgs e)
     {
         await this.HandleImagePastingFromClipboard((data, extension) => ViewModel?.OnImagePaste(data, extension));
+    }
+    
+    private void SaveAndClose_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button button) return;
+
+        StyledElement? currentParent = button.Parent;
+
+        while (currentParent is not null)
+        {
+            if (currentParent is Popup popup)
+            {
+                ViewModel?.SaveCommand.Execute(true);
+                
+                popup.Close();
+                break;
+            }
+
+            currentParent = currentParent.Parent;
+        }
     }
 }

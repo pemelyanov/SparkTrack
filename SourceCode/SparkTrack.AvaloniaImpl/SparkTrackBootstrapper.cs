@@ -47,11 +47,12 @@ using Pages.Update;
 using Pages.UsersList;
 using ReactiveUI;
 using Services.AttachmentsPathCache;
+using Services.DeepLinkNavigation;
 using Splat;
 
 public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 {
-    private static readonly IConfiguration s_configuration = InitializeConfiguration();
+    public static readonly IConfiguration Configuration = InitializeConfiguration();
 
     protected override void RegisterViews(IMutableDependencyResolver builder)
     {
@@ -94,6 +95,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
 
     protected override void RegisterServices(ContainerBuilder builder)
     {
+        builder.RegisterInstance(Configuration).As<IConfiguration>().SingleInstance();
         builder.RegisterType<MainWindow>().AsSelf().AsImplementedInterfaces().SingleInstance();
 
         builder.RegisterAvaloniaServices();
@@ -101,7 +103,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         // TODO: Вынести путь до настроек в файл конфигурации
         builder.RegisterModule(
             new APIModule(
-                s_configuration.GetRequiredSection("ApiBaseUrl").Get<string>()
+                Configuration.GetRequiredSection("ApiBaseUrl").Get<string>()
                 ?? throw new InvalidOperationException("Api base url not found"),
                 Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -120,15 +122,43 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
             "interface-configuration.json"
         ));
 
+        var configsFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "SparkTrack",
+            "Configs"
+        );
+        
+        builder.RegisterJsonConfiguration<WindowStateConfig>(Path.Combine(
+            configsFolder,
+            "window-state.json"
+        ));
+        
+        builder.RegisterJsonConfiguration<FeaturesPageConfig>(Path.Combine(
+            configsFolder,
+            "features-page.json"
+        ));
+        
+        builder.RegisterJsonConfiguration<AdminPendingPaymentsPageConfig>(Path.Combine(
+            configsFolder,
+            "admin-pending-payments-page.json"
+        ));
+        
+        builder.RegisterJsonConfiguration<AdminPaymentsHistoryPageConfig>(Path.Combine(
+            configsFolder,
+            "admin-payments-history-page.json"
+        ));
+
         RegisterUpdatingIfNeeded(builder);
         
         RegisterTemplateService<SubTaskTemplate>(builder , "SubTasks");
         RegisterTemplateService<FeatureTemplate>(builder, "Features");
+
+        builder.RegisterType<DeepLinkNavigationService>().AsImplementedInterfaces().SingleInstance();
     }
 
     private void RegisterUpdatingIfNeeded(ContainerBuilder builder)
     {
-        var updatingSection = s_configuration.GetSection("Updating");
+        var updatingSection = Configuration.GetSection("Updating");
 
         if (!updatingSection.Exists()) return;
 
@@ -163,7 +193,8 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
     private static IConfiguration InitializeConfiguration()
     {
         return new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: true)
+            .AddJsonFile("appsettings.json")
+            .AddJsonFile("appsettings.Local.json", optional: true)
             .Build();
     }
 

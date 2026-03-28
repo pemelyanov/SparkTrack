@@ -5,6 +5,7 @@ namespace SparkTrack.Desktop;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using AvaloniaImpl;
+using DeepLink;
 using Fanatiki.MVVM.Extensions;
 using NLog;
 using ReactiveUI;
@@ -14,17 +15,43 @@ sealed class Program
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
     private static          Mutex?  s_mutex;
     
+    #if DEBUG
+    private const           string  MutexName = "SparkTrackDebugMutex";
+    #else
+    private const           string  MutexName = "SparkTrackMutex";
+    #endif
+    
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args)
     {
+        SetupLogger();
+        s_logger.Info("Logger configured");
+        
+        var deepLink = string.Empty;
+
+        if (args.Length > 0)
+        {
+            deepLink = args[0];
+            s_logger.Info("App starting with deeplink: {deeplink}", deepLink);
+
+            try
+            {
+                App.StartupDeepLink = SparkTrackDeepLink.Parse(deepLink);
+            }
+            catch (Exception e)
+            {
+                s_logger.Warn(e, "Error handling deeplink");
+            }
+        }
+        
         bool createdNew;
 
         try
         {
-            s_mutex = new Mutex(true, "SparkTrackMutex", out createdNew);
+            s_mutex = new Mutex(true, MutexName, out createdNew);
         }
         catch
         {
@@ -34,21 +61,20 @@ sealed class Program
         if (!createdNew)
         {
             // Сообщаем первому инстансу, что нужно показать окно
-            SingleInstanceIpc.SignalFirstInstance();
+            s_logger.Info("Found existing app instance, redirecting to one...");
+            SingleInstanceIpc.SignalFirstInstance(deepLink);
             return;
         }
         
-        SetupLogger();
-        s_logger.Info("Logger configured");
-        
         RxApp.MainThreadScheduler = AvaloniaScheduler.Instance;
         
-        s_logger.Info("Starting app...");
+        s_logger.Info("Starting app v{version}...", typeof(Program).Assembly.GetName().Version);
 
         try
         {
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
+            
             s_logger.Info("App shutted down");
         }
         catch (Exception e)
@@ -70,10 +96,31 @@ sealed class Program
         .WithInterFont()
         .LogToNLog()
         .UseReactiveUI()
-        .With(() => new Win32PlatformOptions { OverlayPopups = true })
-        .With(() => new SkiaOptions { UseOpacitySaveLayer = true, MaxGpuResourceSizeBytes = 512 * 1024 * 1024})
+        .With(() =>
+            {
+                var options = new Win32PlatformOptions
+                {
+                    OverlayPopups = true
+                };
+
+                if (SparkTrackBootstrapper.Configuration["RenderingMode"] is { } renderingModeString
+                    && Enum.TryParse<Win32RenderingMode>(renderingModeString, out var renderingMode))
+                {
+                    s_logger.Info("Setting custom rendering mode: {renderingMode}", renderingMode);
+                    options.RenderingMode = [renderingMode];
+                }
+
+                return options;
+            }
+        )
+        .With(() => new SkiaOptions
+            {
+                UseOpacitySaveLayer = true,
+                MaxGpuResourceSizeBytes = 512 * 1024 * 1024
+            }
+        )
         .UseBootstrapper<SparkTrackBootstrapper>([typeof(App).Assembly]);
-    
+
     private static void SetupLogger()
     {
         NLogConfigManager.EnsureNLogConfig(typeof(App).Assembly, "SparkTrack.AvaloniaImpl.NLog.config");
@@ -81,4 +128,6 @@ sealed class Program
         LogManager.Setup(cfg => cfg.LoadConfigurationFromFile(NLogConfigManager.NLogConfigPath));
         LogManager.ReconfigExistingLoggers();
     }
+    
+    
 }

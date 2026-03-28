@@ -46,7 +46,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True"
+                <DataGridTextColumn IsReadOnly="True" Width="200"
                                     Header="Почта" Binding="{Binding Model.Email}" />
                 <DataGridTextColumn Width="120" IsReadOnly="True"
                                     Header="Роль" Binding="{Binding Model.Role, Converter={StaticResource RoleConverter}}" />

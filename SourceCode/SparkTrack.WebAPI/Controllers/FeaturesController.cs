@@ -34,23 +34,17 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<PagedDTO<FeatureDTO>>> GetPageAsync(
-        Guid? projectId = null,
-        bool showCompleted = false,
-        DateTime? startDate = null,
-        DateTime? endDate = null,
-        bool showOnlyMine = true,
+        [FromQuery] bool showOnlyMine = true,
+        [FromQuery] FeatureFilterQueryDTO? filterDTO = null,
         [FromQuery] SortQueryDTO? sortQuery = null,
         [FromQuery] PageQueryDTO? pageQuery = null
     )
     {
         var page = await featuresService.GetPageAsync(
-            projectId,
-            showCompleted,
-            startDate?.ToUniversalTime(),
-            endDate?.ToUniversalTime(),
             showOnlyMine,
+            filterDTO?.ToDomain(),
             sortQuery?.ToDomain(),
-            pageQuery?.ToDomain() ?? PageQuery.All
+            pageQuery?.ToDomain()
         );
 
         var mappedPage = page.ToDTO(it => it.ToDTO());
@@ -144,5 +138,15 @@ public class FeaturesController(IFeaturesService featuresService, ICommentsServi
     public Task<ActionResult> DeleteCommentAsync([FromRoute] Guid id)
     {
         return this.OkWithDomainExceptionsHandling(() => commentsService.DeleteAsync(id));
+    }
+    
+    [HttpPatch("send-on-payment")]
+    [Authorize(Roles = $"{nameof(ERole.Admin)}, {nameof(ERole.God)}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public Task<ActionResult> SendOnPaymentAsync([FromBody] IReadOnlyList<int> featuresIdList)
+    {
+        return this.OkWithDomainExceptionsHandling(() => featuresService.SendOnPaymentAsync(featuresIdList));
     }
 }

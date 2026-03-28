@@ -1,8 +1,13 @@
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Avalonia;
-using SparkTrack.AvaloniaImpl.Data;
 using SparkTrack.AvaloniaImpl.Data.Configurations;
+using SparkTrack.Core.Client.Extensions;
 using SparkTrack.Core.Client.Services.Configuration;
 using Splat;
+using Point = System.Drawing.Point;
+using Size = System.Drawing.Size;
 
 namespace SparkTrack.AvaloniaImpl.Windows.Main;
 
@@ -21,12 +26,19 @@ using ReactiveUI;
 using Services.Clipboard;
 using Services.DialogHost;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService, IClipboardService
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogService, IPopupNotificationService,
+    IClipboardService
 {
     private readonly WindowNotificationManager m_notificationManager;
 
     private readonly IConfigurationService<InterfaceConfiguration> m_interfaceConfiguration =
         Locator.Current.GetService<IConfigurationService<InterfaceConfiguration>>()!;
+
+    private readonly IConfigurationService<WindowStateConfig> m_windowStateConfig =
+        Locator.Current.GetService<IConfigurationService<WindowStateConfig>>()!;
+
+    private readonly BehaviorSubject<Point?> m_windowPosition = new(null);
+    private readonly BehaviorSubject<Size?>  m_windowSize     = new(null);
 
     private readonly double m_scale;
 
@@ -35,12 +47,40 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
         InitializeComponent();
 
         m_scale = m_interfaceConfiguration.Config.Scale / 100d;
-        
+
         m_notificationManager = new WindowNotificationManager
         {
             Position = NotificationPosition.BottomCenter,
             ZIndex = 1000
         };
+
+        this.WhenActivated(OnActivated);
+    }
+
+    private void OnActivated(CompositeDisposable disposables)
+    {
+        if (m_windowStateConfig.Config.Position is { } savedPosition)
+            Position = new PixelPoint(savedPosition.X, savedPosition.Y);
+
+        if (m_windowStateConfig.Config.Size is { } savedSize)
+        {
+            Width = savedSize.Width;
+            Height = savedSize.Height;
+        }
+
+        if (m_windowStateConfig.Config.IsFullScreen is true) WindowState = WindowState.Maximized;
+        
+        m_windowPosition.CombineLatest(m_windowSize, (position, size) => new { position, size })
+            .Throttle(TimeSpan.FromSeconds(0.5))
+            .Skip(1)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(value => m_windowStateConfig.Update(it => it with
+            {
+                Position = value.position,
+                Size = value.size,
+                IsFullScreen = WindowState == WindowState.Maximized
+            }))
+            .DisposeWith(disposables);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
@@ -137,9 +177,19 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IDialogSe
     public async Task SaveToClipboardAsync(string text, string? notificationText = null)
     {
         if (Clipboard is null) return;
-            
+
         await Clipboard.SetTextAsync(text);
-        
-        if(!string.IsNullOrEmpty(notificationText)) Show(ENotificationType.Information, notificationText);
+
+        if (!string.IsNullOrEmpty(notificationText)) Show(ENotificationType.Information, notificationText);
+    }
+
+    private void Window_OnPositionChanged(object? sender, PixelPointEventArgs e)
+    {
+        m_windowPosition.OnNext(new Point(Position.X, Position.Y));
+    }
+
+    private void Window_OnSizeChanged(object? sender, SizeChangedEventArgs e)
+    {
+        m_windowSize.OnNext(new Size((int)Bounds.Width, (int)Bounds.Height));
     }
 }

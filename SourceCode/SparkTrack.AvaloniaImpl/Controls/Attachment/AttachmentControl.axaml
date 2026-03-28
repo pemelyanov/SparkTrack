@@ -8,6 +8,7 @@
              xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:common="clr-namespace:FluentIcons.Common;assembly=FluentIcons.Common"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Controls.Attachment.AttachmentControl"
              x:DataType="attachment:IAttachmentViewModel"
@@ -87,7 +88,7 @@
 
             <Panel Grid.Column="0" IsVisible="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNotNull}}">
                 <avalonia:SymbolIcon
-                    Symbol="{Binding LoadProgress.LoadType, FallbackValue={x:Static attachment:ELoadType.Download}, 
+                    Symbol="{Binding LoadProgress.LoadType, FallbackValue={x:Static common:Symbol.ArrowDownload}, 
                     Mode=OneWay, Converter={x:Static attachment:AttachmentControl.LoadingIconConverter}}"
                     HorizontalAlignment="Center" VerticalAlignment="Center" />
 

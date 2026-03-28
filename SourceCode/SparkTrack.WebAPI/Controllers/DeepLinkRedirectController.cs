@@ -1,5 +1,6 @@
 ﻿namespace SparkTrack.WebAPI.Controllers;
 
+using DeepLink;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -9,8 +10,9 @@ public class DeepLinkRedirectController : Controller
     public IActionResult RedirectToDeepLink()
     {
         var rawQueryString = HttpContext.Request.QueryString.Value;
-        string deeplink = $"sparktrack://{rawQueryString}";
+
+        var deepLink = SparkTrackDeepLink.FromQuery(rawQueryString);
         
-        return Redirect(deeplink);
+        return Redirect(deepLink);
     }
 }

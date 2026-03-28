@@ -9,26 +9,24 @@ using MappingExtensions;
 internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClientFactory) : IFeaturesService
 {
     public async Task<IReadOnlyPagedData<Feature>> GetPageAsync(
-        Guid? projectId,
-        bool showCompleted,
-        DateTime? startDate,
-        DateTime? endDate,
-        bool showOnlyMine,
-        SortQuery? sortQuery,
-        PageQuery pageQuery
+        bool showOnlyMine = true,
+        FeatureFilterQuery? filterQuery = null,
+        SortQuery? sortQuery = null,
+        PageQuery? pageQuery = null
     )
     {
         using var clientWrapper = featuresClientFactory();
         var dto = await clientWrapper.Client.GetPageAsync(
-            projectId,
-            showCompleted,
-            startDate,
-            endDate,
-            showOnlyMine,
-            sortQuery?.SortField,
-            sortQuery?.SortDescending,
-            pageQuery.Page,
-            pageQuery.ItemsPerPage
+            showOnlyMine: showOnlyMine,
+            projectId: filterQuery?.ProjectId,
+            showClosed: filterQuery?.ShowClosed,
+            showCompleted: filterQuery?.ShowCompleted,
+            startDate: filterQuery?.StartDate,
+            endDate: filterQuery?.EndDate,
+            sortField: sortQuery?.SortField,
+            sortDescending: sortQuery?.SortDescending,
+            page: pageQuery?.Page,
+            itemsPerPage: pageQuery?.ItemsPerPage
         );
 
         var list = dto.Items.Select(it => it.ToDomain()).ToArray();
@@ -65,5 +63,12 @@ internal class FeaturesService(Func<ClientWrapper<FeaturesClient>> featuresClien
         using var clientWrapper = featuresClientFactory();
 
         await clientWrapper.Client.DeleteAsync(id, force);
+    }
+
+    public async Task SendOnPaymentAsync(IReadOnlyList<int> featuresIdList)
+    {
+        using var clientWrapper = featuresClientFactory();
+
+        await clientWrapper.Client.SendOnPaymentAsync(featuresIdList);
     }
 }
