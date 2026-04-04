@@ -171,7 +171,7 @@ public abstract class AttachmentViewModelBase : ViewModelBase
 
         if (!IsImage)
         {
-            m_logger.Info("Attachment is not image, starting process for {uri}", Uri);
+            m_logger.Info("Attachment is not image, starting process for {name}", Name);
 
             try
             {
@@ -182,6 +182,8 @@ public abstract class AttachmentViewModelBase : ViewModelBase
                         UseShellExecute = true
                     }
                 );
+                
+                m_logger.Info("Process started for {uri}", Uri);
             }
             catch (Exception e)
             {

@@ -242,9 +242,8 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     [Reactive]
     public string Name { get; set; } = string.Empty;
-
-    [Reactive]
-    public IAttachmentViewModel? PreviewAttachment { get; private set; }
+    
+    public SuspendableObservableCollection<IAttachmentViewModel> PreviewAttachmentsList { get; } = [];
 
     [Reactive]
     public bool IsInEditMode { get; set; }
@@ -297,6 +296,11 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     public ReactiveCommand<Unit, Unit> SaveCommentCommand { get; }
 
+    public void RemovePreviewAttachment(IAttachmentViewModel attachmentViewModel)
+    {
+        PreviewAttachmentsList.Remove(attachmentViewModel);
+    }
+    
     public async Task ShareAsync()
     {
         if(m_feature is not {} feature) return;
@@ -542,7 +546,7 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             ReelLink = ReelLink,
             PreviewDescription = PreviewDescription,
             ReelDescription = ReelDescription,
-            PreviewAttachmentName = PreviewAttachment?.Name
+            PreviewAttachmentsList = PreviewAttachmentsList.Select(it => it.Name).ToArray()
         }
     );
 
@@ -580,12 +584,25 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
         var template = TryParseJson<ReelWithPreviewTemplate>(description);
 
+        if(template is not null)
+            template = MigrateTemplate(template);
+
         ReelLink = template?.ReelLink ?? string.Empty;
         ReelDescription = template?.ReelDescription ?? string.Empty;
         PreviewDescription = template?.PreviewDescription ?? string.Empty;
 
-        PreviewAttachment =
-            AttachmentsPanelViewModel.AttachmentsList.FirstOrDefault(it => it.Name == template?.PreviewAttachmentName);
+        if (template is not null)
+        {
+            var previews =
+                AttachmentsPanelViewModel.AttachmentsList.Where(it => template.PreviewAttachmentsList.Contains(it.Name)
+                );
+
+            using (PreviewAttachmentsList.SuspendNotifications())
+            {
+                PreviewAttachmentsList.Clear();
+                PreviewAttachmentsList.AddRange(previews);
+            }
+        }
     }
 
     private TData? TryParseJson<TData>(string? data) where TData : class
@@ -601,6 +618,24 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
             return null;
         }
     }
+
+    #pragma warning disable CS0618 // Type or member is obsolete
+    private ReelWithPreviewTemplate MigrateTemplate(ReelWithPreviewTemplate template)
+    {
+      
+        if (string.IsNullOrWhiteSpace(template.PreviewAttachmentName)) return template;
+        
+
+        List<string> attachmentsList = [template.PreviewAttachmentName];
+        
+        attachmentsList.AddRange(template.PreviewAttachmentsList);
+
+        return template with
+        {
+            PreviewAttachmentsList = attachmentsList
+        };
+    }
+    #pragma warning restore CS0618 // Type or member is obsolete
 
     private async Task RefreshCommentsAsync()
     {
@@ -688,11 +723,16 @@ public class FeaturePageViewModel : ViewModelBase, IRoutableViewModel
 
     private void AttachmentsPanelViewModel_OnPreviewAttachmentSetRequested(IAttachmentViewModel preview)
     {
-        PreviewAttachment = preview;
+        if(PreviewAttachmentsList.Contains(preview)) return;
+        
+        PreviewAttachmentsList.Add(preview);
     }
 
     private void AttachmentsPanelViewModel_OnAttachmentAdded(IAttachmentViewModel attachment)
     {
-        if (AttachmentsPanelViewModel.AttachmentsList.Count == 1 && attachment.IsImage) PreviewAttachment = attachment;
+        if (AttachmentsPanelViewModel.AttachmentsList.Count == 1 && attachment.IsImage)
+        {
+            PreviewAttachmentsList.Add(attachment);
+        }
     }
 }

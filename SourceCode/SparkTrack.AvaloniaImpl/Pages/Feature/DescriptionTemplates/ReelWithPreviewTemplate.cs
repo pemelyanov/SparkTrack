@@ -14,5 +14,8 @@ public record ReelWithPreviewTemplate
     
     public required string PreviewDescription { get; init; }
     
+    [Obsolete("Используем PreviewAttachmentsList")]
     public string? PreviewAttachmentName { get; init; }
+
+    public IReadOnlyList<string> PreviewAttachmentsList { get; init; } = [];
 }
