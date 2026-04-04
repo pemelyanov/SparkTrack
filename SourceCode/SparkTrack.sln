@@ -74,6 +74,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clipboard", "Clipboard", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clowd.Clipboard", "Clowd.Clipboard\Clowd.Clipboard.csproj", "{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.SpellChecker", "Avalonia.SpellChecker\Avalonia.SpellChecker.csproj", "{F229E1FF-D383-4255-8921-0301450BCD5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,5 +202,9 @@ Global
 		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1D28878-34DC-41C7-8441-9CFF6C9ABE22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F229E1FF-D383-4255-8921-0301450BCD5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F229E1FF-D383-4255-8921-0301450BCD5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F229E1FF-D383-4255-8921-0301450BCD5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F229E1FF-D383-4255-8921-0301450BCD5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

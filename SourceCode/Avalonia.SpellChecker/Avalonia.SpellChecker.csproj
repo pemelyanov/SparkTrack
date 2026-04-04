@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageId>GHSoftware.Avalonia.SpellChecker</PackageId>
+		<Version>0.3.0</Version>
+		<Authors>Gustavo Augusto Hennig</Authors>
+		<Company>GH Software Ltda</Company>
+		<Description>A spell-checking extension for Avalonia TextBox using WeCantSpell.Hunspell.</Description>
+		<PackageTags>spellcheck, Avalonia, WeCantSpell, Hunspell, TextBox</PackageTags>
+		<RepositoryUrl>https://github.com/GustavoHennig/Avalonia.SpellChecker</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<Copyright>© 2024 Gustavo Augusto Hennig</Copyright>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WeCantSpell.Hunspell" />
+		<PackageReference Include="Avalonia" />
+		<PackageReference Include="FluentAvaloniaUI" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Dictionaries\en_US.aff">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Dictionaries\en_US.dic">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Dictionaries\ru_RU.aff">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Dictionaries\ru_RU.dic">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+</Project>

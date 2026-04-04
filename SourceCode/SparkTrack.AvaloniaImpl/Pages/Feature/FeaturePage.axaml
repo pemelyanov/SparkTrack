@@ -121,7 +121,7 @@
                                                  Classes="subtitle"
                                                  Text="{Binding Name}"
                                                  TextTrimming="CharacterEllipsis" MaxWidth="500" />
-                            <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500" Height="30"
+                            <TextBox x:Name="NameTextBox" Padding="6 2" UseFloatingWatermark="False" Width="500" Height="30"
                                      IsVisible="{Binding IsInEditMode}"
                                      Classes="subtitle" Text="{Binding Name}" />
                         </Panel>

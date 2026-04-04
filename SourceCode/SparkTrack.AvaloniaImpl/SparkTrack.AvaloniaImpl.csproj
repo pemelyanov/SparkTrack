@@ -44,6 +44,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Avalonia.SpellChecker\Avalonia.SpellChecker.csproj" />
       <ProjectReference Include="..\Clowd.Clipboard\Clowd.Clipboard.csproj" />
       <ProjectReference Include="..\Fanatiki.MVVM\Fanatiki.MVVM.csproj" />
       <ProjectReference Include="..\Fanatiki.Updating.GitHub\Fanatiki.Updating.GitHub.csproj" />

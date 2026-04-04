@@ -14,7 +14,7 @@ using Extensions;
 public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
 {
     private CompositeDisposable? m_loadedDisposables;
-    
+
     public FeaturePage()
     {
         InitializeComponent();
@@ -25,16 +25,12 @@ public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
         base.OnLoaded(e);
 
         m_loadedDisposables = new CompositeDisposable();
-        
+
         CommentCreationControl.GetObservable(IsVisibleProperty)
             .Where(isVisible => isVisible)
             .Throttle(TimeSpan.FromMilliseconds(50))
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(
-                _ =>
-                {
-                    MainScrollViewer.ScrollToEnd();
-                }
+            .Subscribe(_ => { MainScrollViewer.ScrollToEnd(); }
             )
             .DisposeWith(m_loadedDisposables);
     }
@@ -42,13 +38,13 @@ public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
     protected override void OnUnloaded(RoutedEventArgs e)
     {
         base.OnUnloaded(e);
-        
+
         m_loadedDisposables?.Dispose();
     }
 
     private void InputElement_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        if(sender is not ScrollViewer scrollViewer) return;
+        if (sender is not ScrollViewer scrollViewer) return;
 
         scrollViewer.Offset = new Vector(scrollViewer.Offset.X + e.Delta.Y * 10, 0);
     }
@@ -57,7 +53,7 @@ public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
     {
         await this.HandleImagePastingFromClipboard((data, extension) => ViewModel?.OnImagePaste(data, extension));
     }
-    
+
     private void SaveAndClose_OnClick(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button button) return;
@@ -69,7 +65,7 @@ public partial class FeaturePage : ReactiveUserControl<FeaturePageViewModel>
             if (currentParent is Popup popup)
             {
                 ViewModel?.SaveCommand.Execute(true);
-                
+
                 popup.Close();
                 break;
             }
