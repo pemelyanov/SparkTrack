@@ -47,7 +47,7 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 
 [Files]
-Source: {#MyFiles}\*; DestDir: {app}; Flags: ignoreversion recursesubdirs createallsubdirs;
+Source: {#MyFiles}\**; DestDir: {app}; Flags: ignoreversion recursesubdirs createallsubdirs;
 
 
 [Registry]
