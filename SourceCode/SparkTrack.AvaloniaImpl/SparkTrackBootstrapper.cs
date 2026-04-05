@@ -27,6 +27,7 @@ using Controls.TemplateSaveForm;
 using Controls.UserAddForm;
 using Controls.UserEditForm;
 using Controls.UsersFilter;
+using Core.Client;
 using Core.Client.AutofacModules;
 using Core.Client.Events;
 using Core.Shared.Eventing;
@@ -65,7 +66,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<MainWindowViewModel>().AsImplementedInterfaces().AsSelf().SingleInstance();
         builder.RegisterType<AuthorizationPageViewModel>().SingleInstance();
         builder.RegisterType<FeaturesListPageViewModel>().SingleInstance();
-        builder.RegisterType<UsersListPageViewModel>().As<IEventHandler<LogoutEvent>>().AsSelf().SingleInstance();
+        builder.RegisterType<UsersListPageViewModel>().As<IEventHandler<LogOutEvent>>().AsSelf().SingleInstance();
         builder.RegisterType<AccountViewModel>().SingleInstance();
         builder.RegisterType<UserAddFormViewModel>();
         builder.RegisterType<FeaturePageViewModel>();
@@ -106,8 +107,7 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
                 Configuration.GetRequiredSection("ApiBaseUrl").Get<string>()
                 ?? throw new InvalidOperationException("Api base url not found"),
                 Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "SparkTrack",
+                    Paths.ApplicationData,
                     "tokens.json"
                 )
             )
@@ -116,15 +116,13 @@ public class SparkTrackBootstrapper : BootstrapperBase<SparkTrackBootstrapper>
         builder.RegisterType<JsonAttachmentsPathCache>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterType<WindowsExplorerService>().AsImplementedInterfaces().SingleInstance();
         builder.RegisterJsonConfiguration<InterfaceConfiguration>(Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "SparkTrack",
+            Paths.ApplicationData,
             "Settings",
             "interface-configuration.json"
         ));
 
         var configsFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "SparkTrack",
+            Paths.ApplicationData,
             "Configs"
         );
         

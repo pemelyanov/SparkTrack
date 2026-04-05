@@ -3,9 +3,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:authorization="clr-namespace:SparkTrack.AvaloniaImpl.Pages.Authorization"
+             xmlns:markupExtensions="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
+             xmlns:converters="clr-namespace:SparkTrack.AvaloniaImpl.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Authorization.AuthorizationPage"
-             x:DataType="authorization:AuthorizationPageViewModel">
+             x:DataType="authorization:AuthorizationPageViewModel"
+             x:Name="Root">
+    <UserControl.Resources>
+        <converters:RoleConverter x:Key="RoleConverter" />
+    </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="TextBox">
             <Setter Property="UseFloatingWatermark" Value="True" />
@@ -25,6 +31,33 @@
                         Command="{Binding LogInCommand}" />
             </StackPanel>
         </Border>
+        
+        <ItemsControl HorizontalAlignment="Left" VerticalAlignment="Bottom" ItemsSource="{Binding AccountsList}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Spacing="8"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Command="{Binding #Root.ViewModel.UseExistingAccountCommand}" CommandParameter="{Binding}">
+                        <Grid ColumnDefinitions="Auto * Auto" ColumnSpacing="8" RowSpacing="8" Width="300">
+                            <ContentControl Content="{markupExtensions:SymbolIcon Symbol=Person}"  Width="64" Height="64" 
+                                            Foreground="{DynamicResource ButtonForeground}"/>
+            
+                            <StackPanel Grid.Column="1" Grid.Row="0" Spacing="8">
+                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                <SelectableTextBlock Text="{Binding Email}" />
+                                <TextBlock Text="{Binding Role, Converter={StaticResource RoleConverter}}" />
+                            </StackPanel>
+                            
+                            <Button Classes="icon delete" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" 
+                                    Command="{Binding #Root.ViewModel.ForgetAccount}" CommandParameter="{Binding}" />
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
         
         <Border Classes="card" Width="500" IsVisible="{Binding AuthorizeExistingCredentialsCommand.IsExecuting^}" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel Spacing="8">

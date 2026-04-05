@@ -2,8 +2,8 @@
 
 using System.Net;
 using System.Net.Http.Headers;
+using Core.Client.Data;
 using Core.Client.Services.Configuration;
-using Data;
 using NLog;
 
 public class RetryAuthHandler(

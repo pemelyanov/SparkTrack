@@ -6,12 +6,12 @@ using Core.Client.Services.Configuration;
 using Core.Shared.Data.Entities;
 using Core.Shared.Eventing;
 using Core.Shared.Extensions;
-using Data;
 using Delegates;
 using MappingExtensions;
 using NLog;
 using Reactive;
 using System.Net;
+using Core.Client.Data;
 
 internal class AuthorizationService(
     ClientFactory<AuthorizationClient> authorizationClientFactory,
@@ -50,7 +50,7 @@ internal class AuthorizationService(
             
             m_currentUser.Value = await GetCurrentProfileAsync();
 
-            await eventEmitter.RaiseAsync<LogoutEvent>();
+            await eventEmitter.RaiseAsync(new LogInEvent());
             
             return true;
         }
@@ -71,6 +71,8 @@ internal class AuthorizationService(
             if (string.IsNullOrEmpty(config.AccessToken) || string.IsNullOrEmpty(config.RefreshToken)) return false;
             
             m_currentUser.Value = await GetCurrentProfileAsync();
+            
+            await eventEmitter.RaiseAsync(new LogInEvent());
 
             return true;
         }
@@ -89,6 +91,8 @@ internal class AuthorizationService(
         try
         {
             await authorizationClientWrapper.Client.LogOutAsync(configurationService.Config.RefreshToken);
+            
+            await eventEmitter.RaiseAsync<LogOutEvent>();
         }
         catch (Exception e)
         {

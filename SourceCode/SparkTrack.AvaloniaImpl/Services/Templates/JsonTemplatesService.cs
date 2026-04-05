@@ -3,6 +3,8 @@ using SparkTrack.AvaloniaImpl.Data.Templates;
 
 namespace SparkTrack.AvaloniaImpl.Services.Templates;
 
+using Core.Client;
+
 public class JsonTemplatesService<TTemplate>(string templateCategoryName)
     : ITemplatesService<TTemplate> where TTemplate : ITemplate
 {
@@ -14,7 +16,7 @@ public class JsonTemplatesService<TTemplate>(string templateCategoryName)
     };
 
     private readonly string m_rootPath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SparkTrack", "Templates");
+        Path.Combine(Paths.ApplicationData, "Templates");
 
     public Task<IReadOnlyList<TemplateGroup<TTemplate>>> GetTemplatesListAsync()
     {

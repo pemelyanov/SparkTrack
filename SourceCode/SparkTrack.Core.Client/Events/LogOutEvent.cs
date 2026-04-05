@@ -1,3 +1,3 @@
 namespace SparkTrack.Core.Client.Events;
 
-public record LogoutEvent;
+public record LogOutEvent;

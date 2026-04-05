@@ -22,7 +22,7 @@ using Core.Shared.Eventing;
 using SparkTrack.Core.Shared.Extensions;
 using Reactive;
 
-public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandler<LogoutEvent>
+public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventHandler<LogOutEvent>
 {
     private readonly Lazy<IScreen>                                  m_hostScreen;
     private readonly IUsersService                                  m_usersService;
@@ -98,7 +98,7 @@ public class UsersListPageViewModel : ViewModelBase, IRoutableViewModel, IEventH
         await ReloadTableCommand.Execute().ToTask();
     }
 
-    public Task HandleAsync(LogoutEvent eventData,  CancellationToken cancellationToken = default)
+    public Task HandleAsync(LogOutEvent eventData,  CancellationToken cancellationToken = default)
     {
         m_userAddFormViewModel.Reset();
 
