@@ -15,7 +15,7 @@
              xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
-             xmlns:behaviors="clr-namespace:Avalonia.SpellChecker.Behaviors;assembly=Avalonia.SpellChecker"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia.ProgressRing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel"
@@ -122,7 +122,8 @@
                                                  Classes="subtitle"
                                                  Text="{Binding Name}"
                                                  TextTrimming="CharacterEllipsis" MaxWidth="500" />
-                            <TextBox x:Name="NameTextBox" Padding="6 2" UseFloatingWatermark="False" Width="500" Height="30"
+                            <TextBox x:Name="NameTextBox" Padding="6 2" UseFloatingWatermark="False" Width="500"
+                                     Height="30"
                                      IsVisible="{Binding IsInEditMode}"
                                      Classes="subtitle" Text="{Binding Name}" />
                         </Panel>
@@ -242,6 +243,19 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Panel x:Name="ReferenceRoot">
+                                                <Panel.ContextMenu>
+                                                    <ContextMenu
+                                                        IsEnabled="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}">
+                                                        <MenuItem Header="Открыть в проводнике"
+                                                                  Command="{Binding OpenInExplorer}"
+                                                                  IsEnabled="{Binding CanOpenInExplorer}" />
+                                                        <MenuItem Header="Получить ссылку"
+                                                                  Command="{Binding GetLinkCommand}" />
+                                                        <MenuItem Header="Копировать" IsVisible="{Binding IsImage}"
+                                                                  Command="{Binding CopyToClipboardCommand}" />
+                                                    </ContextMenu>
+                                                </Panel.ContextMenu>
+                                                
                                                 <Image Width="{StaticResource PreviewSize}"
                                                        MaxHeight="{StaticResource PreviewSize}"
                                                        Source="{Binding Uri, Converter={StaticResource PathToImageSourceConverter}}" />
@@ -258,6 +272,14 @@
                                                         IsVisible="{Binding #ReferenceRoot.IsPointerOver}"
                                                         Command="{Binding #Root.ViewModel.RemovePreviewAttachment}"
                                                         CommandParameter="{Binding}" />
+
+                                                <Border Width="{StaticResource PreviewSize}"
+                                                        Height="{StaticResource PreviewSize}"
+                                                        IsVisible="{Binding !!LoadProgress}">
+                                                    <controls:ProgressRing IsIndeterminate="True" BorderThickness="4"
+                                                                           HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center" />
+                                                </Border>
                                             </Panel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>

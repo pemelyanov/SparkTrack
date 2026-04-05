@@ -37,7 +37,7 @@
 												   Foreground="{DynamicResource SystemAccentColor}"
 												   IsVisible="False"
 												   Text="{TemplateBinding Watermark}"
-												   DockPanel.Dock="Top" />
+												   DockPanel.Dock="Top" Margin="8 2 0 0" />
 										<ScrollViewer Name="PART_ScrollViewer"
 													  HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
 													  VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
