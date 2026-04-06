@@ -21,8 +21,9 @@
         <StyleInclude Source="Styles/TextBoxStyles.axaml" />
         <StyleInclude Source="Styles/TelegramTagStyles.axaml" />
         
-        <Style Selector="TextBox">
-            <Setter Property="(behaviors:SpellChecker.IsEnabled)" Value="True" />
-        </Style>
+        <!-- Из-за проверок текста при переключении режима редактирования иногда вылетает, пока что выключаем -->
+        <!-- <Style Selector="TextBox"> -->
+        <!--     <Setter Property="(behaviors:SpellChecker.IsEnabled)" Value="True" /> -->
+        <!-- </Style> -->
     </Application.Styles>
 </Application>
