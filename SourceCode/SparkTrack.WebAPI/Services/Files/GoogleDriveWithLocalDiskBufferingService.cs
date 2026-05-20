@@ -9,12 +9,16 @@ using NLog;
 public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesService> googleDriveFileServiceFactory)
     : BackgroundService, IFilesService
 {
-    private static readonly ILogger s_logger       = LogManager.GetCurrentClassLogger();
-    private static readonly string  s_bufferFolder = Path.Combine(Path.GetTempPath(), "SparkFilesBuffer");
+    private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
-    private          Channel<BackgroundDriveUploadData>? m_eventsChannel;
-    private readonly ConcurrentDictionary<Guid, string?> m_uploadingLocalFiles   = new();
-    private readonly ConcurrentDictionary<Guid, int>     m_downloadingLocalFiles = new();
+    private static readonly string s_bufferFolder =
+        Environment.GetEnvironmentVariable("SPARK_BUFFER_PATH")
+        ?? Path.Combine(Path.GetTempPath(), "SparkFilesBuffer");
+
+    private Channel<BackgroundDriveUploadData>? m_eventsChannel;
+
+    private readonly ConcurrentDictionary<Guid, BackgroundDriveUploadData> m_uploadingLocalFiles   = new();
+    private readonly ConcurrentDictionary<Guid, int>                       m_downloadingLocalFiles = new();
 
     public Task<string> GetLinkAsync(Guid id) => throw new NotImplementedException();
 
@@ -62,7 +66,7 @@ public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesServ
         {
             await cts.CancelAsync();
         }
-        
+
         return fileId;
     }
 
@@ -73,24 +77,24 @@ public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesServ
         Action<long> contentLengthCallback
     )
     {
-        if (!m_uploadingLocalFiles.TryGetValue(id, out var localFilePath))
+        if (!m_uploadingLocalFiles.TryGetValue(id, out var data))
         {
             await googleDriveFileServiceFactory().DownloadAsync(id, stream, cancellationToken, contentLengthCallback);
             return;
         }
 
-        if (!File.Exists(localFilePath)) throw new NotFoundException($"Файл {id} не найден");
+        if (!File.Exists(data.LocalFilePath)) throw new NotFoundException($"Файл {id} не найден");
 
         try
         {
             m_downloadingLocalFiles.AddOrUpdate(id, _ => 1, (_, value) => ++value);
 
-            var fileInfo = new FileInfo(localFilePath);
+            var fileInfo = new FileInfo(data.LocalFilePath);
 
             contentLengthCallback(fileInfo.Length);
 
             await using var fileStream = new FileStream(
-                localFilePath,
+                data.LocalFilePath,
                 FileMode.OpenOrCreate,
                 FileAccess.ReadWrite,
                 FileShare.ReadWrite
@@ -108,18 +112,18 @@ public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesServ
                     {
                         m_downloadingLocalFiles.TryRemove(id, out _);
 
-                        if (!m_uploadingLocalFiles.ContainsKey(id) && File.Exists(localFilePath))
-                            File.Delete(localFilePath);
-                        else 
+                        if (!m_uploadingLocalFiles.ContainsKey(id) && File.Exists(data.LocalFilePath))
+                            File.Delete(data.LocalFilePath);
+                        else
                             s_logger.Warn(
                                 "Cannot delete buffer file. File is uploading to google drive or not exists. File path: {path}; File id: {id}",
-                                localFilePath,
+                                data.LocalFilePath,
                                 id
                             );
                     }
                     catch (Exception e)
                     {
-                        s_logger.Error(e, "Error while deleting buffer file: {filePath}", localFilePath);
+                        s_logger.Error(e, "Error while deleting buffer file: {filePath}", data.LocalFilePath);
                     }
                 }
                 else
@@ -152,7 +156,7 @@ public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesServ
                 data.FileId
             );
 
-            m_uploadingLocalFiles.TryAdd(data.FileId, data.LocalFilePath);
+            m_uploadingLocalFiles.TryAdd(data.FileId, data);
 
             while (!File.Exists(data.LocalFilePath))
             {
@@ -227,7 +231,40 @@ public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesServ
         }
     }
 
-    private bool HasEnoughSpaceInBuffer(long requiredSpace) => true;
+    private bool HasEnoughSpaceInBuffer(long requiredSpace)
+    {
+        try
+        {
+            Directory.CreateDirectory(s_bufferFolder);
+
+            var driveInfo = new DriveInfo(s_bufferFolder);
+
+            // Проверяем, что диск готов и это не CD-ROM
+            if (!driveInfo.IsReady)
+            {
+                s_logger.Warn("Drive is not ready for space check");
+                return false;
+            }
+
+            var availableFreeSpace = driveInfo.AvailableFreeSpace;
+            var reservedByUploadingFiles = m_uploadingLocalFiles.Values.Sum(it => it.ContentLength);
+
+            s_logger.Info(
+                "Space check: available={available}, required={required}, reserved={reserved}",
+                availableFreeSpace,
+                requiredSpace,
+                reservedByUploadingFiles
+            );
+
+            return availableFreeSpace - reservedByUploadingFiles >= requiredSpace;
+        }
+        catch (Exception ex)
+        {
+            s_logger.Error(ex, "Error checking available disk space");
+            // В случае ошибки лучше отказаться от буферизации
+            return false;
+        }
+    }
 
     private void StartBackgroundDriveUpload(BackgroundDriveUploadData data)
     {
