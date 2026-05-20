@@ -4,14 +4,13 @@ using ILogger = NLog.ILogger;
 
 namespace SparkTrack.WebAPI.Services.Files;
 
-using Core.Services.Files;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Upload;
 using Streams;
 
 public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactory, IConfiguration configuration)
-    : IFilesService
+    : IGoogleDriveFilesService
 {
     private static readonly ILogger s_logger = LogManager.GetCurrentClassLogger();
 
@@ -34,12 +33,79 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         return file.WebViewLink;
     }
 
-    public async Task<Guid> UploadAsync(Stream stream, long contentLength, string? extension, CancellationToken cancellationToken)
+    public async Task<Guid> UploadAsync(
+        Stream stream,
+        long contentLength,
+        string? extension,
+        CancellationToken cancellationToken
+    )
+    {
+        s_logger.Info("Initializing drive");
+
+        var fileId = Guid.NewGuid();
+
+        await UploadAsync(fileId, stream, contentLength, extension, cancellationToken);
+
+        return fileId;
+    }
+
+    public async Task DownloadAsync(
+        Guid id,
+        Stream stream,
+        CancellationToken cancellationToken,
+        Action<long> contentLengthCallback
+    )
     {
         s_logger.Info("Initializing drive");
         var drive = await driveFactory();
 
-        var fileId = Guid.NewGuid();
+        var file = await GetFileByIdAsync(drive, id);
+        var fileId = file.Id;
+
+        if (file.Size is { } size)
+            contentLengthCallback(size);
+
+        var downloadRequest = drive.Files.Get(fileId);
+
+        var downloadStreamProxy = new ProgressWriteStream(stream, OnProgressChanged);
+
+        s_logger.Info("Starting file download to stream: {fileName}", file.Name);
+        await downloadRequest.DownloadAsync(downloadStreamProxy, cancellationToken);
+        s_logger.Info("File download completed: {fileName}", file.Name);
+
+        void OnProgressChanged(long bytes)
+        {
+            s_logger.Info(
+                "Sending file to client: '{id}. Sent: {bytes}/{total} ({percents:P})'",
+                fileId,
+                bytes,
+                file.Size,
+                (float)bytes / file.Size
+            );
+        }
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        s_logger.Info("Initializing drive");
+        var drive = await driveFactory();
+
+        s_logger.Info("Deleting file from drive: {name}", id);
+        // TODO: Добавить поиск по имени
+        await drive.Files.Delete(id.ToString()).ExecuteAsync();
+    }
+
+    public async Task UploadAsync(
+        Guid existingId,
+        Stream stream,
+        long contentLength,
+        string? extension,
+        CancellationToken cancellationToken
+    )
+    {
+        var drive = await driveFactory();
+
+        var fileId = existingId;
 
         var fileName = fileId.ToString();
 
@@ -73,7 +139,7 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         var result = await request.UploadAsync(cancellationToken);
 
         request.ProgressChanged -= OnProgressChanged;
-        
+
         if (result.Status != UploadStatus.Completed)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -84,8 +150,6 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         }
 
         s_logger.Info("File uploaded: {name}", metadata.Name);
-
-        return fileId;
 
         void OnProgressChanged(IUploadProgress progress)
         {
@@ -99,52 +163,6 @@ public sealed class GoogleDriveFilesService(Func<Task<DriveService>> driveFactor
         }
     }
 
-    public async Task DownloadAsync(
-        Guid id,
-        Stream stream,
-        CancellationToken cancellationToken,
-        Action<long> contentLengthCallback
-    )
-    {
-        s_logger.Info("Initializing drive");
-        var drive = await driveFactory();
-
-        var file = await GetFileByIdAsync(drive, id);
-        var fileId = file.Id;
-
-        if (file.Size is { } size)
-            contentLengthCallback(size);
-
-        var downloadRequest = drive.Files.Get(fileId);
-
-        var downloadStreamProxy = new ProgressWriteStream(stream, OnProgressChanged);
-
-        s_logger.Info("Starting file download to stream: {fileName}", file.Name);
-        await downloadRequest.DownloadAsync(downloadStreamProxy, cancellationToken);
-        s_logger.Info("File download completed: {fileName}", file.Name);
-        
-        void OnProgressChanged(long bytes)
-        {
-            s_logger.Info(
-                "Sending file to client: '{id}. Sent: {bytes}/{total} ({percents:P})'",
-                fileId,
-                bytes,
-                file.Size,
-                (float)bytes / file.Size
-            );
-        }
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        s_logger.Info("Initializing drive");
-        var drive = await driveFactory();
-
-        s_logger.Info("Deleting file from drive: {name}", id);
-        // TODO: Добавить поиск по имени
-        await drive.Files.Delete(id.ToString()).ExecuteAsync();
-    }
-    
     private async Task<File> GetFileByIdAsync(DriveService drive, Guid id)
     {
         var fileName = id.ToString();
