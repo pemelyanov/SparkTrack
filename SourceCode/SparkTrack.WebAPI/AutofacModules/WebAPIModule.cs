@@ -75,7 +75,7 @@ public class WebAPIModule(IConfiguration configuration) : Module
             )
             .SingleInstance();
 
-        builder.RegisterType<GoogleDriveFilesService>().As<IGoogleDriveFilesService>().InstancePerLifetimeScope();
+        builder.RegisterType<GoogleDriveFilesService>().As<IGoogleDriveFilesService>().InstancePerDependency();
         builder.RegisterType<GoogleDriveWithLocalDiskBufferingService>().AsImplementedInterfaces().SingleInstance();
 
         return true;

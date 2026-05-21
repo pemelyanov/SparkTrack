@@ -20,7 +20,12 @@ public class GoogleDriveWithLocalDiskBufferingService(Func<IGoogleDriveFilesServ
     private readonly ConcurrentDictionary<Guid, BackgroundDriveUploadData> m_uploadingLocalFiles   = new();
     private readonly ConcurrentDictionary<Guid, int>                       m_downloadingLocalFiles = new();
 
-    public Task<string> GetLinkAsync(Guid id) => throw new NotImplementedException();
+    public Task<string> GetLinkAsync(Guid id)
+    {
+        if (m_uploadingLocalFiles.ContainsKey(id)) throw new NotFoundException("File is not yet uploaded to drive");
+
+        return googleDriveFileServiceFactory().GetLinkAsync(id);
+    }
 
     public async Task<Guid> UploadAsync(
         Stream stream,
