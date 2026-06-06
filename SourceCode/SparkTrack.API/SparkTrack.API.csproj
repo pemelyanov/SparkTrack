@@ -16,4 +16,8 @@
       <PackageReference Include="Autofac" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Data\" />
+    </ItemGroup>
+
 </Project>

@@ -1,14 +1,14 @@
 ﻿namespace SparkTrack.AvaloniaImpl.Services.AttachmentsPathCache;
 
 using System.Text.Json;
+using Core.Client;
 using Core.Shared.Eventing;
 using Events;
 
 public class JsonAttachmentsPathCache : IAttachmentsPathCache, IEventHandler<StartupEvent>
 {
     private static string s_cachePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "SparkTrack",
+        Paths.ApplicationData,
         "attachments_path_cache.json"
     );
 

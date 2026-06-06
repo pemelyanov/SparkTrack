@@ -4,8 +4,6 @@ namespace SparkTrack.API.AutofacModules;
 
 using Autofac;
 using API;
-using Core.Client.Services.Configuration;
-using Data;
 using Interceptors;
 using Services.Authorization;
 using Services.Comments;
@@ -15,7 +13,7 @@ using Services.PaymentBills;
 using Services.Projects;
 using Services.SubTasks;
 using Services.Users;
-using System.Reflection;
+using Core.Client.Data;
 using Module = Autofac.Module;
 
 public class APIModule(string apiBaseUrl, string tokensConfigPath) : Module

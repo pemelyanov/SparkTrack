@@ -6,6 +6,8 @@ using System.Windows.Input;
 public interface IAttachmentViewModel
 {
     event Action<IAttachmentViewModel> PreviewSetRequested;
+
+    event Action CopyToClipboardRequested;
     
     bool IsImage { get; }
     
@@ -30,6 +32,8 @@ public interface IAttachmentViewModel
     ICommand SaveAsCommand { get; }
     
     ICommand GetLinkCommand { get; }
+    
+    ICommand CopyToClipboardCommand { get; }
 
     Task RemoveAsync();
 

@@ -7,6 +7,7 @@ namespace SparkTrack.AvaloniaImpl;
 using System.Globalization;
 using Windows.Main;
 using Avalonia.Controls;
+using Avalonia.SpellChecker;
 using Avalonia.Threading;
 using Core.Shared.Eventing;
 using DeepLink;
@@ -41,6 +42,7 @@ public partial class App : Application
         var ruCulture = CultureInfo.GetCultureInfo("ru-RU");
         CultureInfo.CurrentCulture = ruCulture;
         CultureInfo.CurrentUICulture = ruCulture;
+        SpellCheckerConfig.Initialize(SpellCheckerConfig.Create("ru_RU", "en_US"));
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var mainWindow = Locator.Current.GetService<MainWindow>()!;

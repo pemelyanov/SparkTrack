@@ -37,9 +37,8 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         Name = Path.GetFileName(path);
         Extension = Path.GetExtension(path).TrimStart('.');
         Size = stream.Length;
+        IsDownloaded = true;
     }
-
-    public bool IsDownloaded => true;
 
     public string Extension { get; }
 
@@ -86,7 +85,8 @@ public class LocalAttachmentViewModel : AttachmentViewModelBase, IAttachmentView
         }
         catch (Exception e)
         {
-            throw new NotifyUIException($"При отправке файла {Name}.{Extension} произошла ошибка", e);
+            m_logger.Warn(e);
+            throw new NotifyUIException($"При отправке файла {Name} произошла ошибка", e);
         }
         finally
         {

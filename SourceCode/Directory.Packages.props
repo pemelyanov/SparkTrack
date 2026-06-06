@@ -56,5 +56,6 @@
     <PackageVersion Include="Xaml.Behaviors.Interactivity" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.0" />
+    <PackageVersion Include="WeCantSpell.Hunspell" Version="7.0.1" />
   </ItemGroup>
 </Project>

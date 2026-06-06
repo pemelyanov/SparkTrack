@@ -15,6 +15,7 @@
              xmlns:link="clr-namespace:SparkTrack.AvaloniaImpl.Controls.Link"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:userName="clr-namespace:SparkTrack.AvaloniaImpl.Controls.UserName"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia.ProgressRing"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="SparkTrack.AvaloniaImpl.Pages.Feature.FeaturePage"
              x:DataType="feature:FeaturePageViewModel"
@@ -83,15 +84,6 @@
             </Style>
         </Style>
 
-        <Style Selector="ContentControl.attachment-preview">
-            <Setter Property="Content">
-                <Template>
-                    <Image
-                        Source="{Binding PreviewAttachment.Uri, Converter={StaticResource PathToImageSourceConverter}}" />
-                </Template>
-            </Setter>
-        </Style>
-
         <Style Selector="ContentControl.author-edit">
             <Style Selector="^ Border.card">
                 <Setter Property="Padding" Value="4" />
@@ -130,7 +122,8 @@
                                                  Classes="subtitle"
                                                  Text="{Binding Name}"
                                                  TextTrimming="CharacterEllipsis" MaxWidth="500" />
-                            <TextBox Padding="6 2" UseFloatingWatermark="False" Width="500" Height="30"
+                            <TextBox x:Name="NameTextBox" Padding="6 2" UseFloatingWatermark="False" Width="500"
+                                     Height="30"
                                      IsVisible="{Binding IsInEditMode}"
                                      Classes="subtitle" Text="{Binding Name}" />
                         </Panel>
@@ -201,7 +194,7 @@
                         <!-- Заказчику нужно делить описание на 3 поля и большое превью, -->
                         <!-- но я не хочу жертвовать гибкостью системы, поэтому будем хранить описание Json строкой вот такой структуры, -->
                         <!-- возможно потом можно будет сделать механизм подключения разных шаблонов для описания -->
-                        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto * *" RowSpacing="8" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="* Auto" RowDefinitions="Auto Auto" RowSpacing="8" ColumnSpacing="8">
                             <Panel Grid.Column="0" Grid.Row="0">
                                 <link:Link Url="{Binding ReelLink}"
                                            IsVisible="{Binding !IsInEditMode}" VerticalAlignment="Center" />
@@ -209,37 +202,88 @@
                                          PastingFromClipboard="TextBox_OnPastingFromClipboard" />
                             </Panel>
 
-                            <Border Classes="card" Grid.Row="1" Grid.Column="0">
-                                <StackPanel>
-                                    <TextBlock Text="Ролик:" VerticalAlignment="Center" />
+                            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="8">
+                                <Border Classes="card" VerticalAlignment="Top">
+                                    <Grid RowSpacing="8" RowDefinitions="Auto Auto *">
+                                        <TextBlock Grid.Row="0" Text="Ролик:" VerticalAlignment="Center" />
 
-                                    <Separator />
+                                        <Separator Grid.Row="1" />
 
-                                    <ContentControl Classes="reel-description"
-                                                    Classes.description-edit="{Binding IsInEditMode}"
-                                                    Classes.description-view="{Binding !IsInEditMode}"
-                                                    Tag="{Binding ReelDescription, Mode=TwoWay}" />
-                                </StackPanel>
-                            </Border>
+                                        <ContentControl Grid.Row="2" Classes="reel-description"
+                                                        Classes.description-edit="{Binding IsInEditMode}"
+                                                        Classes.description-view="{Binding !IsInEditMode}"
+                                                        Tag="{Binding ReelDescription, Mode=TwoWay}" />
+                                    </Grid>
+                                </Border>
 
-                            <Border Classes="card" Grid.Row="2" Grid.Column="0">
-                                <StackPanel>
-                                    <TextBlock Text="Превью:" VerticalAlignment="Center" />
+                                <Border Classes="card" VerticalAlignment="Top">
+                                    <Grid RowSpacing="8" RowDefinitions="Auto Auto *">
+                                        <TextBlock Grid.Row="0" Text="Превью:" VerticalAlignment="Center" />
 
-                                    <Separator />
+                                        <Separator Grid.Row="1" />
 
-                                    <ContentControl Classes="preview-description"
-                                                    Classes.description-edit="{Binding IsInEditMode}"
-                                                    Classes.description-view="{Binding !IsInEditMode}"
-                                                    Tag="{Binding PreviewDescription, Mode=TwoWay}" />
-                                </StackPanel>
-                            </Border>
+                                        <ContentControl Grid.Row="2" Classes="preview-description"
+                                                        Classes.description-edit="{Binding IsInEditMode}"
+                                                        Classes.description-view="{Binding !IsInEditMode}"
+                                                        Tag="{Binding PreviewDescription, Mode=TwoWay}" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
 
-                            <Border Classes="card" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2"
-                                    Width="{StaticResource PreviewSize}"
-                                    Height="{StaticResource PreviewSize}" VerticalAlignment="Top">
-                                <ContentControl
-                                    Classes.attachment-preview="{Binding AttachmentsPanelViewModel.AttachmentsList.Count}" />
+                            <Border Classes="card" Grid.Row="1" Grid.Column="1"
+                                    VerticalAlignment="Top"
+                                    IsVisible="{Binding PreviewAttachmentsList.Count}">
+                                <ItemsControl ItemsSource="{Binding PreviewAttachmentsList}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid RowSpacing="8" ColumnSpacing="8" Columns="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Panel x:Name="ReferenceRoot">
+                                                <Panel.ContextMenu>
+                                                    <ContextMenu
+                                                        IsEnabled="{Binding LoadProgress, Converter={x:Static ObjectConverters.IsNull}}">
+                                                        <MenuItem Header="Открыть в проводнике"
+                                                                  Command="{Binding OpenInExplorer}"
+                                                                  IsEnabled="{Binding CanOpenInExplorer}" />
+                                                        <MenuItem Header="Получить ссылку"
+                                                                  Command="{Binding GetLinkCommand}" />
+                                                        <MenuItem Header="Копировать" IsVisible="{Binding IsImage}"
+                                                                  Command="{Binding CopyToClipboardCommand}" />
+                                                    </ContextMenu>
+                                                </Panel.ContextMenu>
+                                                
+                                                <Image Width="{StaticResource PreviewSize}"
+                                                       MaxHeight="{StaticResource PreviewSize}"
+                                                       Source="{Binding Uri, Converter={StaticResource PathToImageSourceConverter}}" />
+
+                                                <Button Content="{markupExtensions:SymbolIcon Symbol=Open}"
+                                                        IsVisible="{Binding #ReferenceRoot.IsPointerOver}"
+                                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                        HorizontalContentAlignment="Center"
+                                                        VerticalContentAlignment="Center"
+                                                        Command="{Binding Open}" />
+
+                                                <Button Classes="icon close" HorizontalAlignment="Right"
+                                                        VerticalAlignment="Top" Margin="8"
+                                                        IsVisible="{Binding #ReferenceRoot.IsPointerOver}"
+                                                        Command="{Binding #Root.ViewModel.RemovePreviewAttachment}"
+                                                        CommandParameter="{Binding}" />
+
+                                                <Border Width="{StaticResource PreviewSize}"
+                                                        Height="{StaticResource PreviewSize}"
+                                                        IsVisible="{Binding !!LoadProgress}">
+                                                    <controls:ProgressRing IsIndeterminate="True" BorderThickness="4"
+                                                                           HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center" />
+                                                </Border>
+                                            </Panel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </Border>
                         </Grid>
 
@@ -261,7 +305,7 @@
                         <Button Content="Новый комментарий" HorizontalAlignment="Right" Margin="0 0 8 0"
                                 Command="{Binding CreateCommentAsync}" />
                     </Panel>
-                    
+
                     <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommentsCommand.IsExecuting^}" />
                 </Panel>
 
@@ -288,13 +332,14 @@
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                             <Button Classes="accent" Content="Создать" Command="{Binding SaveCommentCommand}"
                                     HotKey="Enter" />
-                            <Button Content="Отмена" Command="{Binding CancelCommentAsync}" CommandParameter="{x:False}" HotKey="Escape" />
+                            <Button Content="Отмена" Command="{Binding CancelCommentAsync}"
+                                    CommandParameter="{x:False}" HotKey="Escape" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
         </ScrollViewer>
-        
+
         <ProgressBar IsIndeterminate="True" IsVisible="{Binding RefreshCommand.IsExecuting^}" VerticalAlignment="Top" />
 
         <Button Classes="icon back" Margin="8" HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -302,36 +347,37 @@
                 Classes.esc-hot-key="{Binding !IsEditingComment}" />
 
         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="8">
-            <Border Classes="card" Padding="8 2" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" Margin="0 0 16 0">
+            <Border Classes="card" Padding="8 2" IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}"
+                    Margin="0 0 16 0">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Режим: " VerticalAlignment="Center" />
                     <ToggleSwitch Classes="edit-view-switch" IsChecked="{Binding IsInEditMode, Mode=TwoWay}"
                                   VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
-            
+
             <Button Classes="icon share" Command="{Binding ShareAsync}" IsVisible="{Binding !IsNew}" />
 
             <Button Classes="icon reload f5-hot-key" Command="{Binding RefreshCommand}" IsVisible="{Binding !IsNew}" />
 
             <Button Classes="icon template-add" Command="{Binding CreateTemplateAsync}"
                     IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}" />
-            
+
             <Panel IsVisible="{localMarkupExtensions:CurrentUserInRole Admin}">
                 <Button Classes="accent" Content="Сохранить"
                         Classes.enter-hot-key="{Binding CanSaveByHotKey}"
                         Command="{Binding SaveCommand}"
                         IsEnabled="{Binding $self.IsVisible}"
                         IsVisible="{Binding !CanChooseBetweenSaveAndSaveWithClose}" />
-                
+
                 <SplitButton Classes="accent" Content="Сохранить"
-                        Classes.enter-hot-key="{Binding CanSaveByHotKey}"
-                        Command="{Binding SaveCommand}"
-                        IsEnabled="{Binding $self.IsVisible}"
-                        IsVisible="{Binding CanChooseBetweenSaveAndSaveWithClose}">
+                             Classes.enter-hot-key="{Binding CanSaveByHotKey}"
+                             Command="{Binding SaveCommand}"
+                             IsEnabled="{Binding $self.IsVisible}"
+                             IsVisible="{Binding CanChooseBetweenSaveAndSaveWithClose}">
                     <SplitButton.Flyout>
                         <Flyout>
-                            <Button Content="Сохранить и закрыть" Click="SaveAndClose_OnClick"/>
+                            <Button Content="Сохранить и закрыть" Click="SaveAndClose_OnClick" />
                         </Flyout>
                     </SplitButton.Flyout>
                 </SplitButton>

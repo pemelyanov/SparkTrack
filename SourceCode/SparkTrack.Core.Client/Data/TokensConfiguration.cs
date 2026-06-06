@@ -1,4 +1,4 @@
-﻿namespace SparkTrack.API.Data;
+﻿namespace SparkTrack.Core.Client.Data;
 
 public record TokensConfiguration
 {

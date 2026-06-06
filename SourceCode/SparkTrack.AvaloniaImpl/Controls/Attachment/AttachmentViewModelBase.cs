@@ -14,14 +14,9 @@ using System.Windows.Input;
 using NLog;
 using ReactiveUI;
 
-public abstract class AttachmentViewModelBase(
-    Action<IAttachmentViewModel> onRemove,
-    IDialogService dialogService,
-    IExplorerService explorerService,
-    ILogger logger
-) : ViewModelBase
+public abstract class AttachmentViewModelBase : ViewModelBase
 {
-    protected readonly ILogger                  m_logger = logger;
+    protected readonly ILogger                  m_logger;
     protected          CancellationTokenSource? m_cancellationTokenSource;
 
     protected static readonly string s_downloadsFolder = Path.Combine(
@@ -30,13 +25,38 @@ public abstract class AttachmentViewModelBase(
         "SparkTrackDownloads"
     );
 
-    private          IDisposable?  m_progressSubscription;
-    private          DateTime?     m_lastUpdateTime;
-    private          long          m_lastBytesTransferred;
-    private readonly Queue<double> m_speedSamples  = new(); // Для сглаживания скорости
-    private const    int           MaxSpeedSamples = 64; // Количество семплов для усреднения
+    private          IDisposable?                 m_progressSubscription;
+    private          DateTime?                    m_lastUpdateTime;
+    private          long                         m_lastBytesTransferred;
+    private readonly Queue<double>                m_speedSamples  = new(); // Для сглаживания скорости
+    private readonly Action<IAttachmentViewModel> m_onRemove;
+    private readonly IDialogService               m_dialogService;
+    private readonly IExplorerService             m_explorerService;
+
+    protected AttachmentViewModelBase(Action<IAttachmentViewModel> onRemove,
+                                      IDialogService dialogService,
+                                      IExplorerService explorerService,
+                                      ILogger logger)
+    {
+        m_onRemove = onRemove;
+        m_dialogService = dialogService;
+        m_explorerService = explorerService;
+        m_logger = logger;
+
+        CopyToClipboardCommand = ReactiveCommand.Create(
+            () => CopyToClipboardRequested?.Invoke(),
+            this.WhenAnyValue(
+                it => it.IsImage,
+                it => it.IsDownloaded,
+                (isImage, isDownloaded) => isImage && isDownloaded
+            )
+        );
+    }
+
+    private const    int                          MaxSpeedSamples = 64; // Количество семплов для усреднения
 
     public event Action<IAttachmentViewModel>? PreviewSetRequested;
+    public event Action? CopyToClipboardRequested;
 
     protected override void OnActivated(CompositeDisposable disposables)
     {
@@ -97,6 +117,9 @@ public abstract class AttachmentViewModelBase(
             }
         ).DisposeWith(disposables);
     }
+    
+    [Reactive]
+    public bool IsDownloaded { get; protected set; }
 
     [Reactive]
     public AttachmentLoadProgress? LoadProgress { get; protected set; }
@@ -118,17 +141,19 @@ public abstract class AttachmentViewModelBase(
     public bool CanOpenInExplorer { get; protected set; } = true;
 
     public ICommand GetLinkCommand { get; init; } = ReactiveCommand.Create(() => { }, Observable.Return(false));
+    
+    public ICommand CopyToClipboardCommand { get; }
 
     public virtual async Task RemoveAsync()
     {
         m_logger.Info("Attempt to remove attachment (base call)");
 
-        if (!await dialogService.ConfirmAsync(
+        if (!await m_dialogService.ConfirmAsync(
             "Вы действительно хотите удалить файл?",
             "Удаление файла"
         )) return;
 
-        onRemove.Invoke(GetThis());
+        m_onRemove.Invoke(GetThis());
     }
 
     protected abstract IAttachmentViewModel GetThis();
@@ -146,7 +171,7 @@ public abstract class AttachmentViewModelBase(
 
         if (!IsImage)
         {
-            m_logger.Info("Attachment is not image, starting process for {uri}", Uri);
+            m_logger.Info("Attachment is not image, starting process for {name}", Name);
 
             try
             {
@@ -157,6 +182,8 @@ public abstract class AttachmentViewModelBase(
                         UseShellExecute = true
                     }
                 );
+                
+                m_logger.Info("Process started for {uri}", Uri);
             }
             catch (Exception e)
             {
@@ -169,13 +196,13 @@ public abstract class AttachmentViewModelBase(
         m_logger.Info("Attachment is image, openning preview dialog");
         var imageViewModel = new ImageDialogViewModel(Name, Uri);
 
-        dialogService.ShowAsync(imageViewModel);
+        m_dialogService.ShowAsync(imageViewModel);
     }
 
     public void OpenInExplorer()
     {
         m_logger.Info("Attempt to open attachment in explorer");
-        explorerService.OpenContainingFolder(Uri);
+        m_explorerService.OpenContainingFolder(Uri);
     }
 
     public void RaisePreviewSetRequested() => PreviewSetRequested?.Invoke(GetThis());
@@ -187,7 +214,7 @@ public abstract class AttachmentViewModelBase(
         m_cancellationTokenSource = null;
 
         if (close)
-            onRemove(GetThis());
+            m_onRemove(GetThis());
     }
 
     private void UpdateSpeedAndTime(AttachmentLoadProgress progress)
