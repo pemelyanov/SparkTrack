@@ -1,0 +1,3 @@
+[submodule "SourceCode/Dependencies/Avalonia.SpellChecker"]
+	path = SourceCode/Dependencies/Avalonia.SpellChecker
+	url = https://github.com/GustavoHennig/Avalonia.SpellChecker.git

@@ -1,0 +1,6 @@
+version: '3.8'
+
+services:
+  postgres:
+    volumes:
+      - C:/ProgramData/SparkTrack/db/postgres/data:/var/lib/postgresql/data
